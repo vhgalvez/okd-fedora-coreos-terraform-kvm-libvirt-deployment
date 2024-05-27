@@ -11,7 +11,7 @@ terraform {
     }
     ct = {
       source  = "poseidon/ct"
-      version = "0.10.0"
+      version = "0.13.0"
     }
     template = {
       source  = "hashicorp/template"
