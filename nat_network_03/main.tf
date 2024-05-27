@@ -1,7 +1,6 @@
 
 # nat_network_03/main.tf
 
-
 terraform {
   required_version = ">= 0.13"
 
@@ -33,13 +32,13 @@ resource "libvirt_network" "kube_network_03" {
 }
 
 resource "libvirt_pool" "volumetmp_03" {
-  name = "${var.cluster_name}_03"
+  name = "volumetmp_03"
   type = "dir"
-  path = "/var/lib/libvirt/images/${var.cluster_name}_03"
+  path = "/var/lib/libvirt/images/volumetmp_03"
 }
 
 resource "libvirt_volume" "base" {
-  name   = "${var.cluster_name}-base"
+  name   = "base"
   source = var.base_image
   pool   = libvirt_pool.volumetmp_03.name
   format = "qcow2"
@@ -53,7 +52,7 @@ data "template_file" "vm-configs" {
   vars = {
     ssh_keys  = jsonencode(var.ssh_keys),
     name      = each.key,
-    host_name = "${each.key}.${var.cluster_name}.${var.cluster_domain}",
+    host_name = each.value.name_dominio,
     gateway   = var.gateway,
     dns1      = var.dns1,
     dns2      = var.dns2,
@@ -78,7 +77,7 @@ resource "libvirt_ignition" "ignition" {
 resource "libvirt_volume" "vm_disk" {
   for_each = var.vm_definitions
 
-  name           = "${each.key}-${var.cluster_name}.qcow2"
+  name           = "${each.key}-disk"
   base_volume_id = libvirt_volume.base.id
   pool           = libvirt_pool.volumetmp_03.name
   format         = "qcow2"
