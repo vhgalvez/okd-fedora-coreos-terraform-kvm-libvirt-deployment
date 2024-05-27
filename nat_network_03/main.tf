@@ -49,7 +49,7 @@ data "template_file" "vm-configs" {
   template = file("${path.module}/configs/machine-${each.key}-config.yaml.tmpl")
 
   vars = {
-    ssh_keys  = jsonencode(var.ssh_keys),
+    ssh_keys  = join(",", var.ssh_keys),
     name      = each.key,
     host_name = each.value.name_dominio,
     gateway   = var.gateway,
