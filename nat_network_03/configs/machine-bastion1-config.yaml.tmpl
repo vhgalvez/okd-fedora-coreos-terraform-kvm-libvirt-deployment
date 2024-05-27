@@ -1,0 +1,22 @@
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys: ${ssh_keys}
+    - name: root
+      password_hash: $6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
+
+storage:
+  files:
+    - path: /etc/hostname
+      filesystem: "root"
+      mode: 0644
+      contents:
+        inline: ${host_name}
+    - path: /home/core/works
+      filesystem: root
+      mode: 0755
+      contents:
+        inline: |
+          #!/bin/bash
+          set -euo pipefail
+          echo My name is ${name} and the hostname is ${host_name}
