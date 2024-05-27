@@ -1,10 +1,14 @@
+
+# terraform.tfvars
+
 rocky9_image = "/var/lib/libvirt/images/rocky_image/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2"
+
 vm_rockylinux_definitions = {
   "freeipa1" = {
     cpus           = 2,
     memory         = 2048,
     ip             = "10.17.3.11",
-    hostname       = "freeipa1",
+    hostname       = "freeipa1.cefaslocalserver.com",
     volume_name    = "freeipa1_volume",
     volume_format  = "qcow2",
     volume_pool    = "default",
@@ -13,12 +17,12 @@ vm_rockylinux_definitions = {
     cloudinit_pool = "default",
     domain_memory  = "4096"
   },
-  "load_balancer1" = {
+  "loadbalancer1" = {
     cpus           = 2,
     memory         = 2048,
     ip             = "10.17.3.12",
-    hostname       = "load_balancer1",
-    volume_name    = "load_balancer1_volume",
+    hostname       = "loadbalancer1.cefaslocalserver.com",
+    volume_name    = "loadbalancer1_volume",
     volume_format  = "qcow2",
     volume_pool    = "default",
     volume_size    = "32212254720",
@@ -30,7 +34,7 @@ vm_rockylinux_definitions = {
     cpus           = 2,
     memory         = 2048,
     ip             = "10.17.3.13",
-    hostname       = "postgresql1",
+    hostname       = "postgresql1.cefaslocalserver.com",
     volume_name    = "postgresql1_volume",
     volume_format  = "qcow2",
     volume_pool    = "default",
