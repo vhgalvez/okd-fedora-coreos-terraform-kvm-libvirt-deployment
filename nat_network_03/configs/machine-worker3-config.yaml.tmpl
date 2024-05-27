@@ -51,6 +51,16 @@ storage:
           Gateway=${gateway}
           Metric=1024
 
+          [Route]
+          Destination=10.17.3.0/24
+          Gateway=${gateway}
+          Metric=1024
+
+          [Route]
+          Destination=192.168.0.0/24
+          Gateway=${gateway}
+          Metric=1024
+
 systemd:
   units:
     - name: apply-network-routes.service
