@@ -1,16 +1,17 @@
 # nat_network_03/variables.tf
+
 variable "base_image" {
   description = "Path to the base VM image"
   type        = string
 }
 
 variable "vm_definitions" {
-  description = "Definitions of virtual machines including CPU and memory configuration"
+  description = "Definitions of virtual machines including CPU, memory, IP, and domain name"
   type = map(object({
-    cpus   = number
-    memory = number
-    ip     = string
-
+    cpus         = number
+    memory       = number
+    ip           = string
+    name_dominio = string
   }))
 }
 
@@ -38,8 +39,8 @@ variable "dns1" {
   description = "Primary DNS server"
   type        = string
 }
+
 variable "dns2" {
   description = "Secondary DNS server"
   type        = string
-
 }

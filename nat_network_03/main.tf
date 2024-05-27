@@ -1,4 +1,7 @@
-# nat_network_03\main.tf
+
+# nat_network_03/main.tf
+
+
 terraform {
   required_version = ">= 0.13"
 
@@ -53,7 +56,8 @@ data "template_file" "vm-configs" {
     host_name = "${each.key}.${var.cluster_name}.${var.cluster_domain}",
     gateway   = var.gateway,
     dns1      = var.dns1,
-    dns2      = var.dns2
+    dns2      = var.dns2,
+    ip        = each.value.ip
   }
 }
 
