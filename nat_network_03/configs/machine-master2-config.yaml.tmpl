@@ -36,20 +36,30 @@ storage:
           Name=eth0
 
           [Network]
-          DHCP=yes
+          Address=${ip}/24
+          Gateway=${gateway}
+          DNS=${dns1}
+          DNS=${dns2}
 
           [Route]
+          Destination=0.0.0.0/0
           Gateway=${gateway}
+          Metric=1024
+
+          [Route]
           Destination=10.17.4.0/24
+          Gateway=${gateway}
+          Metric=1024
 
 systemd:
   units:
-    - name: systemd-networkd.service
+    - name: apply-network-routes.service
       enabled: true
       contents: |
         [Unit]
-        Description=Apply systemd-networkd configurations
-        After=network.target
+        Description=Apply custom network routes
+        After=network-online.target
+        Wants=network-online.target
 
         [Service]
         Type=oneshot
