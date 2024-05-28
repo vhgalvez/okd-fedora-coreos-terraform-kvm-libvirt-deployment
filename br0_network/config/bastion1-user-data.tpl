@@ -37,7 +37,20 @@ write_files:
     path: /etc/sysconfig/selinux
     permissions: "0644"
 
+  - path: /etc/systemd/network/10-static-en.network
+    content: |
+      [Match]
+      Name=eth0
+
+      [Network]
+      Address=${ip}/24
+      Gateway=${gateway}
+      DNS=${dns1}
+      DNS=${dns2}
+
 runcmd:
+  - sudo ip route add 10.17.3.0/24 via 192.168.0.21 dev eth0
+  - sudo ip route add 10.17.4.0/24 via 192.168.0.21 dev eth0
   - echo "Instance setup completed" >> /var/log/cloud-init-output.log
   - ["dnf", "install", "-y", "firewalld"]
   - ["systemctl", "enable", "--now", "firewalld"]
