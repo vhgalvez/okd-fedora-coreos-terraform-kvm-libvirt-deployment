@@ -67,10 +67,10 @@ data "template_file" "network-configs" {
 resource "libvirt_cloudinit_disk" "vm_cloudinit" {
   for_each = var.vm_rockylinux_definitions
 
-  name            = "${each.key}_cloudinit.iso"
-  pool            = libvirt_pool.volumetmp_nat_02.name
-  user_data       = data.template_file.vm-configs[each.key].rendered
-  network_config  = data.template_file.network-configs[each.key].rendered
+  name           = "${each.key}_cloudinit.iso"
+  pool           = libvirt_pool.volumetmp_nat_02.name
+  user_data      = data.template_file.vm-configs[each.key].rendered
+  network_config = data.template_file.network-configs[each.key].rendered
 }
 
 resource "libvirt_volume" "vm_disk" {
