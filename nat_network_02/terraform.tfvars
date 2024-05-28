@@ -16,7 +16,7 @@ vm_rockylinux_definitions = {
     cloudinit_pool = "default",
     domain_memory  = "4096"
   },
-  "loadbalancer1" = {
+  "load_balancer1" = {
     cpus           = 2,
     memory         = 2048,
     ip             = "10.17.3.12",
