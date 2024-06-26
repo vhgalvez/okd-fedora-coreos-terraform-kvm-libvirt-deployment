@@ -13,16 +13,6 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-
-resource "libvirt_pool" "default" {
-  name = "default"
-  type = "dir"
-  path = "/var/lib/libvirt/images"
-
-  lifecycle {
-    ignore_changes = [name]
-  }
-}
 resource "libvirt_network" "br0" {
   name      = var.rocky9_network_name
   mode      = "bridge"
