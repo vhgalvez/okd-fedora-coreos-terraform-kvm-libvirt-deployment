@@ -18,9 +18,6 @@ resource "libvirt_pool" "default" {
   name = "default"
   type = "dir"
   path = "/var/lib/libvirt/images"
-  lifecycle {
-    ignore_changes = [name]
-  }
 }
 
 resource "libvirt_network" "br0" {
