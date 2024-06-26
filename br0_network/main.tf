@@ -13,10 +13,11 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
+
 resource "libvirt_pool" "default" {
-  name   = "default"
-  type   = "dir"
-  path   = "/var/lib/libvirt/images"
+  name = "default"
+  type = "dir"
+  path = "/var/lib/libvirt/images"
 
   lifecycle {
     ignore_changes = [name]
