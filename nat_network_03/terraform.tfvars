@@ -1,4 +1,4 @@
-base_image = "/var/lib/libvirt/images/flatcar_production_qemu_image.img"
+base_image = "/var/lib/libvirt/images/flatcar-linux/flatcar_production_qemu_image.img"
 
 vm_definitions = {
   "bootstrap1" = { cpus = 1, memory = 1024, ip = "10.17.4.20", name_dominio = "bootstrap1.cefaslocalserver.com"},

@@ -246,3 +246,7 @@ nmcli device reapply enp4s0f1
 sudo ip route del default via 192.168.0.1 dev enp3s0f1
 sudo ip route del default via 192.168.0.1 dev enp3s0f0
 sudo ip route del default via 192.168.0.1 dev enp4s0f1
+
+
+
+https://computingforgeeks.com/how-to-provision-vms-on-kvm-with-terraform/#google_vignette
