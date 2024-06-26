@@ -13,7 +13,6 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Crear la red
 resource "libvirt_network" "br0" {
   name      = var.rocky9_network_name
   mode      = "bridge"
@@ -22,20 +21,17 @@ resource "libvirt_network" "br0" {
   addresses = ["192.168.0.0/24"]
 }
 
-# Crear el grupo de almacenamiento para bastion
 resource "libvirt_pool" "volumetmp_bastion" {
   name = "${var.cluster_name}_bastion"
   type = "dir"
   path = "/var/lib/libvirt/images/${var.cluster_name}_bastion"
 }
 
-# Definir la imagen base del volumen
 resource "libvirt_volume" "rocky9_image" {
   name   = "${var.cluster_name}-rocky9_image"
   source = var.rocky9_image
   pool   = libvirt_pool.volumetmp_bastion.name
   format = "qcow2"
-  depends_on = [libvirt_pool.volumetmp_bastion]
 }
 
 data "template_file" "vm_configs" {
@@ -72,10 +68,9 @@ resource "libvirt_volume" "vm_disk" {
 
   name           = each.value.volume_name
   base_volume_id = libvirt_volume.rocky9_image.id
-  pool           = libvirt_pool.volumetmp_bastion.name
+  pool           = each.value.volume_pool
   format         = each.value.volume_format
   size           = each.value.volume_size
-  depends_on     = [libvirt_volume.rocky9_image]
 }
 
 resource "libvirt_domain" "vm" {
