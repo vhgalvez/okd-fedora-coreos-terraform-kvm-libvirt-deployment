@@ -1,17 +1,19 @@
-Documento Técnico de Preparación del Ambiente para el Proyecto
+# Documento Técnico de Preparación del Ambiente para el Proyecto
+
 Este documento detalla los pasos necesarios para preparar el ambiente y configurar el sistema para desplegar máquinas virtuales usando Terraform y Libvirt. A continuación, se explican paso a paso las tareas requeridas.
 
-Paso 1: Instalación de Dependencias
-Antes de comenzar con la configuración de las máquinas virtuales, es necesario instalar algunas dependencias en tu sistema.
+## Paso 1: Instalación de Dependencias
 
-Instalación de QEMU, KVM y Libvirt
+### Instalación de QEMU, KVM y Libvirt
 Ejecuta los siguientes comandos para instalar las herramientas necesarias:
 
-bash
-Copiar código
+```bash
 sudo dnf install -y qemu-kvm qemu-img libvirt libvirt-client virt-install
 sudo systemctl enable --now libvirtd
-Paso 2: Configuración del Pool de Almacenamiento
+```
+
+
+## Paso 2: Configuración del Pool de Almacenamiento
 Creación Manual del Pool default
 Primero, definimos, construimos, iniciamos y configuramos el pool default para que se inicie automáticamente con el sistema:
 
@@ -60,4 +62,3 @@ bash
 Copiar código
 cd /var/lib/libvirt/images
 wget https://download.rockylinux.org/pub/rocky/9/images/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2
-Paso 4: Configuración de Terraform

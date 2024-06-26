@@ -152,10 +152,9 @@ Resumen de los Hostnames e IPs
 10.17.4.24 worker1.serverlocalcefas.com
 10.17.4.25 worker2.serverlocalcefas.com
 10.17.4.26 worker3.serverlocalcefas.com
-192.168.0.20 bastion.serverlocalcefas.com
+192.168.0.20 bastion1.serverlocalcefas.com
 10.17.3.11 freeipa.serverlocalcefas.com
-10.17.3.12 lb.serverlocalcefas.com
-10.17.3.13 db.serverlocalcefas
+
 192.168.0.20 bastion1.serverlocalcefas.com
 
 Esta guía debe ayudarte a configurar manualmente la resolución de DNS en tus máquinas virtuales Rocky Linux y Flatcar Linux.
@@ -171,10 +170,8 @@ Esta guía debe ayudarte a configurar manualmente la resolución de DNS en tus m
 10.17.4.24 worker1.cefaslocalserver.com
 10.17.4.25 worker2.cefaslocalserver.com
 10.17.4.26 worker3.cefaslocalserver.com
-192.168.0.20 bastion.cefaslocalserver.com
+192.168.0.20 bastion1.cefaslocalserver.com
 10.17.3.11 freeipa.cefaslocalserver.com
-10.17.3.12 lb.cefaslocalserver.com
-10.17.3.13 db.cefaslocalserver.com
 192.168.0.20 bastion1.cefaslocalserver.com
 ```
 
@@ -192,6 +189,8 @@ Esta guía debe ayudarte a configurar manualmente la resolución de DNS en tus m
 ```
 
 ## Redes Virtuales y Configuración
+
+
 
 ## Tabla de Configuración de Redes - br0 - Bridge Network
 
@@ -225,7 +224,7 @@ Esta guía debe ayudarte a configurar manualmente la resolución de DNS en tus m
 
 | Máquina  | CPU (cores) | Memoria (MB) | IP  | Dominio                      | Sistema Operativo       |
 | -------- | ----------- | ------------ | --- | ---------------------------- | ----------------------- |
-| Bastion1 | 1           | 2024         |     | bastion.cefaslocalserver.com | Rocky Linux 9.3 Minimal |
+| Bastion1 | 1           | 2024         |     | bastion1.cefaslocalserver.com | Rocky Linux 9.3 Minimal |
 
 #### kube_network_02 - NAT Network
 
