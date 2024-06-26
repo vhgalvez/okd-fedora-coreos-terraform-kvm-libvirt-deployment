@@ -13,6 +13,15 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
+# Crear el grupo de almacenamiento predeterminado
+resource "libvirt_pool" "default" {
+  name = "default"
+  type = "dir"
+  path = "/var/lib/libvirt/images"
+  
+}
+
+
 resource "libvirt_network" "br0" {
   name      = var.rocky9_network_name
   mode      = "bridge"
