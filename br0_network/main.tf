@@ -13,7 +13,6 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-
 resource "libvirt_pool" "default" {
   name = "default"
   type = "dir"
@@ -22,6 +21,7 @@ resource "libvirt_pool" "default" {
     ignore_changes = [name]
   }
 }
+
 resource "libvirt_network" "br0" {
   name      = var.rocky9_network_name
   mode      = "bridge"
@@ -41,6 +41,10 @@ resource "libvirt_volume" "rocky9_image" {
   source = var.rocky9_image
   pool   = libvirt_pool.volumetmp_bastion.name
   format = "qcow2"
+
+  depends_on = [
+    libvirt_pool.volumetmp_bastion
+  ]
 }
 
 data "template_file" "vm_configs" {
@@ -70,6 +74,10 @@ resource "libvirt_cloudinit_disk" "vm_cloudinit" {
     dns1    = each.value.dns1,
     dns2    = each.value.dns2
   })
+
+  depends_on = [
+    libvirt_pool.volumetmp_bastion
+  ]
 }
 
 resource "libvirt_volume" "vm_disk" {
@@ -80,6 +88,10 @@ resource "libvirt_volume" "vm_disk" {
   pool           = each.value.volume_pool
   format         = each.value.volume_format
   size           = each.value.volume_size
+
+  depends_on = [
+    libvirt_volume.rocky9_image
+  ]
 }
 
 resource "libvirt_domain" "vm" {
