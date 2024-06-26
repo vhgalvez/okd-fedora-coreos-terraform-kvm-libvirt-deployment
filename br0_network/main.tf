@@ -11,12 +11,21 @@ terraform {
 
 provider "libvirt" {
   uri = "qemu:///system"
-  
+}
+
+resource "libvirt_network" "br0" {
+  name      = var.rocky9_network_name
+  mode      = "bridge"
+  bridge    = "br0"
+  autostart = true
+  addresses = ["192.168.0.0/24"]
+}
+
 resource "libvirt_pool" "default" {
   count = length(data.libvirt_pool_exists.default.ids) == 0 ? 1 : 0
-  name = "default"
-  type = "dir"
-  path = "/var/lib/libvirt/images"
+  name  = "default"
+  type  = "dir"
+  path  = "/var/lib/libvirt/images"
 
   lifecycle {
     prevent_destroy = true
@@ -26,14 +35,6 @@ resource "libvirt_pool" "default" {
 data "libvirt_pool_exists" "default" {
   name = "default"
 }
-resource "libvirt_network" "br0" {
-  name      = var.rocky9_network_name
-  mode      = "bridge"
-  bridge    = "br0"
-  autostart = true
-  addresses = ["192.168.0.0/24"]
-}
-
 resource "libvirt_pool" "volumetmp_bastion" {
   name = "${var.cluster_name}_bastion"
   type = "dir"
