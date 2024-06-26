@@ -1,14 +1,3 @@
-terraform {
-  required_version = ">= 0.13"
-
-  required_providers {
-    libvirt = {
-      source  = "dmacvicar/libvirt"
-      version = "0.7.1"
-    }
-  }
-}
-
 provider "libvirt" {
   uri = "qemu:///system"
 }
@@ -32,6 +21,7 @@ resource "libvirt_volume" "rocky9_image" {
   source = var.rocky9_image
   pool   = libvirt_pool.volumetmp_bastion.name
   format = "qcow2"
+  depends_on = [libvirt_pool.volumetmp_bastion]
 }
 
 data "template_file" "vm_configs" {
@@ -68,9 +58,10 @@ resource "libvirt_volume" "vm_disk" {
 
   name           = each.value.volume_name
   base_volume_id = libvirt_volume.rocky9_image.id
-  pool           = each.value.volume_pool
+  pool           = libvirt_pool.volumetmp_bastion.name
   format         = each.value.volume_format
   size           = each.value.volume_size
+  depends_on     = [libvirt_volume.rocky9_image]
 }
 
 resource "libvirt_domain" "vm" {
@@ -112,8 +103,4 @@ resource "libvirt_domain" "vm" {
   cpu {
     mode = "host-passthrough"
   }
-}
-
-output "bastion_ip_address" {
-  value = var.vm_rockylinux_definitions["bastion1"].ip
 }
