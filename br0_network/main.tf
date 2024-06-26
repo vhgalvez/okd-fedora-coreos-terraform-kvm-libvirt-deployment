@@ -21,25 +21,6 @@ resource "libvirt_network" "br0" {
   addresses = ["192.168.0.0/24"]
 }
 
-resource "null_resource" "check_default_pool" {
-  provisioner "local-exec" {
-    command = "virsh pool-info default"
-  }
-}
-
-resource "libvirt_pool" "default" {
-  count = null_resource.check_default_pool.*.id == "" ? 1 : 0
-  name  = "default"
-  type  = "dir"
-  path  = "/var/lib/libvirt/images"
-
-  lifecycle {
-    prevent_destroy = true
-  }
-}
-
-
-
 resource "libvirt_pool" "volumetmp_bastion" {
   name = "${var.cluster_name}_bastion"
   type = "dir"
