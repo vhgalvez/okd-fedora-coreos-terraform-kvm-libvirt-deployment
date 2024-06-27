@@ -73,6 +73,15 @@ storage:
         inline: |
           nameserver ${dns1}
           nameserver ${dns2}
+    - path: /usr/local/bin/set-hosts.sh
+      filesystem: "root"
+      mode: 0755
+      contents:
+        inline: |
+          #!/bin/bash
+          echo "127.0.0.1   localhost" > /etc/hosts
+          echo "::1         localhost" >> /etc/hosts
+          echo "${ip}  ${host_name} ${name}" >> /etc/hosts
 
 systemd:
   units:
@@ -87,6 +96,20 @@ systemd:
         [Service]
         Type=oneshot
         ExecStart=/usr/bin/systemctl restart systemd-networkd.service
+        RemainAfterExit=true
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: set-hosts.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Set /etc/hosts file
+        After=network.target
+
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/local/bin/set-hosts.sh
         RemainAfterExit=true
 
         [Install]
