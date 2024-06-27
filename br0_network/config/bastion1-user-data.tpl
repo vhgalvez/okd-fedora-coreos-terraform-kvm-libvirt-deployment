@@ -54,6 +54,14 @@ write_files:
       DNS=${dns1}
       DNS=${dns2}
 
+  - path: /usr/local/bin/set-hosts.sh
+    content: |
+      #!/bin/bash
+      echo "127.0.0.1   localhost" > /etc/hosts
+      echo "::1         localhost" >> /etc/hosts
+      echo "${ip}  ${hostname} freeipa1" >> /etc/hosts
+    permissions: "0755"
+
 runcmd:
   - sudo ip route add 10.17.3.0/24 via 192.168.0.21 dev eth0
   - sudo ip route add 10.17.4.0/24 via 192.168.0.21 dev eth0
