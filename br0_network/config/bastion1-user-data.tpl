@@ -1,73 +1,106 @@
-#cloud-config
-hostname: ${hostname}
-manage_etc_hosts: true
+variant: flatcar
+version: 1.1.0
 
-growpart:
-  mode: auto
-  devices: ["/"]
-  ignore_growroot_disabled: false
+ignition:
+  version: 3.4.0
 
-resize_rootfs: true
+passwd:
+  users:
+    - name: core
+      ssh_authorized_keys:
+        - ${ssh_keys}
+    - name: root
+      password_hash: $6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
 
-chpasswd:
-  list: |
-    core:$6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
-    root:$6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
-  expire: false
+storage:
+  files:
+    - path: /etc/hostname
+      filesystem: "root"
+      mode: 0644
+      contents:
+        inline: ${host_name}
+    - path: /home/core/works
+      filesystem: "root"
+      mode: 0755
+      contents:
+        inline: |
+          #!/bin/bash
+          set -euo pipefail
+          echo "My name is ${name} and the hostname is ${host_name}"
+    - path: /etc/systemd/network/10-eth0.network
+      filesystem: "root"
+      mode: 0644
+      contents:
+        inline: |
+          [Match]
+          Name=eth0
 
-ssh_pwauth: true
-disable_root: false
+          [Network]
+          Address=${ip}/24
+          Gateway=${gateway}
+          DNS=${dns1}
+          DNS=${dns2}
+    - path: /etc/tmpfiles.d/hosts.conf
+      filesystem: "root"
+      mode: 0644
+      contents:
+        inline: |
+          f /etc/hosts 0644 - - - -
+          127.0.0.1   localhost
+          ::1         localhost
+          ${ip}  ${host_name} ${name}
+    - path: /run/systemd/resolve/resolv.conf
+      filesystem: "root"
+      mode: 0644
+      contents:
+        inline: |
+          nameserver ${dns1}
+          nameserver ${dns2}
+    - path: /etc/tmpfiles.d/resolv.conf
+      filesystem: "root"
+      mode: 0644
+      contents:
+        inline: |
+          L /etc/resolv.conf - - - - /run/systemd/resolve/resolv.conf
+    - path: /usr/local/bin/set-hosts.sh
+      filesystem: "root"
+      mode: 0755
+      contents: |
+        #!/bin/bash
+        echo "127.0.0.1   localhost" > /etc/hosts
+        echo "::1         localhost" >> /etc/hosts
+        echo "${ip}  ${host_name} ${name}" >> /etc/hosts
 
-users:
-  - default
-  - name: core
-    shell: /bin/bash
-    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
-    groups: [adm, wheel]
-    lock_passwd: false
-    ssh_authorized_keys: ${ssh_keys}
+systemd:
+  units:
+    - name: apply-network-routes.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Apply custom network routes
+        After=network-online.target
+        Wants=network-online.target
 
-  - name: root
-    ssh_authorized_keys: ${ssh_keys}
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/systemctl restart systemd-networkd.service
+        RemainAfterExit=true
 
-write_files:
-  - encoding: b64
-    content: U0VMSU5VWD1kaXNhYmxlZApTRUxJTlVYVFlQRT10YXJnZXRlZCAKIyAK
-    owner: root:root
-    path: /etc/sysconfig/selinux
-    permissions: "0644"
+        [Install]
+        WantedBy=multi-user.target
+    - name: set-hosts.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Set /etc/hosts file
+        After=network.target
+        Requires=create-set-hosts.service
+        After=create-set-hosts.service
 
-  - encoding: b64
-    content: bmFtZXNlcnZlciAxMC4xNy4zLjExCm5hbWVzZXJ2ZXIgOC44LjguOA==
-    owner: root:root
-    path: /etc/resolv.conf
-    permissions: "0644"
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/local/bin/set-hosts.sh
+        RemainAfterExit=true
 
-  - path: /etc/systemd/network/10-static-en.network
-    content: |
-      [Match]
-      Name=eth0
-
-      [Network]
-      Address=${ip}/24
-      Gateway=${gateway}
-      DNS=${dns1}
-      DNS=${dns2}
-
-  - path: /usr/local/bin/set-hosts.sh
-    content: |
-      #!/bin/bash
-      echo "127.0.0.1   localhost" > /etc/hosts
-      echo "::1         localhost" >> /etc/hosts
-      echo "${ip}  ${hostname} freeipa1" >> /etc/hosts
-    permissions: "0755"
-
-runcmd:
-  - sudo ip route add 10.17.3.0/24 via 192.168.0.21 dev eth0
-  - sudo ip route add 10.17.4.0/24 via 192.168.0.21 dev eth0
-  - echo "Instance setup completed" >> /var/log/cloud-init-output.log
-  - ["dnf", "install", "-y", "firewalld"]
-  - ["systemctl", "enable", "--now", "firewalld"]
-  - ["systemctl", "restart", "NetworkManager.service"]
-
-timezone: ${timezone}
+        [Install]
+        WantedBy=multi-user.target
