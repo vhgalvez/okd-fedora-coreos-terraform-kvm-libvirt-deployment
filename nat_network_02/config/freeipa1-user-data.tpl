@@ -1,6 +1,6 @@
 #cloud-config
 hostname: ${hostname}
-manage_etc_hosts: true
+manage_etc_hosts: false
 
 growpart:
   mode: auto
@@ -56,15 +56,18 @@ write_files:
       echo "nameserver 8.8.8.8" >> /etc/resolv.conf
     permissions: "0755"
 
-  - path: /etc/hosts
+  - path: /usr/local/bin/set-hosts.sh
     content: |
-      127.0.0.1   localhost
-      ::1         localhost
-      ${ip}  ${hostname} freeipa1
+      #!/bin/bash
+      echo "127.0.0.1   localhost" > /etc/hosts
+      echo "::1         localhost" >> /etc/hosts
+      echo "${ip}  ${hostname} freeipa1" >> /etc/hosts
+    permissions: "0755"
 
 runcmd:
   - systemctl restart NetworkManager
   - /usr/local/bin/set-dns.sh
+  - /usr/local/bin/set-hosts.sh
   - echo "Instance setup completed" >> /var/log/cloud-init-output.log
   - ip route add 10.17.4.0/24 via 10.17.3.1 dev eth0
   - ip route add 192.168.0.0/24 via 10.17.3.1 dev eth0
