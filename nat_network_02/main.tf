@@ -103,10 +103,4 @@ resource "libvirt_domain" "vm_nat_02" {
     target_type = "serial"
     target_port = "0"
   }
-
-  # Optionally add a serial port
-  serial {
-    type        = "pty"
-    target_port = "0"
-  }
 }
