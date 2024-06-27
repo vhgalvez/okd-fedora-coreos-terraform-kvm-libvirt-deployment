@@ -48,6 +48,13 @@ write_files:
       DNS=${dns1}
       DNS=${dns2}
 
+  - path: /etc/resolv.conf
+    filesystem: "root"
+    mode: 0644
+    contents: |
+      nameserver 10.17.3.11
+      nameserver 8.8.8.8
+
 runcmd:
   - sudo ip route add 10.17.3.0/24 via 192.168.0.21 dev eth0
   - sudo ip route add 10.17.4.0/24 via 192.168.0.21 dev eth0
