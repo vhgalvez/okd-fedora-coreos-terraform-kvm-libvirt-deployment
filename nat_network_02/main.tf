@@ -1,5 +1,5 @@
 terraform {
-  required_version = "= 1.9.0"
+  required_version = "=  1.9.0"
 
   required_providers {
     libvirt = {
@@ -52,6 +52,7 @@ data "template_file" "vm-configs" {
   }
 }
 
+
 resource "libvirt_cloudinit_disk" "vm_cloudinit" {
   for_each = var.vm_rockylinux_definitions
 
@@ -95,18 +96,5 @@ resource "libvirt_domain" "vm_nat_02" {
 
   cpu {
     mode = "host-passthrough"
-  }
-
-  # Add this section for serial console support
-  console {
-    type        = "pty"
-    target_type = "serial"
-    target_port = "0"
-  }
-
-  # Optionally add a serial port
-  serial {
-    type        = "pty"
-    target_port = "0"
   }
 }
