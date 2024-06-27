@@ -61,7 +61,7 @@ write_files:
       #!/bin/bash
       echo "127.0.0.1   localhost" > /etc/hosts
       echo "::1         localhost" >> /etc/hosts
-      echo "${ip}  ${hostname} freeipa1" >> /etc/hosts
+      echo "10.17.3.11  freeipa1.cefaslocalserver.com freeipa1" >> /etc/hosts
     permissions: "0755"
 
 runcmd:
