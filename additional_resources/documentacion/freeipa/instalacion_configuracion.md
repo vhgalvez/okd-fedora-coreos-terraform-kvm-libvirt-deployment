@@ -14,7 +14,7 @@ sudo hostnamectl set-hostname freeipa1.cefaslocalserver.com
 1.3 Editar el Archivo /etc/hosts
 bash
 Copiar código
-echo "192.168.120.10 freeipa1.cefaslocalserver.com freeipa1" | sudo tee -a /etc/hosts
+echo "10.17.3.11 freeipa1.cefaslocalserver.com freeipa1" | sudo tee -a /etc/hosts
 Paso 2: Instalación de FreeIPA
 2.1 Instalar FreeIPA y el Servidor DNS
 bash
