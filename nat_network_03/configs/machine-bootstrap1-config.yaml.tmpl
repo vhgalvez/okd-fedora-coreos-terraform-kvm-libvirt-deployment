@@ -62,15 +62,27 @@ storage:
       contents:
         inline: |
           L /etc/resolv.conf - - - - /run/systemd/resolve/resolv.conf
-    - path: /usr/local/bin/set-hosts.sh
+    - path: /etc/systemd/system/create-set-hosts.service
       filesystem: "root"
-      mode: 0755
-      contents:
-        inline: |
-          #!/bin/bash
-          echo "127.0.0.1   localhost" > /etc/hosts
-          echo "::1         localhost" >> /etc/hosts
-          echo "${ip}  ${host_name} ${name}" >> /etc/hosts
+      mode: 0644
+      contents: |
+        [Unit]
+        Description=Create set-hosts.sh script
+        After=network.target
+
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/bash -c 'cat <<EOF > /usr/local/bin/set-hosts.sh
+#!/bin/bash
+echo "127.0.0.1   localhost" > /etc/hosts
+echo "::1         localhost" >> /etc/hosts
+echo "${ip}  ${host_name} ${name}" >> /etc/hosts
+EOF
+chmod +x /usr/local/bin/set-hosts.sh'
+        RemainAfterExit=true
+
+        [Install]
+        WantedBy=multi-user.target
 
 systemd:
   units:
@@ -95,6 +107,8 @@ systemd:
         [Unit]
         Description=Set /etc/hosts file
         After=network.target
+        Requires=create-set-hosts.service
+        After=create-set-hosts.service
 
         [Service]
         Type=oneshot
