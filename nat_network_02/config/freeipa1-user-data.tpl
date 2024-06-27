@@ -1,6 +1,6 @@
 #cloud-config
 hostname: ${hostname}
-manage_etc_hosts: false
+manage_etc_hosts: true
 
 growpart:
   mode: auto
@@ -16,13 +16,11 @@ users:
     sudo: ["ALL=(ALL) NOPASSWD:ALL"]
     groups: [adm, wheel]
     lock_passwd: false
-    ssh_authorized_keys:
-      - ssh-rsa AAAAB3...your-public-key...rest-of-the-key
+    ssh_authorized_keys: ${ssh_keys}
     passwd: $6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
 
   - name: root
-    ssh_authorized_keys:
-      - ssh-rsa AAAAB3...your-public-key...rest-of-the-key
+    ssh_authorized_keys: ${ssh_keys}
     passwd: $6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
 
 write_files:
@@ -56,15 +54,14 @@ write_files:
       echo "nameserver 8.8.8.8" >> /etc/resolv.conf
     permissions: "0755"
 
-
 runcmd:
   - systemctl restart NetworkManager
   - /usr/local/bin/set-dns.sh
   - echo "Instance setup completed" >> /var/log/cloud-init-output.log
   - ip route add 10.17.4.0/24 via 10.17.3.1 dev eth0
   - ip route add 192.168.0.0/24 via 10.17.3.1 dev eth0
-  - dnf install -y firewalld
-  - systemctl enable --now firewalld
-  - systemctl restart NetworkManager.service
+  - ["dnf", "install", "-y", "firewalld"]
+  - ["systemctl", "enable", "--now", "firewalld"]
+  - ["systemctl", "restart", "NetworkManager.service"]
 
 timezone: ${timezone}
