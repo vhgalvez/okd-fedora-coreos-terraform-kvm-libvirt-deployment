@@ -45,10 +45,23 @@ storage:
       mode: 0644
       contents:
         inline: |
-          f /etc/hosts 0644 - - - 
+          f /etc/hosts 0644 - - - -
           127.0.0.1   localhost
           ::1         localhost
           ${ip}  ${host_name} ${name}
+    - path: /run/systemd/resolve/resolv.conf
+      filesystem: "root"
+      mode: 0644
+      contents:
+        inline: |
+          nameserver ${dns1}
+          nameserver ${dns2}
+    - path: /etc/tmpfiles.d/resolv.conf
+      filesystem: "root"
+      mode: 0644
+      contents:
+        inline: |
+          L /etc/resolv.conf - - - - /run/systemd/resolve/resolv.conf
     - path: /usr/local/bin/set-hosts.sh
       filesystem: "root"
       mode: 0755
