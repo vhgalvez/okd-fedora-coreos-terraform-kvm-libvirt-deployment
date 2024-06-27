@@ -47,11 +47,6 @@ write_files:
       Gateway=${gateway}
       DNS=${dns1}
       DNS=${dns2}
-
-  - path: /etc/resolv.conf
-      content: |
-        nameserver 10.17.3.11
-        nameserver 8.8.8.8
       
 
 runcmd:
