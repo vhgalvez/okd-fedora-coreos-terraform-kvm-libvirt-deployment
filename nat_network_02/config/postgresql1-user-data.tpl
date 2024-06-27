@@ -46,14 +46,17 @@ write_files:
       [main]
       dns=none
 
-  - path: /etc/resolv.conf
+  - path: /usr/local/bin/set-dns.sh
     content: |
-      search cefaslocalserver.com
-      nameserver 10.17.3.11
-      nameserver 8.8.8.8
+      #!/bin/bash
+      echo "search cefaslocalserver.com" > /etc/resolv.conf
+      echo "nameserver 10.17.3.11" >> /etc/resolv.conf
+      echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+    permissions: "0755"
 
 runcmd:
   - systemctl restart NetworkManager
+  - /usr/local/bin/set-dns.sh
   - echo "Instance setup completed" >> /var/log/cloud-init-output.log
   - ip route add 10.17.4.0/24 via 10.17.3.1 dev eth0
   - ip route add 192.168.0.0/24 via 10.17.3.1 dev eth0
