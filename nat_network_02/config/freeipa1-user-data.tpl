@@ -41,7 +41,7 @@ write_files:
     content: bmFtZXNlcnZlciAxMC4xNy4zLjExCm5hbWVzZXJ2ZXIgOC44LjguOA==
     owner: root:root
     path: /etc/resolv.conf
-    permissions: "0644" 
+    permissions: "0644"
 
   - path: /etc/systemd/network/10-static-en.network
     content: |
@@ -53,7 +53,6 @@ write_files:
       Gateway=${gateway}
       DNS=${dns1}
       DNS=${dns2}
-
 
 runcmd:
   - echo "Instance setup completed" >> /var/log/cloud-init-output.log
