@@ -17,12 +17,12 @@ users:
     groups: [adm, wheel]
     lock_passwd: false
     ssh_authorized_keys:
-      - ${ssh_keys}
+      - ssh-rsa AAAAB3...your-public-key... rest-of-the-key
     passwd: $6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
 
   - name: root
     ssh_authorized_keys:
-      - ${ssh_keys}
+      - ssh-rsa AAAAB3...your-public-key... rest-of-the-key
     passwd: $6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
 
 write_files:
