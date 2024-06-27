@@ -26,7 +26,7 @@ storage:
         inline: |
           #!/bin/bash
           set -euo pipefail
-          echo My name is ${name} and the hostname is ${host_name}
+          echo "My name is ${name} and the hostname is ${host_name}"
     - path: /etc/systemd/network/10-eth0.network
       filesystem: "root"
       mode: 0644
