@@ -1,4 +1,3 @@
-
 # nat_network_03/main.tf
 terraform {
   required_version = "= 1.9.0"
@@ -104,6 +103,12 @@ resource "libvirt_domain" "machine" {
   graphics {
     type        = "vnc"
     listen_type = "address"
+  }
+
+  console {
+    type        = "pty"
+    target_type = "serial"
+    target_port = "0"
   }
 }
 
