@@ -9,15 +9,6 @@ growpart:
 
 resize_rootfs: true
 
-chpasswd:
-  list: |
-    core:$6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
-    root:$6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
-  expire: false
-
-ssh_pwauth: true
-disable_root: false
-
 users:
   - default
   - name: core
@@ -26,9 +17,11 @@ users:
     groups: [adm, wheel]
     lock_passwd: false
     ssh_authorized_keys: ${ssh_keys}
+    passwd: $6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
 
   - name: root
     ssh_authorized_keys: ${ssh_keys}
+    passwd: $6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
 
 write_files:
   - encoding: b64
@@ -48,10 +41,19 @@ write_files:
       DNS=${dns1}
       DNS=${dns2}
 
+  - path: /etc/NetworkManager/conf.d/dns.conf
+    content: |
+      [main]
+      dns=none
+
+  - path: /etc/resolv.conf
+    content: |
+      search cefaslocalserver.com
+      nameserver 10.17.3.11
+      nameserver 8.8.8.8
+
 runcmd:
   - systemctl restart NetworkManager
-  - echo "nameserver 10.17.3.11" > /etc/resolv.conf
-  - echo "nameserver 8.8.8.8" >> /etc/resolv.conf
   - echo "Instance setup completed" >> /var/log/cloud-init-output.log
   - ip route add 10.17.4.0/24 via 10.17.3.1 dev eth0
   - ip route add 192.168.0.0/24 via 10.17.3.1 dev eth0
