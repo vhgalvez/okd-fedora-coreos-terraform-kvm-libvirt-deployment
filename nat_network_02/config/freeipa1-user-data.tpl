@@ -1,5 +1,5 @@
 #cloud-config
-hostname: freeipa1.cefaslocalserver.com
+hostname: ${hostname}
 manage_etc_hosts: false
 
 growpart:
@@ -16,21 +16,18 @@ users:
     sudo: ["ALL=(ALL) NOPASSWD:ALL"]
     groups: [adm, wheel]
     lock_passwd: false
-    ssh_authorized_keys:
-      - ssh-rsa AAAAB3...your-public-key...rest-of-the-key
+    ssh_authorized_keys: ${ssh_keys}
     passwd: $6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
 
   - name: root
-    ssh_authorized_keys:
-      - ssh-rsa AAAAB3...your-public-key...rest-of-the-key
+    ssh_authorized_keys: ${ssh_keys}
     passwd: $6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
 
 write_files:
-  - path: /etc/sysconfig/selinux
-    content: |
-      SELINUX=disabled
-      SELINUXTYPE=targeted
+  - encoding: b64
+    content: U0VMSU5VWD1kaXNhYmxlZApTRUxJTlVYVFlQRT10YXJnZXRlZCAKIyAK
     owner: root:root
+    path: /etc/sysconfig/selinux
     permissions: "0644"
 
   - path: /etc/systemd/network/10-static-en.network
@@ -39,10 +36,10 @@ write_files:
       Name=eth0
 
       [Network]
-      Address=10.17.3.11/24
-      Gateway=10.17.3.1
-      DNS=10.17.3.11
-      DNS=8.8.8.8
+      Address=${ip}/24
+      Gateway=${gateway}
+      DNS=${dns1}
+      DNS=${dns2}
 
   - path: /etc/NetworkManager/conf.d/dns.conf
     content: |
@@ -62,7 +59,7 @@ write_files:
       #!/bin/bash
       echo "127.0.0.1   localhost" > /etc/hosts
       echo "::1         localhost" >> /etc/hosts
-      echo "10.17.3.11  freeipa1.cefaslocalserver.com freeipa1" >> /etc/hosts
+      echo "${ip}  ${hostname} freeipa1" >> /etc/hosts
     permissions: "0755"
 
 runcmd:
@@ -75,4 +72,4 @@ runcmd:
   - systemctl enable --now firewalld
   - systemctl restart NetworkManager.service
 
-timezone: UTC
+timezone: ${timezone}
