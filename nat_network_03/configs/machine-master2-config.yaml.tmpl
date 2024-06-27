@@ -71,8 +71,8 @@ storage:
       mode: 0644
       contents:
         inline: |
-          nameserver 8.8.8.8
-          nameserver 10.17.4.11
+          nameserver ${dns1}
+          nameserver ${dns2}
 
 systemd:
   units:
