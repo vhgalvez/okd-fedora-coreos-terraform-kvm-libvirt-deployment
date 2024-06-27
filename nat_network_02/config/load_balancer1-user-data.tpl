@@ -36,6 +36,12 @@ write_files:
     owner: root:root
     path: /etc/sysconfig/selinux
     permissions: "0644"
+    
+  - encoding: b64
+    content: bmFtZXNlcnZlciAxMC4xNy4zLjExCm5hbWVzZXJ2ZXIgOC44LjguOA==
+    owner: root:root
+    path: /etc/resolv.conf
+    permissions: "0644" 
 
   - path: /etc/systemd/network/10-static-en.network
     content: |
