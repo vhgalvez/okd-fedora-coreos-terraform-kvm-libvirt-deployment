@@ -61,5 +61,8 @@ runcmd:
   - ["dnf", "install", "-y", "firewalld"]
   - ["systemctl", "enable", "--now", "firewalld"]
   - ["systemctl", "restart", "NetworkManager.service"]
+  - ["bash", "-c", "echo 'dns=none' >> /etc/NetworkManager/NetworkManager.conf"]
+  - ["systemctl", "restart", "NetworkManager.service"]
+  - ["bash", "-c", "echo -e 'nameserver 10.17.3.11\nnameserver 8.8.8.8' > /etc/resolv.conf"]
 
 timezone: ${timezone}
