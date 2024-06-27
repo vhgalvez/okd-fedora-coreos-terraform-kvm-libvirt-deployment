@@ -10,8 +10,8 @@ vm_rockylinux_definitions = {
     hostname      = "bastion1.cefaslocalserver.com",
     ip            = "192.168.0.20",
     gateway       = "192.168.0.1",
-    dns1          = "8.8.8.8",
-    dns2          = "8.8.4.4"
+    dns1          = "10.17.3.11",
+    dns2          = "8.8.8.8"
   }
 }
 cluster_name        = "cluster_cefaslocalserver"
