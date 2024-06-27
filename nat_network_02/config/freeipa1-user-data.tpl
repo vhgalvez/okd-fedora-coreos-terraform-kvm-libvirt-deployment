@@ -54,6 +54,12 @@ write_files:
       echo "nameserver 8.8.8.8" >> /etc/resolv.conf
     permissions: "0755"
 
+  - path: /etc/hosts
+    content: |
+      127.0.0.1   localhost
+      ::1         localhost
+      ${ip}  ${hostname} freeipa1
+
 runcmd:
   - systemctl restart NetworkManager
   - /usr/local/bin/set-dns.sh
