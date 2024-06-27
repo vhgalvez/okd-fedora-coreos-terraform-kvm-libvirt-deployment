@@ -26,10 +26,11 @@ users:
     passwd: $6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
 
 write_files:
-  - encoding: b64
-    content: U0VMSU5VWD1kaXNhYmxlZApTRUxJTlVYVFlQRT10YXJnZXRlZCAKIyAK
+  - path: /etc/sysconfig/selinux
+    content: |
+      SELINUX=disabled
+      SELINUXTYPE=targeted
     owner: root:root
-    path: /etc/sysconfig/selinux
     permissions: "0644"
 
   - path: /etc/systemd/network/10-static-en.network
