@@ -16,13 +16,13 @@ users:
     sudo: ["ALL=(ALL) NOPASSWD:ALL"]
     groups: [adm, wheel]
     lock_passwd: false
-    ssh_authorized_keys: 
-      - ${ssh_keys}
+    ssh_authorized_keys:
+      - ${ssh_key_core}
     passwd: $6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
 
   - name: root
-    ssh_authorized_keys: 
-      - ${ssh_keys}
+    ssh_authorized_keys:
+      - ${ssh_key_root}
     passwd: $6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
 
 write_files:
@@ -55,12 +55,6 @@ write_files:
       echo "nameserver 10.17.3.11" >> /etc/resolv.conf
       echo "nameserver 8.8.8.8" >> /etc/resolv.conf
     permissions: "0755"
-
-  - path: /etc/hosts
-    content: |
-      127.0.0.1   localhost
-      ::1         localhost
-      ${ip}  ${hostname} freeipa1
 
 runcmd:
   - systemctl restart NetworkManager
