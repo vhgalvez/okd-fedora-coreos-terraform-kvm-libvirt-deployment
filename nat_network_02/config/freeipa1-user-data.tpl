@@ -1,5 +1,5 @@
 #cloud-config
-hostname: ${hostname}
+hostname: freeipa1.cefaslocalserver.com
 manage_etc_hosts: false
 
 growpart:
@@ -39,10 +39,10 @@ write_files:
       Name=eth0
 
       [Network]
-      Address=${ip}/24
-      Gateway=${gateway}
-      DNS=${dns1}
-      DNS=${dns2}
+      Address=10.17.3.11/24
+      Gateway=10.17.3.1
+      DNS=10.17.3.11
+      DNS=8.8.8.8
 
   - path: /etc/NetworkManager/conf.d/dns.conf
     content: |
@@ -66,7 +66,6 @@ write_files:
     permissions: "0755"
 
 runcmd:
-  - systemctl restart NetworkManager
   - /usr/local/bin/set-dns.sh
   - /usr/local/bin/set-hosts.sh
   - echo "Instance setup completed" >> /var/log/cloud-init-output.log
@@ -76,4 +75,4 @@ runcmd:
   - systemctl enable --now firewalld
   - systemctl restart NetworkManager.service
 
-timezone: ${timezone}
+timezone: UTC
