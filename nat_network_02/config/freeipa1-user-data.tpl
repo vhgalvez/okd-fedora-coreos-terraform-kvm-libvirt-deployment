@@ -56,18 +56,10 @@ write_files:
       echo "nameserver 8.8.8.8" >> /etc/resolv.conf
     permissions: "0755"
 
-  - path: /usr/local/bin/set-hosts.sh
-    content: |
-      #!/bin/bash
-      echo "127.0.0.1   localhost" > /etc/hosts
-      echo "::1         localhost" >> /etc/hosts
-      echo "10.17.3.11  freeipa1.cefaslocalserver.com freeipa1" >> /etc/hosts
-    permissions: "0755"
 
 runcmd:
   - systemctl restart NetworkManager
   - /usr/local/bin/set-dns.sh
-  - /usr/local/bin/set-hosts.sh
   - echo "Instance setup completed" >> /var/log/cloud-init-output.log
   - ip route add 10.17.4.0/24 via 10.17.3.1 dev eth0
   - ip route add 192.168.0.0/24 via 10.17.3.1 dev eth0
