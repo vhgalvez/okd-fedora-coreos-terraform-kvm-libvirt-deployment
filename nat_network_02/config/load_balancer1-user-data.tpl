@@ -63,7 +63,6 @@ runcmd:
   - ["systemctl", "restart", "NetworkManager.service"]
   - ["bash", "-c", "echo 'dns=none' >> /etc/NetworkManager/NetworkManager.conf"]
   - ["systemctl", "restart", "NetworkManager.service"]
-  - ["bash", "-c", "echo 'bmFtZXNlcnZlciAxMC4xNy4zLjExCm5hbWVzZXJ2ZXIgOC44LjguOA==' | base64 -d > /etc/resolv.conf"]
-
+  - ["bash", "-c", "echo -e 'nameserver 10.17.3.11\nnameserver 8.8.8.8' > /etc/resolv.conf"]
 
 timezone: ${timezone}
