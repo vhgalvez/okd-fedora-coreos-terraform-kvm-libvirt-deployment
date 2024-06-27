@@ -92,3 +92,7 @@ ssh-audit  -2 127.0.0.1
 (rec) +sntrup761x25519-sha512@openssh.com   -- kex algorithm to append
 
 ```
+
+
+
+

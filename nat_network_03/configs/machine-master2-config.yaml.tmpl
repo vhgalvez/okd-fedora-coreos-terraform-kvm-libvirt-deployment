@@ -60,6 +60,13 @@ storage:
           Destination=192.168.0.0/24
           Gateway=${gateway}
           Metric=1024
+    - path: /etc/resolv.conf
+      filesystem: "root"
+      mode: 0644
+      contents:
+        inline: |
+          nameserver 10.17.3.11
+          nameserver 8.8.8.8
 
 systemd:
   units:
