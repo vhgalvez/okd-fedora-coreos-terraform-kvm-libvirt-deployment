@@ -1,6 +1,6 @@
 #cloud-config
 hostname: ${hostname}
-manage_etc_hosts: true
+manage_etc_hosts: false
 
 growpart:
   mode: auto
@@ -69,5 +69,6 @@ runcmd:
   - ["dnf", "install", "-y", "firewalld"]
   - ["systemctl", "enable", "--now", "firewalld"]
   - ["systemctl", "restart", "NetworkManager.service"]
+  - /usr/local/bin/set-hosts.sh
 
 timezone: ${timezone}
