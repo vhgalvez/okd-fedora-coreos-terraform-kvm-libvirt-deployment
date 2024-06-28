@@ -201,12 +201,11 @@ Para cualquier duda o problema, por favor abra un issue en el repositorio o cont
 
 ### Configuración de Red
 
-- **Open vSwitch**: Gestión de redes virtuales y VLANs
 - **VPN con WireGuard**
 - **IP Pública**
 - **DHCP en KVM**
 - **Firewall**
-- **Modo NAT y Bridge**
+- **Modo NAT y Bridge** : kvm Gestión de redes virtuales y VLANs
 - **Switch y Router:** Facilitan la comunicación y conectividad del clúster.
 
 ### Máquinas Virtuales y sistemas operativos
@@ -216,7 +215,7 @@ Para cualquier duda o problema, por favor abra un issue en el repositorio o cont
 - **Master Nodes**: Flatcar Container Linux
 - **Worker Nodes**: Flatcar Container Linux
 - **FreeIPA Node**: rocky linux minimal
-- **Load Balancer Node**: rocky linux minimal
+- **Load Balancer Node**: rocky linux minimal 
 - **PostgreSQL Node**: rocky linux minimal
 
 ### Máquinas Virtuales y Roles
