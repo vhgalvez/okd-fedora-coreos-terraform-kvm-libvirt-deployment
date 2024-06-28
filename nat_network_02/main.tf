@@ -1,3 +1,4 @@
+# nat_network_02\main.tf
 terraform {
   required_version = "= 1.9.0"
 
@@ -44,6 +45,7 @@ data "template_file" "vm-configs" {
   vars = {
     ssh_keys = jsonencode(var.ssh_keys),
     hostname = each.value.hostname,
+    short_hostname = each.value.short_hostname,
     timezone = var.timezone,
     ip       = each.value.ip,
     gateway  = var.gateway,
