@@ -487,3 +487,11 @@ resource "libvirt_network" "kube_network_03" {
 ![sudo virsh list --](https://github.com/vhgalvez/terraform-openshift-kvm-deployment/blob/4f16ea5ee7688d1d5b3a1611792ffaca2526c88b/complemento/image/mv_server.png "width=200 height=150")
 
 ![Servidor](https://github.com/vhgalvez/terraform-openshift-kvm-deployment/blob/5f378e8f80f5a90654b18568974b810bcca779bf/complemento/image/mv_virsh_list.png "width=200 height=150")
+
+
+## instalar okd
+
+### key de registro de redhat
+
+url:   https://console.redhat.com/openshift/create/local
+
