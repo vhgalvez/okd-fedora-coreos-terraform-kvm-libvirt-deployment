@@ -56,7 +56,6 @@ storage:
         inline: |
           nameserver ${dns1}
           nameserver ${dns2}
-          search cefaslocalserver.com
     - path: /etc/tmpfiles.d/resolv.conf
       filesystem: "root"
       mode: 0644
