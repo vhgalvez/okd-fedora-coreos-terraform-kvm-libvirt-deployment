@@ -43,6 +43,5 @@ variable "vm_rockylinux_definitions" {
     gateway        = string
     dns1           = string
     dns2           = string
-    short_hostname = string
   }))
 }
