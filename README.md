@@ -462,7 +462,7 @@ Estas interfaces se utilizan para la comunicación y conectividad de la red, inc
 
 
 
-
+## Definicion de redes en terrafor
 ```hcl
 # Red br0 - Bridge Network - Rocky Linux 9.3
 resource "libvirt_network" "br0" {
