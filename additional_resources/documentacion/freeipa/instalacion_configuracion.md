@@ -208,3 +208,11 @@ resource "libvirt_network" "kube_network_03" {
   addresses = ["10.17.4.0/24"]
 }
 ```
+
+
+Directory Manager password:
+Password (confirm):
+12345678
+
+kinit admin
+12345678
