@@ -19,61 +19,61 @@ Este repositorio contiene tres subproyectos de Terraform que se deben ejecutar d
 
 1. Navegue al directorio `bastion_network`:
 
-    ```bash
-    cd bastion_network
-    ```
+   ```bash
+   cd bastion_network
+   ```
 
 2. Inicialice Terraform y actualice los proveedores:
 
-    ```bash
-    sudo terraform init --upgrade
-    ```
+   ```bash
+   sudo terraform init --upgrade
+   ```
 
 3. Aplique la configuración de Terraform:
 
-    ```bash
-    sudo terraform apply
-    ```
+   ```bash
+   sudo terraform apply
+   ```
 
 ### Inicializar y Aplicar Terraform para `nat_network_02`
 
 1. Navegue al directorio `nat_network_02`:
 
-    ```bash
-    cd ../nat_network_02
-    ```
+   ```bash
+   cd ../nat_network_02
+   ```
 
 2. Inicialice Terraform y actualice los proveedores:
 
-    ```bash
-    sudo terraform init --upgrade
-    ```
+   ```bash
+   sudo terraform init --upgrade
+   ```
 
 3. Aplique la configuración de Terraform:
 
-    ```bash
-    sudo terraform apply
-    ```
+   ```bash
+   sudo terraform apply
+   ```
 
 ### Inicializar y Aplicar Terraform para `nat_network_03`
 
 1. Navegue al directorio `nat_network_03`:
 
-    ```bash
-    cd ../nat_network_03
-    ```
+   ```bash
+   cd ../nat_network_03
+   ```
 
 2. Inicialice Terraform y actualice los proveedores:
 
-    ```bash
-    sudo terraform init --upgrade
-    ```
+   ```bash
+   sudo terraform init --upgrade
+   ```
 
 3. Aplique la configuración de Terraform:
 
-    ```bash
-    sudo terraform apply
-    ```
+   ```bash
+   sudo terraform apply
+   ```
 
 ## Detalles de las Máquinas Virtuales
 
@@ -89,6 +89,7 @@ Este repositorio contiene tres subproyectos de Terraform que se deben ejecutar d
 ### nat_network_02
 
 - **Nombre:** freeipa1
+
   - **CPU:** 2
   - **Memoria:** 2048 MB
   - **IP:** 10.17.3.11
@@ -96,6 +97,7 @@ Este repositorio contiene tres subproyectos de Terraform que se deben ejecutar d
   - **Sistema Operativo:** Rocky Linux 9.3
 
 - **Nombre:** load_balancer1
+
   - **CPU:** 2
   - **Memoria:** 2048 MB
   - **IP:** 10.17.3.12
@@ -112,6 +114,7 @@ Este repositorio contiene tres subproyectos de Terraform que se deben ejecutar d
 ### nat_network_03
 
 - **Nombre:** bootstrap1
+
   - **CPU:** 1
   - **Memoria:** 1024 MB
   - **IP:** 10.17.4.20
@@ -119,6 +122,7 @@ Este repositorio contiene tres subproyectos de Terraform que se deben ejecutar d
   - **Sistema Operativo:** Flatcar Container Linux
 
 - **Nombre:** master1
+
   - **CPU:** 2
   - **Memoria:** 2048 MB
   - **IP:** 10.17.4.21
@@ -126,6 +130,7 @@ Este repositorio contiene tres subproyectos de Terraform que se deben ejecutar d
   - **Sistema Operativo:** Flatcar Container Linux
 
 - **Nombre:** master2
+
   - **CPU:** 2
   - **Memoria:** 2048 MB
   - **IP:** 10.17.4.22
@@ -133,6 +138,7 @@ Este repositorio contiene tres subproyectos de Terraform que se deben ejecutar d
   - **Sistema Operativo:** Flatcar Container Linux
 
 - **Nombre:** master3
+
   - **CPU:** 2
   - **Memoria:** 2048 MB
   - **IP:** 10.17.4.23
@@ -140,6 +146,7 @@ Este repositorio contiene tres subproyectos de Terraform que se deben ejecutar d
   - **Sistema Operativo:** Flatcar Container Linux
 
 - **Nombre:** worker1
+
   - **CPU:** 2
   - **Memoria:** 2048 MB
   - **IP:** 10.17.4.24
@@ -147,6 +154,7 @@ Este repositorio contiene tres subproyectos de Terraform que se deben ejecutar d
   - **Sistema Operativo:** Flatcar Container Linux
 
 - **Nombre:** worker2
+
   - **CPU:** 2
   - **Memoria:** 2048 MB
   - **IP:** 10.17.4.25
@@ -159,7 +167,6 @@ Este repositorio contiene tres subproyectos de Terraform que se deben ejecutar d
   - **IP:** 10.17.4.26
   - **Rol:** Ejecución de aplicaciones
   - **Sistema Operativo:** Flatcar Container Linux
-
 
 ## Notas Adicionales
 
@@ -237,9 +244,7 @@ Estas interfaces se utilizan para la comunicación y conectividad de la red, inc
 - Las direcciones IP pueden cambiar debido a la asignación dinámica de DHCP.
 - Se utilizará una infraestructura de red para configurar el modo Bridge en el nodo Bastion.
 
-
 ### Automatización y Orquestación
-
 
 - **Terraform**: Automatización de infraestructura
 - **Ansible**: Configuración y manejo de operaciones
@@ -261,7 +266,6 @@ Estas interfaces se utilizan para la comunicación y conectividad de la red, inc
 - **Nginx:** Servidor web y proxy inverso para aplicaciones web.
 - **Apache Kafka:** Plataforma de mensajería utilizada para la comunicación entre microservicios.
 - **Redis:** Almacenamiento en caché y base de datos en memoria para mejorar el rendimiento de las aplicaciones.
-
 
 ### Seguridad y Protección
 
@@ -290,7 +294,6 @@ Estas interfaces se utilizan para la comunicación y conectividad de la red, inc
   - **/dev/mapper/rl-root**: 100G (7.5G usado)
   - **/dev/sda2**: 1014M (718M usado)
   - **/dev/mapper/rl-home**: 3.0T (25G usado)
-  
 
 ## Máquinas Virtuales y Roles
 
@@ -301,14 +304,13 @@ Estas interfaces se utilizan para la comunicación y conectividad de la red, inc
   - **Worker Nodes**: 3 x (2 CPUs, 2048 MB), ejecutan aplicaciones
   - **Bastion Node**: 1 CPU, 1024 MB, seguridad y acceso
   - **Load Balancer**: 1 CPU, 1024 MB, con Traefik
-  
+
 ## Red y Conectividad
 
 - **Switch**: TP-Link LS1008G - 8 puertos Gigabit no administrados
 - **Router WiFi**: Conexión fibra óptica, 600 Mbps de subida/bajada, IP pública
 - **Red**: Configurada red NAT y red Bridge de kvm
 - **VPN**: WireGuard para acceso seguro ssh administrado por Bastion Node
-
 
 ## Redes Virtuales y Configuración
 
@@ -366,7 +368,6 @@ Estas interfaces se utilizan para la comunicación y conectividad de la red, inc
 | Worker2    | 2           | 2048         | 10.17.4.25 | worker2.cefaslocalserver.com    | Flatcar Container Linux |
 | Worker3    | 2           | 2048         | 10.17.4.26 | worker3.cefaslocalserver.com    | Flatcar Container Linux |
 
-
 ## Tabla de Configuración de Redes
 
 ### Tabla de Configuración de Redes - br0
@@ -395,52 +396,43 @@ Estas interfaces se utilizan para la comunicación y conectividad de la red, inc
 | kube_network_03 | `worker2`    | 10.17.4.25   | Ejecución de aplicaciones  | (Virtual - NAT) |
 | kube_network_03 | `worker3`    | 10.17.4.26   | Ejecución de aplicaciones  | (Virtual - NAT) |
 
-
-
 ## Tabla de Configuración de Redes - br0 - Bridge Network
 
 | Nombre   | Dirección IP    |
-|----------|-----------------|
-| enp3s0f1 | 192.168.0.52/24 | 
-| enp4s0f0 | 192.168.0.18/24 | 
+| -------- | --------------- |
+| enp3s0f1 | 192.168.0.52/24 |
+| enp4s0f0 | 192.168.0.18/24 |
 | enp4s0f1 | 192.168.0.35/24 |
 | virbro   | 10.17.3.1/24    |
 | virbr1   | 10.17.4.1/24    |
-
-
-
 
 # Información Detallada de la Máquina
 
 ## Detalles de la Red
 
-| Dirección IP    | Hostname                        | Alias     | Interfaz de Red | Estado de la Interfaz | IP Asignada               | Máscara de Subred          |
-|-----------------|---------------------------------|-----------|-----------------|-----------------------|---------------------------|----------------------------|
-| 192.168.0.21    | physical1.cefaslocalserver.com  | physical1 | enp3s0f1        | UP                    | 192.168.0.52/24           | 255.255.255.0              |
-| 192.168.0.18    |                                 |           | enp4s0f0        | UP                    | 192.168.0.18/24           | 255.255.255.0              |
-| 192.168.0.35    |                                 |           | enp4s0f1        | UP                    | 192.168.0.35/24           | 255.255.255.0              |
-| 192.168.0.28    |                                 |           | br0             | UP                    | 192.168.0.28/24 (Primary) | 255.255.255.0              |
-| 192.168.0.21    |                                 |           | br0             | UP                    | 192.168.0.21/24 (Secondary) | 255.255.255.0              |
-| 10.17.3.1       |                                 |           | virbr0          | UP                    | 10.17.3.1/24              | 255.255.255.0              |
-| 10.17.4.1       |                                 |           | virbr1          | UP                    | 10.17.4.1/24              | 255.255.255.0              |
+| Dirección IP | Hostname                       | Alias     | Interfaz de Red | Estado de la Interfaz | IP Asignada                 | Máscara de Subred |
+| ------------ | ------------------------------ | --------- | --------------- | --------------------- | --------------------------- | ----------------- |
+| 192.168.0.21 | physical1.cefaslocalserver.com | physical1 | enp3s0f1        | UP                    | 192.168.0.52/24             | 255.255.255.0     |
+| 192.168.0.18 |                                |           | enp4s0f0        | UP                    | 192.168.0.18/24             | 255.255.255.0     |
+| 192.168.0.35 |                                |           | enp4s0f1        | UP                    | 192.168.0.35/24             | 255.255.255.0     |
+| 192.168.0.28 |                                |           | br0             | UP                    | 192.168.0.28/24 (Primary)   | 255.255.255.0     |
+| 192.168.0.21 |                                |           | br0             | UP                    | 192.168.0.21/24 (Secondary) | 255.255.255.0     |
+| 10.17.3.1    |                                |           | virbr0          | UP                    | 10.17.3.1/24                | 255.255.255.0     |
+| 10.17.4.1    |                                |           | virbr1          | UP                    | 10.17.4.1/24                | 255.255.255.0     |
 
 ## Detalles Adicionales de la Máquina
 
-| Máquina   | CPU (cores) | Memoria (MB) | IP            | Dominio                       | Sistema Operativo       |
-|-----------|-------------|--------------|---------------|-------------------------------|-------------------------|
-| physical1 | 24          | 35904        | 192.168.0.21  | physical1.cefaslocalserver.com | Rocky Linux 9.4         |
-
+| Máquina   | CPU (cores) | Memoria (MB) | IP           | Dominio                        | Sistema Operativo |
+| --------- | ----------- | ------------ | ------------ | ------------------------------ | ----------------- |
+| physical1 | 24          | 35904        | 192.168.0.21 | physical1.cefaslocalserver.com | Rocky Linux 9.4   |
 
 # Puentes de Red
 
-| Nombre del Puente | Puente ID         | STP Habilitado | Interfaces Conectadas            |
-|-------------------|-------------------|----------------|----------------------------------|
-| br0               | 8000.2c768aacdebc | Sí             | enp3s0f0, vnet0                  |
-| virbr0            | 8000.525400b64c99 | Sí             | vnet1, vnet2, vnet3              |
+| Nombre del Puente | Puente ID         | STP Habilitado | Interfaces Conectadas                            |
+| ----------------- | ----------------- | -------------- | ------------------------------------------------ |
+| br0               | 8000.2c768aacdebc | Sí             | enp3s0f0, vnet0                                  |
+| virbr0            | 8000.525400b64c99 | Sí             | vnet1, vnet2, vnet3                              |
 | virbr1            | 8000.52540016b5de | Sí             | vnet4, vnet5, vnet6, vnet7, vnet8, vnet9, vnet10 |
-
-
-
 
 ## Información del Sistema
 
@@ -457,12 +449,12 @@ Estas interfaces se utilizan para la comunicación y conectividad de la red, inc
 #####################   Terminal: /dev/pts/16
 #####################   CPU: Intel Xeon X5650 (24) @ 2.665GHz
   #################     GPU: AMD ATI 01:03.0 ES1000
+   ################
                         Memory: 21362MiB / 35904MiB
-```                      
+```
 
+## Definicion de redes en Terraform
 
-
-## Definicion de redes en terrafor
 ```hcl
 # Red br0 - Bridge Network - Rocky Linux 9.3
 resource "libvirt_network" "br0" {
@@ -490,8 +482,6 @@ resource "libvirt_network" "kube_network_03" {
   addresses = ["10.17.4.0/24"]
 }
 ```
-
-
 
 ## Maquinas Virtuales funcionando
 
