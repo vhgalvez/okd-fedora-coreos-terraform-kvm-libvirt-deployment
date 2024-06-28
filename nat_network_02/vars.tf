@@ -58,5 +58,6 @@ variable "vm_rockylinux_definitions" {
     volume_size    = string
     volume_name    = string
     hostname       = string
+    short_hostname = string
   }))
 }

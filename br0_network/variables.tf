@@ -32,16 +32,17 @@ variable "timezone" {
 variable "vm_rockylinux_definitions" {
   description = "Definitions of virtual machines including CPU and memory configuration"
   type = map(object({
-    cpus          = number
-    memory        = number
-    ip            = string
-    volume_format = string
-    volume_pool   = string
-    volume_size   = string
-    volume_name   = string
-    hostname      = string
-    gateway       = string
-    dns1          = string
-    dns2          = string
+    cpus           = number
+    memory         = number
+    ip             = string
+    volume_format  = string
+    volume_pool    = string
+    volume_size    = string
+    volume_name    = string
+    hostname       = string
+    gateway        = string
+    dns1           = string
+    dns2           = string
+    short_hostname = string
   }))
 }

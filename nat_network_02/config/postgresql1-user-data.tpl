@@ -51,7 +51,7 @@ write_files:
       #!/bin/bash
       echo "search cefaslocalserver.com" > /etc/resolv.conf
       echo "nameserver 10.17.3.11" >> /etc/resolv.conf
-      echo "${ip}  ${hostname} ${hostname%%.*}" >> /etc/hosts
+      echo "${ip}  ${hostname} ${short_hostname}" >> /etc/hosts
     permissions: "0755"
 
   - path: /usr/local/bin/set-hosts.sh
@@ -59,7 +59,7 @@ write_files:
       #!/bin/bash
       echo "127.0.0.1   localhost" > /etc/hosts
       echo "::1         localhost" >> /etc/hosts
-      echo "${ip}  ${hostname} freeipa1" >> /etc/hosts
+      echo "${ip}  ${hostname} ${short_hostname}" >> /etc/hosts
     permissions: "0755"
 
 runcmd:

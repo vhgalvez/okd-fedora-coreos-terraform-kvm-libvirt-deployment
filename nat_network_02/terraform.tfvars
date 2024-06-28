@@ -15,6 +15,7 @@ vm_rockylinux_definitions = {
     cloudinit_disk = "rocky9_cloudinit_disk.iso",
     cloudinit_pool = "default",
     domain_memory  = "4096"
+    short_hostname = "freeipa1"
   },
   "load_balancer1" = {
     cpus           = 2,
@@ -28,6 +29,7 @@ vm_rockylinux_definitions = {
     cloudinit_disk = "rocky9_cloudinit_disk.iso",
     cloudinit_pool = "default",
     domain_memory  = "4096"
+    short_hostname = "loadbalancer1"
   },
   "postgresql1" = {
     cpus           = 2,
@@ -41,6 +43,7 @@ vm_rockylinux_definitions = {
     cloudinit_disk = "rocky9_cloudinit_disk.iso",
     cloudinit_pool = "default",
     domain_memory  = "4096"
+    short_hostname = "postgresql1"
   }
 }
 
