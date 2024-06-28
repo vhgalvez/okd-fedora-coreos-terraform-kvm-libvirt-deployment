@@ -308,7 +308,8 @@ Estas interfaces se utilizan para la comunicación y conectividad de la red, inc
 - **Router WiFi**: Conexión fibra óptica, 600 Mbps de subida/bajada, IP pública
 - **Red**: Configurada red NAT y red Bridge de kvm
 - **VPN**: WireGuard para acceso seguro ssh administrado por Bastion Node
-- 
+
+
 ## Redes Virtuales y Configuración
 
 ## Tabla de Configuración de Redes - br0 - Bridge Network
@@ -395,6 +396,7 @@ Estas interfaces se utilizan para la comunicación y conectividad de la red, inc
 | kube_network_03 | `worker3`    | 10.17.4.26   | Ejecución de aplicaciones  | (Virtual - NAT) |
 
 
+
 ## Tabla de Configuración de Redes - br0 - Bridge Network
 
 | Nombre   | Dirección IP    |
@@ -404,6 +406,60 @@ Estas interfaces se utilizan para la comunicación y conectividad de la red, inc
 | enp4s0f1 | 192.168.0.35/24 |
 | virbro   | 10.17.3.1/24    |
 | virbr1   | 10.17.4.1/24    |
+
+
+
+
+# Información Detallada de la Máquina
+
+## Detalles de la Red
+
+| Dirección IP    | Hostname                        | Alias     | Interfaz de Red | Estado de la Interfaz | IP Asignada               | Máscara de Subred          |
+|-----------------|---------------------------------|-----------|-----------------|-----------------------|---------------------------|----------------------------|
+| 192.168.0.21    | physical1.cefaslocalserver.com  | physical1 | enp3s0f1        | UP                    | 192.168.0.52/24           | 255.255.255.0              |
+| 192.168.0.18    |                                 |           | enp4s0f0        | UP                    | 192.168.0.18/24           | 255.255.255.0              |
+| 192.168.0.35    |                                 |           | enp4s0f1        | UP                    | 192.168.0.35/24           | 255.255.255.0              |
+| 192.168.0.28    |                                 |           | br0             | UP                    | 192.168.0.28/24 (Primary) | 255.255.255.0              |
+| 192.168.0.21    |                                 |           | br0             | UP                    | 192.168.0.21/24 (Secondary) | 255.255.255.0              |
+| 10.17.3.1       |                                 |           | virbr0          | UP                    | 10.17.3.1/24              | 255.255.255.0              |
+| 10.17.4.1       |                                 |           | virbr1          | UP                    | 10.17.4.1/24              | 255.255.255.0              |
+
+## Detalles Adicionales de la Máquina
+
+| Máquina   | CPU (cores) | Memoria (MB) | IP            | Dominio                       | Sistema Operativo       |
+|-----------|-------------|--------------|---------------|-------------------------------|-------------------------|
+| physical1 | 24          | 35904        | 192.168.0.21  | physical1.cefaslocalserver.com | Rocky Linux 9.4         |
+
+
+# Puentes de Red
+
+| Nombre del Puente | Puente ID         | STP Habilitado | Interfaces Conectadas            |
+|-------------------|-------------------|----------------|----------------------------------|
+| br0               | 8000.2c768aacdebc | Sí             | enp3s0f0, vnet0                  |
+| virbr0            | 8000.525400b64c99 | Sí             | vnet1, vnet2, vnet3              |
+| virbr1            | 8000.52540016b5de | Sí             | vnet4, vnet5, vnet6, vnet7, vnet8, vnet9, vnet10 |
+
+
+
+
+## Información del Sistema
+
+```bash
+        #####           victory@physical1.cefaslocalserver.com
+       #######          --------------------------------------
+       ##O#O##          OS: Rocky Linux 9.4 (Blue Onyx) x86_64
+       #######          Host: ProLiant DL380 G7
+     ###########        Kernel: 5.14.0-427.22.1.el9_4.x86_64
+    #############       Uptime: 3 hours, 5 mins
+   ###############      Packages: 1301 (rpm)
+   ################     Shell: bash 5.1.8
+  #################     Resolution: 1024x768
+#####################   Terminal: /dev/pts/16
+#####################   CPU: Intel Xeon X5650 (24) @ 2.665GHz
+  #################     GPU: AMD ATI 01:03.0 ES1000
+                        Memory: 21362MiB / 35904MiB
+```                      
+
 
 
 
