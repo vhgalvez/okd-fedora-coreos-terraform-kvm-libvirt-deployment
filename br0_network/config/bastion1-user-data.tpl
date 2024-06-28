@@ -38,7 +38,7 @@ write_files:
     permissions: "0644"
 
   - encoding: b64
-    content: bmFtZXNlcnZlciAxMC4xNy4zLjExCm5hbWVzZXJ2ZXIgOC44LjguOA==
+    content: c2VhcmNoIGNlZmFzbG9jYWxzZXJ2ZXIuY29tCm5hbWVzZXJ2ZXIgMTAuMTcuMy4xMQpuYW1lc2VydmVyIDguOC44Ljg=
     owner: root:root
     path: /etc/resolv.conf
     permissions: "0644"
