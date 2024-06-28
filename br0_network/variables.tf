@@ -1,3 +1,4 @@
+# br0_network\variables.tf
 variable "ssh_keys" {
   description = "SSH keys for the VMs"
   type        = list(string)
@@ -43,5 +44,6 @@ variable "vm_rockylinux_definitions" {
     gateway        = string
     dns1           = string
     dns2           = string
+    short_hostname = string
   }))
 }

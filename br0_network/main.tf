@@ -1,3 +1,4 @@
+# br0_network\main.tf
 terraform {
   required_version = "= 1.9.0"
 
@@ -39,13 +40,14 @@ data "template_file" "vm_configs" {
 
   template = file("${path.module}/config/${each.key}-user-data.tpl")
   vars = {
-    ssh_keys = jsonencode(var.ssh_keys),
-    hostname = each.value.hostname,
-    timezone = var.timezone,
-    ip       = each.value.ip,
-    gateway  = each.value.gateway,
-    dns1     = each.value.dns1,
-    dns2     = each.value.dns2
+    ssh_keys       = jsonencode(var.ssh_keys),
+    hostname       = each.value.hostname,
+    short_hostname = each.value.short_hostname,
+    timezone       = var.timezone,
+    ip             = each.value.ip,
+    gateway        = each.value.gateway,
+    dns1           = each.value.dns1,
+    dns2           = each.value.dns2
   }
 }
 
