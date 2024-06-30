@@ -241,3 +241,7 @@ Apache Kafka
 Redis
 Rook y Ceph
 Con este detallado listado, puedes tener una vista clara y ordenada de todas las tecnologías, IPs, máquinas virtuales, y configuraciones involucradas en el proyecto de despliegue de OpenShift en KVM utilizando Terraform.
+
+
+
+

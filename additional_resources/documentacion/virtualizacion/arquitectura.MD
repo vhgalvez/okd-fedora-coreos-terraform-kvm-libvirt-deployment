@@ -322,3 +322,104 @@ Salida HTTPS:
 
 La salida HTTPS de las aplicaciones web desplegadas en el clúster pasa por el servidor web NGINX en el clúster OKD y luego a través del balanceador de carga Traefik hacia la IP pública.
 Con este diagrama y descripción, puedes visualizar la arquitectura completa del proyecto, incluyendo todas las tecnologías, máquinas virtuales, servidor físico y redes involucradas.
+
+
+                                +-------------------------------------------------------------+
+                                |                     Servidor Físico                         |
+                                |                ProLiant DL380 G7                            |
+                                +-------------------------------------------------------------+
+                                  |  IP Pública: XXX.XXX.XXX.XXX
+                                  |  IPs Privadas: 192.168.0.0/24
+                                  |
+                                  |-- Red br0 (Bridge Network)
+                                  |   |-- Bastion Node (Rocky Linux 9.3 Minimal)
+                                  |       |-- Función: Acceso seguro, VPN, SSH, Gestión de BD
+                                  |       |-- Interfaz: enp3s0f1 - 192.168.0.20
+                                  |
+                                  |-- Red kube_network_02 (NAT Network)
+                                  |   |-- FreeIPA Node (Rocky Linux 9.3)
+                                  |   |     |-- Función: Servidor DNS y gestión de identidades
+                                  |   |     |-- IP: 10.17.3.11
+                                  |   |
+                                  |   |-- Load Balancer Node (Rocky Linux 9.3)
+                                  |   |     |-- Función: Balanceo de carga con Traefik
+                                  |   |     |-- IP: 10.17.3.12
+                                  |   |
+                                  |   |-- PostgreSQL Node (Rocky Linux 9.3)
+                                  |         |-- Función: Gestión de bases de datos
+                                  |         |-- IP: 10.17.3.13
+                                  |
+                                  |-- Red kube_network_03 (NAT Network)
+                                      |-- Bootstrap Node (Flatcar Container Linux)
+                                      |     |-- Función: Inicialización del clúster
+                                      |     |-- IP: 10.17.4.20
+                                      |
+                                      |-- Master Nodes (Flatcar Container Linux)
+                                      |   |-- Master1
+                                      |   |     |-- Función: Gestión del clúster
+                                      |   |     |-- IP: 10.17.4.21
+                                      |   |
+                                      |   |-- Master2
+                                      |   |     |-- Función: Gestión del clúster
+                                      |   |     |-- IP: 10.17.4.22
+                                      |   |
+                                      |   |-- Master3
+                                      |         |-- Función: Gestión del clúster
+                                      |         |-- IP: 10.17.4.23
+                                      |
+                                      |-- Worker Nodes (Flatcar Container Linux)
+                                          |-- Worker1
+                                          |     |-- Función: Ejecución de aplicaciones
+                                          |     |-- IP: 10.17.4.24
+                                          |
+                                          |-- Worker2
+                                          |     |-- Función: Ejecución de aplicaciones
+                                          |     |-- IP: 10.17.4.25
+                                          |
+                                          |-- Worker3
+                                                |-- Función: Ejecución de aplicaciones
+                                                |-- IP: 10.17.4.26
+
+                                 Red Pública:
+                                  +--------------------------+
+                                  | IP Pública               |
+                                  |    XXX.XXX.XXX.XXX       |
+                                  +-----------|--------------+
+                                              |
+                                  +-----------|--------------+
+                                  |  VPN (WireGuard)         |
+                                  |  Para acceso seguro SSH  |
+                                  |  y gestión de BD         |
+                                  +--------------------------+
+
+                                 Red Interna (NAT):
+                                  +--------------------------+
+                                  | Load Balancer (Traefik)  |
+                                  | IP: 10.17.3.12           |
+                                  |                          |
+                                  |---+----------------------+
+                                      |
+                                  +---|----------------------+
+                                  | Clúster OKD              |
+                                  |                          |
+                                  | Master Nodes:            |
+                                  | - Master1: 10.17.4.21    |
+                                  | - Master2: 10.17.4.22    |
+                                  | - Master3: 10.17.4.23    |
+                                  |                          |
+                                  | Worker Nodes:            |
+                                  | - Worker1: 10.17.4.24    |
+                                  | - Worker2: 10.17.4.25    |
+                                  | - Worker3: 10.17.4.26    |
+                                  +--------------------------+
+
+                                 Salida HTTPS:
+                                  +--------------------------+
+                                  | IP Pública               |
+                                  |    XXX.XXX.XXX.XXX       |
+                                  +-----------|--------------+
+                                              |
+                                  +-----------|--------------+
+                                  |  Servidor Web NGINX      |
+                                  |  en el clúster OKD       |
+                                  +--------------------------+
