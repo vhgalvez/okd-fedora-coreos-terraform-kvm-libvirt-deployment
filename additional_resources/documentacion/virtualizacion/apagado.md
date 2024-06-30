@@ -48,10 +48,29 @@ sudo virsh shutdown master1
 ```
 
 
+
 Verifica el estado final:
 
 ```bash
 sudo virsh list --all
+```
+
+```bash
+[victory@physical1 terraform-openshift-kvm-deployment_linux_Flatcar]$ sudo virsh list --all
+ Id   Nombre                          Estado
+-----------------------------------------------
+ -    bastion1.cefaslocalserver.com   apagado
+ -    bootstrap1                      apagado
+ -    freeipa1                        apagado
+ -    load_balancer1                  apagado
+ -    master1                         apagado
+ -    master2                         apagado
+ -    master3                         apagado
+ -    postgresql1                     apagado
+ -    worker1                         apagado
+ -    worker2                         apagado
+ -    worker3                         apagado
+
 ```
 
 Nota Adicional
@@ -96,3 +115,7 @@ sudo virsh start worker1
 sudo virsh start worker2
 sudo virsh start worker3
 ```
+
+
+
+
