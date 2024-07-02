@@ -94,3 +94,6 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
+    - name: systemd-resolved.service
+      enabled: true
+      mask: false

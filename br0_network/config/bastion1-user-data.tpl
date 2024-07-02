@@ -37,12 +37,6 @@ write_files:
     path: /etc/sysconfig/selinux
     permissions: "0644"
 
-  - encoding: b64
-    content: c2VhcmNoIGNlZmFzbG9jYWxzZXJ2ZXIuY29tCm5hbWVzZXJ2ZXIgMTAuMTcuMy4xMQpuYW1lc2VydmVyIDguOC44Ljg=
-    owner: root:root
-    path: /etc/resolv.conf
-    permissions: "0644"
-
   - path: /etc/systemd/network/10-static-en.network
     content: |
       [Match]
@@ -60,6 +54,8 @@ write_files:
       echo "127.0.0.1   localhost" > /etc/hosts
       echo "::1         localhost" >> /etc/hosts
       echo "${ip}  ${hostname} ${short_hostname}" >> /etc/hosts
+      echo "nameserver ${dns1}" >> /etc/resolv.conf
+      echo "nameserver ${dns2}" >> /etc/resolv.conf
     permissions: "0755"
 
 runcmd:
