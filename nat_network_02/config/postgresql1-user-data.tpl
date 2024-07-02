@@ -50,8 +50,8 @@ write_files:
     content: |
       #!/bin/bash
       echo "search cefaslocalserver.com" > /etc/resolv.conf
-      echo "nameserver 10.17.3.11" >> /etc/resolv.conf
-      echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+      echo "nameserver ${dns1}" >> /etc/resolv.conf
+      echo "nameserver ${dns2}" >> /etc/resolv.conf
     permissions: "0755"
 
   - path: /usr/local/bin/set-hosts.sh
@@ -63,6 +63,8 @@ write_files:
     permissions: "0755"
 
 runcmd:
+  - chmod +x /usr/local/bin/set-dns.sh
+  - chmod +x /usr/local/bin/set-hosts.sh
   - /usr/local/bin/set-dns.sh
   - /usr/local/bin/set-hosts.sh
   - echo "Instance setup completed" >> /var/log/cloud-init-output.log
