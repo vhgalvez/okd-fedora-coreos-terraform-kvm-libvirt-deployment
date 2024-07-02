@@ -1,19 +1,23 @@
-Resolución de Problemas de DNS Externa en FreeIPA
+# Resolución de Problemas de DNS Externa en FreeIPA
 
-Este documento proporciona una guía detallada para solucionar problemas de resolución de DNS externa en un servidor FreeIPA, específicamente deshabilitando la validación DNSSEC.
+## Introducción
 
-Paso 1: Verificar y Configurar DNSSEC
-Editar el Archivo de Configuración de named
-Primero, necesitamos editar el archivo de configuración de named para deshabilitar DNSSEC.
+Esta guía detalla cómo solucionar problemas de resolución de DNS externa en FreeIPA, deshabilitando la validación DNSSEC.
 
-bash
-Copiar código
+## Paso 1: Verificar y Configurar DNSSEC
+
+### Editar el Archivo de Configuración de named
+
+```bash
 sudo vi /etc/named/ipa-options-ext.conf
-Deshabilitar DNSSEC
-Asegúrate de que la opción dnssec-validation esté configurada en no. Añade o edita las siguientes líneas en el bloque options:
+```
 
-conf
-Copiar código
+## Deshabilitar DNSSEC
+
+Asegúrate de que la opción dnssec-validation esté configurada en no:
+
+
+```bash
 /* User customization for BIND named
  *
  * This file is included in /etc/named.conf and is not modified during IPA
@@ -33,81 +37,100 @@ listen-on-v6 { any; };
 /* dnssec-enable is obsolete and 'yes' by default */
 
 dnssec-validation no;
-Reiniciar el Servicio named
-Guarda los cambios y reinicia el servicio DNS para aplicar los cambios.
+```
 
-bash
-Copiar código
+## Reiniciar el Servicio named
+
+Guarda los cambios y reinicia el servicio DNS:
+
+```bash
 sudo systemctl restart named
-Si encuentras un error, verifica el estado del servicio y los logs para más detalles:
+```
+Verificar el Estado del Servicio
 
-bash
-Copiar código
+```bash
 sudo systemctl status named
 journalctl -xeu named.service
-Paso 2: Verificar la Resolución de DNS
-Verificar la Resolución de un Dominio Externo
-Usa el comando dig para comprobar si ahora puedes resolver dominios externos.
+```
+## Paso 2: Verificar la Resolución de DNS
 
-bash
-Copiar código
+### Verificar la Resolución de DNS
+
+```bash
 dig google.com
-Paso 3: Limpiar la Caché de DNS (Opcional)
-Limpiar la Caché de DNS
-Aunque el servicio named reiniciado debería limpiar la caché, puedes hacerlo manualmente si es necesario.
+```
 
-bash
-Copiar código
+## Paso 3: Limpiar la Caché de DNS (Opcional)
+
+### Limpiar la Caché de DNS
+        
+```bash
 sudo rndc flush
-Paso 4: Verificar la Configuración de Firewall
-Asegúrate de que el Firewall no esté Bloqueando las Solicitudes DNS
+```
+
+### Paso 4: Verificar la Configuración de Firewall
+
 Listar las Reglas del Firewall
-Verifica las reglas actuales del firewall.
 
-bash
-Copiar código
+```bash
 sudo firewall-cmd --list-all
-Permitir el Tráfico DNS si es Necesario
-Si ves que las reglas del firewall están bloqueando el puerto 53, añade las reglas necesarias para permitir el tráfico DNS.
+```
+### Permitir el Tráfico DNS si es Necesario
 
-bash
-Copiar código
+
+```bash
 sudo firewall-cmd --permanent --add-port=53/udp
 sudo firewall-cmd --permanent --add-port=53/tcp
 sudo firewall-cmd --reload
-Paso 5: Verificar la Conectividad de Red
-Verificar la Conectividad Hacia el Reenviador DNS
-Asegúrate de que tu servidor pueda alcanzar el reenviador DNS configurado (8.8.8.8).
+```
+### Paso 5: Verificar la Conectividad de Red
 
-bash
-Copiar código
+### Verificar la Conectividad Hacia el Reenviador DNS
+
+```bash
 ping 8.8.8.8
-Resumen
-Editar /etc/named/ipa-options-ext.conf:
+```
 
-Añade dnssec-validation no; al bloque de opciones.
-Reiniciar el Servicio named:
+## Resumen
 
-Reinicia el servicio DNS para aplicar los cambios.
-Verificar los Reenviadores DNS:
+1. Editar `/etc/named/ipa-options-ext.conf`:
+ 
+Añade `dnssec-validation no;` al bloque de opciones.
 
-Asegúrate de que los reenviadores estén correctamente configurados.
-Probar la Resolución DNS:
+2. Reiniciar el servicio `named`:
+        
 
-Usa dig para confirmar que la resolución de DNS externa está funcionando.
-Verificar la Configuración de Firewall:
+```bash
+sudo systemctl restart named
+```
 
-Asegúrate de que el firewall permite el tráfico DNS en el puerto 53.
-Verificar la Conectividad de Red:
+3. Verificar los Reenviadores DNS:
 
-Confirma que tu servidor puede alcanzar el reenviador DNS.
-Siguiendo estos pasos, deberías poder resolver tanto nombres de dominio internos como externos utilizando tu servidor DNS de FreeIPA.
+```bash
+ipa dnsconfig-mod --forwarder=8.8.8.8
+```
 
-Ejemplo de Archivo de Configuración de named
-A continuación se muestra un ejemplo del archivo de configuración de named:
+4. Probar la Resolución DNS:
 
-conf
-Copiar código
+```bash
+dig google.com
+```
+
+5. Verificar la Configuración de Firewall:
+
+```bash
+sudo firewall-cmd --list-all
+```
+
+1. Verificar la Conectividad de Red:
+
+```bash
+ping 8.8.8.8
+```
+
+## Ejemplo de Archivo de Configuración de `named`
+
+```bash
 /* WARNING: This config file is managed by IPA.
  *
  * DO NOT MODIFY! Any modification will be overwritten by upgrades.
@@ -170,3 +193,4 @@ dyndb "ipa" "/usr/lib64/bind/ldap.so" {
         sasl_mech "EXTERNAL";
         krb5_keytab "FILE:/etc/named.keytab";
 };
+```

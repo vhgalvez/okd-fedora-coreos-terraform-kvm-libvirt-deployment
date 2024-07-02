@@ -41,6 +41,8 @@ Durante la instalación, sigue las instrucciones en pantalla y proporciona los p
 
 
 ```bash
+[core@freeipa1 ~]$ sudo ipa-server-install
+
 The log file for this installation can be found in /var/log/ipaserver-install.log
 ==============================================================================
 This program will set up the IPA Server.
@@ -63,6 +65,7 @@ Enter the fully qualified domain name of the computer
 on which you're setting up server software. Using the form
 <hostname>.<domainname>
 Example: master.example.com
+
 
 Server host name [freeipa1.cefaslocalserver.com]: freeipa1.cefaslocalserver.com
 
@@ -91,13 +94,40 @@ IPA admin password:
 Password (confirm):
 
 Checking DNS domain cefaslocalserver.com., please wait ...
-Do you want to configure DNS forwarders? [yes]: yes
-Following DNS servers are configured in /etc/resolv.conf: 10.17.3.11, 8.8.8.8
-Do you want to configure these servers as DNS forwarders? [yes]: no
-All detected DNS servers were added. You can enter additional addresses now:
-Enter an IP address for a DNS forwarder, or press Enter to skip:
-DNS forwarders: 8.8.8.8
-Do you want to search for missing reverse zones? [yes]:
+Do you want to configure DNS forwarders? [yes]: no
+No DNS forwarders configured
+Do you want to search for missing reverse zones? [yes]: yes
+Checking DNS domain 3.17.10.in-addr.arpa., please wait ...
+Reverse zone 3.17.10.in-addr.arpa. for IP address 10.17.3.11 already exists
+Trust is configured but no NetBIOS domain name found, setting it now.
+Enter the NetBIOS name for the IPA domain.
+Only up to 15 uppercase ASCII letters, digits and dashes are allowed.
+Example: EXAMPLE.
+
+
+NetBIOS domain name [CEFASLOCALSERVE]: CEFASLOCALSERVE
+ç
+Do you want to configure chrony with NTP server or pool address? [no]: no
+
+The IPA Master Server will be configured with:
+Hostname:       freeipa1.cefaslocalserver.com
+IP address(es): 10.17.3.11
+Domain name:    cefaslocalserver.com
+Realm name:     CEFASLOCALSERVER.COM
+
+The CA will be configured with:
+Subject DN:   CN=Certificate Authority,O=CEFASLOCALSERVER.COM
+Subject base: O=CEFASLOCALSERVER.COM
+Chaining:     self-signed
+
+BIND DNS server will be configured to serve IPA domain with:
+Forwarders:       No forwarders
+Forward policy:   only
+Reverse zone(s):  No reverse zone
+
+Continue to configure the system with these values? [no]: yes
+
+The following operations may take some minutes to complete.
 ```
 
 ## Paso 3: Configuración del Servidor DNS en FreeIPA
@@ -115,6 +145,12 @@ dig freeipa1.cefaslocalserver.com
 ## Paso 4 Configuración de Reenvío de DNS en FreeIPA
 
 ### Configurar los reenviadores DNS en FreeIPA:
+
+```bash
+[core@freeipa1 ~]$ kinit admin
+Password for admin@CEFASLOCALSERVER.COM:
+```
+12345678
 
 Asegúrate de que FreeIPA esté configurado para reenviar solicitudes DNS que no pueda resolver internamente a un servidor DNS externo, como el de Google (8.8.8.8). Si no lo configuraste durante la instalación, puedes hacerlo manualmente.
 
