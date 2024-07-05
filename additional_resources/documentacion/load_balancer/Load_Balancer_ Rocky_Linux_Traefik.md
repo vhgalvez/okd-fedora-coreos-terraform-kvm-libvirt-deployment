@@ -134,6 +134,7 @@ Contenido del archivo traefik.toml:
 
 [api]
   dashboard = true
+  insecure = true
 
 [providers.docker]
   endpoint = "unix:///var/run/docker.sock"
@@ -149,6 +150,7 @@ Contenido del archivo traefik.toml:
   storage = "acme.json"
   [certificatesResolvers.myresolver.acme.httpChallenge]
     entryPoint = "http"
+
 ```
 
 ### 4.3 Crear el Archivo acme.json
@@ -194,6 +196,7 @@ services:
       - /etc/traefik/traefik.toml:/traefik.toml
       - /etc/traefik/acme.json:/acme.json
     restart: always
+
 ```
 
 ### 4.5 Iniciar Traefik con Docker Compose
