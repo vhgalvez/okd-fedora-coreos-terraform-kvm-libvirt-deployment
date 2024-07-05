@@ -1,104 +1,131 @@
-markdown
-Copiar código
 # Instalación de Traefik en LoadBalancer1 utilizando Docker Compose
 
-A continuación se detallan los pasos para instalar Traefik en la máquina LoadBalancer1 con IP `10.17.3.12`, dominio `loadbalancer1.cefaslocalserver.com`, y sistema operativo Rocky Linux 9.3.
+A continuación se detallan los pasos para instalar Traefik en la máquina LoadBalancer1 con IP 10.17.3.12, dominio loadbalancer1.cefaslocalserver.com, y sistema operativo Rocky Linux 9.3.
 
 ## Paso 1: Preparar el Entorno
 
-### Acceder al Servidor
-Conéctese al servidor `loadbalancer1` mediante SSH:
+### 1.1 Acceder al Servidor
+
+Conéctese al servidor loadbalancer1 mediante SSH:
 
 ```bash
-ssh root@10.17.3.12
-Actualizar el Sistema
+sudo ssh -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift core@10.17.3.12 -p 22
+```
+
+### 1.2 Actualizar el Sistema
+
 Actualice los paquetes del sistema:
 
-bash
-Copiar código
-sudo dnf update -y
-Instalar Dependencias
+```bash
+sudo dnf update -y && sudo dnf upgrade -y
+```
+
+### 1.3 Instalar Dependencias
+
 Instale las dependencias necesarias:
 
-bash
-Copiar código
+```bash
 sudo dnf install -y epel-release
 sudo dnf install -y wget vim
-Paso 2: Instalar Docker
-Instalar Docker
+```
+
+## Paso 2: Instalar Docker
+
+### 2.1 Instalar Docker
+
 Siga estos pasos para instalar Docker en Rocky Linux:
 
-bash
-Copiar código
+```bash
 sudo dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
 sudo dnf install -y docker-ce docker-ce-cli containerd.io
-Iniciar y Habilitar Docker
+```
+
+### 2.2 Iniciar y Habilitar Docker
+
 Inicie el servicio de Docker y configúrelo para que se inicie automáticamente al arrancar el sistema:
 
-bash
-Copiar código
+```bash
 sudo systemctl start docker
 sudo systemctl enable docker
-Paso 3: Instalar Docker Compose
-Descargar Docker Compose
+```
+
+## Paso 3: Instalar Docker Compose
+
+### 3.1 Descargar Docker Compose
+
 Descargue Docker Compose usando curl:
 
-bash
-Copiar código
-sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-Dar Permisos de Ejecución
+```bash
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+```
+
+### 3.2 Dar Permisos de Ejecución
+
 Asigne permisos de ejecución al binario descargado:
 
-bash
-Copiar código
+```bash
 sudo chmod +x /usr/local/bin/docker-compose
-Verificar la Instalación
+```
+
+### 3.3 Verificar la Instalación
+
 Verifique que Docker Compose esté instalado correctamente:
 
-bash
-Copiar código
+```bash
 /usr/local/bin/docker-compose --version
-Añadir Docker Compose al PATH
+```
+
+### 3.4 Añadir Docker Compose al PATH
+
 Asegúrese de que Docker Compose esté en el PATH. Puede añadirlo temporalmente a su sesión actual:
 
-bash
-Copiar código
+```bash
 export PATH=$PATH:/usr/local/bin
+```
+
 Para añadirlo permanentemente, puede añadir la línea anterior al archivo .bashrc o .bash_profile de su usuario:
 
-bash
-Copiar código
+```bash
 echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc
 source ~/.bashrc
-Modificar el PATH para sudo
+```
+
+### 3.5 Modificar el PATH para sudo
+
 Edite el archivo /etc/sudoers para incluir /usr/local/bin en secure_path:
 
-bash
-Copiar código
+```bash
 sudo visudo
+```
+
 Modifique la línea Defaults secure_path para que se vea así:
 
-plaintext
-Copiar código
+```bash
 Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
-Paso 4: Configurar y Ejecutar Traefik con Docker Compose
-Crear Directorio de Configuración de Traefik
+```
+
+## Paso 4: Configurar y Ejecutar Traefik con Docker Compose
+
+### 4.1 Crear Directorio de Configuración de Traefik
+
 Cree el directorio de configuración de Traefik:
 
-bash
-Copiar código
+```bash
 mkdir -p /etc/traefik
+```
+
 cd /etc/traefik
-Crear el Archivo de Configuración traefik.toml
+
+4.2 Crear el Archivo de Configuración traefik.toml
+
 Cree el archivo traefik.toml con el siguiente contenido:
 
-bash
-Copiar código
+```bash
 vim /etc/traefik/traefik.toml
+```
 Contenido del archivo traefik.toml:
 
-toml
-Copiar código
+```toml
 [entryPoints]
   [entryPoints.http]
     address = ":80"
@@ -122,23 +149,29 @@ Copiar código
   storage = "acme.json"
   [certificatesResolvers.myresolver.acme.httpChallenge]
     entryPoint = "http"
-Crear el Archivo acme.json
+```
+
+### 4.3 Crear el Archivo acme.json
+
 Cree el archivo acme.json y ajuste los permisos:
 
-bash
-Copiar código
+```bash
 touch /etc/traefik/acme.json
 chmod 600 /etc/traefik/acme.json
-Crear el Archivo docker-compose.yml
+```
+
+### 4.4 Crear el Archivo docker-compose.yml
+
 Cree el archivo docker-compose.yml con el siguiente contenido:
 
-bash
-Copiar código
+```bash
 vim /etc/traefik/docker-compose.yml
-Contenido del archivo docker-compose.yml:
+```
 
-yaml
-Copiar código
+Contenido del archivo `docker-compose.yml`:
+
+
+```yaml
 version: '3'
 
 services:
@@ -161,36 +194,47 @@ services:
       - /etc/traefik/traefik.toml:/traefik.toml
       - /etc/traefik/acme.json:/acme.json
     restart: always
-Iniciar Traefik con Docker Compose
+```
+
+### 4.5 Iniciar Traefik con Docker Compose
+
 Navegue al directorio /etc/traefik y ejecute Docker Compose:
 
-bash
-Copiar código
+```bash
 cd /etc/traefik
 sudo /usr/local/bin/docker-compose up -d
-Paso 5: Verificar la Instalación
-Verificar el Estado de Traefik
+```
+
+## Paso 5: Verificar la Instalación
+
+### 5.1 Verificar el Estado de Traefik
+
 Puede verificar que el contenedor de Traefik esté en funcionamiento con:
 
-bash
-Copiar código
+```bash
 sudo docker ps
-Acceder al Dashboard de Traefik
+```
+
+### 5.2 Acceder al Dashboard de Traefik
+
 Abra un navegador web y acceda al dashboard de Traefik usando la IP pública o el dominio del servidor:
 
-plaintext
-Copiar código
+```plaintext
 http://10.17.3.12:8080/dashboard/
-Paso 6: Configurar el Firewall
-Abrir Puertos en el Firewall
+```
+
+## Paso 6: Configurar el Firewall
+
+### 6.1 Abrir Puertos en el Firewall
+
 Abra los puertos necesarios en el firewall:
 
-bash
-Copiar código
+```bash
 sudo firewall-cmd --permanent --add-port=80/tcp
 sudo firewall-cmd --permanent --add-port=443/tcp
 sudo firewall-cmd --permanent --add-port=8080/tcp
 sudo firewall-cmd --reload
+```
 
 
 Con estos pasos, habrás instalado y configurado Traefik en la máquina LoadBalancer1 utilizando Docker Compose.
