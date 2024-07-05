@@ -135,6 +135,40 @@ Continue to configure the system with these values? [no]: yes
 The following operations may take some minutes to complete.
 ```
 
+### 2.3 Verificar la Instalación de FreeIPA
+
+```bash
+sudo systemctl status named
+```
+
+```bash
+[core@freeipa1 ~]$ sudo systemctl status named
+● named.service - Berkeley Internet Name Domain (DNS)
+     Loaded: loaded (/usr/lib/systemd/system/named.service; enabled; preset: disabled)
+     Active: active (running) since Fri 2024-07-05 18:01:44 BST; 18min ago
+   Main PID: 31992 (named)
+      Tasks: 11 (limit: 24608)
+     Memory: 29.7M
+        CPU: 339ms
+     CGroup: /system.slice/named.service
+             └─31992 /usr/sbin/named -u named -c /etc/named.conf -E pkcs11
+
+Jul 05 18:01:44 freeipa1.cefaslocalserver.com named[31992]: zone 0.in-addr.arpa/IN: loaded serial 0
+Jul 05 18:01:44 freeipa1.cefaslocalserver.com named[31992]: zone 1.0.0.127.in-addr.arpa/IN: loaded serial 0
+Jul 05 18:01:44 freeipa1.cefaslocalserver.com named[31992]: zone localhost/IN: loaded serial 0
+Jul 05 18:01:44 freeipa1.cefaslocalserver.com named[31992]: zone 1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip>
+Jul 05 18:01:44 freeipa1.cefaslocalserver.com named[31992]: zone localhost.localdomain/IN: loaded serial 0
+Jul 05 18:01:44 freeipa1.cefaslocalserver.com named[31992]: all zones loaded
+Jul 05 18:01:44 freeipa1.cefaslocalserver.com named[31992]: running
+Jul 05 18:01:44 freeipa1.cefaslocalserver.com systemd[1]: Started Berkeley Internet Name Domain (DNS).
+Jul 05 18:01:44 freeipa1.cefaslocalserver.com named[31992]: zone cefaslocalserver.com/IN: loaded serial 1720198904
+Jul 05 18:15:24 freeipa1.cefaslocalserver.com named[31992]: zone cefaslocalserver.com/IN: zone_journal_compact: could not get zone >
+```
+
+```bash
+sudo systemctl enable named
+```
+
 ## Paso 3: Configuración del Servidor DNS en FreeIPA
 
 ### 3.1 Configurar el DNS durante la Instalación de FreeIPA
@@ -467,6 +501,8 @@ ping -c 4 google.com
 ```
 
 
+sudo systemctl ena named
+
 
 Verificar el estado del servicio DNS
 
@@ -498,10 +534,36 @@ Verificar la conectividad hacia el servidor FreeIPA
 ping -c 4 10.17.3.11
 ```
 
+[core@freeipa1 ~]$ sudo systemctl status named
+● named.service - Berkeley Internet Name Domain (DNS)
+     Loaded: loaded (/usr/lib/systemd/system/named.service; enabled; preset: disabled)
+     Active: active (running) since Fri 2024-07-05 18:01:44 BST; 18min ago
+   Main PID: 31992 (named)
+      Tasks: 11 (limit: 24608)
+     Memory: 29.7M
+        CPU: 339ms
+     CGroup: /system.slice/named.service
+             └─31992 /usr/sbin/named -u named -c /etc/named.conf -E pkcs11
+
+Jul 05 18:01:44 freeipa1.cefaslocalserver.com named[31992]: zone 0.in-addr.arpa/IN: loaded serial 0
+Jul 05 18:01:44 freeipa1.cefaslocalserver.com named[31992]: zone 1.0.0.127.in-addr.arpa/IN: loaded serial 0
+Jul 05 18:01:44 freeipa1.cefaslocalserver.com named[31992]: zone localhost/IN: loaded serial 0
+Jul 05 18:01:44 freeipa1.cefaslocalserver.com named[31992]: zone 1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip>
+Jul 05 18:01:44 freeipa1.cefaslocalserver.com named[31992]: zone localhost.localdomain/IN: loaded serial 0
+Jul 05 18:01:44 freeipa1.cefaslocalserver.com named[31992]: all zones loaded
+Jul 05 18:01:44 freeipa1.cefaslocalserver.com named[31992]: running
+Jul 05 18:01:44 freeipa1.cefaslocalserver.com systemd[1]: Started Berkeley Internet Name Domain (DNS).
+Jul 05 18:01:44 freeipa1.cefaslocalserver.com named[31992]: zone cefaslocalserver.com/IN: loaded serial 1720198904
+Jul 05 18:15:24 freeipa1.cefaslocalserver.com named[31992]: zone cefaslocalserver.com/IN: zone_journal_compact: could not get zone >
+lines 1-20/20 (END)
+
+
+
+
 
 Abre el archivo `/etc/named.conf` o el archivo donde se incluyan las opciones de configuración 
 
-(/etc/named/ipa-options-ext.conf en el caso de FreeIPA).
+(`/etc/named/ipa-options-ext.conf` en el caso de FreeIPA).
 
 Agrega o modifica la opción allow-recursion para incluir las redes que deben permitir la recursión:
 
@@ -532,7 +594,39 @@ dig google.com
 ```
 Si sigues estos pasos, deberías poder resolver dominios externos correctamente.
 
+```bash
+/* User customization for BIND named
+ *
+ * This file is included in /etc/named.conf and is not modified during IPA
+ * upgrades.
+ *
+ * It must only contain "options" settings. Any other setting must be
+ * configured in /etc/named/ipa-ext.conf.
+ *
+ * Examples:
+ * allow-recursion { trusted_network; };
+ * allow-query-cache { trusted_network; };
+ */
 
+/* turns on IPv6 for port 53, IPv4 is on by default for all ifaces */
+listen-on-v6 { any; };
+
+/* dnssec-enable is obsolete and 'yes' by default */
+dnssec-validation no;
+
+/* Permitir recursión para todas las redes */
+allow-recursion { any; };
+```
+
+```bash
+sudo systemctl restart named
+```
+
+
+
+```bash
+dig google.com
+```
 
 ## Recursos de Terraform para Redes
 
