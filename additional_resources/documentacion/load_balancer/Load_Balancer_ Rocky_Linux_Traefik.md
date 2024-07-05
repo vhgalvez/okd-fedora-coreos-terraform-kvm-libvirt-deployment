@@ -239,5 +239,9 @@ sudo firewall-cmd --permanent --add-port=8080/tcp
 sudo firewall-cmd --reload
 ```
 
+# Rocky Linux traefik
+
+
+![alt text](../../image/Rocky_Linux_Traefik.png)
 
 Con estos pasos, habrás instalado y configurado Traefik en la máquina LoadBalancer1 utilizando Docker Compose.
