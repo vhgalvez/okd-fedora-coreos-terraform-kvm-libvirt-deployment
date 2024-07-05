@@ -429,7 +429,7 @@ kinit admin
 Verificar los registros DNS
 ```bash
 ipa dnsrecord-add cefaslocalserver.com physical1 --a-rec 192.168.0.21
-ipa dnsrecord-add cefaslocalserver.com bootstrap1 --a-rec 10.17.4.20
+ipa dnsrecord-add cefaslocalserver.com bootstrap1 --a-rec 10.17.3.14
 ipa dnsrecord-add cefaslocalserver.com master1 --a-rec 10.17.4.21
 ipa dnsrecord-add cefaslocalserver.com master2 --a-rec 10.17.4.22
 ipa dnsrecord-add cefaslocalserver.com master3 --a-rec 10.17.4.23
@@ -499,6 +499,38 @@ ping -c 4 10.17.3.11
 ```
 
 
+Abre el archivo `/etc/named.conf` o el archivo donde se incluyan las opciones de configuración 
+
+(/etc/named/ipa-options-ext.conf en el caso de FreeIPA).
+
+Agrega o modifica la opción allow-recursion para incluir las redes que deben permitir la recursión:
+
+
+```bash
+options {
+    ...
+    allow-recursion { any; }; # Permitir recursión para todas las redes
+    ...
+}
+```
+
+Guarda los cambios y reinicia el servicio named:
+
+```bash
+sudo systemctl restart named
+```
+Verifica el estado del servicio para asegurarte de que no hay errores:
+
+```bash
+sudo systemctl status named
+```
+Prueba la resolución de DNS nuevamente para dominios externos:
+
+
+```bash
+dig google.com
+```
+Si sigues estos pasos, deberías poder resolver dominios externos correctamente.
 
 
 
