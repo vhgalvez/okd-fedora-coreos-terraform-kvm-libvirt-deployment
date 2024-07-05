@@ -111,7 +111,7 @@ Example: EXAMPLE.
 
 
 NetBIOS domain name [CEFASLOCALSERVE]: CEFASLOCALSERVE
-ç
+
 Do you want to configure chrony with NTP server or pool address? [no]: no
 
 The IPA Master Server will be configured with:
