@@ -1,6 +1,7 @@
 # Guía de Instalación y Configuración del Servidor DNS con FreeIPA en Rocky Linux
 
 ## Introducción
+
 Este documento proporciona una guía detallada para la instalación y configuración de FreeIPA como servidor DNS en Rocky Linux. FreeIPA es una solución integrada de identidad y autenticación que incluye características como Kerberos, LDAP, DNS y NTP.
 
 ## Paso 1: Preparación del Sistema
@@ -161,6 +162,344 @@ Asegúrate de que FreeIPA esté configurado para reenviar solicitudes DNS que no
 ```bash
 ipa dnsconfig-mod --forwarder=8.8.8.8
 ```
+
+
+# Resolución de Problemas de DNS Externa en FreeIPA
+
+## Introducción
+
+Esta guía detalla cómo solucionar problemas de resolución de DNS externa en FreeIPA, deshabilitando la validación DNSSEC.
+
+## Paso 1: Verificar y Configurar DNSSEC
+
+### Editar el Archivo de Configuración de named
+
+```bash
+sudo vi /etc/named/ipa-options-ext.conf
+```
+
+## Deshabilitar DNSSEC
+
+Asegúrate de que la opción dnssec-validation esté configurada en no:
+
+
+```bash
+/* User customization for BIND named
+ *
+ * This file is included in /etc/named.conf and is not modified during IPA
+ * upgrades.
+ *
+ * It must only contain "options" settings. Any other setting must be
+ * configured in /etc/named/ipa-ext.conf.
+ *
+ * Examples:
+ * allow-recursion { trusted_network; };
+ * allow-query-cache { trusted_network; };
+ */
+
+/* turns on IPv6 for port 53, IPv4 is on by default for all ifaces */
+listen-on-v6 { any; };
+
+/* dnssec-enable is obsolete and 'yes' by default */
+
+dnssec-validation no;
+```
+
+## Reiniciar el Servicio named
+
+Guarda los cambios y reinicia el servicio DNS:
+
+```bash
+sudo systemctl restart named
+```
+Verificar el Estado del Servicio
+
+```bash
+sudo systemctl status named
+journalctl -xeu named.service
+```
+## Paso 2: Verificar la Resolución de DNS
+
+### Verificar la Resolución de DNS
+
+```bash
+dig google.com
+```
+
+## Paso 3: Limpiar la Caché de DNS (Opcional)
+
+### Limpiar la Caché de DNS
+        
+```bash
+sudo rndc flush
+```
+
+### Paso 4: Verificar la Configuración de Firewall
+
+Listar las Reglas del Firewall
+
+```bash
+sudo firewall-cmd --list-all
+```
+### Permitir el Tráfico DNS si es Necesario
+
+
+```bash
+sudo firewall-cmd --permanent --add-port=53/udp
+sudo firewall-cmd --permanent --add-port=53/tcp
+sudo firewall-cmd --reload
+```
+### Paso 5: Verificar la Conectividad de Red
+
+### Verificar la Conectividad Hacia el Reenviador DNS
+
+```bash
+ping 8.8.8.8
+```
+
+## Resumen
+
+1. Editar `/etc/named/ipa-options-ext.conf`:
+ 
+Añade `dnssec-validation no;` al bloque de opciones.
+
+2. Reiniciar el servicio `named`:
+        
+
+```bash
+sudo systemctl restart named
+```
+
+3. Verificar los Reenviadores DNS:
+
+```bash
+ipa dnsconfig-mod --forwarder=8.8.8.8
+```
+
+4. Probar la Resolución DNS:
+
+```bash
+dig google.com
+```
+
+5. Verificar la Configuración de Firewall:
+
+```bash
+sudo firewall-cmd --list-all
+```
+
+1. Verificar la Conectividad de Red:
+
+```bash
+ping 8.8.8.8
+```
+
+## Ejemplo de Archivo de Configuración de `named`
+
+```bash
+/* WARNING: This config file is managed by IPA.
+ *
+ * DO NOT MODIFY! Any modification will be overwritten by upgrades.
+ *
+ *
+ * - /etc/named/ipa-options-ext.conf (for options)
+ * - /etc/named/ipa-logging-ext.conf (for logging options)
+ * - /etc/named/ipa-ext.conf (all other settings)
+ */
+
+options {
+        // Put files that named is allowed to write in the data/ directory:
+        directory "/var/named"; // the default
+        dump-file               "data/cache_dump.db";
+        statistics-file         "data/named_stats.txt";
+        memstatistics-file      "data/named_mem_stats.txt";
+
+        tkey-gssapi-keytab "/etc/named.keytab";
+
+        pid-file "/run/named/named.pid";
+
+        managed-keys-directory "/var/named/dynamic";
+
+        /* user customizations of options */
+        include "/etc/named/ipa-options-ext.conf";
+
+        /* crypto policy snippet on platforms with system-wide policy. */
+        include "/etc/crypto-policies/back-ends/bind.config";
+};
+
+/* If you want to enable debugging, eg. using the 'rndc trace' command,
+ * By default, SELinux policy does not allow named to modify the /var/named directory,
+ * so put the default debug log file in data/ :
+ */
+logging {
+        channel default_debug {
+                file "data/named.run";
+                severity dynamic;
+                print-time yes;
+        };
+        include "/etc/named/ipa-logging-ext.conf";
+};
+
+zone "." IN {
+        type hint;
+        file "named.ca";
+};
+
+include "/etc/named.rfc1912.zones";
+include "/etc/named.root.key";
+
+/* user customization */
+include "/etc/named/ipa-ext.conf";
+
+dyndb "ipa" "/usr/lib64/bind/ldap.so" {
+        uri "ldapi://%2fvar%2frun%2fslapd-CEFASLOCALSERVER-COM.socket";
+        base "cn=dns,dc=cefaslocalserver,dc=com";
+        server_id "freeipa1.cefaslocalserver.com";
+        auth_method "sasl";
+        sasl_mech "EXTERNAL";
+        krb5_keytab "FILE:/etc/named.keytab";
+};
+```
+
+# Solución de Problemas de DNS con FreeIPA y Kerberos
+
+Para solucionar el problema de las credenciales de Kerberos al intentar añadir registros DNS en FreeIPA, sigue estos pasos:
+
+## Paso 1: Obtener un Ticket de Kerberos
+
+Primero, necesitas obtener un ticket de Kerberos con el usuario admin. Ejecuta `kinit` para obtener un ticket:
+
+```bash
+kinit admin
+```
+
+Introduce la contraseña del usuario admin cuando se te pida. Este comando debe completarse sin errores.
+
+## Paso 2: Añadir Registros DNS
+
+```bash
+ipa dnsrecord-add cefaslocalserver.com physical1 --a-rec 192.168.0.21
+ipa dnsrecord-add cefaslocalserver.com bootstrap1 --a-rec 10.17.4.20
+ipa dnsrecord-add cefaslocalserver.com master1 --a-rec 10.17.4.21
+ipa dnsrecord-add cefaslocalserver.com master2 --a-rec 10.17.4.22
+ipa dnsrecord-add cefaslocalserver.com master3 --a-rec 10.17.4.23
+ipa dnsrecord-add cefaslocalserver.com worker1 --a-rec 10.17.4.24
+ipa dnsrecord-add cefaslocalserver.com worker2 --a-rec 10.17.4.25
+ipa dnsrecord-add cefaslocalserver.com worker3 --a-rec 10.17.4.26
+ipa dnsrecord-add cefaslocalserver.com bastion1 --a-rec 192.168.0.20
+ipa dnsrecord-add cefaslocalserver.com freeipa1 --a-rec 10.17.3.11
+ipa dnsrecord-add cefaslocalserver.com load_balancer1 --a-rec 10.17.3.12
+ipa dnsrecord-add cefaslocalserver.com postgresql1 --a-rec 10.17.3.13
+```
+
+Verificación de Credenciales de Kerberos
+
+Si sigues recibiendo el error "did not receive Kerberos credentials", puede que necesites asegurarte de que tu ticket de Kerberos esté vigente y que el tiempo de vida del ticket no haya expirado. Verificar el ticket de Kerberos:
+
+```bash
+klist
+```
+
+Este comando muestra el ticket actual y su tiempo de vida. Asegúrate de que el ticket no haya expirado. Eliminar el ticket de Kerberos si es necesario y obtener uno nuevo:
+
+```bash
+kdestroy
+kinit admin
+```
+
+Reintento de Comandos
+
+Después de asegurarte de que tienes un ticket válido, reintenta añadir los registros DNS:
+
+```bash
+ipa dnsrecord-add cefaslocalserver.com physical1 --a-rec 192.168.0.21
+```
+
+Repite con los demás registros necesarios.
+
+Aquí tienes un resumen de todos los comandos importantes para asegurar que los registros DNS se añadan y verifiquen correctamente:
+
+
+Obtener un ticket de Kerberos
+
+```bash
+kinit admin
+```
+
+Verificar los registros DNS
+```bash
+ipa dnsrecord-add cefaslocalserver.com physical1 --a-rec 192.168.0.21
+ipa dnsrecord-add cefaslocalserver.com bootstrap1 --a-rec 10.17.4.20
+ipa dnsrecord-add cefaslocalserver.com master1 --a-rec 10.17.4.21
+ipa dnsrecord-add cefaslocalserver.com master2 --a-rec 10.17.4.22
+ipa dnsrecord-add cefaslocalserver.com master3 --a-rec 10.17.4.23
+ipa dnsrecord-add cefaslocalserver.com worker1 --a-rec 10.17.4.24
+ipa dnsrecord-add cefaslocalserver.com worker2 --a-rec 10.17.4.25
+ipa dnsrecord-add cefaslocalserver.com worker3 --a-rec 10.17.4.26
+ipa dnsrecord-add cefaslocalserver.com bastion1 --a-rec 192.168.0.20
+ipa dnsrecord-add cefaslocalserver.com freeipa1 --a-rec 10.17.3.11
+ipa dnsrecord-add cefaslocalserver.com load_balancer1 --a-rec 10.17.3.12
+ipa dnsrecord-add cefaslocalserver.com postgresql1 --a-rec 10.17.3.13
+```
+
+
+Verificar los registros DNS
+
+```bash
+
+ipa dnsrecord-find cefaslocalserver.com
+```
+
+Verificar la resolución DNS desde una VM
+
+```bash
+dig physical1.cefaslocalserver.com
+dig freeipa1.cefaslocalserver.com
+dig bootstrap1.cefaslocalserver.com
+dig master1.cefaslocalserver.com
+dig google.com
+```
+```bash
+ping -c 4 physical1.cefaslocalserver.com
+ping -c 4 bootstrap1.cefaslocalserver.com
+ping -c 4 master1.cefaslocalserver.com
+ping -c 4 google.com
+```
+
+
+
+Verificar el estado del servicio DNS
+
+```bash
+sudo systemctl status named
+```
+Verificar la configuración del firewall en el servidor FreeIPA
+Asegúrate de que el firewall permite el tráfico DNS en los puertos 53 TCP/UDP.
+
+
+
+```bash
+sudo firewall-cmd --list-all
+sudo firewall-cmd --permanent --add-port=53/udp
+sudo firewall-cmd --permanent --add-port=53/tcp
+sudo firewall-cmd --reload
+
+```
+
+Limpiar la caché DNS en las VMs
+
+```bash
+sudo systemd-resolve --flush-caches
+sudo systemctl restart systemd-resolved
+```
+Verificar la conectividad hacia el servidor FreeIPA
+
+```bash
+ping -c 4 10.17.3.11
+```
+
+
+
 
 
 ## Recursos de Terraform para Redes
