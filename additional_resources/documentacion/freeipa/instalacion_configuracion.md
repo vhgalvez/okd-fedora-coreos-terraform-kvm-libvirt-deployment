@@ -27,7 +27,10 @@ cat /etc/hosts
 ## Paso 2: Instalación de FreeIPA
 
 ### 2.1 Instalar FreeIPA y el Servidor DNS
+
+```bash
 sudo dnf install -y ipa-server ipa-server-dns
+```
 
 ### 2.2 Ejecutar el Script de Instalación de FreeIPA
 
