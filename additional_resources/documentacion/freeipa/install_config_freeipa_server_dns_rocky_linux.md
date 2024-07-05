@@ -567,6 +567,7 @@ A continuación se proporciona un resumen de los hostnames e IPs para referencia
 | 10.17.4.25    | worker2.cefaslocalserver.com     |
 | 10.17.4.26    | worker3.cefaslocalserver.com     |
 
+
 ### Red br0 - Bridge Network
 
 ```hcl
@@ -576,9 +577,7 @@ resource "libvirt_network" "br0" {
   bridge    = "br0"
   autostart = true
   addresses = ["192.168.0.0/24"]
-}
 ```
-
 
 ### Red kube_network_02 - NAT Network
 
