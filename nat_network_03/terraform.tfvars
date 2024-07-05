@@ -1,7 +1,6 @@
 base_image = "/var/lib/libvirt/images/flatcar-linux/flatcar_production_qemu_image.img"
 
 vm_definitions = {
-  "bootstrap1" = { cpus = 1, memory = 1024, ip = "10.17.4.20", name_dominio = "bootstrap1.cefaslocalserver.com"},
   "master1"    = { cpus = 2, memory = 2048, ip = "10.17.4.21", name_dominio = "master1.cefaslocalserver.com"},
   "master2"    = { cpus = 2, memory = 2048, ip = "10.17.4.22", name_dominio = "master2.cefaslocalserver.com"},
   "master3"    = { cpus = 2, memory = 2048, ip = "10.17.4.23", name_dominio = "master3.cefaslocalserver.com"},
