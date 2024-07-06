@@ -1,5 +1,7 @@
 # Proyecto de Despliegue de OpenShift en KVM utilizando Terraform
+
 Requisitos
+
 Terraform: v0.13 o superior
 Acceso a un servidor KVM con libvirt
 Estructura del Proyecto
@@ -9,26 +11,27 @@ nat_network_03/
 Instrucciones de Ejecución
 Inicializar y Aplicar Terraform para bastion_network:
 
-bash
-Copiar código
+```bash
 cd bastion_network
 sudo terraform init --upgrade
 sudo terraform apply
+```
 Inicializar y Aplicar Terraform para nat_network_02:
 
-bash
-Copiar código
+```bash
 cd ../nat_network_02
 sudo terraform init --upgrade
 sudo terraform apply
+```
 Inicializar y Aplicar Terraform para nat_network_03:
 
-bash
-Copiar código
+```bash
 cd ../nat_network_03
 sudo terraform init --upgrade
 sudo terraform apply
+```
 Detalles de las Máquinas Virtuales
+
 bastion_network:
 
 Nombre: bastion1
@@ -225,9 +228,13 @@ resource "libvirt_network" "kube_network_03" {
   autostart = true
   addresses = ["10.17.4.0/24"]
 }
+
 Tecnologías Utilizadas
+
 Terraform
+
 KVM con Libvirt
+
 Rocky Linux 9.3 y 9.4
 Flatcar Container Linux
 WireGuard (VPN)
@@ -240,6 +247,7 @@ Nginx
 Apache Kafka
 Redis
 Rook y Ceph
+
 Con este detallado listado, puedes tener una vista clara y ordenada de todas las tecnologías, IPs, máquinas virtuales, y configuraciones involucradas en el proyecto de despliegue de OpenShift en KVM utilizando Terraform.
 
 
