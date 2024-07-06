@@ -22,11 +22,13 @@ Cuando vuelvas a encender las máquinas virtuales, verifica que los servicios cr
 ```bash
 sudo virsh start freeipa1
 ```
+
 Luego, ingresa a la máquina virtual y verifica el estado del servicio DNS:
 
 ```bash
 sudo virsh console freeipa1
 ```
+
 # Una vez dentro de la máquina virtual
 
 sudo systemctl status named
@@ -46,8 +48,6 @@ sudo virsh shutdown worker2
 sudo virsh shutdown worker3
 sudo virsh shutdown master1
 ```
-
-
 
 Verifica el estado final:
 
@@ -70,7 +70,6 @@ sudo virsh list --all
  -    worker1                         apagado
  -    worker2                         apagado
  -    worker3                         apagado
-
 ```
 
 Nota Adicional
@@ -97,13 +96,8 @@ Fecha: [Fecha de Creación del Documento]
 
 Este documento proporciona una guía paso a paso para el apagado seguro de máquinas virtuales utilizando virsh shutdown y la verificación de servicios críticos después del reinicio.
 
-
-
-
-
-
 ```bash
-sudo virsh start bastion1
+sudo virsh start bastion1.cefaslocalserver.com
 sudo virsh start freeipa1
 sudo virsh start load_balancer1
 sudo virsh start postgresql1
@@ -115,7 +109,3 @@ sudo virsh start worker1
 sudo virsh start worker2
 sudo virsh start worker3
 ```
-
-
-
-
