@@ -513,9 +513,11 @@ Para asegurar que el servidor físico tiene suficiente memoria para operar de ma
 
 La asignación total de memoria para las máquinas virtuales ajustadas sería:
 
-(5 VMs * 2048 MB) + (3 VMs * 4096 MB) + (3 VMs * 3584 MB)  
-= 10,240 MB + 12,288 MB + 10,752 MB  
+```plaintext
+(5 VMs * 2048 MB) + (3 VMs * 4096 MB) + (3 VMs * 3584 MB)
+= 10,240 MB + 12,288 MB + 10,752 MB
 = 33,280 MB
+```
 
 ## Buffer Adicional
 
