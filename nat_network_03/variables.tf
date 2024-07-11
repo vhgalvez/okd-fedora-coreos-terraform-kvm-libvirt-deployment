@@ -4,7 +4,7 @@ variable "base_image" {
 }
 
 variable "vm_definitions" {
-  description = "Definitions of virtual machines including CPU, memory, IP, and domain name"
+  description = "Definitions of virtual machines including CPU, memory, IP, domain name, and disk size"
   type = map(object({
     cpus         = number
     memory       = number
@@ -33,4 +33,3 @@ variable "dns2" {
   description = "Secondary DNS server"
   type        = string
 }
-
