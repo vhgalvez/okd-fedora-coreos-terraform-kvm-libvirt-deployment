@@ -10,7 +10,7 @@ variable "vm_definitions" {
     memory       = number
     ip           = string
     name_dominio = string
-    disk_size    = number
+    disk_size    = number  # Tamaño del disco en GB
   }))
 }
 
