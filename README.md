@@ -606,9 +606,8 @@ url:   https://console.redhat.com/openshift/create/local
 ```
 
 
-
 # Contacto
 
 Para cualquier duda o problema, por favor abra un issue en el repositorio o contacte al mantenedor del proyecto.
 
-Mantenedor del Proyecto: Victor Galvez
+**Mantenedor del Proyecto:** [Victor Galvez](https://github.com/vhgalvez)
