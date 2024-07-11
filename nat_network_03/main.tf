@@ -78,7 +78,7 @@ resource "libvirt_volume" "vm_disk" {
   base_volume_id = libvirt_volume.base.id
   pool           = libvirt_pool.volumetmp_03.name
   format         = "qcow2"
-  size           = each.value.disk_size * 1024
+  size           = each.value.disk_size * 1024  # Convertir GB a MB
 }
 
 resource "libvirt_domain" "machine" {
