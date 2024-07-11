@@ -495,20 +495,19 @@ Para asegurar que el servidor físico tiene suficiente memoria para operar de ma
 
 ## Tabla Ajustada de Máquinas Virtuales
 
-| Nombre           | CPUs | Memoria (MB) | IP           | Hostname                          | Volumen Nombre     | Volumen Tamaño (GB) |
-|------------------|------|--------------|--------------|----------------------------------|--------------------|----------------------|
-| freeipa1         | 2    | 2048         | 10.17.3.11   | freeipa1.cefaslocalserver.com    | freeipa1_volume    | 30                   |
-| load_balancer1   | 2    | 2048         | 10.17.3.12   | loadbalancer1.cefaslocalserver.com| loadbalancer1_volume| 30                   |
-| postgresql1      | 2    | 2048         | 10.17.3.13   | postgresql1.cefaslocalserver.com | postgresql1_volume | 30                   |
-| bootstrap1       | 2    | 2048         | 10.17.3.14   | bootstrap1.cefaslocalserver.com  | bootstrap1_volume  | 30                   |
-| bastion1         | 2    | 2048         | 192.168.0.20 | bastion1.cefaslocalserver.com    | bastion1_volume    | 30                   |
-| master1          | 2    | 4096         | 10.17.4.21   | master1.cefaslocalserver.com     | master1_volume     | 50                   |
-| master2          | 2    | 4096         | 10.17.4.22   | master2.cefaslocalserver.com     | master2_volume     | 50                   |
-| master3          | 2    | 4096         | 10.17.4.23   | master3.cefaslocalserver.com     | master3_volume     | 50                   |
-| worker1          | 2    | 3584         | 10.17.4.24   | worker1.cefaslocalserver.com     | worker1_volume     | 50                   |
-| worker2          | 2    | 3584         | 10.17.4.25   | worker2.cefaslocalserver.com     | worker2_volume     | 50                   |
-| worker3          | 2    | 3584         | 10.17.4.26   | worker3.cefaslocalserver.com     | worker3_volume     | 50                   |
-
+| Nombre           | CPUs | Memoria (MB) | IP           | Hostname                          | Volumen Tamaño (GB) |
+|------------------|------|--------------|--------------|----------------------------------|----------------------|
+| freeipa1         | 2    | 2048         | 10.17.3.11   | freeipa1.cefaslocalserver.com    | 30                   |
+| load_balancer1   | 2    | 2048         | 10.17.3.12   | loadbalancer1.cefaslocalserver.com| 30                   |
+| postgresql1      | 2    | 2048         | 10.17.3.13   | postgresql1.cefaslocalserver.com | 30                   |
+| bootstrap1       | 2    | 2048         | 10.17.3.14   | bootstrap1.cefaslocalserver.com  | 30                   |
+| bastion1         | 2    | 2048         | 192.168.0.20 | bastion1.cefaslocalserver.com    | 30                   |
+| master1          | 2    | 4096         | 10.17.4.21   | master1.cefaslocalserver.com     | 50                   |
+| master2          | 2    | 4096         | 10.17.4.22   | master2.cefaslocalserver.com     | 50                   |
+| master3          | 2    | 4096         | 10.17.4.23   | master3.cefaslocalserver.com     | 50                   |
+| worker1          | 2    | 3584         | 10.17.4.24   | worker1.cefaslocalserver.com     | 50                   |
+| worker2          | 2    | 3584         | 10.17.4.25   | worker2.cefaslocalserver.com     | 50                   |
+| worker3          | 2    | 3584         | 10.17.4.26   | worker3.cefaslocalserver.com     | 50                   |
 
 ## Total de Memoria Asignada
 
