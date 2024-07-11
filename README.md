@@ -540,6 +540,7 @@ Con estos ajustes, se garantiza que el servidor físico tenga suficiente memoria
 url:   https://console.redhat.com/openshift/create/local
 
 
+bash
                                      +---------------------+
                                      |    IP Pública       |
                                      | (Conexiones HTTPS)  |
@@ -598,6 +599,7 @@ url:   https://console.redhat.com/openshift/create/local
                                     +---------------------------+
                                     |        Internet           |
                                     +---------------------------+
+```
 
 
 
