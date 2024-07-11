@@ -79,7 +79,7 @@ resource "libvirt_volume" "vm_disk" {
   base_volume_id = libvirt_volume.base.id
   pool           = libvirt_pool.volumetmp_03.name
   format         = "qcow2"
-  capacity       = each.value.disk_size
+  #capacity       = each.value.disk_size
 }
 
 resource "libvirt_domain" "machine" {
