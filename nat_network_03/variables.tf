@@ -10,6 +10,7 @@ variable "vm_definitions" {
     memory       = number
     ip           = string
     name_dominio = string
+    disk_size    = number
   }))
 }
 
