@@ -75,6 +75,12 @@ Este repositorio contiene tres subproyectos de Terraform que se deben ejecutar d
    sudo terraform apply
    ```
 
+## Notas Adicionales
+
+- Asegúrese de tener las variables y configuraciones adecuadas en los archivos `terraform.tfvars` de cada subproyecto.
+- Cada subproyecto tiene su propio `main.tf` y configuración de variables, por lo que no debería haber conflictos de nombres si sigue las instrucciones anteriores.
+- Puede ajustar las configuraciones y variables según sea necesario para adaptarse a su entorno y necesidades específicas.
+
 ## Detalles de las Máquinas Virtuales
 
 ### bastion_network
@@ -89,7 +95,6 @@ Este repositorio contiene tres subproyectos de Terraform que se deben ejecutar d
 ### nat_network_02
 
 - **Nombre:** freeipa1
-
   - **CPU:** 2
   - **Memoria:** 2048 MB
   - **IP:** 10.17.3.11
@@ -97,7 +102,6 @@ Este repositorio contiene tres subproyectos de Terraform que se deben ejecutar d
   - **Sistema Operativo:** Rocky Linux 9.3
 
 - **Nombre:** load_balancer1
-
   - **CPU:** 2
   - **Memoria:** 2048 MB
   - **IP:** 10.17.3.12
@@ -114,71 +118,55 @@ Este repositorio contiene tres subproyectos de Terraform que se deben ejecutar d
 ### nat_network_03
 
 - **Nombre:** bootstrap1
-
-  - **CPU:** 1
-  - **Memoria:** 1024 MB
-  - **IP:** 10.17.4.20
+  - **CPU:** 2
+  - **Memoria:** 2048 MB
+  - **IP:** 10.17.3.14
   - **Rol:** Inicialización del clúster
   - **Sistema Operativo:** Flatcar Container Linux
 
 - **Nombre:** master1
-
   - **CPU:** 2
-  - **Memoria:** 2048 MB
+  - **Memoria:** 4096 MB
   - **IP:** 10.17.4.21
   - **Rol:** Gestión del clúster
   - **Sistema Operativo:** Flatcar Container Linux
 
 - **Nombre:** master2
-
   - **CPU:** 2
-  - **Memoria:** 2048 MB
+  - **Memoria:** 4096 MB
   - **IP:** 10.17.4.22
   - **Rol:** Gestión del clúster
   - **Sistema Operativo:** Flatcar Container Linux
 
 - **Nombre:** master3
-
   - **CPU:** 2
-  - **Memoria:** 2048 MB
+  - **Memoria:** 4096 MB
   - **IP:** 10.17.4.23
   - **Rol:** Gestión del clúster
   - **Sistema Operativo:** Flatcar Container Linux
 
 - **Nombre:** worker1
-
   - **CPU:** 2
-  - **Memoria:** 2048 MB
+  - **Memoria:** 3584 MB
   - **IP:** 10.17.4.24
   - **Rol:** Ejecución de aplicaciones
   - **Sistema Operativo:** Flatcar Container Linux
 
 - **Nombre:** worker2
-
   - **CPU:** 2
-  - **Memoria:** 2048 MB
+  - **Memoria:** 3584 MB
   - **IP:** 10.17.4.25
   - **Rol:** Ejecución de aplicaciones
   - **Sistema Operativo:** Flatcar Container Linux
 
 - **Nombre:** worker3
   - **CPU:** 2
-  - **Memoria:** 2048 MB
+  - **Memoria:** 3584 MB
   - **IP:** 10.17.4.26
   - **Rol:** Ejecución de aplicaciones
   - **Sistema Operativo:** Flatcar Container Linux
 
-## Notas Adicionales
 
-- Asegúrese de tener las variables y configuraciones adecuadas en los archivos `terraform.tfvars` de cada subproyecto.
-- Cada subproyecto tiene su propio `main.tf` y configuración de variables, por lo que no debería haber conflictos de nombres si sigue las instrucciones anteriores.
-- Puede ajustar las configuraciones y variables según sea necesario para adaptarse a su entorno y necesidades específicas.
-
-## Contacto
-
-Para cualquier duda o problema, por favor abra un issue en el repositorio o contacte al mantenedor del proyecto.
-
----
 
 **Mantenedor del Proyecto:** [Victor Galvez](https://github.com/vhgalvez)
 
@@ -551,3 +539,70 @@ Con estos ajustes, se garantiza que el servidor físico tenga suficiente memoria
 
 url:   https://console.redhat.com/openshift/create/local
 
+
+                                     +---------------------+
+                                     |    IP Pública       |
+                                     | (Conexiones HTTPS)  |
+                                     |     192.168.0.21    |
+                                     +----------+----------+
+                                                |
+                                                v
+                                    +-----------+----------+
+                                    |  Load Balancer (Traefik)  |
+                                    |   IP: 10.17.3.12          |
+                                    +-----------+----------+
+                                                |
+                       +------------------------+------------------------+
+                       |                        |                        |
+                       v                        v                        v
+               +-------+-------+        +-------+-------+        +-------+-------+
+               |   Master 1    |        |   Master 2    |        |   Master 3    |
+               |   IP: 10.17.4.21|      |   IP: 10.17.4.22|      |   IP: 10.17.4.23|
+               +-------+-------+        +-------+-------+        +-------+-------+
+                       |                        |                        |
+                       +------------------------+------------------------+
+                                                |
+                                                v
+                                    +-----------+----------+
+                                    |  Bootstrap (OKD)     |
+                                    |   IP: 10.17.4.20     |
+                                    +-----------+----------+
+                                                |
+                                                v
+            +-------------------+------------------+------------------+
+            |                   |                  |                  |
+            v                   v                  v                  v
+     +-------+-------+   +-------+-------+  +-------+-------+   +-------+-------+
+     |   Worker 1    |   |   Worker 2    |  |   Worker 3    |   |  FreeIPA (DNS)|
+     |   IP: 10.17.4.24| |   IP: 10.17.4.25| |   IP: 10.17.4.26| |  IP: 10.17.3.11|
+     +-------+-------+   +-------+-------+  +-------+-------+   +-------+-------+
+
+            +----------------------------------------------------------------+
+            |                            Bastion Node                        |
+            |           Acceso Seguro, Punto de Conexión de Bridge           |
+            |                       IP: 192.168.0.20                         |
+            +----------------------------------------------------------------+
+                                                |
+                                                v
+                                    +-----------+----------+
+                                    |      Servidor Físico      |
+                                    |   IP: 192.168.0.21        |
+                                    +---------------------------+
+                                                |
+                                                v
+                                    +---------------------------+
+                                    |   Switch y Router         |
+                                    +---------------------------+
+                                                |
+                                                v
+                                    +---------------------------+
+                                    |        Internet           |
+                                    +---------------------------+
+
+
+
+# Contacto
+
+Para cualquier duda o problema, por favor abra un issue en el repositorio o contacte al mantenedor del proyecto.
+
+Mantenedor del Proyecto: Victor Galvez
