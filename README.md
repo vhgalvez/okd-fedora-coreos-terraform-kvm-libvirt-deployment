@@ -296,14 +296,16 @@ Estas interfaces se utilizan para la comunicación y conectividad de la red, inc
 
 ## Máquinas Virtuales y Roles
 
-- **Total VMs**: 9
+- **Total VMs**: 11
 - **Roles**:
-  - **Bootstrap Node**: 1 CPU, 1024 MB, inicializa clúster
-  - **Master Nodes**: 3 x (2 CPUs, 2048 MB), gestionan el clúster
-  - **Worker Nodes**: 3 x (2 CPUs, 2048 MB), ejecutan aplicaciones
-  - **Bastion Node**: 1 CPU, 1024 MB, seguridad y acceso
-  - **Load Balancer**: 1 CPU, 1024 MB, con Traefik
-
+  - **Bootstrap Node**: 2 CPUs, 2048 MB, inicializa el clúster
+  - **Master Nodes**: 3 x (2 CPUs, 4096 MB), gestionan el clúster
+  - **Worker Nodes**: 3 x (2 CPUs, 3584 MB), ejecutan aplicaciones
+  - **Bastion Node**: 2 CPUs, 2048 MB, seguridad y acceso
+  - **Load Balancer**: 2 CPUs, 2048 MB, con Traefik
+  - **FreeIPA Node**: 2 CPUs, 2048 MB, servidor de DNS y gestión de identidades
+  - **PostgreSQL Node**: 2 CPUs, 2048 MB, gestión de bases de datos
+  
 ## Red y Conectividad
 
 - **Switch**: TP-Link LS1008G - 8 puertos Gigabit no administrados
@@ -449,25 +451,6 @@ resource "libvirt_network" "kube_network_03" {
 | virbr0            | 8000.525400b64c99 | Sí             | vnet1, vnet2, vnet3                              |
 | virbr1            | 8000.52540016b5de | Sí             | vnet4, vnet5, vnet6, vnet7, vnet8, vnet9, vnet10 |
 
-## Información del Sistema
-
-```bash
-        #####           victory@physical1.cefaslocalserver.com
-       #######          --------------------------------------
-       ##O#O##          OS: Rocky Linux 9.4 (Blue Onyx) x86_64
-       #######          Host: ProLiant DL380 G7
-     ###########        Kernel: 5.14.0-427.22.1.el9_4.x86_64
-    #############       Uptime: 3 hours, 5 mins
-   ###############      Packages: 1301 (rpm)
-   ################     Shell: bash 5.1.8
-  #################     Resolution: 1024x768
-#####################   Terminal: /dev/pts/16
-#####################   CPU: Intel Xeon X5650 (24) @ 2.665GHz
-  #################     GPU: AMD ATI 01:03.0 ES1000
-   ################
-                        Memory: 21362MiB / 35904MiB
-```
-
 ## Definicion de redes en Terraform
 
 ```hcl
@@ -497,25 +480,46 @@ resource "libvirt_network" "kube_network_03" {
   addresses = ["10.17.4.0/24"]
 }
 ```
+
+## Información del Sistema
+
+```bash
+        #####           victory@physical1.cefaslocalserver.com
+       #######          --------------------------------------
+       ##O#O##          OS: Rocky Linux 9.4 (Blue Onyx) x86_64
+       #######          Host: ProLiant DL380 G7
+     ###########        Kernel: 5.14.0-427.22.1.el9_4.x86_64
+    #############       Uptime: 3 hours, 5 mins
+   ###############      Packages: 1301 (rpm)
+   ################     Shell: bash 5.1.8
+  #################     Resolution: 1024x768
+#####################   Terminal: /dev/pts/16
+#####################   CPU: Intel Xeon X5650 (24) @ 2.665GHz
+  #################     GPU: AMD ATI 01:03.0 ES1000
+   ################
+                        Memory: 21362MiB / 35904MiB
+```
+
+
 # Ajustes Recomendados para las Máquinas Virtuales
 
 Para asegurar que el servidor físico tiene suficiente memoria para operar de manera eficiente, se deben ajustar las asignaciones de memoria de las máquinas virtuales. Aquí te presento una tabla ajustada de las máquinas virtuales, teniendo en cuenta los requisitos mínimos para un entorno de laboratorio con OKD.
 
 ## Tabla Ajustada de Máquinas Virtuales
 
-| Nombre           | CPUs | Memoria (MB) | IP           | Hostname                          | Volumen Nombre     | Volumen Formato | Volumen Pool | Volumen Tamaño (GB) | Cloudinit Disk          | Cloudinit Pool | Dominio Memoria (MB) | Short Hostname  |
-|------------------|------|--------------|--------------|----------------------------------|--------------------|-----------------|--------------|----------------------|------------------------|----------------|-----------------------|-----------------|
+| Nombre           | CPUs | Memoria (MB) | IP           | Hostname                          | Volumen Nombre     | Volumen Formato | Volumen Pool | Volumen Tamaño (GB) | Cloudinit Pool | Dominio Memoria (MB) | Short Hostname  |
+|------------------|------|--------------|--------------|----------------------------------|--------------------|-----------------|--------------|----------------------|----------------|-----------------------|-----------------|
 | freeipa1         | 2    | 2048         | 10.17.3.11   | freeipa1.cefaslocalserver.com    | freeipa1_volume    | qcow2           | default      | 30                   | default        | 2048                  | freeipa1        |
 | load_balancer1   | 2    | 2048         | 10.17.3.12   | loadbalancer1.cefaslocalserver.com| loadbalancer1_volume| qcow2          | default      | 30                   | default        | 2048                  | loadbalancer1   |
-| postgresql1      | 2    | 2048         | 10.17.3.13   | postgresql1.cefaslocalserver.com | postgresql1_volume | qcow2           | default      | 30                   |default        | 2048                  | postgresql1     |
-| bootstrap1       | 2    | 2048         | 10.17.3.14   | bootstrap1.cefaslocalserver.com  | bootstrap1_volume  | qcow2           | default      | 30                   |  default        | 2048                  | bootstrap1      |
-| bastion1         | 2    | 2048         | 192.168.0.20 | bastion1.cefaslocalserver.com    | bastion1_volume    | qcow2           | default      | 30                   | -                      | -              | -                     | bastion1        |
-| master1          | 2    | 4096         | 10.17.4.21   | master1.cefaslocalserver.com     | master1_volume     | qcow2           | default      | 50                   | -                      | -              | -                     | master1         |
-| master2          | 2    | 4096         | 10.17.4.22   | master2.cefaslocalserver.com     | master2_volume     | qcow2           | default      | 50                   | -                      | -              | -                     | master2         |
-| master3          | 2    | 4096         | 10.17.4.23   | master3.cefaslocalserver.com     | master3_volume     | qcow2           | default      | 50                   | -                      | -              | -                     | master3         |
-| worker1          | 2    | 3584         | 10.17.4.24   | worker1.cefaslocalserver.com     | worker1_volume     | qcow2           | default      | 50                   | -                      | -              | -                     | worker1         |
-| worker2          | 2    | 3584         | 10.17.4.25   | worker2.cefaslocalserver.com     | worker2_volume     | qcow2           | default      | 50                   | -                      | -              | -                     | worker2         |
-| worker3          | 2    | 3584         | 10.17.4.26   | worker3.cefaslocalserver.com     | worker3_volume     | qcow2           | default      | 50                   | -                      | -              | -                     | worker3         |
+| postgresql1      | 2    | 2048         | 10.17.3.13   | postgresql1.cefaslocalserver.com | postgresql1_volume | qcow2           | default      | 30                   | default        | 2048                  | postgresql1     |
+| bootstrap1       | 2    | 2048         | 10.17.3.14   | bootstrap1.cefaslocalserver.com  | bootstrap1_volume  | qcow2           | default      | 30                   | default        | 2048                  | bootstrap1      |
+| bastion1         | 2    | 2048         | 192.168.0.20 | bastion1.cefaslocalserver.com    | bastion1_volume    | qcow2           | default      | 30                   | -              | -                     | bastion1        |
+| master1          | 2    | 4096         | 10.17.4.21   | master1.cefaslocalserver.com     | master1_volume     | qcow2           | default      | 50                   | -              | -                     | master1         |
+| master2          | 2    | 4096         | 10.17.4.22   | master2.cefaslocalserver.com     | master2_volume     | qcow2           | default      | 50                   | -              | -                     | master2         |
+| master3          | 2    | 4096         | 10.17.4.23   | master3.cefaslocalserver.com     | master3_volume     | qcow2           | default      | 50                   | -              | -                     | master3         |
+| worker1          | 2    | 3584         | 10.17.4.24   | worker1.cefaslocalserver.com     | worker1_volume     | qcow2           | default      | 50                   | -              | -                     | worker1         |
+| worker2          | 2    | 3584         | 10.17.4.25   | worker2.cefaslocalserver.com     | worker2_volume     | qcow2           | default      | 50                   | -              | -                     | worker2         |
+| worker3          | 2    | 3584         | 10.17.4.26   | worker3.cefaslocalserver.com     | worker3_volume     | qcow2           | default      | 50                   | -              | -                     | worker3         |
 
 ## Total de Memoria Asignada
 
@@ -532,13 +536,6 @@ Esta asignación deja aproximadamente 2,624 MB para el sistema host, lo cual deb
 ## Conclusión
 
 Con estos ajustes, se garantiza que el servidor físico tenga suficiente memoria disponible para operar de manera eficiente mientras se ejecutan todas las máquinas virtuales necesarias para tu entorno de laboratorio con OKD.
-
-
-
-
-
-
-
 
 
 ## Maquinas Virtuales funcionando
