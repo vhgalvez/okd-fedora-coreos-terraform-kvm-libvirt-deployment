@@ -412,7 +412,6 @@ Introduce la contraseña del usuario admin cuando se te pida. Este comando debe 
 ## Paso 2: Añadir Registros DNS
 
 ```bash
-ipa dnsrecord-add cefaslocalserver.com physical1 --a-rec 192.168.0.21
 ipa dnsrecord-add cefaslocalserver.com bootstrap1 --a-rec 10.17.4.20
 ipa dnsrecord-add cefaslocalserver.com master1 --a-rec 10.17.4.21
 ipa dnsrecord-add cefaslocalserver.com master2 --a-rec 10.17.4.22
@@ -434,50 +433,12 @@ Si sigues recibiendo el error "did not receive Kerberos credentials", puede que 
 klist
 ```
 
-Este comando muestra el ticket actual y su tiempo de vida. Asegúrate de que el ticket no haya expirado. Eliminar el ticket de Kerberos si es necesario y obtener uno nuevo:
+## Paso 3: Verificar los Registros DNS
 
-```bash
-kdestroy
-kinit admin
-```
-
-Reintento de Comandos
-
-Después de asegurarte de que tienes un ticket válido, reintenta añadir los registros DNS:
-
-```bash
-ipa dnsrecord-add cefaslocalserver.com physical1 --a-rec 192.168.0.21
-```
-
-Repite con los demás registros necesarios.
-
-Aquí tienes un resumen de todos los comandos importantes para asegurar que los registros DNS se añadan y verifiquen correctamente:
-
-
-Obtener un ticket de Kerberos
 
 ```bash
 kinit admin
 ```
-
-Verificar los registros DNS
-```bash
-ipa dnsrecord-add cefaslocalserver.com physical1 --a-rec 192.168.0.21
-ipa dnsrecord-add cefaslocalserver.com bootstrap1 --a-rec 10.17.3.14
-ipa dnsrecord-add cefaslocalserver.com master1 --a-rec 10.17.4.21
-ipa dnsrecord-add cefaslocalserver.com master2 --a-rec 10.17.4.22
-ipa dnsrecord-add cefaslocalserver.com master3 --a-rec 10.17.4.23
-ipa dnsrecord-add cefaslocalserver.com worker1 --a-rec 10.17.4.24
-ipa dnsrecord-add cefaslocalserver.com worker2 --a-rec 10.17.4.25
-ipa dnsrecord-add cefaslocalserver.com worker3 --a-rec 10.17.4.26
-ipa dnsrecord-add cefaslocalserver.com bastion1 --a-rec 192.168.0.20
-ipa dnsrecord-add cefaslocalserver.com freeipa1 --a-rec 10.17.3.11
-ipa dnsrecord-add cefaslocalserver.com load_balancer1 --a-rec 10.17.3.12
-ipa dnsrecord-add cefaslocalserver.com postgresql1 --a-rec 10.17.3.13
-```
-
-
-Verificar los registros DNS
 
 ```bash
 
@@ -645,7 +606,7 @@ El servidor físico actúa como el anfitrión principal para las máquinas virtu
 
 | Dirección IP  | Hostname                        | Alias     |
 |---------------|---------------------------------|-----------|
-| 192.168.0.21  | physical1.cefaslocalserver.com  | physical1 |
+| 192.168.0. ?  | physical1.cefaslocalserver.com  | physical1 |
 
 ## Redes Virtuales y su Configuración
 
