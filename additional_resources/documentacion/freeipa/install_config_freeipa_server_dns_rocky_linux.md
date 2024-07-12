@@ -330,6 +330,8 @@ ping 8.8.8.8
 
 ## Ejemplo de Archivo de Configuración de `named`
 
+ El archivo /etc/named.conf no hay modificarlo, ya que es gestionado por FreeIPA. Sin embargo, puedes ver la configuración actual del servicio DNS en FreeIPA.
+
 ```bash
 sudo cat /etc/named.conf
 ```
@@ -416,7 +418,7 @@ Introduce la contraseña del usuario admin cuando se te pida. Este comando debe 
 ## Paso 2: Añadir Registros DNS
 
 ```bash
-ipa dnsrecord-add cefaslocalserver.com bootstrap1 --a-rec 10.17.4.20
+ipa dnsrecord-add cefaslocalserver.com bootstrap1 --a-rec 10.17.3.14
 ipa dnsrecord-add cefaslocalserver.com master1 --a-rec 10.17.4.21
 ipa dnsrecord-add cefaslocalserver.com master2 --a-rec 10.17.4.22
 ipa dnsrecord-add cefaslocalserver.com master3 --a-rec 10.17.4.23
@@ -537,13 +539,13 @@ Abre el archivo `/etc/named.conf` o el archivo donde se incluyan las opciones de
 
 Agrega o modifica la opción allow-recursion para incluir las redes que deben permitir la recursión:
 
-
 ```bash
-options {
-    ...
+sudo vim /etc/named/ipa-options-ext.conf
+```
+
+Agrega la siguiente línea para permitir la recursión para todas las redes:
+```bash
     allow-recursion { any; }; # Permitir recursión para todas las redes
-    ...
-}
 ```
 
 Guarda los cambios y reinicia el servicio named:
