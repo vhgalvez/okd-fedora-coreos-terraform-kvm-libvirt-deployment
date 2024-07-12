@@ -111,17 +111,16 @@ Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
 Cree el directorio de configuración de Traefik:
 
 ```bash
-mkdir -p /etc/traefik
-```
-
+sudo mkdir -p /etc/traefik
 cd /etc/traefik
+```
 
 4.2 Crear el Archivo de Configuración traefik.toml
 
 Cree el archivo traefik.toml con el siguiente contenido:
 
 ```bash
-vim /etc/traefik/traefik.toml
+sudo vim /etc/traefik/traefik.toml
 ```
 
 Contenido del archivo traefik.toml:
@@ -151,7 +150,6 @@ Contenido del archivo traefik.toml:
   storage = "acme.json"
   [certificatesResolvers.myresolver.acme.httpChallenge]
     entryPoint = "http"
-
 ```
 
 ### 4.3 Crear el Archivo acme.json
@@ -159,8 +157,8 @@ Contenido del archivo traefik.toml:
 Cree el archivo acme.json y ajuste los permisos:
 
 ```bash
-touch /etc/traefik/acme.json
-chmod 600 /etc/traefik/acme.json
+sudo touch /etc/traefik/acme.json
+sudo chmod 600 /etc/traefik/acme.json
 ```
 
 ### 4.4 Crear el Archivo docker-compose.yml
