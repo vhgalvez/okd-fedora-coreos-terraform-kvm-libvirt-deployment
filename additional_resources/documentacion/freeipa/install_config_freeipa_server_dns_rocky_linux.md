@@ -331,6 +331,10 @@ ping 8.8.8.8
 ## Ejemplo de Archivo de Configuración de `named`
 
 ```bash
+sudo cat /etc/named.conf
+```
+
+```bash
 /* WARNING: This config file is managed by IPA.
  *
  * DO NOT MODIFY! Any modification will be overwritten by upgrades.
