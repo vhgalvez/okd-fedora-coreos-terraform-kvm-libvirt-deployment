@@ -152,7 +152,7 @@ Contenido del archivo `traefik.toml`:
     entryPoint = "http"
 ```
 
-### 4.3 Crear el Archivo acme.json
+### 4.3 Crear el Archivo `acme.json`
 
 Cree el archivo acme.json y ajuste los permisos:
 
