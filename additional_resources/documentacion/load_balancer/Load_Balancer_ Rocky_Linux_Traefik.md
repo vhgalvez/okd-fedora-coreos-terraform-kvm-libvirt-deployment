@@ -123,6 +123,7 @@ Cree el archivo traefik.toml con el siguiente contenido:
 ```bash
 vim /etc/traefik/traefik.toml
 ```
+
 Contenido del archivo traefik.toml:
 
 ```toml
@@ -172,13 +173,12 @@ vim /etc/traefik/docker-compose.yml
 
 Contenido del archivo `docker-compose.yml`:
 
-
 ```yaml
-version: '3'
+version: "3"
 
 services:
   traefik:
-    image: traefik:v2.3
+    image: traefik:v3.0
     command:
       - --api.insecure=true
       - --providers.docker
@@ -196,7 +196,6 @@ services:
       - /etc/traefik/traefik.toml:/traefik.toml
       - /etc/traefik/acme.json:/acme.json
     restart: always
-
 ```
 
 ### 4.5 Iniciar Traefik con Docker Compose
@@ -238,10 +237,9 @@ sudo firewall-cmd --permanent --add-port=443/tcp
 sudo firewall-cmd --permanent --add-port=8080/tcp
 sudo firewall-cmd --reload
 ```
+
 Con estos pasos, habrás instalado y configurado Traefik en la máquina LoadBalancer1 utilizando Docker Compose.
 
-## Traefik en Rocky Linux 
-
+## Traefik en Rocky Linux
 
 ![alt text](../../image/Rocky_Linux_Traefik.png)
-
