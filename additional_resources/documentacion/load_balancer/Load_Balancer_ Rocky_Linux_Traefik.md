@@ -123,7 +123,7 @@ Cree el archivo traefik.toml con el siguiente contenido:
 sudo vim /etc/traefik/traefik.toml
 ```
 
-Contenido del archivo traefik.toml:
+Contenido del archivo `traefik.toml`:
 
 ```toml
 [entryPoints]
