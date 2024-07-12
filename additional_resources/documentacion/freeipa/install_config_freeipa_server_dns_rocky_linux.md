@@ -528,12 +528,16 @@ Limpiar la caché DNS en las VMs
 sudo systemd-resolve --flush-caches
 sudo systemctl restart systemd-resolved
 ```
+
 Verificar la conectividad hacia el servidor FreeIPA
 
 ```bash
 ping -c 4 10.17.3.11
 ```
 
+verificar el servicio named
+
+```bash
 [core@freeipa1 ~]$ sudo systemctl status named
 ● named.service - Berkeley Internet Name Domain (DNS)
      Loaded: loaded (/usr/lib/systemd/system/named.service; enabled; preset: disabled)
@@ -556,10 +560,11 @@ Jul 05 18:01:44 freeipa1.cefaslocalserver.com systemd[1]: Started Berkeley Inter
 Jul 05 18:01:44 freeipa1.cefaslocalserver.com named[31992]: zone cefaslocalserver.com/IN: loaded serial 1720198904
 Jul 05 18:15:24 freeipa1.cefaslocalserver.com named[31992]: zone cefaslocalserver.com/IN: zone_journal_compact: could not get zone >
 lines 1-20/20 (END)
+```
 
 
 
-
+## Solución de Problemas de Resolución de DNS Externa en FreeIPA
 
 Abre el archivo `/etc/named.conf` o el archivo donde se incluyan las opciones de configuración 
 
