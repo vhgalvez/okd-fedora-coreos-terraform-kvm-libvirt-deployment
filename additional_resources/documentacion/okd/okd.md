@@ -57,6 +57,10 @@ ipa dnsrecord-add cefaslocalserver.com worker1.produccion --a-rec=10.17.4.24
 ipa dnsrecord-add cefaslocalserver.com worker2.produccion --a-rec=10.17.4.25
 ipa dnsrecord-add cefaslocalserver.com worker3.produccion --a-rec=10.17.4.26
 ```
+
+![alt text](../../image/dns_api_okd.png)
+
+
 ## Paso 5: Crear el Archivo de Configuración de Instalación
 
 ### 5.1 Crear install-config.yaml
