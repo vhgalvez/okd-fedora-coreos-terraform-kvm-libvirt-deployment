@@ -15,6 +15,15 @@ Este repositorio contiene tres subproyectos de Terraform que se deben ejecutar d
 
 ## Instrucciones de Ejecución
 
+
+Clonar el Repositorio de Terraform
+
+Clona el repositorio que contiene tu configuración de Terraform.
+
+```bash
+git clone https://github.com/vhgalvez/terraform-openshift-kvm-deployment.git
+cd terraform-openshift-kvm-deployment_
+
 ### Inicializar y Aplicar Terraform para `br0_network`
 
 1. Navegue al directorio `br0_network`:

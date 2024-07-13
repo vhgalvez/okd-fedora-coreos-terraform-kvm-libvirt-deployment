@@ -29,7 +29,7 @@ Verificación de la Creación del Pool
 Verifica que el pool se haya creado y esté activo:
 
 
-```bash
+```bash 
 sudo virsh pool-list --all
 ```
 
