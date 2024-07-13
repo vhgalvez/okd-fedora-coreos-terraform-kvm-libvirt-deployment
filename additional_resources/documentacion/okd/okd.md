@@ -8,6 +8,21 @@
 - **Acceso a un servidor DNS (FreeIPA) configurado**
 - **Llave SSH configurada**
 
+
+## Introducción
+
+OKD (OpenShift Kubernetes Distribution) es una distribución de Kubernetes de código abierto que incluye herramientas y características adicionales para facilitar la administración y el despliegue de aplicaciones en contenedores. En esta guía, aprenderás a instalar un clúster OKD multinodo en KVM con los pasos necesarios y las configuraciones específicas para asegurar un despliegue exitoso.
+
+
+
+## Paso 1: Descargar e Instalar el Cliente de OpenShift (oc)
+
+acesewer a bootstrap1	10.17.3.14	
+sudo ssh -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift  core@10.17.3.14 -p 22
+
+### 1.1 Descargar el Cliente de OpenShift
+
+
 ## Paso 3: Descargar el Instalador de OKD
 
 ### 3.1 Descargar openshift-install
