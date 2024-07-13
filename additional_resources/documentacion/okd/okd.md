@@ -31,6 +31,17 @@ sudo mv openshift-install /usr/local/bin/
 
 ### 4.1 Añadir Entradas DNS
 
+Conéctate a tu servidor FreeIPA y autentícate como administrador.
+```bash
+[victory@physical1 ~]$  sudo ssh -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift  core@10.17.3.11 -p 22
+```
+
+Autentícate como administrador en FreeIPA.
+```bash
+[core@freeipa1 ~]$ kinit admin
+```
+12345678
+
 Configura las entradas DNS necesarias para tu clúster en FreeIPA. Estas entradas permiten el correcto funcionamiento y acceso a los componentes del clúster.
 
 ```bash
