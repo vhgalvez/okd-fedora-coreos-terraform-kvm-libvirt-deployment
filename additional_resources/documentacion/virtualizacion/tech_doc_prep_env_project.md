@@ -4,14 +4,50 @@ Este documento detalla los pasos necesarios para preparar el ambiente y configur
 
 ## Paso 1: Instalación de Dependencias
 
-### Instalación de QEMU, KVM y Libvirt
+### Instalación de QEMU, KVM y Libvirt y terraform
+
 Ejecuta los siguientes comandos para instalar las herramientas necesarias:
+
+#### Instalación de QEMU, KVM y Libvirt
 
 ```bash
 sudo dnf install -y qemu-kvm qemu-img libvirt libvirt-client virt-install
-sudo systemctl enable --now libvirtd
+sudo dnf install -y epel-release
+sudo dnf install -y bridge-utils virt-top libguestfs-tools bridge-utils virt-viewer
+sudo systemctl start libvirtd
+sudo systemctl enable libvirtd
+sudo systemctl status libvirtd
+sudo usermod -aG libvirt $USER
+newgrp libvirt
+brctl show
+nmcli connection show
 ```
 
+#### Instalación de Terraform
+
+Agregar el Repositorio de HashiCorp
+
+Primero, agrega el repositorio de HashiCorp a tu sistema:
+
+```bash
+sudo dnf config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+```
+Instalar Terraform
+
+Luego, instala Terraform usando dnf:
+
+```bash
+sudo dnf -y install terraform
+```
+Verificar la Instalación
+
+Finalmente, verifica que Terraform se haya instalado correctamente:
+
+``` bash
+terraform -version
+```
+
+Deberías ver la versión de Terraform instalada, confirmando que la instalación fue exitosa.
 
 ## Paso 2: Configuración del Pool de Almacenamiento
 
