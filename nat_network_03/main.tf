@@ -47,12 +47,12 @@ data "template_file" "vm-configs" {
   template = file("${path.module}/configs/machine-${each.key}-config.yaml.tmpl")
 
   vars = {
-    ssh_keys  = join(",", var.ssh_keys),
-    name      = each.key,
-    host_name = each.value.name_dominio,
-    gateway   = var.gateway,
-    dns1      = var.dns1,
-    dns2      = var.dns2,
+    ssh_keys  = join(",", var.ssh_keys)
+    name      = each.key
+    host_name = each.value.name_dominio
+    gateway   = var.gateway
+    dns1      = var.dns1
+    dns2      = var.dns2
     ip        = each.value.ip
   }
 }
@@ -61,6 +61,13 @@ data "ct_config" "vm-ignitions" {
   for_each = var.vm_definitions
 
   content = data.template_file.vm-configs[each.key].rendered
+}
+
+resource "local_file" "ignition_configs" {
+  for_each = var.vm_definitions
+
+  content  = data.ct_config.vm-ignitions[each.key].rendered
+  filename = "${path.module}/ignition-configs/${each.key}.ign"
 }
 
 resource "libvirt_ignition" "ignition" {
