@@ -4,7 +4,7 @@ Este repositorio contiene tres subproyectos de Terraform que se deben ejecutar d
 
 ## Estructura del Proyecto
 
-- `bastion_network/`
+- `br0_network/`
 - `nat_network_02/`
 - `nat_network_03/`
 
@@ -15,12 +15,12 @@ Este repositorio contiene tres subproyectos de Terraform que se deben ejecutar d
 
 ## Instrucciones de Ejecución
 
-### Inicializar y Aplicar Terraform para `bastion_network`
+### Inicializar y Aplicar Terraform para `br0_network`
 
-1. Navegue al directorio `bastion_network`:
+1. Navegue al directorio `br0_network`:
 
    ```bash
-   cd bastion_network
+   cd br0_network
    ```
 
 2. Inicialice Terraform y actualice los proveedores:
@@ -570,7 +570,7 @@ url:   https://console.redhat.com/openshift/create/local
                                                 v
                                     +-----------+----------+
                                     |  Bootstrap (OKD)     |
-                                    |   IP: 10.17.4.20     |
+                                    |   IP: 10.17.3.12     |
                                     +-----------+----------+
                                                 |
                                                 v
