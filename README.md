@@ -546,7 +546,7 @@ Con estos ajustes, se garantiza que el servidor físico tenga suficiente memoria
 
 ![Servidor](https://github.com/vhgalvez/terraform-openshift-kvm-deployment/blob/5f378e8f80f5a90654b18568974b810bcca779bf/complemento/image/mv_virsh_list.png "width=200 height=150")
 
-## Máquinas Virtuales Generadas con Terraform y arhivos de configuración ignition .ign
+## Arhivos de configuración ignition de flatcar linux container generados.
 ![alt text](additional_resources/image/generados_ign.png)
 
 ## instalar okd
