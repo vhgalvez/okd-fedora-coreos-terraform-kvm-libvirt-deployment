@@ -27,8 +27,9 @@ storage:
           #!/bin/bash
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
-          mv /tmp/oc /usr/local/bin/oc
-          rm -rf /tmp/oc.tar.gz
+          sudo mv /tmp/oc /usr/local/bin/oc
+          sudo rm -rf /tmp/oc.tar.gz
+          echo 'export KUBECONFIG=/home/core/okd-install/auth/kubeconfig' >> /home/core/.bashrc
     - path: /etc/systemd/network/10-eth0.network
       filesystem: "root"
       mode: 0644
