@@ -210,3 +210,64 @@ El Balanceador de Carga (Traefik) con la IP 10.17.3.12 se utiliza para distribui
 - **Externa:** `api.produccion` gestiona el acceso externo al clúster.
 
 Esta guía te ayudará a instalar un clúster OKD multinodo en KVM con los pasos necesarios y las configuraciones específicas para asegurar un despliegue exitoso.
+
+
+__
+
+Paso 1: Descargar e Instalar el Cliente de OpenShift (oc)
+Descargar el Cliente de OpenShift:
+
+Descarga el cliente desde la misma página de lanzamientos de OKD.
+
+bash
+Copiar código
+wget https://github.com/openshift/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-client-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
+Extraer el archivo descargado:
+
+bash
+Copiar código
+tar -xzvf openshift-client-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
+Mover el binario oc al directorio /usr/local/bin:
+
+bash
+Copiar código
+sudo mv oc /usr/local/bin/
+sudo chmod +x /usr/local/bin/oc
+Verificar la instalación:
+
+bash
+Copiar código
+oc version
+Paso 2: Aprobar Solicitudes de Certificado (CSR)
+Una vez que el cliente oc está instalado, puedes listar y aprobar las solicitudes de certificados necesarias para que los nodos se unan al clúster.
+
+Listar las solicitudes de certificado:
+
+bash
+Copiar código
+oc get csr
+Aprobar las solicitudes pendientes:
+
+bash
+Copiar código
+oc certificate approve <CSR_NAME>
+Repite este proceso para todas las solicitudes pendientes.
+
+Paso 3: Verificar la Instalación
+Verificar que todos los nodos del clúster estén en estado Ready:
+
+bash
+Copiar código
+oc get nodes
+Paso 4: Completar la Instalación
+Esperar la Compleción de la Instalación:
+
+bash
+Copiar código
+openshift-install --dir=/home/core/okd-install wait-for install-complete --log-level=debug
+Este comando monitoreará la instalación hasta que se complete.
+
+
+[core@bootstrap1 ~]$ openshift-install create manifests --dir=/home/core/okd-install
+INFO Manifests created in: /home/core/okd-install/manifests and /home/core/okd-install/openshift
+[core@bootstrap1 ~]$
