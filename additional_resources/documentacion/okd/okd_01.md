@@ -228,6 +228,14 @@ Sigue los logs y espera a que la instalación se complete:
 openshift-install --dir=/home/core/okd-install wait-for install-complete --log-level=debug
 ```
 
+```bash
+sudo dnf install bind-utils -y
+```
+
+```bash
+
+
+
 ---
 
 #### Recursos Adicionales
@@ -478,5 +486,7 @@ Esta guía te ayudará a instalar un clúster OKD multinodo en KVM con los pasos
 ### Contacto
 
 Para cualquier duda o problema, por favor abre un issue en el repositorio o contacta al mantenedor del proyecto.
+
+
 
 **Mantenedor del Proyecto:** Victor Galvez
