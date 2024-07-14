@@ -31,7 +31,7 @@ storage:
           sudo mv /tmp/oc /usr/local/bin/oc
           sudo chmod +x /usr/local/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
-          echo 'export KUBECONFIG=/home/core/okd-install/auth/kubeconfig' | sudo tee -a /home/core/.bashrc
+          echo 'export KUBECONFIG=/home/core/okd-install/auth/kubeconfig' >> /home/core/.bashrc
     - path: /etc/systemd/network/10-eth0.network
       filesystem: "root"
       mode: 0644
