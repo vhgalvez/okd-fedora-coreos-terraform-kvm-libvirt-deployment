@@ -28,10 +28,11 @@ storage:
           set -euo pipefail
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
-          sudo mv /tmp/oc /usr/local/bin/oc
+          sudo mv /tmp/oc /usr/local/bin/
           sudo chmod +x /usr/local/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
-          echo 'export KUBECONFIG=/home/core/okd-install/auth/kubeconfig' | sudo tee -a /home/core/.bashrc
+          echo 'export PATH=$PATH:/usr/local/bin' >> /home/core/.bashrc
+          echo 'export KUBECONFIG=/home/core/okd-install/auth/kubeconfig' >> /home/core/.bashrc
     - path: /etc/systemd/network/10-eth0.network
       filesystem: "root"
       mode: 0644
@@ -109,7 +110,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/home/core/install-oc.sh
+        ExecStart=/bin/bash /home/core/install-oc.sh
         RemainAfterExit=true
 
         [Install]
