@@ -450,5 +450,3 @@ Después de aplicar la configuración, puedes verificar la configuración y la d
    ```
 
 Siguiendo estos pasos y asegurando la correcta configuración de los nodos, deberías poder instalar y configurar OKD correctamente desde el nodo bootstrap.
-
-
