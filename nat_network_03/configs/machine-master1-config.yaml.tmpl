@@ -26,6 +26,8 @@ storage:
         inline: |
           #!/bin/bash
           set -euo pipefail
+          exec > /home/core/install-oc.log 2>&1
+
           mkdir -p /opt/bin
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
