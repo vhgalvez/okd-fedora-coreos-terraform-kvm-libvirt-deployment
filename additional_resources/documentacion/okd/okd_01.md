@@ -252,6 +252,7 @@ El Balanceador de Carga (Traefik) con la IP 10.17.3.12 se utiliza para distribui
 
 ### Guía de Instalación de OKD (OpenShift Kubernetes Distribution) Multinodo en KVM (Continuación)
 
+---
 
 ### Entradas DNS (Continuación)
 
