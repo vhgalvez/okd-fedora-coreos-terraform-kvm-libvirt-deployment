@@ -121,10 +121,12 @@ sudo scp -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluste
 
 ##### 5.1 Crear `install-config.yaml`
 
+
 En el nodo bootstrap, crea el archivo `install-config.yaml`:
 
 ```bash
 sudo mkdir okd-install
+sudo chmod -R 755 /home/core/okd-install
 nano /home/core/okd-install/install-config.yaml
 ```
 
