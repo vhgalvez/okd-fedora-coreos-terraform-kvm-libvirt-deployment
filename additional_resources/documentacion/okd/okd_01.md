@@ -302,17 +302,6 @@ El Balanceador de Carga (Traefik) con la IP 10.17.3.12 se utiliza para distribui
 - **Externa:** `api.produccion` gestiona el acceso externo al clúster.
 
 ---
-
-Esta guía te ayudará a instalar un clúster OKD multinodo en KVM con los pasos necesarios y las configuraciones específicas para asegurar un despliegue exitoso.
-
-### Contacto
-
-Para cualquier duda o problema, por favor abre un issue en el repositorio o contacta al mantenedor del proyecto.
-
-**Mantenedor del Proyecto:** Victor Galvez
-
----
-
 ### Plantilla Ignition Actualizada
 
 Aquí está la plantilla Ignition actualizada que incluye la configuración para instalar `oc` y establecer `KUBECONFIG` automáticamente:
@@ -345,11 +334,22 @@ storage:
       contents:
         inline: |
           #!/bin/bash
+          set -euo pipefail
+          exec > /home/core/install-oc.log 2>&1
+
+          mkdir -p /opt/bin
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
-          sudo mv /tmp/oc /usr/local/bin/oc
+          sudo mv /tmp/oc /opt/bin/oc
+          sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
-          echo 'export KUBECONFIG=/home/core/okd-install/auth/kubeconfig' >> /home/core/.bashrc
+
+          if [ -w /home/core/.bashrc ]; then
+            echo 'export PATH=$PATH:/opt/bin' >> /home/core/.bashrc
+            echo 'export KUBECONFIG=/home/core/okd-install/auth/kubeconfig' >> /home/core/.bashrc
+          else
+            echo "/home/core/.bashrc no es modificable"
+          fi
     - path: /etc/systemd/network/10-eth0.network
       filesystem: "root"
       mode: 0644
@@ -427,7 +427,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/home/core/install-oc.sh
+        ExecStart=/bin/bash /home/core/install-oc.sh
         RemainAfterExit=true
 
         [Install]
@@ -450,3 +450,12 @@ Después de aplicar la configuración, puedes verificar la configuración y la d
    ```
 
 Siguiendo estos pasos y asegurando la correcta configuración de los nodos, deberías poder instalar y configurar OKD correctamente desde el nodo bootstrap.
+
+---
+Esta guía te ayudará a instalar un clúster OKD multinodo en KVM con los pasos necesarios y las configuraciones específicas para asegurar un despliegue exitoso.
+
+### Contacto
+
+Para cualquier duda o problema, por favor abre un issue en el repositorio o contacta al mantenedor del proyecto.
+
+**Mantenedor del Proyecto:** Victor Galvez
