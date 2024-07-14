@@ -127,29 +127,26 @@ Contenido del archivo `traefik.toml`:
 
 ```toml
 [entryPoints]
-  [entryPoints.http]
+  [entryPoints.web]
     address = ":80"
-  [entryPoints.https]
+  [entryPoints.websecure]
     address = ":443"
 
-[api]
-  dashboard = true
-  insecure = true
+[http]
+  [http.routers]
+    [http.routers.api]
+      entryPoints = ["websecure"]
+      service = "api@internal"
+      rule = "Host(`load_balancer1.cefaslocalserver.com`)"
 
-[providers.docker]
-  endpoint = "unix:///var/run/docker.sock"
-  exposedByDefault = false
-
-[log]
-  level = "DEBUG"
-
-[accessLog]
-
-[certificatesResolvers.myresolver.acme]
-  email = "your-email@example.com"
-  storage = "acme.json"
-  [certificatesResolvers.myresolver.acme.httpChallenge]
-    entryPoint = "http"
+  [http.services]
+    [http.services.api.loadBalancer]
+      [[http.services.api.loadBalancer.servers]]
+        url = "http://10.17.4.21"
+      [[http.services.api.loadBalancer.servers]]
+        url = "http://10.17.4.22"
+      [[http.services.api.loadBalancer.servers]]
+        url = "http://10.17.4.23"
 ```
 
 ### 4.3 Crear el Archivo `acme.json`
@@ -215,13 +212,25 @@ Puede verificar que el contenedor de Traefik esté en funcionamiento con:
 sudo docker ps
 ```
 
-### 5.2 Acceder al Dashboard de Traefik
+### 5.2 Configurar el DNS
+
+
+En el servidor dns freeipa1  Agregue un registro DNS para el dominio load_balancer1.cefaslocalserver.com apuntando a la IP del servidor LoadBalancer1 (
+  
+  ```bash
+kinit admin
+ipa dnsrecord-add cefaslocalserver.com load_balancer1 --a-rec 10.17.3.12
+```
+
+### 5.3 Acceder al Dashboard de Traefik
 
 Abra un navegador web y acceda al dashboard de Traefik usando la IP pública o el dominio del servidor:
 
-```plaintext
-http://10.17.3.12:8080/dashboard/
-```
+Verificación
+
+Dashboard: Accede a http://load_balancer1.cefaslocalserver.com:8080/dashboard/ para verificar el estado del dashboard.
+Logs: Revisa los logs para asegurarte de que no hay errores.
+
 
 ## Paso 6: Configurar el Firewall
 
@@ -237,6 +246,8 @@ sudo firewall-cmd --reload
 ```
 
 Con estos pasos, habrás instalado y configurado Traefik en la máquina LoadBalancer1 utilizando Docker Compose.
+
+
 
 ## Traefik en Rocky Linux
 

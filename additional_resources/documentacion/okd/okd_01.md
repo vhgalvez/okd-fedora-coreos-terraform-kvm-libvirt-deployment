@@ -126,7 +126,6 @@ En el nodo bootstrap, crea el archivo `install-config.yaml`:
 
 ```bash
 sudo mkdir okd-install
-sudo chmod -R 755 /home/core/okd-install
 nano /home/core/okd-install/install-config.yaml
 ```
 
@@ -162,6 +161,15 @@ sshKey: 'ssh-rsa AAAA...'  # Reemplaza con tu clave SSH pública
 ##### 6.1 Generar Manifiestos
 
 En el nodo bootstrap, genera los manifiestos:
+
+permisos de escritura en el directorio de instalación:
+
+```bash
+sudo chown -R core:core /home/core/okd-install
+sudo chmod -R 755 /home/core/okd-install
+```
+
+genera los manifiestos:
 
 ```bash
 openshift-install create manifests --dir=/home/core/okd-install
