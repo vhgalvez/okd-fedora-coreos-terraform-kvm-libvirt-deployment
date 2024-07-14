@@ -445,9 +445,19 @@ Después de aplicar la configuración, puedes verificar la configuración y la d
 
 2. **Verifica que `oc` esté disponible y configurado:**
    ```bash
+   
+   oc version
+
    source ~/.bashrc
    oc get nodes
    ```
+
+3. **Verifica el estado de los servicios de systemd:**
+ 
+```bash
+sudo systemctl status install-oc.service
+```
+
 
 Siguiendo estos pasos y asegurando la correcta configuración de los nodos, deberías poder instalar y configurar OKD correctamente desde el nodo bootstrap.
 
