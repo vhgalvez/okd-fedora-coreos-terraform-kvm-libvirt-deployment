@@ -160,3 +160,26 @@ ls -l /var/www/html/okd/
 Verifica la conectividad de red y asegúrate de que todas las direcciones IP y nombres de host sean correctos en tu configuración.
 
 Con estos pasos, deberías poder instalar un clúster OKD multinodo en KVM. Asegúrate de seguir cada paso cuidadosamente y verificar las configuraciones para asegurar un despliegue exitoso.
+
+___
+
+
+arece que hay un problema con la resolución de nombres DNS, específicamente con api.cluster-cefas.cefaslocalserver.com. Según el error de openshift-install, no puede resolver la dirección api.cluster-cefas.cefaslocalserver.com.
+
+Paso para Solucionar el Problema
+Verificar el registro DNS:
+
+El registro DNS api.cluster-cefas.cefaslocalserver.com no está listado en la salida de ipa dnsrecord-find. Debes agregarlo.
+Agregar el Registro DNS Faltante:
+
+Agrega el registro DNS api.cluster-cefas para el dominio cefaslocalserver.com.
+bash
+Copiar código
+ipa dnsrecord-add cefaslocalserver.com api.cluster-cefas --a-rec 10.17.4.21
+Verificar el Registro DNS:
+Confirma que el registro DNS se ha agregado correctamente.
+bash
+Copiar código
+ipa dnsrecord-show cefaslocalserver.com api.cluster-cefas
+Reiniciar el Proceso de Instalación:
+Una vez que el registro DNS esté correctamente configurado, vuelve a ejecutar el comando para esperar a que la instalación se complete.
