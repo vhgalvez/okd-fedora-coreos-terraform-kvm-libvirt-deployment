@@ -30,7 +30,7 @@ storage:
 
           echo "Starting OpenShift CLI installation"
           mkdir -p /opt/bin
-          curl -L -o /tmp/openshift-client-linux.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz
+          curl -L -o /tmp/openshift-client-linux.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz
           tar -xzf /tmp/openshift-client-linux.tar.gz -C /tmp
           sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
@@ -53,8 +53,7 @@ storage:
           echo "Starting kubelet installation"
           curl -L -o /tmp/kubelet.rpm https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/rhel-8/kubernetes/kubelet-1.20.0-0.1.20210118102551.fc32.x86_64.rpm
           sudo rpm -ivh /tmp/kubelet.rpm || { echo "Failed to install kubelet RPM"; exit 1; }
-          sudo mv /usr/bin/kubelet /opt/bin/kubelet || { echo "Failed to move kubelet binary"; exit 1; }
-          sudo ln -s /opt/bin/kubelet /usr/bin/kubelet || { echo "Failed to link kubelet binary"; exit 1; }
+          sudo ln -s /usr/bin/kubelet /opt/bin/kubelet || { echo "Failed to link kubelet binary"; exit 1; }
           sudo systemctl enable kubelet
           sudo systemctl start kubelet
 
@@ -128,7 +127,7 @@ systemd:
         After=network.target
 
         [Service]
-        ExecStart=/usr/bin/kubelet
+        ExecStart=/opt/bin/kubelet
         Restart=always
         StartLimitInterval=0
         RestartSec=10
