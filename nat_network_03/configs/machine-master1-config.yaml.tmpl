@@ -49,6 +49,9 @@ storage:
           set -euo pipefail
           exec > /home/core/install-kubelet.log 2>&1
 
+          # Install necessary tools
+          sudo flatpak install rpm-ostree -y
+
           # Install kubelet
           curl -L -o /tmp/kubelet.rpm https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/rhel-8/kubernetes/kubelet-1.20.0-0.1.20210118102551.fc32.x86_64.rpm
           if [ -f /tmp/kubelet.rpm ]; then
