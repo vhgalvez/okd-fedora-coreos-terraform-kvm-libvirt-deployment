@@ -41,6 +41,7 @@ storage:
             echo 'export KUBECONFIG=/home/core/okd-install/auth/kubeconfig' >> /home/core/.bashrc
           else
             echo "/home/core/.bashrc is not writable"
+          fi
     - path: /home/core/install-kubelet.sh
       filesystem: "root"
       mode: 0755
