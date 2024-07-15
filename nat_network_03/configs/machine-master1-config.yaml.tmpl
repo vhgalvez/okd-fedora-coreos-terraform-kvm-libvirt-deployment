@@ -29,7 +29,7 @@ storage:
           exec > /home/core/install-oc.log 2>&1
 
           mkdir -p /opt/bin
-          curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
+          curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
           sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
@@ -50,12 +50,14 @@ storage:
           exec > /home/core/install-kubelet.log 2>&1
 
           # Install kubelet
-          curl -L -o /tmp/kubelet.rpm https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/linux/kubernetes/kubelet-1.20.0-0.1.20210118102551.fc32.x86_64.rpm
-          sudo rpm -ivh /tmp/kubelet.rpm
-          sudo systemctl enable kubelet
-
-          # Start kubelet
-          sudo systemctl start kubelet
+          curl -L -o /tmp/kubelet.rpm https://download.openshift.com/pub/openshift-v4/clients/ocp/latest/rhel-8/kubernetes/kubelet-1.20.0-0.1.20210118102551.fc32.x86_64.rpm
+          if [ -f /tmp/kubelet.rpm ]; then
+            sudo rpm -ivh /tmp/kubelet.rpm
+            sudo systemctl enable kubelet
+            sudo systemctl start kubelet
+          else
+            echo "Failed to download kubelet RPM" >> /home/core/install-kubelet.log
+          fi
 
 systemd:
   units:
