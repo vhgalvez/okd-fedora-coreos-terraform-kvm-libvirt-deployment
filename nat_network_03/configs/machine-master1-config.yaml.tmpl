@@ -41,7 +41,6 @@ storage:
             echo 'export KUBECONFIG=/home/core/okd-install/auth/kubeconfig' >> /home/core/.bashrc
           else
             echo "/home/core/.bashrc is not writable"
-          fi
     - path: /home/core/install-kubelet.sh
       filesystem: "root"
       mode: 0755
@@ -117,6 +116,22 @@ systemd:
         Type=oneshot
         ExecStart=/bin/bash /home/core/install-kubelet.sh
         RemainAfterExit=true
+
+        [Install]
+        WantedBy=multi-user.target
+    - name: kubelet.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Kubelet
+        Documentation=https://kubernetes.io/docs/
+        After=network.target
+
+        [Service]
+        ExecStart=/usr/bin/kubelet
+        Restart=always
+        StartLimitInterval=0
+        RestartSec=10
 
         [Install]
         WantedBy=multi-user.target
