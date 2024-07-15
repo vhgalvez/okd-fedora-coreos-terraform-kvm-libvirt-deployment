@@ -25,9 +25,10 @@ storage:
       contents:
         inline: |
           #!/bin/bash
-          set -euo pipefail
+          set -euxo pipefail
           exec > /home/core/install-oc.log 2>&1
 
+          echo "Starting OpenShift CLI installation"
           mkdir -p /opt/bin
           curl -L -o /tmp/openshift-client-linux.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz
           tar -xzf /tmp/openshift-client-linux.tar.gz -C /tmp
@@ -39,16 +40,17 @@ storage:
             echo 'export PATH=$PATH:/opt/bin' >> /home/core/.bashrc
             echo 'export KUBECONFIG=/home/core/okd-install/auth/kubeconfig' >> /home/core/.bashrc
           else
-            echo "/home/core/.bashrc no es modificable"
+            echo "/home/core/.bashrc is not writable"
     - path: /home/core/install-kubelet.sh
       filesystem: "root"
       mode: 0755
       contents:
         inline: |
           #!/bin/bash
-          set -euo pipefail
+          set -euxo pipefail
           exec > /home/core/install-kubelet.log 2>&1
 
+          echo "Starting kubelet installation"
           toolbox --bind=/etc:/host/etc --bind=/usr:/host/usr --bind=/opt:/host/opt --bind=/var:/host/var --bind=/run:/host/run /bin/bash -c '
             curl -L -o /tmp/kubelet.rpm https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/rhel-8/kubernetes/kubelet-1.20.0-0.1.20210118102551.fc32.x86_64.rpm
             rpm -ivh /tmp/kubelet.rpm
