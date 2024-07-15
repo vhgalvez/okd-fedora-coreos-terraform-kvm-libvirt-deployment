@@ -29,11 +29,11 @@ storage:
           exec > /home/core/install-oc.log 2>&1
 
           mkdir -p /opt/bin
-          curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz
-          tar -xzf /tmp/oc.tar.gz -C /tmp
+          curl -L -o /tmp/openshift-client-linux.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz
+          tar -xzf /tmp/openshift-client-linux.tar.gz -C /tmp
           sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
-          sudo rm -rf /tmp/oc.tar.gz
+          sudo rm -rf /tmp/openshift-client-linux.tar.gz
 
           if [ -w /home/core/.bashrc ]; then
             echo 'export PATH=$PATH:/opt/bin' >> /home/core/.bashrc
@@ -57,6 +57,7 @@ storage:
             sudo systemctl start kubelet
           else
             echo "Failed to download kubelet RPM" >> /home/core/install-kubelet.log
+          fi
 
 systemd:
   units:
