@@ -30,7 +30,7 @@ storage:
 
           echo "Starting OpenShift CLI installation"
           mkdir -p /opt/bin
-          curl -L -o /tmp/openshift-client-linux.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz
+          curl -L -o /tmp/openshift-client-linux.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz
           tar -xzf /tmp/openshift-client-linux.tar.gz -C /tmp
           sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
@@ -52,7 +52,7 @@ storage:
 
           echo "Starting kubelet installation"
           toolbox --bind=/etc:/host/etc --bind=/usr:/host/usr --bind=/opt:/host/opt --bind=/var:/host/var --bind=/run:/host/run /bin/bash -c '
-            curl -L -o /tmp/kubelet.rpm https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/rhel-8/kubernetes/kubelet-1.20.0-0.1.20210118102551.fc32.x86_64.rpm
+            curl -L -o /tmp/kubelet.rpm https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/kubernetes/kubelet-1.20.0-0.1.20210118102551.fc32.x86_64.rpm
             sudo rpm -ivh /tmp/kubelet.rpm
             if [ -f /usr/bin/kubelet ]; then
               sudo systemctl enable kubelet
