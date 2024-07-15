@@ -132,21 +132,39 @@ Contenido del archivo `traefik.toml`:
   [entryPoints.websecure]
     address = ":443"
 
-[http]
-  [http.routers]
-    [http.routers.api]
-      entryPoints = ["websecure"]
-      service = "api@internal"
-      rule = "Host(`load_balancer1.cefaslocalserver.com`)"
+[api]
+  dashboard = true
+  insecure = true
 
-  [http.services]
-    [http.services.api.loadBalancer]
-      [[http.services.api.loadBalancer.servers]]
-        url = "http://10.17.4.21"
-      [[http.services.api.loadBalancer.servers]]
-        url = "http://10.17.4.22"
-      [[http.services.api.loadBalancer.servers]]
-        url = "http://10.17.4.23"
+[providers.docker]
+  endpoint = "unix:///var/run/docker.sock"
+  exposedByDefault = false
+
+[log]
+  level = "DEBUG"
+
+[accessLog]
+
+[certificatesResolvers.myresolver.acme]
+  email = "your-email@example.com"
+  storage = "acme.json"
+  [certificatesResolvers.myresolver.acme.httpChallenge]
+    entryPoint = "web"
+
+[http.routers]
+  [http.routers.api]
+    entryPoints = ["websecure"]
+    service = "api@internal"
+    rule = "Host(`load_balancer1.cefaslocalserver.com`)"
+
+[http.services]
+  [http.services.api.loadBalancer]
+    [[http.services.api.loadBalancer.servers]]
+      url = "http://10.17.4.21"
+    [[http.services.api.loadBalancer.servers]]
+      url = "http://10.17.4.22"
+    [[http.services.api.loadBalancer.servers]]
+      url = "http://10.17.4.23"
 ```
 
 ### 4.3 Crear el Archivo `acme.json`
