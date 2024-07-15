@@ -52,7 +52,9 @@ storage:
 
           echo "Starting kubelet installation"
           curl -L -o /tmp/kubelet.rpm https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/rhel-8/kubernetes/kubelet-1.20.0-0.1.20210118102551.fc32.x86_64.rpm
-          sudo rpm -ivh /tmp/kubelet.rpm
+          sudo rpm -ivh /tmp/kubelet.rpm || { echo "Failed to install kubelet RPM"; exit 1; }
+          sudo mv /usr/bin/kubelet /opt/bin/kubelet || { echo "Failed to move kubelet binary"; exit 1; }
+          sudo ln -s /opt/bin/kubelet /usr/bin/kubelet || { echo "Failed to link kubelet binary"; exit 1; }
           sudo systemctl enable kubelet
           sudo systemctl start kubelet
 
