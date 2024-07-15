@@ -49,12 +49,11 @@ storage:
           set -euo pipefail
           exec > /home/core/install-kubelet.log 2>&1
 
-          # Install kubelet using toolbox
           toolbox --bind=/etc:/host/etc --bind=/usr:/host/usr --bind=/opt:/host/opt --bind=/var:/host/var --bind=/run:/host/run /bin/bash -c '
             curl -L -o /tmp/kubelet.rpm https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/rhel-8/kubernetes/kubelet-1.20.0-0.1.20210118102551.fc32.x86_64.rpm
-            sudo rpm-ostree install /tmp/kubelet.rpm
-            sudo systemctl enable kubelet
-            sudo systemctl start kubelet
+            rpm -ivh /tmp/kubelet.rpm
+            systemctl enable kubelet
+            systemctl start kubelet
           '
 
 systemd:
