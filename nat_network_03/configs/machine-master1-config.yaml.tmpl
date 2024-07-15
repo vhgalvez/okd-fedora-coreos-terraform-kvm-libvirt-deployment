@@ -1,5 +1,5 @@
 variant: flatcar
-version: 1.1.0
+version: 3.4.0
 
 ignition:
   version: 3.4.0
@@ -8,55 +8,49 @@ passwd:
   users:
     - name: core
       ssh_authorized_keys:
-        - ${ssh_keys}
+        - "${ssh_keys}"
     - name: root
-      password_hash: $6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
+      password_hash: "$6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/"
 
 storage:
   files:
     - path: /etc/hostname
-      filesystem: "root"
       mode: 0644
       contents:
-        inline: ${host_name}
+        inline: "${host_name}"
     - path: /home/core/install-oc.sh
-      filesystem: "root"
       mode: 0755
       contents:
         inline: |
           #!/bin/bash
-          set -euxo pipefail
-          exec > /home/core/install-oc.log 2>&1
+          set -euo pipefail
+          exec >> /home/core/install-oc.log 2>&1
 
           echo "Starting OpenShift CLI installation"
           mkdir -p /opt/bin
-          curl -L -o /tmp/openshift-client-linux.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz
+          curl -L -o /tmp/openshift-client-linux.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz
           tar -xzf /tmp/openshift-client-linux.tar.gz -C /tmp
-          sudo mv /tmp/oc /opt/bin/oc
-          sudo chmod +x /opt/bin/oc
-          sudo rm -rf /tmp/openshift-client-linux.tar.gz
+          mv /tmp/oc /opt/bin/oc
+          chmod +x /opt/bin/oc
+          rm -f /tmp/openshift-client-linux.tar.gz
 
-          if [ -w /home/core/.bashrc ]; then
-            echo 'export PATH=$PATH:/opt/bin' >> /home/core/.bashrc
-            echo 'export KUBECONFIG=/home/core/okd-install/auth/kubeconfig' >> /home/core/.bashrc
-          else
-            echo "/home/core/.bashrc is not writable"
+          echo 'export PATH=$PATH:/opt/bin' >> /home/core/.bashrc
+          echo 'export KUBECONFIG=/home/core/okd-install/auth/kubeconfig' >> /home/core/.bashrc
     - path: /home/core/install-kubelet.sh
-      filesystem: "root"
       mode: 0755
       contents:
         inline: |
           #!/bin/bash
-          set -euxo pipefail
-          exec > /home/core/install-kubelet.log 2>&1
+          set -euo pipefail
+          exec >> /home/core/install-kubelet.log 2>&1
 
           echo "Starting kubelet installation"
-          curl -L -o /tmp/kubelet.rpm https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/rhel-8/kubernetes/kubelet-1.20.0-0.1.20210118102551.fc32.x86_64.rpm
-          sudo rpm -ivh /tmp/kubelet.rpm || { echo "Failed to install kubelet RPM"; exit 1; }
-          sudo ln -s /usr/bin/kubelet /opt/bin/kubelet || { echo "Failed to link kubelet binary"; exit 1; }
-          sudo systemctl daemon-reload
-          sudo systemctl enable kubelet
-          sudo systemctl start kubelet
+          KUBELET_VERSION=$(curl -s https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/release.txt | grep 'kubernetes ' | awk '{print $2}')
+          curl -L -o /tmp/kubelet.rpm https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rpms/kubelet-${KUBELET_VERSION}.x86_64.rpm
+          rpm-ostree install /tmp/kubelet.rpm
+          ln -sf /usr/bin/kubelet /opt/bin/kubelet
+          systemctl daemon-reload
+          systemctl enable --now kubelet
 
 systemd:
   units:
@@ -84,7 +78,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "${ip}  ${host_name} ${name}" >> /etc/hosts'
+        ExecStart=/bin/bash -c 'echo "127.0.0.1 localhost" > /etc/hosts && echo "::1 localhost" >> /etc/hosts && echo "${ip} ${host_name} ${name}" >> /etc/hosts'
         RemainAfterExit=true
 
         [Install]
@@ -116,22 +110,6 @@ systemd:
         Type=oneshot
         ExecStart=/bin/bash /home/core/install-kubelet.sh
         RemainAfterExit=true
-
-        [Install]
-        WantedBy=multi-user.target
-    - name: kubelet.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Kubelet
-        Documentation=https://kubernetes.io/docs/
-        After=network.target
-
-        [Service]
-        ExecStart=/opt/bin/kubelet
-        Restart=always
-        StartLimitInterval=0
-        RestartSec=10
 
         [Install]
         WantedBy=multi-user.target
