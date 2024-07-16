@@ -34,3 +34,7 @@ variable "dns2" {
   description = "Secondary DNS server"
   type        = string
 }
+variable "KUBELET_VERSION" {
+  description = "Version of Kubelet"
+  type        = string
+}

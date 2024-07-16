@@ -54,6 +54,7 @@ data "template_file" "vm-configs" {
     dns1      = var.dns1
     dns2      = var.dns2
     ip        = each.value.ip
+    kubelet_version = var.KUBELET_VERSION
   }
 }
 
