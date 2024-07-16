@@ -1,5 +1,5 @@
 variant: flatcar
-version: 3.4.0
+version: 1.1.0
 
 ignition:
   version: 3.4.0
@@ -8,49 +8,85 @@ passwd:
   users:
     - name: core
       ssh_authorized_keys:
-        - "${ssh_keys}"
+        - ${ssh_keys}
     - name: root
-      password_hash: "$6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/"
+      password_hash: $6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
 
 storage:
   files:
     - path: /etc/hostname
+      filesystem: "root"
       mode: 0644
       contents:
-        inline: "${host_name}"
-    - path: /home/core/install-oc.sh
+        inline: ${host_name}
+    - path: /home/core/install-oc-kubelet.sh
+      filesystem: "root"
       mode: 0755
       contents:
         inline: |
           #!/bin/bash
           set -euo pipefail
-          exec >> /home/core/install-oc.log 2>&1
+          exec > /home/core/install-oc-kubelet.log 2>&1
 
-          echo "Starting OpenShift CLI installation"
+          # Install oc
           mkdir -p /opt/bin
-          curl -L -o /tmp/openshift-client-linux.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz
-          tar -xzf /tmp/openshift-client-linux.tar.gz -C /tmp
-          mv /tmp/oc /opt/bin/oc
-          chmod +x /opt/bin/oc
-          rm -f /tmp/openshift-client-linux.tar.gz
+          curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
+          tar -xzf /tmp/oc.tar.gz -C /tmp
+          sudo mv /tmp/oc /opt/bin/oc
+          sudo chmod +x /opt/bin/oc
+          sudo rm -rf /tmp/oc.tar.gz
 
-          echo 'export PATH=$PATH:/opt/bin' >> /home/core/.bashrc
-          echo 'export KUBECONFIG=/home/core/okd-install/auth/kubeconfig' >> /home/core/.bashrc
-    - path: /home/core/install-kubelet.sh
-      mode: 0755
+          # Install kubelet
+          curl -L -o /tmp/kubelet https://storage.googleapis.com/kubernetes-release/release/${kubelet_version}/bin/linux/amd64/kubelet
+          sudo mv /tmp/kubelet /opt/bin/kubelet
+          sudo chmod +x /opt/bin/kubelet
+
+          # Set PATH and KUBECONFIG in .bashrc
+          if [ -w /home/core/.bashrc ]; then
+            echo 'export PATH=$PATH:/opt/bin' >> /home/core/.bashrc
+            echo 'export KUBECONFIG=/home/core/okd-install/auth/kubeconfig' >> /home/core/.bashrc
+          else
+            echo "/home/core/.bashrc no es modificable"
+          fi
+
+    - path: /etc/systemd/network/10-eth0.network
+      filesystem: "root"
+      mode: 0644
       contents:
         inline: |
-          #!/bin/bash
-          set -euo pipefail
-          exec >> /home/core/install-kubelet.log 2>&1
+          [Match]
+          Name=eth0
 
-          echo "Starting kubelet installation"
-          KUBELET_VERSION=$(curl -s https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/release.txt | grep 'kubernetes ' | awk '{print $2}')
-          curl -L -o /tmp/kubelet.rpm https://mirror.openshift.com/pub/openshift-v4/x86_64/dependencies/rpms/kubelet-${KUBELET_VERSION}.x86_64.rpm
-          rpm-ostree install /tmp/kubelet.rpm
-          ln -sf /usr/bin/kubelet /opt/bin/kubelet
-          systemctl daemon-reload
-          systemctl enable --now kubelet
+          [Network]
+          Address=${ip}/24
+          Gateway=${gateway}
+          DNS=${dns1}
+          DNS=${dns2}
+
+    - path: /etc/tmpfiles.d/hosts.conf
+      filesystem: "root"
+      mode: 0644
+      contents:
+        inline: |
+          f /etc/hosts 0644 - - - -
+          127.0.0.1   localhost
+          ::1         localhost
+          ${ip}  ${host_name} ${name}
+
+    - path: /run/systemd/resolve/resolv.conf
+      filesystem: "root"
+      mode: 0644
+      contents:
+        inline: |
+          nameserver ${dns1}
+          nameserver ${dns2}
+
+    - path: /etc/tmpfiles.d/resolv.conf
+      filesystem: "root"
+      mode: 0644
+      contents:
+        inline: |
+          L /etc/resolv.conf - - - - /run/systemd/resolve/resolv.conf
 
 systemd:
   units:
@@ -69,6 +105,7 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
+
     - name: set-hosts.service
       enabled: true
       contents: |
@@ -78,37 +115,23 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/bin/bash -c 'echo "127.0.0.1 localhost" > /etc/hosts && echo "::1 localhost" >> /etc/hosts && echo "${ip} ${host_name} ${name}" >> /etc/hosts'
+        ExecStart=/bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "${ip}  ${host_name} ${name}" >> /etc/hosts'
         RemainAfterExit=true
 
         [Install]
         WantedBy=multi-user.target
-    - name: install-oc.service
+
+    - name: install-oc-kubelet.service
       enabled: true
       contents: |
         [Unit]
-        Description=Install OpenShift CLI (oc)
+        Description=Install OpenShift CLI (oc) and Kubelet
         After=network-online.target
         Wants=network-online.target
 
         [Service]
         Type=oneshot
-        ExecStart=/bin/bash /home/core/install-oc.sh
-        RemainAfterExit=true
-
-        [Install]
-        WantedBy=multi-user.target
-    - name: install-kubelet.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Install and start kubelet
-        After=network-online.target
-        Wants=network-online.target
-
-        [Service]
-        Type=oneshot
-        ExecStart=/bin/bash /home/core/install-kubelet.sh
+        ExecStart=/bin/bash /home/core/install-oc-kubelet.sh
         RemainAfterExit=true
 
         [Install]
