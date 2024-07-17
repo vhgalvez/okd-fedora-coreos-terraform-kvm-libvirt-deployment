@@ -135,7 +135,7 @@ Y agrega el siguiente contenido:
 apiVersion: v1
 baseDomain: cefaslocalserver.com
 metadata:
-  name: cluster-cefas
+  name: okd-cluster
 compute:
 - name: worker
   replicas: 3
@@ -143,57 +143,15 @@ controlPlane:
   name: master
   replicas: 3
 networking:
-  machineNetwork:
-  - cidr: 10.17.3.0/24
+  networkType: OpenShiftSDN
+  clusterNetwork:
+  - cidr: 10.128.0.0/14
+    hostPrefix: 23
+  serviceNetwork:
+  - 172.30.0.0/16
 platform:
-  baremetal:
-    provisioningNetworkCIDR: 172.22.0.0/24
-    provisioningNetwork: Managed
-    apiVIP: 10.17.3.10
-    ingressVIP: 10.17.3.11
-    hosts:
-    - name: master1
-      role: master
-      bmc:
-        address: ipmi://192.168.0.1
-        username: admin
-        password: password
-      bootMACAddress: 52:54:00:e6:e1:8a
-    - name: master2
-      role: master
-      bmc:
-        address: ipmi://192.168.0.2
-        username: admin
-        password: password
-      bootMACAddress: 52:54:00:62:4e:95
-    - name: master3
-      role: master
-      bmc:
-        address: ipmi://192.168.0.3
-        username: admin
-        password: password
-      bootMACAddress: 52:54:00:9e:91:6e
-    - name: worker1
-      role: worker
-      bmc:
-        address: ipmi://192.168.0.4
-        username: admin
-        password: password
-      bootMACAddress: 52:54:00:46:e9:42
-    - name: worker2
-      role: worker
-      bmc:
-        address: ipmi://192.168.0.5
-        username: admin
-        password: password
-      bootMACAddress: 52:54:00:6e:6a:57
-    - name: worker3
-      role: worker
-      bmc:
-        address: ipmi://192.168.0.6
-        username: admin
-        password: password
-      bootMACAddress: 52:54:00:ae:dd:e2
+  none: {}
+fips: false
 pullSecret: '{"auths": ...}'  # Reemplaza con tu pull secret
 sshKey: | ssh-rsa AAAA... # Reemplaza con tu clave SSH pública 
 ```
