@@ -205,3 +205,161 @@ Contacto
 Para cualquier duda o problema, por favor abra un issue en el repositorio o contacte al mantenedor del proyecto.
 
 Mantenedor del Proyecto: Victor Galvez
+
+
+
+___
+
+Para copiar los archivos .ign desde tu máquina local a la máquina bootstrap (bootstrap1) en tu clúster de OpenShift, sigue estos pasos. Aquí asumimos que ya tienes acceso a la máquina bootstrap y que los archivos .ign están en el directorio /home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/ignition-configs.
+
+Pasos para copiar los archivos .ign a bootstrap1
+Navega al directorio que contiene los archivos .ign:
+
+sh
+Copiar código
+cd /home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/ignition-configs
+Copia los archivos .ign usando scp:
+Utiliza el siguiente comando para copiar todos los archivos .ign al servidor bootstrap1. Asegúrate de que el usuario core en el bootstrap tenga permisos suficientes para recibir estos archivos.
+
+sh
+Copiar código
+scp -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift *.ign core@10.17.3.14:/home/core/
+Este comando:
+
+Usa scp para copiar los archivos.
+La opción -i especifica la clave privada SSH a usar para la autenticación.
+*.ign indica que se deben copiar todos los archivos con extensión .ign en el directorio actual.
+core@10.17.3.14:/home/core/ es el destino en la máquina bootstrap.
+Verifica los archivos en la máquina bootstrap:
+Una vez que los archivos se han copiado, inicia sesión en la máquina bootstrap para verificar que los archivos .ign se han copiado correctamente.
+
+sh
+Copiar código
+ssh -i /root/.ssh/cluster_openshift/key_cluster_openshift core@10.17.3.14 -p 22
+ls /home/core/*.ign
+Pasos detallados
+1. Navega al directorio de los archivos .ign
+sh
+Copiar código
+cd /home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/ignition-configs
+2. Copia los archivos con scp
+sh
+Copiar código
+scp -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift *.ign core@10.17.3.14:/home/core/
+3. Verifica los archivos en la máquina bootstrap
+sh
+Copiar código
+ssh -i /root/.ssh/cluster_openshift/key_cluster_openshift core@10.17.3.14 -p 22
+ls /home/core/*.ign
+Si todos los pasos anteriores se ejecutan correctamente, deberías tener tus archivos Ignition copiados en la máquina bootstrap (bootstrap1) listos para su uso en la configuración de tu clúster OKD.
+
+Si tienes alguna otra duda o problema durante el proceso, no dudes en preguntar.
+
+
+[victory@physical1 ignition-configs]$ scp -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift *.ign core@10.17.3.14:/home/core/
+Warning: Identity file /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift not accessible: Permission denied.
+The authenticity of host '10.17.3.14 (10.17.3.14)' can't be established.
+ED25519 key fingerprint is SHA256:HBiQu585YDdke+tP884X+9u06dfTiggVwnoWmEPhj4k.
+This key is not known by any other names
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added '10.17.3.14' (ED25519) to the list of known hosts.
+core@10.17.3.14: Permission denied (publickey,gssapi-keyex,gssapi-with-mic).
+Connection closed
+[victory@physical1 ignition-configs]$
+
+ChatGPT
+El problema con los permisos de la clave de identidad SSH se puede resolver de la siguiente manera:
+
+Verifica los permisos del archivo de clave privada SSH:
+Asegúrate de que el archivo de clave privada SSH tiene los permisos correctos. Los permisos deben ser tales que solo el propietario del archivo tenga acceso de lectura y escritura.
+
+sh
+Copiar código
+sudo chmod 600 /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift
+Asegúrate de que estás utilizando el archivo de clave privada correcto:
+Verifica que el archivo de clave privada que estás utilizando es el correcto y tiene los permisos adecuados.
+
+Ejecuta el comando scp con permisos de superusuario:
+Dado que el archivo de clave privada está en el directorio /root/.ssh/, necesitas permisos de superusuario para acceder a él.
+
+sh
+Copiar código
+sudo scp -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift *.ign core@10.17.3.14:/home/core/
+Asegúrate de que el usuario core en el servidor de destino tiene la clave pública correspondiente:
+Verifica que la clave pública correspondiente a la clave privada está añadida al archivo ~/.ssh/authorized_keys del usuario core en el servidor de destino (10.17.3.14).
+
+Pasos detallados:
+1. Cambia los permisos del archivo de clave privada SSH
+sh
+Copiar código
+sudo chmod 600 /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift
+2. Copia los archivos con scp usando permisos de superusuario
+sh
+Copiar código
+sudo scp -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift *.ign core@10.17.3.14:/home/core/
+3. Verifica que la clave pública está en el archivo authorized_keys del usuario core
+Asegúrate de que el contenido del archivo id_rsa_key_cluster_openshift.pub (la clave pública) esté en el archivo /home/core/.ssh/authorized_keys en el servidor de destino.
+
+Posibles comandos adicionales para solucionar problemas:
+Acceso a la máquina bootstrap y verificación de claves:
+
+sh
+Copiar código
+ssh -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift core@10.17.3.14 -p 22
+cat /home/core/.ssh/authorized_keys
+Añadir la clave pública manualmente si es necesario:
+
+sh
+Copiar código
+echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDC9XqGWEd2de3Ud8TgvzFchK2/SYh+WHohA1KEuveXjCbse9aXKmNAZ369vaGFFGrxbSptMeEt41ytEFpU09gAXM6KSsQWGZxfkCJQSWIaIEAdft7QHnTpMeronSgYZIU+5P7/RJcVhHBXfjLHV6giHxFRJ9MF7n6sms38VsuF2s4smI03DWGWP6Ro7siXvd+LBu2gDqosQaZQiz5/FX5YWxvuhq0E/ACas/JE8fjIL9DQPcFrgQkNAv1kHpIWRqSLPwyTMMxGgFxGI8aCTH/Uaxbqa7Qm/aBfdG2lZBE1XU6HRjAToFmqsPJv4LkBxaC1Ag62QPXONNxAA97arICr vhgalvez@gmail.com" >> /home/core/.ssh/authorized_keys
+Estos pasos deberían permitirte copiar los archivos .ign a la máquina bootstrap sin problemas. Si continúas teniendo problemas, asegúrate de que los permisos y configuraciones de las claves SSH están configurados correctamente en ambas máquinas (local y destino).
+
+
+[victory@physical1 ignition-configs]$ sudo chmod 600 /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift
+[victory@physical1 ignition-configs]$ sudo scp -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift *.ign core@10.17.3.14:/home/core/
+master1.ign                                          100% 3716   534.0KB/s   00:00
+master2.ign                                          100% 3554   466.8KB/s   00:00
+master3.ign                                          100% 3554     3.2MB/s   00:00
+worker1.ign                                          100% 3554     3.3MB/s   00:00
+worker2.ign                                          100% 3558     2.9MB/s   00:00
+worker3.ign                                          100% 3558     3.5MB/s   00:00
+documentoalo
+ChatGPT
+¡Excelente! Los archivos .ign se copiaron correctamente en el servidor bootstrap. Ahora, deberías estar listo para continuar con la instalación del clúster. Aquí tienes los pasos siguientes:
+
+Verificar los archivos .ign en el servidor bootstrap:
+Asegúrate de que los archivos se copiaron correctamente y están en el directorio correcto.
+
+sh
+Copiar código
+ls -l /home/core/*.ign
+Crear los nodos del clúster:
+Utiliza el comando openshift-install para crear el clúster. Ya que tienes los archivos .ign en su lugar, este paso iniciará el proceso de configuración de los nodos maestros y trabajadores.
+
+sh
+Copiar código
+openshift-install create cluster --dir=/home/core/okd-install --log-level=debug
+Monitorear el proceso de instalación:
+La instalación de OpenShift puede tardar un tiempo. Es importante monitorear los registros para asegurarse de que no haya errores críticos.
+
+sh
+Copiar código
+tail -f /home/core/okd-install/.openshift_install.log
+Si encuentras algún error durante el proceso de instalación, revisa los registros detenidamente y compártelos para poder ofrecer una solución más específica. Aquí tienes algunos comandos útiles para diagnosticar problemas durante la instalación:
+
+Verificar el estado de los nodos:
+
+sh
+Copiar código
+oc get nodes
+Verificar los pods en el clúster:
+
+sh
+Copiar código
+oc get pods --all-namespaces
+Revisar los logs de un pod específico:
+
+sh
+Copiar código
+oc logs <nombre-del-pod> -n <namespace>
+Con estos pasos, deberías poder continuar con la configuración de tu clúster OpenShift. Si hay algún problema específico, por favor proporciona los detalles y los registros relevantes para poder ayudarte mejor.
