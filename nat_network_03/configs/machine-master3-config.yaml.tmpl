@@ -27,40 +27,39 @@ storage:
       mode: 0644
       contents:
         inline: ${host_name}
-    - path: /home/core/install-master-components.sh
+    - path: /usr/local/bin/install-master-components.sh
       filesystem: root
       mode: 0755
       contents:
         inline: |
           #!/bin/bash
-          set -euo pipefail
-          exec > /home/core/install-master-components.log 2>&1
+          set -euxo pipefail
+          exec > /var/log/install-master-components.log 2>&1
 
           # Install kubelet
-          curl -L -o /tmp/kubelet https://storage.googleapis.com/kubernetes-release/release/${kubelet_version}/bin/linux/amd64/kubelet
-          sudo mv /tmp/kubelet /opt/bin/kubelet
-          sudo chmod +x /opt/bin/kubelet
+          curl -L -o /usr/local/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/${kubelet_version}/bin/linux/amd64/kubelet
+          chmod +x /usr/local/bin/kubelet
 
           # Install cri-o
           curl -L -o /tmp/crio.tar.gz https://github.com/cri-o/cri-o/releases/download/${crio_version}/cri-o-${crio_version}.tar.gz
           tar -xzf /tmp/crio.tar.gz -C /tmp
-          sudo mv /tmp/crio-${crio_version}-linux-amd64/crio /opt/bin/crio
-          sudo chmod +x /opt/bin/crio
-          sudo rm -rf /tmp/crio.tar.gz /tmp/crio-${crio_version}-linux-amd64
+          mv /tmp/crio-${crio_version}-linux-amd64/crio /usr/local/bin/crio
+          chmod +x /usr/local/bin/crio
+          rm -rf /tmp/crio.tar.gz /tmp/crio-${crio_version}-linux-amd64
 
           # Install oc
-          mkdir -p /opt/bin
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
-          sudo mv /tmp/oc /opt/bin/oc
-          sudo chmod +x /opt/bin/oc
-          sudo rm -rf /tmp/oc.tar.gz
+          mv /tmp/oc /usr/local/bin/oc
+          chmod +x /usr/local/bin/oc
+          rm -rf /tmp/oc.tar.gz
 
           # Enable and start services
-          sudo systemctl enable kubelet
-          sudo systemctl start kubelet
-          sudo systemctl enable crio
-          sudo systemctl start crio
+          systemctl daemon-reload
+          systemctl enable kubelet
+          systemctl start kubelet
+          systemctl enable crio
+          systemctl start crio
 
     - path: /etc/systemd/network/10-eth0.network
       filesystem: root
@@ -144,7 +143,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/bin/bash /home/core/install-master-components.sh
+        ExecStart=/usr/local/bin/install-master-components.sh
         RemainAfterExit=true
 
         [Install]
