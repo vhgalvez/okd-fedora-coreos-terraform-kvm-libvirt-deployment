@@ -38,7 +38,7 @@ storage:
           tar -xzf /tmp/crio.tar.gz -C /tmp
           sudo mv /tmp/crio-${crio_version}-linux-amd64/crio /opt/bin/crio
           sudo chmod +x /opt/bin/crio
-          sudo rm -rf /tmp/crio.tar.gz /tmp/crio-${crio_version}-linux-amd64
+          sudo rm -rf /tmp/crio.tar.gz /tmp/crio-${crio-version}-linux-amd64
 
           # Install oc
           mkdir -p /opt/bin
@@ -144,9 +144,17 @@ systemd:
 
     - name: getty@tty1.service
       enabled: true
-      dropins:
-        - name: autologin.conf
-          contents: |
-            [Service]
-            ExecStart=
-            ExecStart=-/usr/sbin/agetty --noclear %I $TERM
+      contents: |
+        [Unit]
+        Description=Getty on tty1
+        After=systemd-user-sessions.service plymouth-quit-wait.service
+        After=rc-local.service
+        Wants=rc-local.service
+
+        [Service]
+        ExecStart=-/sbin/agetty --noclear %I $TERM
+        Type=idle
+        Restart=always
+
+        [Install]
+        WantedBy=multi-user.target
