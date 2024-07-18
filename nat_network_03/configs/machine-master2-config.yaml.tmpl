@@ -151,7 +151,7 @@ systemd:
         WantedBy=multi-user.target
 
     - name: getty@tty1.service
-      enabled: true
+      enabled: false
       contents: |
         [Unit]
         Description=Getty on tty1
@@ -160,7 +160,7 @@ systemd:
         Wants=rc-local.service
 
         [Service]
-        ExecStart=/sbin/agetty --noclear %I $TERM
+        ExecStart=/sbin/agetty %I $TERM
         Type=simple
         Restart=always
 
