@@ -60,6 +60,7 @@ data "template_file" "vm-configs" {
     crio_version                    = var.crio_version
     kube_controller_manager_version = var.kube_controller_manager_version
     kube_scheduler_version          = var.kube_scheduler_version
+    password_hash                   = var.password_hash
   }
 }
 

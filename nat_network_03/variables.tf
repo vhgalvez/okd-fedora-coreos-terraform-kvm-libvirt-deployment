@@ -63,3 +63,8 @@ variable "kube_scheduler_version" {
   description = "Version of Kube-scheduler"
   type        = string
 }
+
+variable "password_hash" {
+  description = "Password hash for the root user"
+  type        = string
+}

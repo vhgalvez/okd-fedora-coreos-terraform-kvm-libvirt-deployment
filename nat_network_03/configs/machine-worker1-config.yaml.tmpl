@@ -99,7 +99,7 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Description=Apply custom network routes
+        Description: Apply custom network routes
         After=network-online.target
         Wants=network-online.target
 
@@ -115,7 +115,7 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Description=Set /etc/hosts file
+        Description: Set /etc/hosts file
         After=network.target
 
         [Service]
@@ -130,7 +130,7 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Description=Install Kubernetes worker components
+        Description: Install Kubernetes worker components
         After=network-online.target
         Wants=network-online.target
 
