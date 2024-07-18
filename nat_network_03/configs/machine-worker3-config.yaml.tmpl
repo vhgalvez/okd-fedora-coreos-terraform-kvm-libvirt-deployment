@@ -149,20 +149,3 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
-
-    - name: getty@tty1.service
-      enabled: false
-      contents: |
-        [Unit]
-        Description=Getty on tty1
-        After=systemd-user-sessions.service plymouth-quit-wait.service
-        After=rc-local.service
-        Wants=rc-local.service
-
-        [Service]
-        ExecStart=/sbin/agetty %I $TERM
-        Type=simple
-        Restart=always
-
-        [Install]
-        WantedBy=multi-user.target
