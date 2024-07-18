@@ -92,6 +92,7 @@ resource "libvirt_volume" "vm_disk" {
   format         = "qcow2"
   size           = each.value.disk_size * 1024 * 1024 # size in MB converted to bytes
 }
+
 resource "libvirt_domain" "machine" {
   for_each = var.vm_definitions
 
