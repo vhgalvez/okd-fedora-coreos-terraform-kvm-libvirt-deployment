@@ -1,9 +1,4 @@
 variant: flatcar
-version:Here is the corrected `configs/machine-master1-config.yaml.tmpl` file:
-
-### `configs/machine-master1-config.yaml.tmpl`
-```yaml
-variant: flatcar
 version: 1.1.0
 
 ignition:
@@ -23,7 +18,8 @@ storage:
       filesystem: "root"
       mode: 0644
       contents:
-        inline: ${host_name}
+        inline: |
+          ${host_name}
     - path: /home/core/install-oc-kubelet.sh
       filesystem: "root"
       mode: 0755
