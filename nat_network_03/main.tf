@@ -125,13 +125,25 @@ resource "libvirt_domain" "machine" {
 }
 
 output "ip_addresses" {
-  value = { for key, machine in libvirt_domain.machine : key => machine.network_interface[0].addresses[0] if length(machine.network_interface[0].addresses) > 0 }
+  value = {
+    for key, machine in libvirt_domain.machine : key => machine.network_interface[0].addresses[0] if length(machine.network_interface[0].addresses) > 0
+  }
 }
 
 output "rendered_vm_configs" {
-  value = { for key, config in data.template_file.vm-configs : key => config.rendered }
+  value = {
+    for key, config in data.template_file.vm-configs : key => {
+      rendered_content = config.rendered
+      vm_name          = key
+    }
+  }
 }
 
 output "ct_config_content" {
-  value = { for key, config in data.ct_config.vm-ignitions : key => config.content }
+  value = {
+    for key, config in data.ct_config.vm-ignitions : key => {
+      rendered_content = config.rendered
+      vm_name          = key
+    }
+  }
 }
