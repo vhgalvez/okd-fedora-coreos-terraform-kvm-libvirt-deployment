@@ -48,3 +48,7 @@ variable "etcd_version" {
   description = "Version of etcd"
   type        = string
 }
+variable "crio_version" {
+  description = "Version of CRI-O"
+  type        = string
+}

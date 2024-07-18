@@ -57,6 +57,7 @@ data "template_file" "vm-configs" {
     kubelet_version        = var.kubelet_version
     kube_apiserver_version = var.kube_apiserver_version
     etcd_version           = var.etcd_version
+    crio_version           = var.crio_version
   }
 }
 
