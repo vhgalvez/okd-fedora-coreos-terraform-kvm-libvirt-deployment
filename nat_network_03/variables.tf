@@ -10,7 +10,7 @@ variable "vm_definitions" {
     memory       = number
     ip           = string
     name_dominio = string
-    disk_size    = number  # en MB
+    disk_size    = number  # in MB
   }))
 }
 
@@ -38,11 +38,13 @@ variable "KUBELET_VERSION" {
   description = "Version of Kubelet"
   type        = string
 }
+
 variable "kube_apiserver_version" {
-  description = "Version of Kubelet"
+  description = "Version of Kube-apiserver"
   type        = string
 }
+
 variable "etcd_version" {
-  description = "Version of Kubelet"
+  description = "Version of etcd"
   type        = string
 }
