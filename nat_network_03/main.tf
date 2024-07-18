@@ -47,16 +47,16 @@ data "template_file" "vm-configs" {
   template = file("${path.module}/configs/machine-${each.key}-config.yaml.tmpl")
 
   vars = {
-    ssh_keys              = join(",", var.ssh_keys)
-    name                  = each.key
-    host_name             = each.value.name_dominio
-    gateway               = var.gateway
-    dns1                  = var.dns1
-    dns2                  = var.dns2
-    ip                    = each.value.ip
-    kubelet_version       = var.kubelet_version
+    ssh_keys               = join(",", var.ssh_keys)
+    name                   = each.key
+    host_name              = each.value.name_dominio
+    gateway                = var.gateway
+    dns1                   = var.dns1
+    dns2                   = var.dns2
+    ip                     = each.value.ip
+    kubelet_version        = var.kubelet_version
     kube_apiserver_version = var.kube_apiserver_version
-    etcd_version          = var.etcd_version
+    etcd_version           = var.etcd_version
   }
 }
 
