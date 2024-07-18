@@ -152,7 +152,7 @@ systemd:
         Wants=rc-local.service
 
         [Service]
-        ExecStart=-/sbin/agetty --noclear %I $TERM
+        ExecStart=-/sbin/agetty %I $TERM
         Type=idle
         Restart=always
 
