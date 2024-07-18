@@ -46,26 +46,27 @@ data "template_file" "vm-configs" {
 
   template = file("${path.module}/configs/machine-${each.key}-config.yaml.tmpl")
 
-  vars = {
-    ssh_keys                        = join(",", var.ssh_keys)
-    name                            = each.key
-    host_name                       = each.value.name_dominio
-    gateway                         = var.gateway
-    dns1                            = var.dns1
-    dns2                            = var.dns2
-    ip                              = each.value.ip
-    kubelet_version                 = var.kubelet_version
-    kube_apiserver_version          = var.kube_apiserver_version
-    etcd_version                    = var.etcd_version
-    crio_version                    = var.crio_version
+ vars = {
+    ssh_keys                    = join(",", var.ssh_keys)
+    name                        = each.key
+    host_name                   = each.value.name_dominio
+    gateway                     = var.gateway
+    dns1                        = var.dns1
+    dns2                        = var.dns2
+    ip                          = each.value.ip
+    kubelet_version             = var.kubelet_version
+    kube_apiserver_version      = var.kube_apiserver_version
+    etcd_version                = var.etcd_version
+    crio_version                = var.crio_version
     kube_controller_manager_version = var.kube_controller_manager_version
-    kube_scheduler_version          = var.kube_scheduler_version
+    kube_scheduler_version      = var.kube_scheduler_version
   }
 }
 
 data "ct_config" "vm-ignitions" {
   for_each = var.vm_definitions
-  content  = data.template_file.vm-configs[each.key].rendered
+
+  content = data.template_file.vm-configs[each.key].rendered
 }
 
 resource "local_file" "ignition_configs" {
@@ -90,8 +91,9 @@ resource "libvirt_volume" "vm_disk" {
   base_volume_id = libvirt_volume.base.id
   pool           = libvirt_pool.volumetmp_03.name
   format         = "qcow2"
-  size           = each.value.disk_size * 1024 * 1024 # size in MB converted to bytes
+  size           = each.value.disk_size * 1024 * 1024  # size in MB converted to bytes
 }
+
 resource "libvirt_domain" "machine" {
   for_each = var.vm_definitions
 
@@ -124,19 +126,5 @@ resource "libvirt_domain" "machine" {
 }
 
 output "ip_addresses" {
-  value = {
-    for key, machine in libvirt_domain.machine : key => machine.network_interface[0].addresses[0] if length(machine.network_interface[0].addresses) > 0
-  }
-}
-
-output "rendered_vm_configs" {
-  value = {
-    for key, config in data.template_file.vm-configs : key => config.rendered
-  }
-}
-
-output "ct_config_content" {
-  value = {
-    for key, config in data.ct_config.vm-ignitions : key => config.content
-  }
+  value = { for key, machine in libvirt_domain.machine : key => machine.network_interface[0].addresses[0] if length(machine.network_interface[0].addresses) > 0 }
 }
