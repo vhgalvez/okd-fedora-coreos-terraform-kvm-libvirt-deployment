@@ -37,7 +37,7 @@ storage:
           sudo rm -rf /tmp/oc.tar.gz
 
           # Install kubelet
-          curl -L -o /tmp/kubelet https://storage.googleapis.com/kubernetes-release/release/${kubelet_version}/bin/linux/amd64/kubelet
+          curl -L -o /tmp/kubelet https://storage.googleapis.com/kubernetes-release/release/${KUBELET_VERSION}/bin/linux/amd64/kubelet
           sudo mv /tmp/kubelet /opt/bin/kubelet
           sudo chmod +x /opt/bin/kubelet
 
