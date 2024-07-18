@@ -65,8 +65,7 @@ data "template_file" "vm-configs" {
 
 data "ct_config" "vm-ignitions" {
   for_each = var.vm_definitions
-
-  content = data.template_file.vm-configs[each.key].rendered
+  content  = data.template_file.vm-configs[each.key].rendered
 }
 
 resource "local_file" "ignition_configs" {
