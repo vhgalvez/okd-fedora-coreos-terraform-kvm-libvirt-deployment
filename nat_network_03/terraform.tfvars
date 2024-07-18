@@ -54,5 +54,7 @@ dns1    = "10.17.3.11"
 dns2    = "8.8.8.8"
 
 KUBELET_VERSION = "v1.21.0"
-kube_apiserver_version = "v1.22.0"
-etcd_version = "v3.5.0"
+kube_apiserver_version = "v1.21.0"
+etcd_version = "v3.4.13"
+
+
