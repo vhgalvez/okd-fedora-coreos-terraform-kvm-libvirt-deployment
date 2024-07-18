@@ -55,6 +55,8 @@ data "template_file" "vm-configs" {
     dns2      = var.dns2
     ip        = each.value.ip
     kubelet_version = var.KUBELET_VERSION
+    kube_apiserver_version = var.kube_apiserver_version
+    etcd_version = var.etcd_version
   }
 }
 

@@ -38,3 +38,11 @@ variable "KUBELET_VERSION" {
   description = "Version of Kubelet"
   type        = string
 }
+variable "kube_apiserver_version" {
+  description = "Version of Kubelet"
+  type        = string
+}
+variable "etcd_version" {
+  description = "Version of Kubelet"
+  type        = string
+}
