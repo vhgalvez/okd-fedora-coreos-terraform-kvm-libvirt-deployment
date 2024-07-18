@@ -1,4 +1,9 @@
 variant: flatcar
+version:Here is the corrected `configs/machine-master1-config.yaml.tmpl` file:
+
+### `configs/machine-master1-config.yaml.tmpl`
+```yaml
+variant: flatcar
 version: 1.1.0
 
 ignition:
@@ -37,7 +42,7 @@ storage:
           sudo rm -rf /tmp/oc.tar.gz
 
           # Install kubelet
-          curl -L -o /tmp/kubelet https://storage.googleapis.com/kubernetes-release/release/${KUBELET_VERSION}/bin/linux/amd64/kubelet
+          curl -L -o /tmp/kubelet https://storage.googleapis.com/kubernetes-release/release/${kubelet_version}/bin/linux/amd64/kubelet
           sudo mv /tmp/kubelet /opt/bin/kubelet
           sudo chmod +x /opt/bin/kubelet
 
