@@ -18,8 +18,7 @@ storage:
       filesystem: "root"
       mode: 0644
       contents:
-        inline: |
-          ${host_name}
+        inline: ${host_name}
     - path: /home/core/install-oc-kubelet.sh
       filesystem: "root"
       mode: 0755
@@ -43,7 +42,7 @@ storage:
           sudo chmod +x /opt/bin/kubelet
 
           # Set PATH and KUBECONFIG in .bashrc
-          if [ -w /home/core/.bashrc]; then
+          if [ -w /home/core/.bashrc ]; then
             echo 'export PATH=$PATH:/opt/bin' >> /home/core/.bashrc
             echo 'export KUBECONFIG=/home/core/okd-install/auth/kubeconfig' >> /home/core/.bashrc
           else
