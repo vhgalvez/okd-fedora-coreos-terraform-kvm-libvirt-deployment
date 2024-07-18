@@ -19,14 +19,26 @@ storage:
       mode: 0644
       contents:
         inline: ${host_name}
-    - path: /home/core/install-oc-kubelet.sh
+    - path: /home/core/install-master-components.sh
       filesystem: "root"
       mode: 0755
       contents:
         inline: |
           #!/bin/bash
           set -euo pipefail
-          exec > /home/core/install-oc-kubelet.log 2>&1
+          exec > /home/core/install-master-components.log 2>&1
+
+          # Install kubelet
+          curl -L -o /tmp/kubelet https://storage.googleapis.com/kubernetes-release/release/${kubelet_version}/bin/linux/amd64/kubelet
+          sudo mv /tmp/kubelet /opt/bin/kubelet
+          sudo chmod +x /opt/bin/kubelet
+
+          # Install cri-o
+          curl -L -o /tmp/crio.tar.gz https://github.com/cri-o/cri-o/releases/download/${crio_version}/cri-o-${crio_version}.tar.gz
+          tar -xzf /tmp/crio.tar.gz -C /tmp
+          sudo mv /tmp/crio-${crio_version}-linux-amd64/crio /opt/bin/crio
+          sudo chmod +x /opt/bin/crio
+          sudo rm -rf /tmp/crio.tar.gz /tmp/crio-${crio_version}-linux-amd64
 
           # Install oc
           mkdir -p /opt/bin
@@ -36,18 +48,37 @@ storage:
           sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
 
-          # Install kubelet
-          curl -L -o /tmp/kubelet https://storage.googleapis.com/kubernetes-release/release/${kubelet_version}/bin/linux/amd64/kubelet
-          sudo mv /tmp/kubelet /opt/bin/kubelet
-          sudo chmod +x /opt/bin/kubelet
+          # Install etcd
+          curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/${etcd_version}/etcd-${etcd_version}-linux-amd64.tar.gz
+          tar -xzf /tmp/etcd.tar.gz -C /tmp
+          sudo mv /tmp/etcd-${etcd_version}-linux-amd64/etcd /opt/bin/etcd
+          sudo chmod +x /opt/bin/etcd
+          sudo rm -rf /tmp/etcd.tar.gz /tmp/etcd-${etcd_version}-linux-amd64
 
-          # Set PATH and KUBECONFIG in .bashrc
-          if [ -w /home/core/.bashrc ]; then
-            echo 'export PATH=$PATH:/opt/bin' >> /home/core/.bashrc
-            echo 'export KUBECONFIG=/home/core/okd-install/auth/kubeconfig' >> /home/core/.bashrc
-          else
-            echo "/home/core/.bashrc no es modificable"
-          fi
+          # Install kube-apiserver
+          curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/${kube_apiserver_version}/bin/linux/amd64/kube-apiserver
+          sudo mv /tmp/kube-apiserver /opt/bin/kube-apiserver
+          sudo chmod +x /opt/bin/kube-apiserver
+
+          # Install kube-controller-manager
+          curl -L -o /tmp/kube-controller-manager https://dl.k8s.io/release/${kube_controller_manager_version}/bin/linux/amd64/kube-controller-manager
+          sudo mv /tmp/kube-controller-manager /opt/bin/kube-controller-manager
+          sudo chmod +x /opt/bin/kube-controller-manager
+
+          # Install kube-scheduler
+          curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/${kube_scheduler_version}/bin/linux/amd64/kube-scheduler
+          sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
+          sudo chmod +x /opt/bin/kube-scheduler
+
+          # Enable and start services
+          sudo systemctl enable kube-apiserver
+          sudo systemctl start kube-apiserver
+          sudo systemctl enable etcd
+          sudo systemctl start etcd
+          sudo systemctl enable kube-controller-manager
+          sudo systemctl start kube-controller-manager
+          sudo systemctl enable kube-scheduler
+          sudo systemctl start kube-scheduler
 
     - path: /etc/systemd/network/10-eth0.network
       filesystem: "root"
@@ -94,45 +125,45 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Description=Apply custom network routes
-        After=network-online.target
-        Wants=network-online.target
+        Description: Apply custom network routes
+        After: network-online.target
+        Wants: network-online.target
 
         [Service]
-        Type=oneshot
-        ExecStart=/usr/bin/systemctl restart systemd-networkd.service
-        RemainAfterExit=true
+        Type: oneshot
+        ExecStart: /usr/bin/systemctl restart systemd-networkd.service
+        RemainAfterExit: true
 
         [Install]
-        WantedBy=multi-user.target
+        WantedBy: multi-user.target
 
     - name: set-hosts.service
       enabled: true
       contents: |
         [Unit]
-        Description=Set /etc/hosts file
-        After=network.target
+        Description: Set /etc/hosts file
+        After: network.target
 
         [Service]
-        Type=oneshot
-        ExecStart=/bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "${ip}  ${host_name} ${name}" >> /etc/hosts'
-        RemainAfterExit=true
+        Type: oneshot
+        ExecStart: /bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "${ip}  ${host_name} ${name}" >> /etc/hosts'
+        RemainAfterExit: true
 
         [Install]
-        WantedBy=multi-user.target
+        WantedBy: multi-user.target
 
-    - name: install-oc-kubelet.service
+    - name: install-master-components.service
       enabled: true
       contents: |
         [Unit]
-        Description=Install OpenShift CLI (oc) and Kubelet
-        After=network-online.target
-        Wants=network-online.target
+        Description: Install Kubernetes master components
+        After: network-online.target
+        Wants: network-online.target
 
         [Service]
-        Type=oneshot
-        ExecStart=/bin/bash /home/core/install-oc-kubelet.sh
-        RemainAfterExit=true
+        Type: oneshot
+        ExecStart: /bin/bash /home/core/install-master-components.sh
+        RemainAfterExit: true
 
         [Install]
-        WantedBy=multi-user.target
+        WantedBy: multi-user.target
