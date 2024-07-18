@@ -160,8 +160,8 @@ systemd:
         Wants=rc-local.service
 
         [Service]
-        ExecStart=/sbin/agetty %I $TERM
-        Type=idle
+        ExecStart=/sbin/agetty --noclear %I $TERM
+        Type=simple
         Restart=always
 
         [Install]
