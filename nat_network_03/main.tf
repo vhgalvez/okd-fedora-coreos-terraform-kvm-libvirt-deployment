@@ -26,6 +26,9 @@ resource "libvirt_network" "kube_network_03" {
   mode      = "nat"
   autostart = true
   addresses = ["10.17.4.0/24"]
+  dhcp {
+    enabled = true
+  }
 }
 
 resource "libvirt_pool" "volumetmp_03" {
@@ -122,27 +125,10 @@ resource "libvirt_domain" "machine" {
     target_type = "serial"
     target_port = "0"
   }
+
+  qemu_agent = true
 }
 
-output "rendered_vm_configs" {
-  value = {
-    for key, config in data.template_file.vm-configs : key => {
-      rendered_content = config.rendered
-      vm_name          = key
-    }
-  }
-}
-
-output "ct_config_content" {
-  value = {
-    for key, config in data.ct_config.vm-ignitions : key => {
-      rendered_content = config.rendered
-      vm_name          = key
-    }
-  }
-}
 output "ip_addresses" {
-  value = {
-    for key, machine in libvirt_domain.machine : key => machine.network_interface[0].addresses[0] if length(machine.network_interface[0].addresses) > 0
-  }
+  value = { for key, machine in libvirt_domain.machine : key => machine.network_interface[0].addresses[0] if length(machine.network_interface[0].addresses) > 0 }
 }

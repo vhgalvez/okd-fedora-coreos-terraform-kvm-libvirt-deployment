@@ -144,17 +144,9 @@ systemd:
 
     - name: getty@tty1.service
       enabled: true
-      contents: |
-        [Unit]
-        Description=Getty on tty1
-        After=systemd-user-sessions.service plymouth-quit-wait.service
-        After=rc-local.service
-        Wants=rc-local.service
-
-        [Service]
-        ExecStart=-/sbin/agetty --noclear %I $TERM
-        Type=idle
-        Restart=always
-
-        [Install]
-        WantedBy=multi-user.target
+      dropins:
+        - name: autologin.conf
+          contents: |
+            [Service]
+            ExecStart=
+            ExecStart=-/usr/sbin/agetty --autologin core --noclear %I $TERM
