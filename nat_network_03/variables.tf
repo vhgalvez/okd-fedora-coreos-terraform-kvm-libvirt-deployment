@@ -63,4 +63,3 @@ variable "kube_scheduler_version" {
   description = "Version of Kube-scheduler"
   type        = string
 }
-
