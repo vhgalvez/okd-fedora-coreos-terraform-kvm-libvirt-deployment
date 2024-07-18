@@ -34,7 +34,7 @@ variable "dns2" {
   type        = string
 }
 
-variable "KUBELET_VERSION" {
+variable "kubelet_version" {
   description = "Version of Kubelet"
   type        = string
 }
