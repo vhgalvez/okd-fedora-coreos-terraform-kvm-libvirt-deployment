@@ -47,17 +47,19 @@ data "template_file" "vm-configs" {
   template = file("${path.module}/configs/machine-${each.key}-config.yaml.tmpl")
 
   vars = {
-    ssh_keys               = join(",", var.ssh_keys)
-    name                   = each.key
-    host_name              = each.value.name_dominio
-    gateway                = var.gateway
-    dns1                   = var.dns1
-    dns2                   = var.dns2
-    ip                     = each.value.ip
-    kubelet_version        = var.kubelet_version
-    kube_apiserver_version = var.kube_apiserver_version
-    etcd_version           = var.etcd_version
-    crio_version           = var.crio_version
+    ssh_keys                        = join(",", var.ssh_keys)
+    name                            = each.key
+    host_name                       = each.value.name_dominio
+    gateway                         = var.gateway
+    dns1                            = var.dns1
+    dns2                            = var.dns2
+    ip                              = each.value.ip
+    kubelet_version                 = var.kubelet_version
+    kube_apiserver_version          = var.kube_apiserver_version
+    etcd_version                    = var.etcd_version
+    crio_version                    = var.crio_version
+    kube_controller_manager_version = var.kube_controller_manager_version
+    kube_scheduler_version          = var.kube_scheduler_version
   }
 }
 
@@ -89,7 +91,7 @@ resource "libvirt_volume" "vm_disk" {
   base_volume_id = libvirt_volume.base.id
   pool           = libvirt_pool.volumetmp_03.name
   format         = "qcow2"
-  size           = each.value.disk_size * 1024 * 1024  # size in MB converted to bytes
+  size           = each.value.disk_size * 1024 * 1024 # size in MB converted to bytes
 }
 
 resource "libvirt_domain" "machine" {
