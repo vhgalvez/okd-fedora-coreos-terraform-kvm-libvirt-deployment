@@ -54,6 +54,10 @@ storage:
           chmod +x /usr/local/bin/oc
           rm -rf /tmp/oc.tar.gz
 
+          # Install qemu-guest-agent
+          sudo rpm-ostree install qemu-guest-agent
+          systemctl enable qemu-guest-agent --now
+
           # Enable and start services
           systemctl daemon-reload
           systemctl enable kubelet
