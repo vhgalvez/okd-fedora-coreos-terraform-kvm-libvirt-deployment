@@ -35,30 +35,30 @@ storage:
           set -euo pipefail
           exec > /var/log/install-worker-components.log 2>&1
 
-          # Create directory for binaries
+          # Crear directorio para binarios
           sudo mkdir -p /opt/bin
 
-          # Install kubelet
+          # Instalar kubelet
           curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
 
-          # Install oc
+          # Instalar oc (OpenShift Client)
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
           sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
 
-          # Install Podman
-          sudo curl -L -o /usr/bin/podman https://github.com/containers/podman/releases/download/v3.4.2/podman-remote-static-v3.4.2-linux-amd64.tar.gz
-          sudo tar -xzf /usr/bin/podman -C /usr/bin/
+          # Instalar Podman
+          curl -L -o /tmp/podman.tar.gz https://github.com/containers/podman/releases/download/v3.4.2/podman-remote-static-v3.4.2-linux-amd64.tar.gz
+          sudo tar -xzf /tmp/podman.tar.gz -C /usr/bin/
           sudo chmod +x /usr/bin/podman
-          sudo rm -rf /usr/bin/podman
+          sudo rm -rf /tmp/podman.tar.gz
 
-          # Verify Podman installation
+          # Verificar instalación de Podman
           podman --version
 
-          # Configure and start CRI-O
+          # Configurar y arrancar CRI-O
           sudo mkdir -p /etc/systemd/system/
           cat <<EOF | sudo tee /etc/systemd/system/crio.service
           [Unit]
@@ -76,7 +76,7 @@ storage:
           WantedBy=multi-user.target
           EOF
 
-          # Reload systemd and start services
+          # Recargar systemd y arrancar servicios
           sudo systemctl daemon-reload
           sudo systemctl enable kubelet
           sudo systemctl start kubelet
@@ -149,62 +149,62 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Description=Apply custom network routes
-        After=network-online.target
-        Wants=network-online.target
+        Description: Apply custom network routes
+        After: network-online.target
+        Wants: network-online.target
 
         [Service]
-        Type=oneshot
-        ExecStart=/usr/bin/systemctl restart systemd-networkd.service
-        RemainAfterExit=true
+        Type: oneshot
+        ExecStart: /usr/bin/systemctl restart systemd-networkd.service
+        RemainAfterExit: true
 
         [Install]
-        WantedBy=multi-user.target
+        WantedBy: multi-user.target
 
     - name: set-hosts.service
       enabled: true
       contents: |
         [Unit]
-        Description=Set /etc/hosts file
-        After=network.target
+        Description: Set /etc/hosts file
+        After: network.target
 
         [Service]
-        Type=oneshot
-        ExecStart=/bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "${ip}  ${host_name} ${name}" >> /etc/hosts'
-        RemainAfterExit=true
+        Type: oneshot
+        ExecStart: /bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "${ip}  ${host_name} ${name}" >> /etc/hosts'
+        RemainAfterExit: true
 
         [Install]
-        WantedBy=multi-user.target
+        WantedBy: multi-user.target
 
     - name: install-worker-components.service
       enabled: true
       contents: |
         [Unit]
-        Description=Install Kubernetes worker components
-        After=network-online.target
-        Wants=network-online.target
+        Description: Install Kubernetes worker components
+        After: network-online.target
+        Wants: network-online.target
 
         [Service]
-        Type=oneshot
-        ExecStart=/bin/bash /home/core/install-worker-components.sh
-        RemainAfterExit=true
+        Type: oneshot
+        ExecStart: /bin/bash /home/core/install-worker-components.sh
+        RemainAfterExit: true
 
         [Install]
-        WantedBy=multi-user.target
+        WantedBy: multi-user.target
 
     - name: getty@tty1.service
       enabled: true
       contents: |
         [Unit]
-        Description=Getty on tty1
-        After=systemd-user-sessions.service plymouth-quit-wait.service
-        After=rc-local.service
-        Wants=rc-local.service
+        Description: Getty on tty1
+        After: systemd-user-sessions.service plymouth-quit-wait.service
+        After: rc-local.service
+        Wants: rc-local.service
 
         [Service]
-        ExecStart=-/sbin/agetty %I $TERM
-        Type=idle
-        Restart=always
+        ExecStart: -/sbin/agetty %I $TERM
+        Type: idle
+        Restart: always
 
         [Install]
-        WantedBy=multi-user.target
+        WantedBy: multi-user.target
