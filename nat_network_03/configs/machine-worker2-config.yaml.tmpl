@@ -34,36 +34,20 @@ storage:
           #!/bin/bash
           set -euo pipefail
           exec > /var/log/install-worker-components.log 2>&1
-
-          # Create directory for binaries
           sudo mkdir -p /opt/bin
-
-          # Install kubelet
           curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
-
-          # Install oc
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
           sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
-
-          # Install cri-o
           curl -L -o /tmp/crio-v1.21.0.tar.gz https://github.com/cri-o/cri-o/archive/refs/tags/v1.21.0.tar.gz
           tar -xzf /tmp/crio-v1.21.0.tar.gz -C /tmp
-
-          # Use a container to build CRI-O binaries
-          docker run --rm -it -v /tmp/cri-o-1.21.0:/usr/src/cri-o -w /usr/src/cri-o golang:1.16 bash -c "make clean && make binaries"
-
-          # Copy binaries to Flatcar
-          sudo cp /tmp/cri-o-1.21.0/bin/* /opt/bin/
+          docker run --rm -it -v /tmp/crio-1.21.0:/usr/src/crio -w /usr/src/crio golang:1.16 bash -c "make clean && make binaries"
+          sudo cp /tmp/crio-1.21.0/bin/* /opt/bin/
           sudo chmod +x /opt/bin/crio
-
-          # Clean up
-          sudo rm -rf /tmp/crio-v1.21.0.tar.gz /tmp/cri-o-1.21.0
-
-          # Create CRI-O configuration
+          sudo rm -rf /tmp/crio-v1.21.0.tar.gz /tmp/crio-1.21.0
           sudo mkdir -p /etc/crio
           cat <<EOF | sudo tee /etc/crio/crio.conf
           [crio]
@@ -71,16 +55,13 @@ storage:
           [crio.runtime]
           conmon = "/usr/bin/conmon"
           EOF
-
-          # Create systemd service for CRI-O
           sudo mkdir -p /etc/systemd/system/
           cat <<EOF | sudo tee /etc/systemd/system/crio.service
           [Unit]
           Description=CRI-O daemon
-          Documentation=https://github.com/cri-o/cri-o
+          Documentation=https://github.com/cri-o/crio
           After=network-online.target
           Wants=network-online.target
-
           [Service]
           ExecStart=/opt/bin/crio
           Restart=always
@@ -91,21 +72,14 @@ storage:
           LimitCORE=infinity
           TasksMax=infinity
           OOMScoreAdjust=-999
-
           [Install]
           WantedBy=multi-user.target
           EOF
-
-          # Create sysconfig for CRI-O
           sudo mkdir -p /etc/sysconfig
           echo 'PATH=/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin' | sudo tee /etc/sysconfig/crio
-
-          # Enable and start CRI-O service
           sudo systemctl daemon-reload
           sudo systemctl enable crio
           sudo systemctl start crio
-
-          # Enable and start kubelet service
           sudo systemctl enable kubelet
           sudo systemctl start kubelet
 
@@ -116,7 +90,6 @@ storage:
         inline: |
           [Match]
           Name=eth0
-
           [Network]
           Address=${ip}/24
           Gateway=${gateway}
@@ -157,12 +130,10 @@ systemd:
         Description=Apply custom network routes
         After=network-online.target
         Wants=network-online.target
-
         [Service]
         Type=oneshot
         ExecStart=/usr/bin/systemctl restart systemd-networkd.service
         RemainAfterExit=true
-
         [Install]
         WantedBy=multi-user.target
 
@@ -172,12 +143,10 @@ systemd:
         [Unit]
         Description=Set /etc/hosts file
         After=network.target
-
         [Service]
         Type=oneshot
         ExecStart=/bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "${ip}  ${host_name} ${name}" >> /etc/hosts'
         RemainAfterExit=true
-
         [Install]
         WantedBy=multi-user.target
 
@@ -188,12 +157,10 @@ systemd:
         Description=Install Kubernetes worker components
         After=network-online.target
         Wants=network-online.target
-
         [Service]
         Type=oneshot
         ExecStart=/bin/bash /home/core/install-worker-components.sh
         RemainAfterExit=true
-
         [Install]
         WantedBy=multi-user.target
 
@@ -205,11 +172,9 @@ systemd:
         After=systemd-user-sessions.service plymouth-quit-wait.service
         After=rc-local.service
         Wants=rc-local.service
-
         [Service]
         ExecStart=-/sbin/agetty %I $TERM
         Type=idle
         Restart=always
-
         [Install]
         WantedBy=multi-user.target

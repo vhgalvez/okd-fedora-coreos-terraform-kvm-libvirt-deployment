@@ -34,36 +34,20 @@ storage:
           #!/bin/bash
           set -euo pipefail
           exec > /var/log/install-master-components.log 2>&1
-
-          # Create directory for binaries
           sudo mkdir -p /opt/bin
-
-          # Install kubelet
           curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
-
-          # Install oc
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
           sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
-
-          # Install cri-o
           curl -L -o /tmp/crio-v1.21.0.tar.gz https://github.com/cri-o/cri-o/archive/refs/tags/v1.21.0.tar.gz
           tar -xzf /tmp/crio-v1.21.0.tar.gz -C /tmp
-
-          # Use a container to build CRI-O binaries
-          docker run --rm -it -v /tmp/cri-o-1.21.0:/usr/src/cri-o -w /usr/src/cri-o golang:1.16 bash -c "make clean && make binaries"
-
-          # Copy binaries to Flatcar
-          sudo cp /tmp/cri-o-1.21.0/bin/* /opt/bin/
+          docker run --rm -it -v /tmp/crio-1.21.0:/usr/src/crio -w /usr/src/crio golang:1.16 bash -c "make clean && make binaries"
+          sudo cp /tmp/crio-1.21.0/bin/* /opt/bin/
           sudo chmod +x /opt/bin/crio
-
-          # Clean up
-          sudo rm -rf /tmp/crio-v1.21.0.tar.gz /tmp/cri-o-1.21.0
-
-          # Create CRI-O configuration
+          sudo rm -rf /tmp/crio-v1.21.0.tar.gz /tmp/crio-1.21.0
           sudo mkdir -p /etc/crio
           cat <<EOF | sudo tee /etc/crio/crio.conf
           [crio]
@@ -71,8 +55,6 @@ storage:
           [crio.runtime]
           conmon = "/usr/bin/conmon"
           EOF
-
-          # Create systemd service for CRI-O
           sudo mkdir -p /etc/systemd/system/
           cat <<EOF | sudo tee /etc/systemd/system/crio.service
           [Unit]
@@ -80,7 +62,6 @@ storage:
           Documentation=https://github.com/cri-o/cri-o
           After=network-online.target
           Wants=network-online.target
-
           [Service]
           ExecStart=/opt/bin/crio
           Restart=always
@@ -91,34 +72,23 @@ storage:
           LimitCORE=infinity
           TasksMax=infinity
           OOMScoreAdjust=-999
-
           [Install]
           WantedBy=multi-user.target
           EOF
-
-          # Install etcd
           curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/v3.4.13/etcd-v3.4.13-linux-amd64.tar.gz
           tar -xzf /tmp/etcd.tar.gz -C /tmp
           sudo mv /tmp/etcd-v3.4.13-linux-amd64/etcd /opt/bin/etcd
           sudo chmod +x /opt/bin/etcd
           sudo rm -rf /tmp/etcd.tar.gz /tmp/etcd-v3.4.13-linux-amd64
-
-          # Install kube-apiserver
           curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-apiserver
           sudo mv /tmp/kube-apiserver /opt/bin/kube-apiserver
           sudo chmod +x /opt/bin/kube-apiserver
-
-          # Install kube-controller-manager
           curl -L -o /tmp/kube-controller-manager https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-controller-manager
           sudo mv /tmp/kube-controller-manager /opt/bin/kube-controller-manager
           sudo chmod +x /opt/bin/kube-controller-manager
-
-          # Install kube-scheduler
           curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-scheduler
           sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
           sudo chmod +x /opt/bin/kube-scheduler
-
-          # Enable and start services
           sudo systemctl daemon-reload
           sudo systemctl enable kubelet
           sudo systemctl start kubelet
@@ -140,7 +110,6 @@ storage:
         inline: |
           [Match]
           Name=eth0
-
           [Network]
           Address=${ip}/24
           Gateway=${gateway}
@@ -181,12 +150,10 @@ systemd:
         Description=Apply custom network routes
         After=network-online.target
         Wants=network-online.target
-
         [Service]
         Type=oneshot
         ExecStart=/usr/bin/systemctl restart systemd-networkd.service
         RemainAfterExit=true
-
         [Install]
         WantedBy=multi-user.target
 
@@ -196,12 +163,10 @@ systemd:
         [Unit]
         Description=Set /etc/hosts file
         After=network.target
-
         [Service]
         Type=oneshot
         ExecStart=/bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "${ip}  ${host_name} ${name}" >> /etc/hosts'
         RemainAfterExit=true
-
         [Install]
         WantedBy=multi-user.target
 
@@ -212,240 +177,10 @@ systemd:
         Description=Install Kubernetes master components
         After=network-online.target
         Wants=network-online.target
-
         [Service]
         Type=oneshot
         ExecStart=/bin/bash /home/core/install-master-components.sh
         RemainAfterExit=true
-
-        [Install]
-        WantedBy=multi-user.target
-
-    - name: getty@tty1.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Getty on tty1
-        After=systemd-user-sessions.service plymouth-quit-waitTo ensure the master node configuration for Flatcar Container Linux is correct, I have refined and validated your existing YAML template based on documentation from OKD, Flatcar, and CRI-O.
-
-Here is the corrected and validated template for `machine-master1-config.yaml.tmpl`:
-
-### `machine-master1-config.yaml.tmpl`
-
-```yaml
-variant: flatcar
-version: 1.1.0
-
-ignition:
-  version: 3.4.0
-
-passwd:
-  users:
-    - name: core
-      shell: /bin/bash
-      sudo: ["ALL=(ALL) NOPASSWD:ALL"]
-      groups: [adm, wheel]
-      lock_passwd: false
-      ssh_authorized_keys:
-        - ${ssh_keys}
-    - name: root
-      shell: /bin/bash
-      ssh_authorized_keys:
-        - ${ssh_keys}
-      password_hash: "$6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/"
-
-storage:
-  files:
-    - path: /etc/hostname
-      filesystem: "root"
-      mode: 0644
-      contents:
-        inline: ${host_name}
-    - path: /home/core/install-master-components.sh
-      filesystem: "root"
-      mode: 0755
-      contents:
-        inline: |
-          #!/bin/bash
-          set -euo pipefail
-          exec > /var/log/install-master-components.log 2>&1
-
-          # Create directory for binaries
-          sudo mkdir -p /opt/bin
-
-          # Install kubelet
-          curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
-          sudo chmod +x /opt/bin/kubelet
-
-          # Install cri-o
-          curl -L -o /tmp/crio-v1.21.0.tar.gz https://github.com/cri-o/cri-o/archive/refs/tags/v1.21.0.tar.gz
-          tar -xzf /tmp/crio-v1.21.0.tar.gz -C /tmp
-
-          # Use a container to build CRI-O binaries
-          docker run --rm -it -v /tmp/cri-o-1.21.0:/usr/src/cri-o -w /usr/src/cri-o golang:1.16 bash -c "make clean && make binaries"
-
-          # Copy binaries to Flatcar
-          sudo cp /tmp/cri-o-1.21.0/bin/* /opt/bin/
-          sudo chmod +x /opt/bin/crio
-
-          # Clean up
-          sudo rm -rf /tmp/crio-v1.21.0.tar.gz /tmp/cri-o-1.21.0
-
-          # Create CRI-O configuration
-          sudo mkdir -p /etc/crio
-          cat <<EOF | sudo tee /etc/crio/crio.conf
-          [crio]
-          version = "1.21.0"
-          [crio.runtime]
-          conmon = "/usr/bin/conmon"
-          EOF
-
-          # Create systemd service for CRI-O
-          sudo mkdir -p /etc/systemd/system/
-          cat <<EOF | sudo tee /etc/systemd/system/crio.service
-          [Unit]
-          Description=CRI-O daemon
-          Documentation=https://github.com/cri-o/cri-o
-          After=network-online.target
-          Wants=network-online.target
-
-          [Service]
-          ExecStart=/opt/bin/crio
-          Restart=always
-          RestartSec=10s
-          StartLimitInterval=0
-          LimitNOFILE=infinity
-          LimitNPROC=infinity
-          LimitCORE=infinity
-          TasksMax=infinity
-          OOMScoreAdjust=-999
-
-          [Install]
-          WantedBy=multi-user.target
-          EOF
-
-          # Install etcd
-          curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/v3.4.13/etcd-v3.4.13-linux-amd64.tar.gz
-          tar -xzf /tmp/etcd.tar.gz -C /tmp
-          sudo mv /tmp/etcd-v3.4.13-linux-amd64/etcd /opt/bin/etcd
-          sudo chmod +x /opt/bin/etcd
-          sudo rm -rf /tmp/etcd.tar.gz /tmp/etcd-v3.4.13-linux-amd64
-
-          # Install kube-apiserver
-          curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-apiserver
-          sudo mv /tmp/kube-apiserver /opt/bin/kube-apiserver
-          sudo chmod +x /opt/bin/kube-apiserver
-
-          # Install kube-controller-manager
-          curl -L -o /tmp/kube-controller-manager https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-controller-manager
-          sudo mv /tmp/kube-controller-manager /opt/bin/kube-controller-manager
-          sudo chmod +x /opt/bin/kube-controller-manager
-
-          # Install kube-scheduler
-          curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-scheduler
-          sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
-          sudo chmod +x /opt/bin/kube-scheduler
-
-          # Enable and start services
-          sudo systemctl daemon-reload
-          sudo systemctl enable kubelet
-          sudo systemctl start kubelet
-          sudo systemctl enable crio
-          sudo systemctl start crio
-          sudo systemctl enable etcd
-          sudo systemctl start etcd
-          sudo systemctl enable kube-apiserver
-          sudo systemctl start kube-apiserver
-          sudo systemctl enable kube-controller-manager
-          sudo systemctl start kube-controller-manager
-          sudo systemctl enable kube-scheduler
-          sudo systemctl start kube-scheduler
-
-    - path: /etc/systemd/network/10-eth0.network
-      filesystem: "root"
-      mode: 0644
-      contents:
-        inline: |
-          [Match]
-          Name=eth0
-
-          [Network]
-          Address=${ip}/24
-          Gateway=${gateway}
-          DNS=${dns1}
-          DNS=${dns2}
-
-    - path: /etc/tmpfiles.d/hosts.conf
-      filesystem: "root"
-      mode: 0644
-      contents:
-        inline: |
-          f /etc/hosts 0644 - - - -
-          127.0.0.1   localhost
-          ::1         localhost
-          ${ip}  ${host_name} ${name}
-
-    - path: /run/systemd/resolve/resolv.conf
-      filesystem: "root"
-      mode: 0644
-      contents:
-        inline: |
-          nameserver ${dns1}
-          nameserver ${dns2}
-
-    - path: /etc/tmpfiles.d/resolv.conf
-      filesystem: "root"
-      mode: 0644
-      contents:
-        inline: |
-          L /etc/resolv.conf - - - - /run/systemd/resolve/resolv.conf
-
-systemd:
-  units:
-    - name: apply-network-routes.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Apply custom network routes
-        After=network-online.target
-        Wants=network-online.target
-
-        [Service]
-        Type=oneshot
-        ExecStart=/usr/bin/systemctl restart systemd-networkd.service
-        RemainAfterExit=true
-
-        [Install]
-        WantedBy=multi-user.target
-
-    - name: set-hosts.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Set /etc/hosts file
-        After=network.target
-
-        [Service]
-        Type=oneshot
-        ExecStart=/bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "${ip}  ${host_name} ${name}" >> /etc/hosts'
-        RemainAfterExit=true
-
-        [Install]
-        WantedBy=multi-user.target
-
-    - name: install-master-components.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Install Kubernetes master components
-        After=network-online.target
-        Wants=network-online.target
-
-        [Service]
-        Type=oneshot
-        ExecStart=/bin/bash /home/core/install-master-components.sh
-        RemainAfterExit=true
-
         [Install]
         WantedBy=multi-user.target
 
@@ -457,11 +192,9 @@ systemd:
         After=systemd-user-sessions.service plymouth-quit-wait.service
         After=rc-local.service
         Wants=rc-local.service
-
         [Service]
         ExecStart=-/sbin/agetty %I $TERM
         Type=idle
         Restart=always
-
         [Install]
         WantedBy=multi-user.target
