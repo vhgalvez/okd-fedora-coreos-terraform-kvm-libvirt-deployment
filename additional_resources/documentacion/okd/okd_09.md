@@ -144,3 +144,41 @@ Copiar código
 dig api.okd-cluster.cefaslocalserver.com
 dig api-int.okd-cluster.cefaslocalserver.com
 If systemd-networkd and systemd-resolved services are not available, ensure network services are properly configured and DNS settings are correctly pointing to your FreeIPA server. You can check and restart the relevant network services specific to Rocky Linux if necessary.
+
+
+
+____
+
+Reprovisionar los nodos
+Aplica los archivos corregidos en tu configuración de Terraform e Ignition.
+Destruye y vuelve a crear los nodos maestros y trabajadores con las nuevas configuraciones.
+Validar la instalación
+Verifica el estado de los servicios:
+
+bash
+Copiar código
+sudo systemctl status kubelet
+sudo systemctl status crio
+sudo systemctl status etcd
+sudo systemctl status kube-apiserver
+sudo systemctl status kube-controller-manager
+sudo systemctl status kube-scheduler
+Verifica las versiones de los binarios instalados:
+
+bash
+Copiar código
+/opt/bin/kubelet --version
+/opt/bin/crio --version
+/opt/bin/oc version
+/opt/bin/etcd --version
+/opt/bin/kube-apiserver --version
+/opt/bin/kube-controller-manager --version
+/opt/bin/kube-scheduler --version
+Revisa los registros de instalación para asegurarte de que todos los componentes se hayan instalado correctamente:
+
+bash
+Copiar código
+sudo journalctl -u install-master-components.service
+sudo journalctl -u install-worker-components.service
+cat /var/log/install-master-components.log
+cat /var/log/install-worker-components.log
