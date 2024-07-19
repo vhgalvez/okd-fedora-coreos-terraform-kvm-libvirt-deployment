@@ -35,8 +35,8 @@ storage:
           set -euo pipefail
           exec > /var/log/install-worker-components.log 2>&1
 
-          # Remount /usr as read-write
-          sudo mount -o remount,rw /usr
+          # Create directory for binaries
+          sudo mkdir -p /opt/bin
 
           # Install kubelet
           curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/${kubelet_version}/bin/linux/amd64/kubelet
@@ -55,9 +55,6 @@ storage:
           sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
-
-          # Remount /usr as read-only
-          sudo mount -o remount,ro /usr
 
           # Enable and start services
           sudo systemctl daemon-reload
