@@ -34,7 +34,54 @@ storage:
           #!/bin/bash
           set -euo pipefail
           exec > /var/log/install-worker-components.log 2>&1
-          # Rest of the script omitted for brevity...
+
+          # Crear directorio para binarios
+          sudo mkdir -p /opt/bin
+
+          # Instalar kubelet
+          curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
+          sudo chmod +x /opt/bin/kubelet
+
+          # Instalar oc (OpenShift Client)
+          curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
+          tar -xzf /tmp/oc.tar.gz -C /tmp
+          sudo mv /tmp/oc /opt/bin/oc
+          sudo chmod +x /opt/bin/oc
+          sudo rm -rf /tmp/oc.tar.gz
+
+          # Instalar Podman
+          curl -L -o /tmp/podman.tar.gz https://github.com/containers/podman/releases/download/v3.4.2/podman-remote-static-v3.4.2-linux-amd64.tar.gz
+          sudo tar -xzf /tmp/podman.tar.gz -C /usr/bin/
+          sudo chmod +x /usr/bin/podman
+          sudo rm -rf /tmp/podman.tar.gz
+
+          # Verificar instalación de Podman
+          podman --version
+
+          # Configurar y arrancar CRI-O
+          sudo mkdir -p /etc/systemd/system/
+          cat <<EOF | sudo tee /etc/systemd/system/crio.service
+          [Unit]
+          Description=CRI-O container runtime
+          After=network.target
+
+          [Service]
+          ExecStartPre=-/usr/bin/podman pull quay.io/crio/crio:latest
+          ExecStart=/usr/bin/podman run --name crio --rm --privileged \
+          -v /var/run:/var/run -v /etc:/etc -v /usr/bin:/usr/bin \
+          -v /sys:/sys -v /run:/run quay.io/crio/crio:latest
+          ExecStop=/usr/bin/podman stop crio
+
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+
+          # Recargar systemd y activar servicios
+          sudo systemctl daemon-reload
+          sudo systemctl enable kubelet
+          sudo systemctl start kubelet
+          sudo systemctl enable crio
+          sudo systemctl start crio
 
     - path: /etc/systemd/system/podman.service
       filesystem: root
