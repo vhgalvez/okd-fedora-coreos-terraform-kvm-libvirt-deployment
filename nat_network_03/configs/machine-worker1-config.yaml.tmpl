@@ -26,14 +26,14 @@ storage:
       mode: 0644
       contents:
         inline: ${host_name}
-    - path: /home/core/install-worker-components.sh
+    - path: /home/core/install-master-components.sh
       filesystem: root
       mode: 0755
       contents:
         inline: |
           #!/bin/bash
           set -euo pipefail
-          exec > /var/log/install-worker-components.log 2>&1
+          exec > /var/log/install-master-components.log 2>&1
 
           # Crear directorio para binarios
           sudo mkdir -p /opt/bin
@@ -48,6 +48,22 @@ storage:
           sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
+
+        
+          # Instalar kube-apiserver
+          curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-apiserver
+          sudo mv /tmp/kube-apiserver /opt/bin/kube-apiserver
+          sudo chmod +x /opt/bin/kube-apiserver
+
+          # Instalar kube-controller-manager
+          curl -L -o /tmp/kube-controller-manager https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-controller-manager
+          sudo mv /tmp/kube-controller-manager /opt/bin/kube-controller-manager
+          sudo chmod +x /opt/bin/kube-controller-manager
+
+          # Instalar kube-scheduler
+          curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-scheduler
+          sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
+          sudo chmod +x /opt/bin/kube-scheduler
 
           # Instalar Podman
           curl -L -o /tmp/podman.tar.gz https://github.com/containers/podman/releases/download/v3.4.2/podman-remote-static-v3.4.2-linux-amd64.tar.gz
@@ -82,6 +98,14 @@ storage:
           sudo systemctl start kubelet
           sudo systemctl enable crio
           sudo systemctl start crio
+          sudo systemctl enable etcd
+          sudo systemctl start etcd
+          sudo systemctl enable kube-apiserver
+          sudo systemctl start kube-apiserver
+          sudo systemctl enable kube-controller-manager
+          sudo systemctl start kube-controller-manager
+          sudo systemctl enable kube-scheduler
+          sudo systemctl start kube-scheduler
 
     - path: /etc/systemd/system/podman.service
       filesystem: root
@@ -176,18 +200,21 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
-    - name: install-worker-components.service
+    - name: install-master-components.service
       enabled: true
       contents: |
         [Unit]
-        Description=Install Kubernetes worker components
+        Description=Install Kubernetes master components
         After=network-online.target
         Wants=network-online.target
 
         [Service]
         Type=oneshot
-        ExecStart=/bin/bash /home/core/install-worker-components.sh
+        ExecStart=/bin/bash /home/core/install-master-components.sh
         RemainAfterExit=true
+
+        [Install]
+        WantedBy=multi-user.target
 
     - name: getty@tty1.service
       enabled: true
