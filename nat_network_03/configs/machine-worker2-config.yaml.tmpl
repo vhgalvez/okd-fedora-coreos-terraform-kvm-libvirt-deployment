@@ -62,6 +62,31 @@ storage:
           sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
 
+          # Install etcd
+          curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/v3.4.13/etcd-v3.4.13-linux-amd64.tar.gz
+          if ! tar -xzf /tmp/etcd.tar.gz -C /tmp; then
+            echo "Error extracting ETCD tarball."
+            exit 1
+          fi
+          sudo mv /tmp/etcd-v3.4.13-linux-amd64/etcd /opt/bin/etcd
+          sudo chmod +x /opt/bin/etcd
+          sudo rm -rf /tmp/etcd.tar.gz /tmp/etcd-v3.4.13-linux-amd64
+
+          # Install kube-apiserver
+          curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-apiserver
+          sudo mv /tmp/kube-apiserver /opt/bin/kube-apiserver
+          sudo chmod +x /opt/bin/kube-apiserver
+
+          # Install kube-controller-manager
+          curl -L -o /tmp/kube-controller-manager https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-controller-manager
+          sudo mv /tmp/kube-controller-manager /opt/bin/kube-controller-manager
+          sudo chmod +x /opt/bin/kube-controller-manager
+
+          # Install kube-scheduler
+          curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-scheduler
+          sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
+          sudo chmod +x /opt/bin/kube-scheduler
+
           # Enable and start services
           sudo systemctl daemon-reload
           sudo systemctl enable kubelet
@@ -162,3 +187,14 @@ systemd:
       contents: |
         [Unit]
         Description=Getty on tty1
+        After=systemd-user-sessions.service plymouth-quit-wait.service
+        After=rc-local.service
+        Wants=rc-local.service
+
+        [Service]
+        ExecStart=-/sbin/agetty %I $TERM
+        Type=idle
+        Restart=always
+
+        [Install]
+        WantedBy=multi-user.target
