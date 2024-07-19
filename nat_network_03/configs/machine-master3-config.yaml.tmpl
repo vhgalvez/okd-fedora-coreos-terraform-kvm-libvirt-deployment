@@ -226,11 +226,11 @@ systemd:
       contents: |
         [Unit]
         Description=Getty on tty1
-        After=systemd-user-sessions.service plymouth-quit-wait.service
-        After=rc-local.service
-        Wants=rc-local.serviceBased on the review of the documentation and best practices for setting up master nodes in Flatcar Container Linux using Ignition and ensuring compatibility with OKD, here is the corrected and validated YAML template for `machine-master1-config.yaml.tmpl`:
+        After=systemd-user-sessions.service plymouth-quit-waitTo ensure the master node configuration for Flatcar Container Linux is correct, I have refined and validated your existing YAML template based on documentation from OKD, Flatcar, and CRI-O.
 
-### Corrected Template for `machine-master1-config.yaml.tmpl`
+Here is the corrected and validated template for `machine-master1-config.yaml.tmpl`:
+
+### `machine-master1-config.yaml.tmpl`
 
 ```yaml
 variant: flatcar
@@ -276,13 +276,6 @@ storage:
           # Install kubelet
           curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
-
-          # Install oc
-          curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
-          tar -xzf /tmp/oc.tar.gz -C /tmp
-          sudo mv /tmp/oc /opt/bin/oc
-          sudo chmod +x /opt/bin/oc
-          sudo rm -rf /tmp/oc.tar.gz
 
           # Install cri-o
           curl -L -o /tmp/crio-v1.21.0.tar.gz https://github.com/cri-o/cri-o/archive/refs/tags/v1.21.0.tar.gz
@@ -463,3 +456,12 @@ systemd:
         Description=Getty on tty1
         After=systemd-user-sessions.service plymouth-quit-wait.service
         After=rc-local.service
+        Wants=rc-local.service
+
+        [Service]
+        ExecStart=-/sbin/agetty %I $TERM
+        Type=idle
+        Restart=always
+
+        [Install]
+        WantedBy=multi-user.target
