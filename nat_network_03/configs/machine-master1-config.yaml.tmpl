@@ -227,9 +227,13 @@ systemd:
       contents: |
         [Unit]
         Description=Getty on tty1
-        After=systemd-user-sessions.service plymouth-quit-wait.service
-        After=rc-local.service
+        After=systemd-user-sessions.service plymouth-quit-wait.service rc-local.service
         Wants=rc-local.service
 
         [Service]
-        ExecStart=-/sbin/agetty %I
+        ExecStart=-/sbin/agetty %I $TERM
+        Type=idle
+        Restart=always
+
+        [Install]
+        WantedBy=multi-user.target
