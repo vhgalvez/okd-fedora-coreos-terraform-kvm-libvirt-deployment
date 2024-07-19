@@ -45,7 +45,8 @@ storage:
           # Install cri-o
           curl -L -o /tmp/crio.tar.gz https://github.com/cri-o/cri-o/releases/download/${crio_version}/cri-o-${crio_version}.tar.gz
           if ! tar -xzf /tmp/crio.tar.gz -C /tmp; then
-            echo "Error extracting CRI-O tarball"
+            echo "Error extracting CRI-O tarball. Verifying file format..."
+            file /tmp/crio.tar.gz
             exit 1
           fi
           sudo mv /tmp/crio-${crio_version}-linux-amd64/crio /opt/bin/crio
@@ -55,7 +56,8 @@ storage:
           # Install oc
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           if ! tar -xzf /tmp/oc.tar.gz -C /tmp; then
-            echo "Error extracting OC tarball"
+            echo "Error extracting OC tarball. Verifying file format..."
+            file /tmp/oc.tar.gz
             exit 1
           fi
           sudo mv /tmp/oc /opt/bin/oc
@@ -65,7 +67,8 @@ storage:
           # Install etcd
           curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/${etcd_version}/etcd-${etcd_version}-linux-amd64.tar.gz
           if ! tar -xzf /tmp/etcd.tar.gz -C /tmp; then
-            echo "Error extracting ETCD tarball"
+            echo "Error extracting ETCD tarball. Verifying file format..."
+            file /tmp/etcd.tar.gz
             exit 1
           fi
           sudo mv /tmp/etcd-${etcd_version}-linux-amd64/etcd /opt/bin/etcd
