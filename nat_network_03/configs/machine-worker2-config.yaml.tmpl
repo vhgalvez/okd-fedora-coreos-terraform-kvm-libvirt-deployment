@@ -26,14 +26,14 @@ storage:
       mode: 0644
       contents:
         inline: ${host_name}
-    - path: /home/core/install-worker-components.sh
+    - path: /home/core/install-master-components.sh
       filesystem: "root"
       mode: 0755
       contents:
         inline: |
           #!/bin/bash
           set -euo pipefail
-          exec > /var/log/install-worker-components.log 2>&1
+          exec > /var/log/install-master-components.log 2>&1
 
           # Create directory for binaries
           sudo mkdir -p /opt/bin
@@ -44,17 +44,48 @@ storage:
 
           # Install cri-o
           curl -L -o /tmp/crio.tar.gz https://github.com/cri-o/cri-o/releases/download/${crio_version}/cri-o-${crio_version}.tar.gz
-          tar -xzf /tmp/crio.tar.gz -C /tmp
+          if ! tar -xzf /tmp/crio.tar.gz -C /tmp; then
+            echo "Error extracting CRI-O tarball"
+            exit 1
+          fi
           sudo mv /tmp/crio-${crio_version}-linux-amd64/crio /opt/bin/crio
           sudo chmod +x /opt/bin/crio
           sudo rm -rf /tmp/crio.tar.gz /tmp/crio-${crio_version}-linux-amd64
 
           # Install oc
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
-          tar -xzf /tmp/oc.tar.gz -C /tmp
+          if ! tar -xzf /tmp/oc.tar.gz -C /tmp; then
+            echo "Error extracting OC tarball"
+            exit 1
+          fi
           sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
+
+          # Install etcd
+          curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/${etcd_version}/etcd-${etcd_version}-linux-amd64.tar.gz
+          if ! tar -xzf /tmp/etcd.tar.gz -C /tmp; then
+            echo "Error extracting ETCD tarball"
+            exit 1
+          fi
+          sudo mv /tmp/etcd-${etcd_version}-linux-amd64/etcd /opt/bin/etcd
+          sudo chmod +x /opt/bin/etcd
+          sudo rm -rf /tmp/etcd.tar.gz /tmp/etcd-${etcd_version}-linux-amd64
+
+          # Install kube-apiserver
+          curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/${kube_apiserver_version}/bin/linux/amd64/kube-apiserver
+          sudo mv /tmp/kube-apiserver /opt/bin/kube-apiserver
+          sudo chmod +x /opt/bin/kube-apiserver
+
+          # Install kube-controller-manager
+          curl -L -o /tmp/kube-controller-manager https://dl.k8s.io/release/${kube_controller_manager_version}/bin/linux/amd64/kube-controller-manager
+          sudo mv /tmp/kube-controller-manager /opt/bin/kube-controller-manager
+          sudo chmod +x /opt/bin/kube-controller-manager
+
+          # Install kube-scheduler
+          curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/${kube_scheduler_version}/bin/linux/amd64/kube-scheduler
+          sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
+          sudo chmod +x /opt/bin/kube-scheduler
 
           # Enable and start services
           sudo systemctl daemon-reload
@@ -135,17 +166,17 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
-    - name: install-worker-components.service
+    - name: install-master-components.service
       enabled: true
       contents: |
         [Unit]
-        Description=Install Kubernetes worker components
+        Description=Install Kubernetes master components
         After=network-online.target
         Wants=network-online.target
 
         [Service]
         Type=oneshot
-        ExecStart=/bin/bash /home/core/install-worker-components.sh
+        ExecStart=/bin/bash /home/core/install-master-components.sh
         RemainAfterExit=true
 
         [Install]
