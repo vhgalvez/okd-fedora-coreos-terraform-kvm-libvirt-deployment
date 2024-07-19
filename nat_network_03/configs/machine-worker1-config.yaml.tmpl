@@ -49,21 +49,6 @@ storage:
           sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
 
-        
-          # Instalar kube-apiserver
-          curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-apiserver
-          sudo mv /tmp/kube-apiserver /opt/bin/kube-apiserver
-          sudo chmod +x /opt/bin/kube-apiserver
-
-          # Instalar kube-controller-manager
-          curl -L -o /tmp/kube-controller-manager https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-controller-manager
-          sudo mv /tmp/kube-controller-manager /opt/bin/kube-controller-manager
-          sudo chmod +x /opt/bin/kube-controller-manager
-
-          # Instalar kube-scheduler
-          curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-scheduler
-          sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
-          sudo chmod +x /opt/bin/kube-scheduler
 
           # Instalar Podman
           curl -L -o /tmp/podman.tar.gz https://github.com/containers/podman/releases/download/v3.4.2/podman-remote-static-v3.4.2-linux-amd64.tar.gz
