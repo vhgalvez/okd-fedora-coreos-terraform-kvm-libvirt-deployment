@@ -26,14 +26,14 @@ storage:
       mode: 0644
       contents:
         inline: ${host_name}
-    - path: /home/core/install-worker-components.sh
+    - path: /home/core/install-master-components.sh
       filesystem: "root"
       mode: 0755
       contents:
         inline: |
           #!/bin/bash
           set -euo pipefail
-          exec > /var/log/install-worker-components.log 2>&1
+          exec > /var/log/install-master-components.log 2>&1
 
           # Remount /usr as read-write
           sudo mount -o remount,rw /usr
@@ -47,7 +47,7 @@ storage:
           tar -xzf /tmp/crio.tar.gz -C /tmp
           sudo mv /tmp/crio-${crio_version}-linux-amd64/crio /opt/bin/crio
           sudo chmod +x /opt/bin/crio
-          sudo rm -rf /tmp/crio.tar.gz /tmp/crio-${crio-version}-linux-amd64
+          sudo rm -rf /tmp/crio.tar.gz /tmp/crio-${crio_version}-linux-amd64
 
           # Install oc
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
@@ -55,6 +55,28 @@ storage:
           sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
+
+          # Install etcd
+          curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/${etcd_version}/etcd-${etcd_version}-linux-amd64.tar.gz
+          tar -xzf /tmp/etcd.tar.gz -C /tmp
+          sudo mv /tmp/etcd-${etcd_version}-linux-amd64/etcd /opt/bin/etcd
+          sudo chmod +x /opt/bin/etcd
+          sudo rm -rf /tmp/etcd.tar.gz /tmp/etcd-${etcd_version}-linux-amd64
+
+          # Install kube-apiserver
+          curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/${kube_apiserver_version}/bin/linux/amd64/kube-apiserver
+          sudo mv /tmp/kube-apiserver /opt/bin/kube-apiserver
+          sudo chmod +x /opt/bin/kube-apiserver
+
+          # Install kube-controller-manager
+          curl -L -o /tmp/kube-controller-manager https://dl.k8s.io/release/${kube_controller_manager_version}/bin/linux/amd64/kube-controller-manager
+          sudo mv /tmp/kube-controller-manager /opt/bin/kube-controller-manager
+          sudo chmod +x /opt/bin/kube-controller-manager
+
+          # Install kube-scheduler
+          curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/${kube_scheduler_version}/bin/linux/amd64/kube-scheduler
+          sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
+          sudo chmod +x /opt/bin/kube-scheduler
 
           # Remount /usr as read-only
           sudo mount -o remount,ro /usr
@@ -111,62 +133,62 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Description: Apply custom network routes
-        After: network-online.target
-        Wants: network-online.target
+        Description=Apply custom network routes
+        After=network-online.target
+        Wants=network-online.target
 
         [Service]
-        Type: oneshot
-        ExecStart: /usr/bin/systemctl restart systemd-networkd.service
-        RemainAfterExit: true
+        Type=oneshot
+        ExecStart=/usr/bin/systemctl restart systemd-networkd.service
+        RemainAfterExit=true
 
         [Install]
-        WantedBy: multi-user.target
+        WantedBy=multi-user.target
 
     - name: set-hosts.service
       enabled: true
       contents: |
         [Unit]
-        Description: Set /etc/hosts file
-        After: network.target
+        Description=Set /etc/hosts file
+        After=network.target
 
         [Service]
-        Type: oneshot
-        ExecStart: /bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "${ip}  ${host_name} ${name}" >> /etc/hosts'
-        RemainAfterExit: true
+        Type=oneshot
+        ExecStart=/bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "${ip}  ${host_name} ${name}" >> /etc/hosts'
+        RemainAfterExit=true
 
         [Install]
-        WantedBy: multi-user.target
+        WantedBy=multi-user.target
 
-    - name: install-worker-components.service
+    - name: install-master-components.service
       enabled: true
       contents: |
         [Unit]
-        Description: Install Kubernetes worker components
-        After: network-online.target
-        Wants: network-online.target
+        Description=Install Kubernetes master components
+        After=network-online.target
+        Wants=network-online.target
 
         [Service]
-        Type: oneshot
-        ExecStart: /bin/bash /home/core/install-worker-components.sh
-        RemainAfterExit: true
+        Type=oneshot
+        ExecStart=/bin/bash /home/core/install-master-components.sh
+        RemainAfterExit=true
 
         [Install]
-        WantedBy: multi-user.target
+        WantedBy=multi-user.target
 
     - name: getty@tty1.service
       enabled: true
       contents: |
         [Unit]
-        Description: Getty on tty1
-        After: systemd-user-sessions.service plymouth-quit-wait.service
-        After: rc-local.service
-        Wants: rc-local.service
+        Description=Getty on tty1
+        After=systemd-user-sessions.service plymouth-quit-wait.service
+        After=rc-local.service
+        Wants=rc-local.service
 
         [Service]
-        ExecStart: -/sbin/agetty %I $TERM
-        Type: idle
-        Restart: always
+        ExecStart=-/sbin/agetty %I $TERM
+        Type=idle
+        Restart=always
 
         [Install]
-        WantedBy: multi-user.target
+        WantedBy=multi-user.target
