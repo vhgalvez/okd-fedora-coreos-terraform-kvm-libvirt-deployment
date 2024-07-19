@@ -13,12 +13,8 @@ passwd:
       lock_passwd: false
       ssh_authorized_keys:
         - ${ssh_keys}
-      passwd: $6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
-    - name: root
-      shell: /bin/bash
-      ssh_authorized_keys:
-        - ${ssh_keys}
-      passwd: $6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/
+      # Elimina la contraseña para evitar el auto-login
+      passwd: ""
 
 storage:
   files:
@@ -53,6 +49,10 @@ storage:
           mv /tmp/oc /usr/local/bin/oc
           chmod +x /usr/local/bin/oc
           rm -rf /tmp/oc.tar.gz
+
+          # Install qemu-guest-agent
+          sudo rpm-ostree install qemu-guest-agent
+          systemctl enable qemu-guest-agent --now
 
           # Enable and start services
           systemctl daemon-reload
