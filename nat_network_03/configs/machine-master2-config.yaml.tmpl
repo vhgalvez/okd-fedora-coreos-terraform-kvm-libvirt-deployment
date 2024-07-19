@@ -44,7 +44,10 @@ storage:
 
           # Install cri-o
           curl -L -o /tmp/crio.tar.gz https://github.com/cri-o/cri-o/releases/download/${crio_version}/cri-o-${crio_version}.tar.gz
-          tar -xzf /tmp/crio.tar.gz -C /tmp
+          if ! tar -xzf /tmp/crio.tar.gz -C /tmp; then
+            echo "Error extracting CRI-O tarball"
+            exit 1
+          fi
           mv /tmp/crio-${crio_version}-linux-amd64/crio /opt/bin/crio
           chmod +x /opt/bin/crio
           rm -rf /tmp/crio.tar.gz /tmp/crio-${crio_version}-linux-amd64

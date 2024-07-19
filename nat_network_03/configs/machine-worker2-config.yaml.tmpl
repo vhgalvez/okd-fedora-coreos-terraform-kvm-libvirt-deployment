@@ -40,21 +40,24 @@ storage:
 
           # Install kubelet
           curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/${kubelet_version}/bin/linux/amd64/kubelet
-          sudo chmod +x /opt/bin/kubelet
+          chmod +x /opt/bin/kubelet
 
           # Install cri-o
           curl -L -o /tmp/crio.tar.gz https://github.com/cri-o/cri-o/releases/download/${crio_version}/cri-o-${crio_version}.tar.gz
-          tar -xzf /tmp/crio.tar.gz -C /tmp
-          sudo mv /tmp/crio-${crio_version}-linux-amd64/crio /opt/bin/crio
-          sudo chmod +x /opt/bin/crio
-          sudo rm -rf /tmp/crio.tar.gz /tmp/crio-${crio_version}-linux-amd64
+          if ! tar -xzf /tmp/crio.tar.gz -C /tmp; then
+            echo "Error extracting CRI-O tarball"
+            exit 1
+          fi
+          mv /tmp/crio-${crio_version}-linux-amd64/crio /opt/bin/crio
+          chmod +x /opt/bin/crio
+          rm -rf /tmp/crio.tar.gz /tmp/crio-${crio_version}-linux-amd64
 
           # Install oc
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
-          sudo mv /tmp/oc /opt/bin/oc
-          sudo chmod +x /opt/bin/oc
-          sudo rm -rf /tmp/oc.tar.gz
+          mv /tmp/oc /opt/bin/oc
+          chmod +x /opt/bin/oc
+          rm -rf /tmp/oc.tar.gz
 
           # Enable and start services
           sudo systemctl daemon-reload
