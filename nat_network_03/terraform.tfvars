@@ -52,10 +52,3 @@ ssh_keys = [
 gateway = "10.17.4.1"
 dns1    = "10.17.3.11"
 dns2    = "8.8.8.8"
-
-kubelet_version                 = "v1.21.0"
-kube_apiserver_version          = "v1.21.0"
-etcd_version                    = "v3.4.13"
-crio_version                    = "1.21.0"
-kube_controller_manager_version = "v1.21.0"
-kube_scheduler_version          = "v1.21.0"

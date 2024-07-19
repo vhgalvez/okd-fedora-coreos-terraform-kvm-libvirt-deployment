@@ -155,18 +155,15 @@ Destruye y vuelve a crear los nodos maestros y trabajadores con las nuevas confi
 Validar la instalación
 Verifica el estado de los servicios:
 
-bash
-Copiar código
+
 sudo systemctl status kubelet
 sudo systemctl status crio
 sudo systemctl status etcd
 sudo systemctl status kube-apiserver
 sudo systemctl status kube-controller-manager
 sudo systemctl status kube-scheduler
-Verifica las versiones de los binarios instalados:
 
-bash
-Copiar código
+
 /opt/bin/kubelet --version
 /opt/bin/crio --version
 /opt/bin/oc version
@@ -174,10 +171,8 @@ Copiar código
 /opt/bin/kube-apiserver --version
 /opt/bin/kube-controller-manager --version
 /opt/bin/kube-scheduler --version
-Revisa los registros de instalación para asegurarte de que todos los componentes se hayan instalado correctamente:
 
-bash
-Copiar código
+
 sudo journalctl -u install-master-components.service
 sudo journalctl -u install-worker-components.service
 cat /var/log/install-master-components.log

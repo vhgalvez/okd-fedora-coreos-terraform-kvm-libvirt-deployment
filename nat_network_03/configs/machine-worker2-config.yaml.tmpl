@@ -39,18 +39,18 @@ storage:
           sudo mkdir -p /opt/bin
 
           # Install kubelet
-          curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/${kubelet_version}/bin/linux/amd64/kubelet
+          curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
 
           # Install cri-o
-          curl -L -o /tmp/crio.tar.gz https://github.com/cri-o/cri-o/releases/download/${crio_version}/cri-o-${crio_version}.tar.gz
+          curl -L -o /tmp/crio.tar.gz https://github.com/cri-o/cri-o/releases/download/v1.21.0/cri-o-1.21.0.tar.gz
           if ! tar -xzf /tmp/crio.tar.gz -C /tmp; then
             echo "Error extracting CRI-O tarball."
             exit 1
           fi
-          sudo mv /tmp/crio-${crio_version}-linux-amd64/crio /opt/bin/crio
+          sudo mv /tmp/crio-1.21.0-linux-amd64/crio /opt/bin/crio
           sudo chmod +x /opt/bin/crio
-          sudo rm -rf /tmp/crio.tar.gz /tmp/crio-${crio_version}-linux-amd64
+          sudo rm -rf /tmp/crio.tar.gz /tmp/crio-1.21.0-linux-amd64
 
           # Install oc
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
@@ -162,14 +162,3 @@ systemd:
       contents: |
         [Unit]
         Description=Getty on tty1
-        After=systemd-user-sessions.service plymouth-quit-wait.service
-        After=rc-local.service
-        Wants=rc-local.service
-
-        [Service]
-        ExecStart=-/sbin/agetty %I $TERM
-        Type=idle
-        Restart=always
-
-        [Install]
-        WantedBy=multi-user.target

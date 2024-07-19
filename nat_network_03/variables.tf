@@ -33,33 +33,3 @@ variable "dns2" {
   description = "Secondary DNS server"
   type        = string
 }
-
-variable "kubelet_version" {
-  description = "Version of Kubelet"
-  type        = string
-}
-
-variable "kube_apiserver_version" {
-  description = "Version of Kube-apiserver"
-  type        = string
-}
-
-variable "etcd_version" {
-  description = "Version of etcd"
-  type        = string
-}
-
-variable "crio_version" {
-  description = "Version of CRI-O"
-  type        = string
-}
-
-variable "kube_controller_manager_version" {
-  description = "Version of Kube-controller-manager"
-  type        = string
-}
-
-variable "kube_scheduler_version" {
-  description = "Version of Kube-scheduler"
-  type        = string
-}

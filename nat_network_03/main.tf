@@ -57,12 +57,6 @@ data "template_file" "vm-configs" {
     dns1                            = var.dns1
     dns2                            = var.dns2
     ip                              = each.value.ip
-    kubelet_version                 = var.kubelet_version
-    kube_apiserver_version          = var.kube_apiserver_version
-    etcd_version                    = var.etcd_version
-    crio_version                    = var.crio_version
-    kube_controller_manager_version = var.kube_controller_manager_version
-    kube_scheduler_version          = var.kube_scheduler_version
   }
 }
 
