@@ -242,3 +242,27 @@ sudo systemctl enable kubelet
 sudo systemctl start kubelet
 sudo systemctl enable crio
 sudo systemctl start crio
+
+
+# Nodos Maestros (Flatcar Container Linux)
+
+- kubelet
+- cri-o
+- oc (OpenShift Client)
+- etcd
+- kube-apiserver
+- kube-controller-manager
+- kube-scheduler
+
+# Nodos Trabajadores (Flatcar Container Linux)
+
+- kubelet
+- cri-o
+- oc (OpenShift Client)
+
+# Nodo de Arranque (Bootstrap) (Rocky Linux)
+
+- kubelet
+- cri-o
+- oc (OpenShift Client)
+- openshift-install
