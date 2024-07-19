@@ -228,6 +228,7 @@ sudo chmod +x /opt/bin/kube-scheduler
 
 __
 
+
 # Install cri-o
 curl -L -o /tmp/crio.tar.gz https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/1.21:/1.21.0/x86_64/cri-o-1.21.0.x86_64.rpm
 sudo rpm2cpio /tmp/crio.tar.gz | sudo cpio -idmv
