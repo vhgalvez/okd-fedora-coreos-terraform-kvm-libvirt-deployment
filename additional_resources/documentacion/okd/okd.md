@@ -363,3 +363,18 @@ sh
 Copiar código
 oc logs <nombre-del-pod> -n <namespace>
 Con estos pasos, deberías poder continuar con la configuración de tu clúster OpenShift. Si hay algún problema específico, por favor proporciona los detalles y los registros relevantes para poder ayudarte mejor.
+
+
+
+sudo virsh destroy master1
+sudo virsh undefine master1
+sudo virsh destroy master2
+sudo virsh undefine master2
+sudo virsh destroy master3
+sudo virsh undefine master3
+sudo virsh destroy worker1
+sudo virsh undefine worker1
+sudo virsh destroy worker2
+sudo virsh undefine worker2
+sudo virsh destroy worker3
+sudo virsh undefine worker3
