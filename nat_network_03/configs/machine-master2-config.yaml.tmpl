@@ -71,6 +71,15 @@ storage:
           sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
           sudo chmod +x /opt/bin/kube-scheduler
 
+          # Install Podman
+          sudo curl -L -o /usr/bin/podman https://github.com/containers/podman/releases/download/v3.4.2/podman-remote-static-v3.4.2-linux-amd64.tar.gz
+          sudo tar -xzf /usr/bin/podman -C /usr/bin/
+          sudo chmod +x /usr/bin/podman
+          sudo rm -rf /usr/bin/podman
+
+          # Verify Podman installation
+          podman --version
+
           # Configure and start CRI-O
           sudo mkdir -p /etc/systemd/system/
           cat <<EOF | sudo tee /etc/systemd/system/crio.service
