@@ -12,25 +12,6 @@ passwd:
       groups: [adm, wheel]
       lock_passwd: false
       ssh_authorized_keys:
-        -Here's the complete YAML template for `machine-worker1-config.yaml.tmpl`, ensuring the installation of necessary components (`kubelet`, `cri-o`, and `oc`) on a worker node of Flatcar Container Linux using Ignition.
-
-### `machine-worker1-config.yaml.tmpl`
-
-```yaml
-variant: flatcar
-version: 1.1.0
-
-ignition:
-  version: 3.4.0
-
-passwd:
-  users:
-    - name: core
-      shell: /bin/bash
-      sudo: ["ALL=(ALL) NOPASSWD:ALL"]
-      groups: [adm, wheel]
-      lock_passwd: false
-      ssh_authorized_keys:
         - ${ssh_keys}
     - name: root
       shell: /bin/bash
