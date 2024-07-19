@@ -173,7 +173,9 @@ sudo systemctl status kube-scheduler
 /opt/bin/kube-scheduler --version
 
 
-sudo journalctl -u install-master-components.service
-sudo journalctl -u install-worker-components.service
 cat /var/log/install-master-components.log
 cat /var/log/install-worker-components.log
+
+sudo journalctl -u install-master-components.service
+
+sudo journalctl -u install-worker-components.service

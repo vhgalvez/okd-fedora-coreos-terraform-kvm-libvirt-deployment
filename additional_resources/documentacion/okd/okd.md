@@ -378,3 +378,79 @@ sudo virsh destroy worker2
 sudo virsh undefine worker2
 sudo virsh destroy worker3
 sudo virsh undefine worker3
+__________
+
+
+Pasos para Instalar CRI-O en Flatcar Container Linux
+1. Descargar e Instalar binarios de CRI-O:
+Primero, asegúrate de tener los binarios necesarios para CRI-O. Debido a que la descarga anterior de CRI-O no funcionó, intentaremos con un enlace diferente o mediante la construcción desde el código fuente si es necesario.
+
+Usar CRI-O desde Source (código fuente)
+1. Descargar el código fuente de CRI-O:
+sh
+Copiar código
+curl -L -o crio-v1.21.0.tar.gz https://github.com/cri-o/cri-o/archive/refs/tags/v1.21.0.tar.gz
+tar -xzf crio-v1.21.0.tar.gz -C /tmp
+2. Construir y mover el binario de crio:
+Flatcar no tiene herramientas de construcción por defecto, necesitarás instalarlas o usarlas en un contenedor.
+
+Usar un contenedor para construir CRI-O:
+Puedes usar un contenedor de golang para construir CRI-O:
+
+sh
+Copiar código
+# Ejecuta el contenedor de golang
+docker run --rm -it -v /tmp/cri-o-1.21.0:/usr/src/cri-o -w /usr/src/cri-o golang:1.16 bash
+
+# Dentro del contenedor, ejecuta:
+make clean
+make binaries
+
+# Sal del contenedor y luego copia los binarios a tu sistema Flatcar
+exit
+sudo cp /tmp/cri-o-1.21.0/bin/* /opt/bin/
+sudo chmod +x /opt/bin/crio
+Configuración de CRI-O:
+Crear la configuración necesaria para CRI-O:
+sh
+Copiar código
+sudo mkdir -p /etc/crio
+cat <<EOF | sudo tee /etc/crio/crio.conf
+[crio]
+version = "1.21.0"
+[crio.runtime]
+conmon = "/usr/bin/conmon"
+EOF
+Crear el servicio systemd para CRI-O:
+sh
+Copiar código
+sudo mkdir -p /etc/systemd/system/
+cat <<EOF | sudo tee /etc/systemd/system/crio.service
+[Unit]
+Description=CRI-O daemon
+Documentation=https://github.com/cri-o/cri-o
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/opt/bin/crio
+Restart=always
+RestartSec=10s
+StartLimitInterval=0
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=infinity
+TasksMax=infinity
+OOMScoreAdjust=-999
+
+[Install]
+WantedBy=multi-user.target
+EOF
+Habilitar y arrancar el servicio de CRI-O:
+sh
+Copiar código
+sudo systemctl daemon-reload
+sudo systemctl enable crio
+sudo systemctl start crio
+Nota
+Flatcar Container Linux es un sistema operativo especializado para ejecutar contenedores y puede no tener todas las herramientas disponibles en sistemas operativos más generales como CentOS o Ubuntu. En caso de cualquier problema con las dependencias, considera usar un sistema operativo que tenga mejor soporte para estas herramientas como Fedora CoreOS que también está diseñado para Kubernetes y OKD.
