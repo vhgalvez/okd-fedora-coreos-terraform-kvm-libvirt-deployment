@@ -43,14 +43,14 @@ storage:
           sudo chmod +x /opt/bin/kubelet
 
           # Install cri-o
-          curl -L -o /tmp/crio.tar.gz https://github.com/cri-o/cri-o/releases/download/v1.21.0/cri-o-1.21.0.tar.gz
+          curl -L -o /tmp/crio.tar.gz https://github.com/cri-o/cri-o/releases/download/v1.21.0/cri-o-1.21.0-linux-amd64.tar.gz
           if ! tar -xzf /tmp/crio.tar.gz -C /tmp; then
             echo "Error extracting CRI-O tarball."
             exit 1
           fi
-          sudo mv /tmp/crio-1.21.0-linux-amd64/crio /opt/bin/crio
+          sudo mv /tmp/cri-o-1.21.0-linux-amd64/crio /opt/bin/crio
           sudo chmod +x /opt/bin/crio
-          sudo rm -rf /tmp/crio.tar.gz /tmp/crio-1.21.0-linux-amd64
+          sudo rm -rf /tmp/crio.tar.gz /tmp/cri-o-1.21.0-linux-amd64
 
           # Install oc
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz

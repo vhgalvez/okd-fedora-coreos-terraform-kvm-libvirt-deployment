@@ -26,6 +26,45 @@ storage:
       mode: 0644
       contents:
         inline: ${host_name}
+    - path: /home/core/install-worker-components.sh
+      filesystem: "root"
+      mode: 0755
+      contents:
+        inline: |
+          #!/bin/bash
+          set -euo pipeAquí tienes las plantillas de Ignition completas para los nodos master y worker, con los scripts necesarios para instalar todos los componentes requeridos, incluyendo CRI-O en Flatcar Container Linux.
+
+### Plantilla para Master
+
+```yaml
+variant: flatcar
+version: 1.1.0
+
+ignition:
+  version: 3.4.0
+
+passwd:
+  users:
+    - name: core
+      shell: /bin/bash
+      sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+      groups: [adm, wheel]
+      lock_passwd: false
+      ssh_authorized_keys:
+        - ${ssh_keys}
+    - name: root
+      shell: /bin/bash
+      ssh_authorized_keys:
+        - ${ssh_keys}
+      password_hash: "$6$hNh1nwO5OWWct4aZ$OoeAkQ4gKNBnGYK0ECi8saBMbUNeQRMICcOPYEu1bFuj9Axt4Rh6EnGba07xtIsGNt2wP9SsPlz543gfJww11/"
+
+storage:
+  files:
+    - path: /etc/hostname
+      filesystem: "root"
+      mode: 0644
+      contents:
+        inline: ${host_name}
     - path: /home/core/install-master-components.sh
       filesystem: "root"
       mode: 0755
@@ -48,9 +87,9 @@ storage:
             echo "Error extracting CRI-O tarball."
             exit 1
           fi
-          sudo mv /tmp/crio-1.21.0-linux-amd64/crio /opt/bin/crio
+          sudo mv /tmp/crio-1.21.0/bin/crio /opt/bin/crio
           sudo chmod +x /opt/bin/crio
-          sudo rm -rf /tmp/crio.tar.gz /tmp/crio-1.21.0-linux-amd64
+          sudo rm -rf /tmp/crio.tar.gz /tmp/crio-1.21.0
 
           # Install oc
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz

@@ -179,3 +179,66 @@ cat /var/log/install-worker-components.log
 sudo journalctl -u install-master-components.service
 
 sudo journalctl -u install-worker-components.service
+
+_______________
+
+
+
+
+
+# paquetes necesarios
+
+# Create directory for binaries
+
+sudo mkdir -p /opt/bin
+
+
+# Install kubelet
+curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
+sudo chmod +x /opt/bin/kubelet
+
+# Install oc
+curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
+tar -xzf /tmp/oc.tar.gz -C /tmp
+sudo mv /tmp/oc /opt/bin/oc
+sudo chmod +x /opt/bin/oc
+sudo rm -rf /tmp/oc.tar.gz
+
+# Install etcd
+curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/v3.4.13/etcd-v3.4.13-linux-amd64.tar.gz
+tar -xzf /tmp/etcd.tar.gz -C /tmp
+sudo mv /tmp/etcd-v3.4.13-linux-amd64/etcd /opt/bin/etcd
+sudo chmod +x /opt/bin/etcd
+sudo rm -rf /tmp/etcd.tar.gz /tmp/etcd-v3.4.13-linux-amd64
+
+# Install kube-apiserver
+curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-apiserver
+sudo mv /tmp/kube-apiserver /opt/bin/kube-apiserver
+sudo chmod +x /opt/bin/kube-apiserver
+
+# Install kube-controller-manager
+curl -L -o /tmp/kube-controller-manager https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-controller-manager
+sudo mv /tmp/kube-controller-manager /opt/bin/kube-controller-manager
+sudo chmod +x /opt/bin/kube-controller-manager
+
+# Install kube-scheduler
+curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-scheduler
+sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
+sudo chmod +x /opt/bin/kube-scheduler
+
+__
+
+# Install cri-o
+curl -L -o /tmp/crio.tar.gz https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/1.21:/1.21.0/x86_64/cri-o-1.21.0.x86_64.rpm
+sudo rpm2cpio /tmp/crio.tar.gz | sudo cpio -idmv
+sudo mv ./usr/bin/crio /opt/bin/
+sudo chmod +x /opt/bin/crio
+rm -rf /tmp/crio.tar.gz ./usr
+
+
+# Enable and start services
+sudo systemctl daemon-reload
+sudo systemctl enable kubelet
+sudo systemctl start kubelet
+sudo systemctl enable crio
+sudo systemctl start crio
