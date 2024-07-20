@@ -35,33 +35,35 @@ storage:
           set -euo pipefail
           exec > /var/log/install-components.log 2>&1
 
-          # Create directory for binaries
+          # Crear directorio para binarios
           sudo mkdir -p /opt/bin
 
-          # Install kubelet
+          # Instalar kubelet
           curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
 
-          # Install oc (OpenShift Client)
+          # Instalar oc (OpenShift Client)
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
           sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
 
-          # Install Podman (required for CRI-O)
+          # Instalar Podman
           curl -L -o /tmp/podman.tar.gz https://github.com/containers/podman/releases/download/v3.4.2/podman-remote-static-v3.4.2-linux-amd64.tar.gz
           sudo tar -xzf /tmp/podman.tar.gz -C /usr/bin/
           sudo chmod +x /usr/bin/podman
           sudo rm -rf /tmp/podman.tar.gz
+
+          # Verificar instalación de Podman
           podman --version
 
-          # Install CRI-O
+          # Instalar CRI-O
           curl -L -o /tmp/crio-v1.21.0.tar.gz https://github.com/cri-o/cri-o/archive/refs/tags/v1.21.0.tar.gz
           tar -xzf /tmp/crio-v1.21.0.tar.gz -C /tmp
 
           # Use a container to build CRI-O binaries
-          podman run --rm -it -v /tmp/cri-o-1.21.0:/usr/src/cri-o -w /usr/src/cri-o golang:1.16 bash -c "make clean && make binaries"
+          docker run --rm -it -v /tmp/cri-o-1.21.0:/usr/src/cri-o -w /usr/src/cri-o golang:1.16 bash -c "make clean && make binaries"
 
           # Copy binaries to Flatcar
           sudo cp /tmp/cri-o-1.21.0/bin/* /opt/bin/
@@ -100,12 +102,17 @@ storage:
           OOMScoreAdjust=-999
           EOF
 
-          # Reload systemd and start services
+          # Recargar systemd y activar servicios
           sudo systemctl daemon-reload
           sudo systemctl enable kubelet
           sudo systemctl start kubelet
           sudo systemctl enable crio
           sudo systemctl start crio
+
+          # Verificar las instalaciones
+          sudo kubelet --version
+          sudo oc version
+          sudo crio --version
 
     - path: /etc/systemd/system/podman.service
       filesystem: root
@@ -200,18 +207,21 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
-    - name: install-master-components.service
+    - name: install-components.service
       enabled: true
       contents: |
         [Unit]
-        Description=Install Kubernetes master components
+        Description=Install Kubernetes components
         After=network-online.target
         Wants=network-online.target
 
         [Service]
         Type=oneshot
-        ExecStart=/bin/bash /home/core/install-master-components.sh
+        ExecStart=/bin/bash /home/core/install-components.sh
         RemainAfterExit=true
+
+        [Install]
+        WantedBy=multi-user.target
 
     - name: getty@tty1.service
       enabled: true
