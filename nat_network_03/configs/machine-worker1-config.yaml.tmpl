@@ -109,10 +109,6 @@ storage:
           sudo systemctl enable crio
           sudo systemctl start crio
 
-          # Verificar las instalaciones
-          sudo kubelet --version
-          sudo oc version
-          sudo crio --version
 
     - path: /etc/systemd/system/podman.service
       filesystem: root
