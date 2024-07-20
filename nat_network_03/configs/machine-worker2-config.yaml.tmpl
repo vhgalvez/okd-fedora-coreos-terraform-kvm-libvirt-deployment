@@ -63,7 +63,7 @@ storage:
           tar -xzf /tmp/crio-v1.21.0.tar.gz -C /tmp
 
           # Use a container to build CRI-O binaries
-          docker run --rm -it -v /tmp/cri-o-1.21.0:/usr/src/cri-o -w /usr/src/cri-o golang:1.16 bash -c "make clean && make binaries"
+          podman run --rm -it -v /tmp/cri-o-1.21.0:/usr/src/cri-o -w /usr/src/cri-o golang:1.16 bash -c "make clean && make binaries"
 
           # Copy binaries to Flatcar
           sudo cp /tmp/cri-o-1.21.0/bin/* /opt/bin/
