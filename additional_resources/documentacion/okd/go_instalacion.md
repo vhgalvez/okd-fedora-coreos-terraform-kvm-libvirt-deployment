@@ -48,5 +48,3 @@
 core@worker1 ~ $ go version
 go version go1.16.15 linux/amd64
 ```
-
-### Conclusion
