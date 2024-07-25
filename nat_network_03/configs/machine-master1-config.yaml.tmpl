@@ -227,21 +227,45 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Description=Set hosts file
-        After=network-online.target
-        Wants=network-online.target
-        Before=kubelet.service
-        Before=crio.service
-        
+        Description=Set /etc/hosts file
+        After=network.target
+
         [Service]
         Type=oneshot
-        ExecStart=/usr/bin/systemctl restart systemd-networkd.service
+        ExecStart=/bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "${ip}  ${host_name} ${name}" >> /etc/hosts'
         RemainAfterExit=true
-        
+
         [Install]
         WantedBy=multi-user.target
 
-        
+    - name: install-components.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Install Kubernetes components
+        After=network-online.target
+        Wants=network-online.target
 
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/bash /home/core/install-components.sh
+        RemainAfterExit=true
 
+        [Install]
+        WantedBy=multi-user.target
 
+    - name: getty@tty1.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Getty on tty1
+        After=systemd-user-sessions.service plymouth-quit-wait.service rc-local.service
+        Wants=rc-local.service
+
+        [Service]
+        ExecStart=-/sbin/agetty %I $TERM
+        Type=idle
+        Restart=always
+
+        [Install]
+        WantedBy=multi-user.target
