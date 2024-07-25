@@ -49,7 +49,7 @@ sudo mkdir -p /etc/crio/
 Luego, edita el archivo de configuración:
 
 ```bash
-sudo nano /etc/crio/crio.conf
+sudo vi /etc/crio/crio.conf
 ```
 
 Y agrega el siguiente contenido:
