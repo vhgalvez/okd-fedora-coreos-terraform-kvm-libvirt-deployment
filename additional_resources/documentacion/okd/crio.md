@@ -18,16 +18,22 @@
     sudo tar -xzf /tmp/crio.tar.gz -C /tmp/crio
     ```
 
-4. **Mover los binarios a `/usr/local/bin` donde deberían tener permisos de escritura:**
+4. **Crear el directorio `/opt/bin/crio` si no existe:**
 
     ```bash
-    sudo mv /tmp/crio/cri-o/bin/* /usr/local/bin/
+    sudo mkdir -p /opt/bin/crio
     ```
 
-5. **Verificar la instalación de CRI-O:**
+5. **Mover los binarios a `/opt/bin/crio/` donde deberían tener permisos de escritura:**
 
     ```bash
-    crio --version
+    sudo mv /tmp/crio/cri-o/bin/* /opt/bin/crio/
+    ```
+
+6. **Verificar la instalación de CRI-O:**
+
+    ```bash
+    /opt/bin/crio/crio --version
     ```
 
 Estos pasos asegurarán que el binario de CRI-O se descargue, extraiga y coloque en el directorio adecuado para su ejecución.
