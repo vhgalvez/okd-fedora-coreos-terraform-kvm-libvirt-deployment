@@ -185,6 +185,27 @@ Confirmar los Binarios de CRI-O y Permisos:
 ls -l /opt/bin/crio/
 ```
 
+```bash
+core@worker3 ~ $ ls -l /opt/bin/crio/
+total 130896
+-rwxr-xr-x. 1 root root    1969712 May 17 08:50 conmon
+-rwxr-xr-x. 1 1001 docker 58376628 Apr 18 08:21 crictl
+-rwxr-xr-x. 1 1001 docker 51066800 Jul  1 11:27 crio
+-rwxr-xr-x. 1 1001 docker  1969712 Jul  1 11:28 crio-conmon
+-rwxr-xr-x. 1 1001 docker  6197224 Jul  1 11:28 crio-conmonrs
+-rwxr-xr-x. 1 1001 docker  2931384 Jul  1 11:28 crio-crun
+-rwxr-xr-x. 1 1001 docker 10802720 Jul  1 11:28 crio-runc
+-rwxr-xr-x. 1 1001 docker   708720 Jul  1 11:27 pinns
+core@worker3 ~ $ ls -l /opt/bin/
+total 235528
+drwxr-xr-x. 2 root root      4096 Jul 25 14:34 crio
+-rwxr-xr-x. 1 root root 118062928 Jul 25 14:22 kubelet
+-rwxr-xr-x. 1 root root 123112560 Aug 31  2021 oc
+core@worker3 ~ $
+```
+
+
+
 Con estos pasos, CRI-O y conmon deberían estar correctamente instalados y configurados en tu sistema. Si encuentras algún problema, revisa los logs y la configuración de tu entorno para resolver cualquier inconveniente.
 
 
