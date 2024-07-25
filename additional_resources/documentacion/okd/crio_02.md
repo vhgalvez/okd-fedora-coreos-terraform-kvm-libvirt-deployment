@@ -94,10 +94,11 @@ image_volumes = "mkdir"
 [crio.network]
 network_dir = "/etc/cni/net.d/"
 plugin_dirs = ["/opt/cni/bin/"]
+```
+
 Archivo del Servicio (/etc/systemd/system/crio.service):
 
-ini
-Copiar código
+```ini
 [Unit]
 Description=CRI-O container runtime
 After=network.target
