@@ -1,52 +1,60 @@
-Documentación de Instalación y Configuración de CRI-O
+# Documentación de Instalación y Configuración de CRI-O
+
 1. Instalación de CRI-O
-Paso 1: Descargar el Binario de CRI-O
 
-bash
-Copiar código
+## Paso 1: Descargar el Binario de CRI-O
+
+```bash
 sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.3.tar.gz
-Paso 2: Crear un Directorio Temporal
+```
+## Paso 2: Crear un Directorio Temporal
 
-bash
-Copiar código
+```bash
 sudo mkdir -p /tmp/crio
-Paso 3: Extraer el Archivo Descargado
+```
+## Paso 3: Extraer el Archivo Descargado
 
-bash
-Copiar código
-sudo tar -xzf /tmp/crio.tar.gz -C /tmp/crio
-Paso 4: Crear el Directorio de Instalación
+```bash
+¡sudo tar -xzf /tmp/crio.tar.gz -C /tmp/crio
+```
 
-bash
-Copiar código
+## Paso 4: Crear el Directorio de Instalación
+
+```bash
 sudo mkdir -p /opt/bin/crio
-Paso 5: Mover los Binarios a /opt/bin/crio/
+```
 
-bash
-Copiar código
+## Paso 5: Mover los Binarios a /opt/bin/crio/
+
+```bash
 sudo mv /tmp/crio/cri-o/bin/* /opt/bin/crio/
-Paso 6: Verificar la Instalación
+```
 
-bash
-Copiar código
+## Paso 6: Verificar la Instalación
+
+```bash
 /opt/bin/crio/crio --version
-2. Configuración de CRI-O
+```
+
+1. Configuración de CRI-O
+   
 Archivo de Configuración (/etc/crio/crio.conf):
 
 Primero, asegúrate de que el directorio /etc/crio/ exista:
 
-bash
-Copiar código
+```bash
 sudo mkdir -p /etc/crio/
+```
+
 Luego, edita el archivo de configuración:
 
-bash
-Copiar código
+```bash
 sudo nano /etc/crio/crio.conf
+```
+
 Y agrega el siguiente contenido:
 
-ini
-Copiar código
+```ini
 [crio]
 log_level = "debug"
 root = "/var/lib/crio"
@@ -105,63 +113,77 @@ LimitNPROC=4096
 
 [Install]
 WantedBy=multi-user.target
-3. Verificación del Servicio
+```
+
+1. Verificación del Servicio
+   
 Estado del Servicio:
 
-bash
-Copiar código
+```bash
 sudo systemctl status crio
+```
+
 Verificación de Logs:
 
-bash
-Copiar código
+```bash
 sudo journalctl -u crio -f
+```
+
 Reiniciar el Servicio (si se realizan cambios):
 
-bash
-Copiar código
+```bash
 sudo systemctl restart crio
 sudo systemctl status crio
-4. Instalación y Configuración de conmon
+```
+
+1. Instalación y Configuración de conmon
+   
 Descargar conmon:
 
-bash
-Copiar código
+```bash
 wget https://github.com/containers/conmon/releases/download/v2.1.12/conmon.amd64
+```
+
 Mover y Renombrar el Archivo Descargado:
 
-bash
-Copiar código
+```bash
 sudo mkdir -p /opt/bin/crio
 sudo mv conmon.amd64 /opt/bin/crio/conmon
+```
+
 Dar Permisos de Ejecución:
 
-bash
-Copiar código
+```bash
 sudo chmod +x /opt/bin/crio/conmon
+```
+
 Actualizar crio.conf para Reflejar la Ruta Correcta de conmon
 
 Asegúrate de que la siguiente línea esté correctamente establecida en /etc/crio/crio.conf bajo la sección [crio.runtime]:
 
-ini
-Copiar código
+```ini
 conmon = "/opt/bin/crio/conmon"
+```
+
 Recargar y Reiniciar CRI-O:
 
-bash
-Copiar código
+```bash
 sudo systemctl daemon-reload
 sudo systemctl restart crio
+```
+
 Verificar el Estado de CRI-O:
 
-bash
-Copiar código
+```bash
 sudo systemctl status crio
+```
+
 Confirmar los Binarios de CRI-O y Permisos:
 
-bash
-Copiar código
+```bash
 ls -l /opt/bin/crio/
+```
+
 Con estos pasos, CRI-O y conmon deberían estar correctamente instalados y configurados en tu sistema. Si encuentras algún problema, revisa los logs y la configuración de tu entorno para resolver cualquier inconveniente.
 
 
