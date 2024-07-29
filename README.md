@@ -585,7 +585,7 @@ url:   https://console.redhat.com/openshift/create/local
                                                 v
                                     +-----------+----------+
                                     |  Bootstrap (OKD)     |
-                                    |   IP: 10.17.3.12     |
+                                    |   IP: 10.17.3.14     |
                                     +-----------+----------+
                                                 |
                                                 v
