@@ -233,7 +233,6 @@ sudo vim /etc/systemd/system/etcd.service
 ```
 
 
-    
 ```ini
 [Unit]
 Description=etcd
@@ -269,5 +268,3 @@ LimitNOFILE=40000
 [Install]
 WantedBy=multi-user.target
 ```
-
-
