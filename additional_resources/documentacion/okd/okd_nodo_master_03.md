@@ -103,3 +103,118 @@ Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 ```
+
+___
+
+
+________
+
+
+
+export ETCD_NAME="etcd0"
+export ETCD_DATA_DIR="/var/lib/etcd"
+export ETCD_INITIAL_ADVERTISE_PEER_URLS="http://10.17.4.21:2380"
+export ETCD_LISTEN_PEER_URLS="http://10.17.4.21:2380"
+export ETCD_LISTEN_CLIENT_URLS="http://10.17.4.21:2379,http://127.0.0.1:2379"
+export ETCD_ADVERTISE_CLIENT_URLS="http://10.17.4.21:2379"
+export ETCD_INITIAL_CLUSTER="etcd0=http://10.17.4.21:2380"
+export ETCD_INITIAL_CLUSTER_STATE="new"
+export ETCD_INITIAL_CLUSTER_TOKEN="etcd-cluster"
+
+
+sudo chown -R etcd:etcd /var/lib/etcd
+sudo chmod -R 700 /var/lib/etcd
+
+
+
+Para asegurar que etcd se ejecute correctamente, necesitas asegurarte de que la configuración es correcta y que etcd esté efectivamente escuchando en las direcciones y puertos adecuados. También es importante verificar los archivos de logs para entender qué puede estar fallando.
+
+Verificar el estado de etcd
+Primero, verifica el estado del servicio etcd:
+
+sh
+Copiar código
+sudo systemctl status etcd
+Si el servicio etcd no está activo, revisa los logs para identificar el problema:
+
+sh
+Copiar código
+sudo journalctl -u etcd -f
+Archivos de configuración de etcd
+El archivo /etc/systemd/system/etcd.service que proporcionaste parece estar bien, pero asegúrate de que las direcciones IP y puertos están configurados correctamente para tu entorno.
+
+Configuración del Servicio etcd
+Verifica y ajusta la configuración del servicio etcd si es necesario. Aquí está un ejemplo de una configuración típica para un clúster etcd:
+
+```ini
+[Unit]
+Description=etcd
+Documentation=https://github.com/coreos/etcd
+After=network.target
+
+[Service]
+User=etcd
+Type=notify
+Environment="ETCD_DATA_DIR=/var/lib/etcd"
+Environment="ETCD_NAME=etcd0"
+Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=http://10.17.4.21:2380"
+Environment="ETCD_LISTEN_PEER_URLS=http://10.17.4.21:2380"
+Environment="ETCD_LISTEN_CLIENT_URLS=http://10.17.4.21:2379,http://127.0.0.1:2379"
+Environment="ETCD_ADVERTISE_CLIENT_URLS=http://10.17.4.21:2379"
+Environment="ETCD_INITIAL_CLUSTER=etcd0=http://10.17.4.21:2380"
+Environment="ETCD_INITIAL_CLUSTER_STATE=new"
+Environment="ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster"
+ExecStart=/opt/bin/etcd
+Restart=always
+RestartSec=10s
+LimitNOFILE=40000
+
+[Install]
+WantedBy=multi-user.target
+```
+
+
+
+Asegúrate de que las variables de entorno están definidas correctamente. Puedes definir estas variables en el archivo de servicio o exportarlas antes de iniciar el servicio:
+
+```sh
+export ETCD_NAME="etcd0"
+export ETCD_DATA_DIR="/var/lib/etcd"
+export ETCD_INITIAL_ADVERTISE_PEER_URLS="http://10.17.4.21:2380"
+export ETCD_LISTEN_PEER_URLS="http://10.17.4.21:2380"
+export ETCD_LISTEN_CLIENT_URLS="http://10.17.4.21:2379,http://127.0.0.1:2379"
+export ETCD_ADVERTISE_CLIENT_URLS="http://10.17.4.21:2379"
+export ETCD_INITIAL_CLUSTER="etcd0=http://10.17.4.21:2380"
+export ETCD_INITIAL_CLUSTER_STATE="new"
+export ETCD_INITIAL_CLUSTER_TOKEN="etcd-cluster"
+```
+
+Permisos y Propietario
+Asegúrate de que los permisos y el propietario del directorio de datos de etcd están configurados correctamente:
+
+sh
+Copiar código
+sudo chown -R etcd:etcd /var/lib/etcd
+sudo chmod -R 700 /var/lib/etcd
+Reiniciar el Servicio etcd
+Después de verificar la configuración y permisos, reinicia el servicio etcd:
+
+sh
+Copiar código
+sudo systemctl daemon-reload
+sudo systemctl restart etcd
+Verificar el Estado de etcd
+Finalmente, verifica el estado de etcd nuevamente para asegurarte de que está activo y funcionando correctamente:
+
+sh
+Copiar código
+sudo systemctl status etcd
+Si el servicio sigue sin funcionar, consulta los logs para identificar problemas específicos:
+
+sh
+Copiar código
+sudo journalctl -u etcd -f
+Configuración para el Entorno de Producción
+Si estás configurando etcd para un entorno de producción con múltiples nodos, necesitarás ajustar las direcciones IP y los puertos en consecuencia y asegurarte de que todos los nodos en el clúster de etcd pueden comunicarse entre sí.
+
+Con estas configuraciones y pasos, deberías poder asegurarte de que etcd está configurado correctamente y funcionando como se espera
