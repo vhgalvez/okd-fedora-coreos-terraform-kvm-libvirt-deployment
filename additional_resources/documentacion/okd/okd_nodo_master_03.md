@@ -216,3 +216,58 @@ Configuración para el Entorno de Producción
 Si estás configurando etcd para un entorno de producción con múltiples nodos, necesitarás ajustar las direcciones IP y los puertos en consecuencia y asegurarte de que todos los nodos en el clúster de etcd pueden comunicarse entre sí.
 
 Con estas configuraciones y pasos, deberías poder asegurarte de que etcd está configurado correctamente y funcionando como se espera en tu clúster de Kubernetes.
+
+----------------------------------------
+
+
+# Configuración de Nodos Master y Worker
+
+
+Para configurar los nodos master y worker y preparar el entorno para la instalación de OKD (OpenShift Kubernetes Distribution), se deben seguir una serie de pasos detallados, incluyendo la generación de certificados y la configuración de los servicios necesarios. A continuación, se describen los pasos y configuraciones necesarias para cada tipo de nodo.
+
+Generación de Claves y Certificados
+
+
+```bash
+sudo vim /etc/systemd/system/etcd.service
+```
+
+
+    
+```ini
+[Unit]
+Description=etcd
+Documentation=https://github.com/coreos/etcd
+After=network.target
+
+[Service]
+User=etcd
+Type=notify
+Environment="ETCD_DATA_DIR=/var/lib/etcd"
+Environment="ETCD_NAME=etcd0"
+Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=http://10.17.4.21:2380"
+Environment="ETCD_LISTEN_PEER_URLS=http://10.17.4.21:2380"
+Environment="ETCD_LISTEN_CLIENT_URLS=http://10.17.4.21:2379,http://127.0.0.1:2379"
+Environment="ETCD_ADVERTISE_CLIENT_URLS=http://10.17.4.21:2379"
+Environment="ETCD_INITIAL_CLUSTER=etcd0=http://10.17.4.21:2380"
+Environment="ETCD_INITIAL_CLUSTER_STATE=new"
+Environment="ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster"
+ExecStart=/opt/bin/etcd \
+  --name ${ETCD_NAME} \
+  --data-dir ${ETCD_DATA_DIR} \
+  --listen-peer-urls ${ETCD_LISTEN_PEER_URLS} \
+  --listen-client-urls ${ETCD_LISTEN_CLIENT_URLS} \
+  --advertise-client-urls ${ETCD_ADVERTISE_CLIENT_URLS} \
+  --initial-advertise-peer-urls ${ETCD_INITIAL_ADVERTISE_PEER_URLS} \
+  --initial-cluster ${ETCD_INITIAL_CLUSTER} \
+  --initial-cluster-state ${ETCD_INITIAL_CLUSTER_STATE} \
+  --initial-cluster-token ${ETCD_INITIAL_CLUSTER_TOKEN}
+Restart=always
+RestartSec=10s
+LimitNOFILE=40000
+
+[Install]
+WantedBy=multi-user.target
+```
+
+
