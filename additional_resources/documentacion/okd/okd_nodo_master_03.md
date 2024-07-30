@@ -104,13 +104,7 @@ Restart=on-failure
 WantedBy=multi-user.target
 ```
 
-___
-
-
-________
-
-
-
+```bash
 export ETCD_NAME="etcd0"
 export ETCD_DATA_DIR="/var/lib/etcd"
 export ETCD_INITIAL_ADVERTISE_PEER_URLS="http://10.17.4.21:2380"
@@ -120,11 +114,12 @@ export ETCD_ADVERTISE_CLIENT_URLS="http://10.17.4.21:2379"
 export ETCD_INITIAL_CLUSTER="etcd0=http://10.17.4.21:2380"
 export ETCD_INITIAL_CLUSTER_STATE="new"
 export ETCD_INITIAL_CLUSTER_TOKEN="etcd-cluster"
+```
 
-
+```bash
 sudo chown -R etcd:etcd /var/lib/etcd
 sudo chmod -R 700 /var/lib/etcd
-
+```
 
 
 Para asegurar que etcd se ejecute correctamente, necesitas asegurarte de que la configuración es correcta y que etcd esté efectivamente escuchando en las direcciones y puertos adecuados. También es importante verificar los archivos de logs para entender qué puede estar fallando.
