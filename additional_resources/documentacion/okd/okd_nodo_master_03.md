@@ -268,3 +268,106 @@ LimitNOFILE=40000
 [Install]
 WantedBy=multi-user.target
 ```
+
+
+Paso 1: Crear el archivo controller-manager.conf con oc
+Utiliza sudo para ejecutar los comandos oc y crear el archivo controller-manager.conf:
+
+bash
+Copiar código
+sudo /opt/bin/oc config set-cluster kubernetes \
+  --certificate-authority=/etc/kubernetes/pki/ca.crt \
+  --embed-certs=true \
+  --server=https://10.17.4.21:6443 \
+  --kubeconfig=/etc/kubernetes/controller-manager.conf
+
+sudo /opt/bin/oc config set-credentials system:kube-controller-manager \
+  --client-certificate=/etc/kubernetes/pki/controller-manager.crt \
+  --client-key=/etc/kubernetes/pki/controller-manager.key \
+  --embed-certs=true \
+  --kubeconfig=/etc/kubernetes/controller-manager.conf
+
+sudo /opt/bin/oc config set-context system:kube-controller-manager@kubernetes \
+  --cluster=kubernetes \
+  --user=system:kube-controller-manager \
+  --kubeconfig=/etc/kubernetes/controller-manager.conf
+
+sudo /opt/bin/oc config use-context system:kube-controller-manager@kubernetes --kubeconfig=/etc/kubernetes/controller-manager.conf
+Paso 2: Ajustar permisos del archivo de configuración
+Asegúrate de que los permisos y propietarios del archivo sean correctos:
+
+bash
+Copiar código
+sudo chown root:root /etc/kubernetes/controller-manager.conf
+sudo chmod 644 /etc/kubernetes/controller-manager.conf
+Paso 3: Recargar y reiniciar el servicio
+Recarga los archivos de configuración del sistema y reinicia el servicio kube-controller-manager:
+
+bash
+Copiar código
+sudo systemctl daemon-reload
+sudo systemctl restart kube-controller-manager
+Paso 4: Verificar el estado del servicio
+Verifica el estado del servicio para asegurarte de que está funcionando correctamente:
+
+bash
+Copiar código
+sudo systemctl status kube-controller-manager
+Paso 5: Verificar los logs si hay problemas
+Si el servicio sigue fallando, verifica los logs para identificar el problema:
+
+bash
+Copiar código
+sudo journalctl -xeu kube-controller-manager
+
+----------------------------------------
+
+# Configuración de Nodos Master y Worker
+
+Paso 1: Generar las claves y certificados necesarios para el kube-scheduler
+bash
+Copiar código
+sudo openssl genrsa -out /etc/kubernetes/pki/scheduler.key 2048
+sudo openssl req -new -key /etc/kubernetes/pki/scheduler.key -subj "/CN=system:kube-scheduler" -out /etc/kubernetes/pki/scheduler.csr
+sudo openssl x509 -req -in /etc/kubernetes/pki/scheduler.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/scheduler.crt -days 10000
+Paso 2: Crear el archivo de configuración del kube-scheduler
+bash
+Copiar código
+sudo /opt/bin/oc config set-cluster kubernetes \
+  --certificate-authority=/etc/kubernetes/pki/ca.crt \
+  --embed-certs=true \
+  --server=https://10.17.4.21:6443 \
+  --kubeconfig=/etc/kubernetes/scheduler.conf
+
+sudo /opt/bin/oc config set-credentials system:kube-scheduler \
+  --client-certificate=/etc/kubernetes/pki/scheduler.crt \
+  --client-key=/etc/kubernetes/pki/scheduler.key \
+  --embed-certs=true \
+  --kubeconfig=/etc/kubernetes/scheduler.conf
+
+sudo /opt/bin/oc config set-context system:kube-scheduler@kubernetes \
+  --cluster=kubernetes \
+  --user=system:kube-scheduler \
+  --kubeconfig=/etc/kubernetes/scheduler.conf
+
+sudo /opt/bin/oc config use-context system:kube-scheduler@kubernetes --kubeconfig=/etc/kubernetes/scheduler.conf
+Paso 3: Asegurar los permisos correctos para el archivo de configuración
+bash
+Copiar código
+sudo chown root:root /etc/kubernetes/scheduler.conf
+sudo chmod 644 /etc/kubernetes/scheduler.conf
+Paso 4: Reiniciar el servicio kube-scheduler
+Después de realizar las verificaciones y ajustes necesarios, recarga los demonios de systemd y reinicia el servicio kube-scheduler:
+
+bash
+Copiar código
+sudo systemctl daemon-reload
+sudo systemctl restart kube-scheduler
+sudo systemctl status kube-scheduler
+Verificación final
+Verifica nuevamente el estado del servicio kube-scheduler y revisa los registros para asegurarte de que se haya iniciado correctamente:
+
+bash
+Copiar código
+sudo systemctl status kube-scheduler
+sudo journalctl -u kube-scheduler -xe
