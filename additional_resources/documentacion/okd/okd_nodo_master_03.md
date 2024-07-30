@@ -114,7 +114,6 @@ sudo chown -R etcd:etcd /var/lib/etcd
 sudo chmod -R 700 /var/lib/etcd
 ```
 
-
 Para asegurar que etcd se ejecute correctamente, necesitas asegurarte de que la configuración es correcta y que etcd esté efectivamente escuchando en las direcciones y puertos adecuados. También es importante verificar los archivos de logs para entender qué puede estar fallando.
 
 Verificar el estado de etcd
