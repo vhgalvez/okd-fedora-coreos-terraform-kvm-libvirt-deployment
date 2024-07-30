@@ -7,8 +7,6 @@ Generación de Claves y Certificados
 
 -----------------------------------
 
-
-
 Primero, necesitamos generar varios certificados y claves que serán utilizados por los diferentes componentes de Kubernetes.
 
 # Crear directorios necesarios
@@ -25,7 +23,7 @@ sudo openssl req -x509 -new -nodes -key /etc/kubernetes/pki/ca.key -subj "/CN=ku
 ```
 
 # Generar clave y certificado para el API Server
-    
+
 ```bash
 sudo openssl genrsa -out /etc/kubernetes/pki/apiserver.key 2048
 sudo openssl req -new -key /etc/kubernetes/pki/apiserver.key -subj "/CN=kube-apiserver" -out /etc/kubernetes/pki/apiserver.csr
@@ -127,18 +125,22 @@ Para asegurar que etcd se ejecute correctamente, necesitas asegurarte de que la 
 Verificar el estado de etcd
 Primero, verifica el estado del servicio etcd:
 
-sh
-Copiar código
+```bash
 sudo systemctl status etcd
+```
+
 Si el servicio etcd no está activo, revisa los logs para identificar el problema:
 
-sh
-Copiar código
+```bash
 sudo journalctl -u etcd -f
+```
+
 Archivos de configuración de etcd
+
 El archivo /etc/systemd/system/etcd.service que proporcionaste parece estar bien, pero asegúrate de que las direcciones IP y puertos están configurados correctamente para tu entorno.
 
 Configuración del Servicio etcd
+
 Verifica y ajusta la configuración del servicio etcd si es necesario. Aquí está un ejemplo de una configuración típica para un clúster etcd:
 
 ```ini
@@ -185,31 +187,39 @@ export ETCD_INITIAL_CLUSTER_TOKEN="etcd-cluster"
 ```
 
 Permisos y Propietario
+
 Asegúrate de que los permisos y el propietario del directorio de datos de etcd están configurados correctamente:
 
-sh
-Copiar código
+```bash
 sudo chown -R etcd:etcd /var/lib/etcd
 sudo chmod -R 700 /var/lib/etcd
+```
+
 Reiniciar el Servicio etcd
+
 Después de verificar la configuración y permisos, reinicia el servicio etcd:
 
-sh
-Copiar código
+```bash
 sudo systemctl daemon-reload
 sudo systemctl restart etcd
+```
+
 Verificar el Estado de etcd
+
 Finalmente, verifica el estado de etcd nuevamente para asegurarte de que está activo y funcionando correctamente:
 
-sh
-Copiar código
+```bash
 sudo systemctl status etcd
+```
+
 Si el servicio sigue sin funcionar, consulta los logs para identificar problemas específicos:
 
-sh
-Copiar código
+```bash
 sudo journalctl -u etcd -f
+```
+
 Configuración para el Entorno de Producción
+
 Si estás configurando etcd para un entorno de producción con múltiples nodos, necesitarás ajustar las direcciones IP y los puertos en consecuencia y asegurarte de que todos los nodos en el clúster de etcd pueden comunicarse entre sí.
 
 Con estas configuraciones y pasos, deberías poder asegurarte de que etcd está configurado correctamente y funcionando como se espera
