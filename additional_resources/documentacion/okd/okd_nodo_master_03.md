@@ -24,11 +24,6 @@ sudo openssl req -x509 -new -nodes -key /etc/kubernetes/pki/ca.key -subj "/CN=ku
 
 # Generar clave y certificado para el API Server
 
-```bash
-sudo openssl genrsa -out /etc/kubernetes/pki/apiserver.key 2048
-sudo openssl req -new -key /etc/kubernetes/pki/apiserver.key -subj "/CN=kube-apiserver" -out /etc/kubernetes/pki/apiserver.csr
-sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver.crt -days 10000
-```
 
 # Generar clave y certificado para etcd
 
@@ -169,8 +164,6 @@ LimitNOFILE=40000
 [Install]
 WantedBy=multi-user.target
 ```
-
-
 
 Asegúrate de que las variables de entorno están definidas correctamente. Puedes definir estas variables en el archivo de servicio o exportarlas antes de iniciar el servicio:
 
