@@ -5,11 +5,10 @@ Para configurar los nodos master y worker y preparar el entorno para la instalac
 
 Generación de Claves y Certificados
 
------------------------------------
-
 Primero, necesitamos generar varios certificados y claves que serán utilizados por los diferentes componentes de Kubernetes.
 
 # Crear directorios necesarios
+
 
 ```bash
 sudo mkdir -p /etc/kubernetes/pki/etcd
