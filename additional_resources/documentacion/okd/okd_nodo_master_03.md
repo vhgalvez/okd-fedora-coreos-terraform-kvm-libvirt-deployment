@@ -63,7 +63,11 @@ sudo openssl genrsa -out /etc/kubernetes/pki/sa.key 2048
 sudo openssl rsa -in /etc/kubernetes/pki/sa.key -pubout -out /etc/kubernetes/pki/sa.pub
 ```
 
- /etc/systemd/system/kube-apiserver.service
+Configuración de Servicios
+
+```bash
+sudo vim /etc/systemd/system/kube-apiserver.service
+```
 
 Configuración de Servicios
 
