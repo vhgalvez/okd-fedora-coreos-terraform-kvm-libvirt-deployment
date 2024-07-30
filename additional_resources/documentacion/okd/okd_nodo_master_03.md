@@ -215,4 +215,4 @@ Configuración para el Entorno de Producción
 
 Si estás configurando etcd para un entorno de producción con múltiples nodos, necesitarás ajustar las direcciones IP y los puertos en consecuencia y asegurarte de que todos los nodos en el clúster de etcd pueden comunicarse entre sí.
 
-Con estas configuraciones y pasos, deberías poder asegurarte de que etcd está configurado correctamente y funcionando como se espera
+Con estas configuraciones y pasos, deberías poder asegurarte de que etcd está configurado correctamente y funcionando como se espera en tu clúster de Kubernetes.
