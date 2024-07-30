@@ -17,6 +17,7 @@ sudo mkdir -p /etc/kubernetes/pki/etcd
 
 # Generar clave y certificado de la CA
 
+
 ```bash
 sudo openssl genrsa -out /etc/kubernetes/pki/ca.key 2048
 sudo openssl req -x509 -new -nodes -key /etc/kubernetes/pki/ca.key -subj "/CN=kube-ca" -days 10000 -out /etc/kubernetes/pki/ca.crt
@@ -62,7 +63,7 @@ Configuración de Servicios
 sudo vim /etc/systemd/system/kube-apiserver.service
 ```
 
-Configuración de Servicios
+# Configuración de Servicios
 
 ```bash
 [Unit]
@@ -116,7 +117,7 @@ sudo chmod -R 700 /var/lib/etcd
 
 Para asegurar que etcd se ejecute correctamente, necesitas asegurarte de que la configuración es correcta y que etcd esté efectivamente escuchando en las direcciones y puertos adecuados. También es importante verificar los archivos de logs para entender qué puede estar fallando.
 
-Verificar el estado de etcd
+# Verificar el estado de etcd
 
 Primero, verifica el estado del servicio etcd:
 
@@ -130,7 +131,7 @@ Si el servicio etcd no está activo, revisa los logs para identificar el problem
 sudo journalctl -u etcd -f
 ```
 
-Archivos de configuración de etcd
+# Archivos de configuración de etcd
 
 El archivo /etc/systemd/system/etcd.service que proporcionaste parece estar bien, pero asegúrate de que las direcciones IP y puertos están configurados correctamente para tu entorno.
 
