@@ -638,7 +638,7 @@ El servidor físico actúa como el anfitrión principal para las máquinas virtu
 
 | Dirección IP  | Hostname                        | Alias      |
 |---------------|---------------------------------|------------|
-| 192.168.0.?   | physical1.cefaslocalserver.com  | physical1  |
+| 192.168.0.18   | physical1.cefaslocalserver.com  | physical1  |
 
 # Redes Virtuales y su Configuración
 
