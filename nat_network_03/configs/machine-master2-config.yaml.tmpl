@@ -151,7 +151,7 @@ storage:
 
           # Generar certificados necesarios
           sudo mkdir -p /etc/kubernetes/pki /etc/kubernetes/pki/etcd
-          
+
           # CA
           sudo openssl genrsa -out /etc/kubernetes/pki/ca.key 2048
           sudo openssl req -x509 -new -nodes -key /etc/kubernetes/pki/ca.key -subj "/CN=kube-ca" -days 10000 -out /etc/kubernetes/pki/ca.crt
