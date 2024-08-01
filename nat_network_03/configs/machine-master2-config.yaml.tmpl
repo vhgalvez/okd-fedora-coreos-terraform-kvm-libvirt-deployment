@@ -132,64 +132,60 @@ storage:
           # Crear archivos de configuración en /etc/kubernetes/manifests
           sudo mkdir -p /etc/kubernetes/manifests
 
-commands:
-  - |
-    sudo cat <<EOF | sudo tee /etc/kubernetes/manifests/kube-apiserver.yaml
-    apiVersion: v1
-    kind: Pod
-    metadata:
-      name: kube-apiserver
-      namespace: kube-system
-    spec:
-      containers:
-      - name: kube-apiserver
-        image: k8s.gcr.io/kube-apiserver:v1.20.0
-        command:
-        - kube-apiserver
-        - --advertise-address=10.17.4.21
-        - --allow-privileged=true
-        - --authorization-mode=Node,RBAC
-        - --client-ca-file=/etc/kubernetes/pki/ca.crt
-        - --etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt
-        - --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt
-        - --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key
-        - --etcd-servers=https://10.17.4.21:2379
-        - --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt
-        - --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key
-        - --secure-port=6443
-        - --service-account-key-file=/etc/kubernetes/pki/sa.pub
-        - --service-cluster-ip-range=10.96.0.0/12
-        - --tls-cert-file=/etc/kubernetes/pki/apiserver.crt
-        - --tls-private-key-file=/etc/kubernetes/pki/apiserver.key
-        volumeMounts:
-        - mountPath: /etc/kubernetes/pki
-          name: pki
-          readOnly: true
-      volumes:
-      - name: pki
-        hostPath:
-          path: /etc/kubernetes/pki
-    EOF
+          sudo cat <<EOF | sudo tee /etc/kubernetes/manifests/kube-apiserver.yaml
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: kube-apiserver
+            namespace: kube-system
+          spec:
+            containers:
+            - name: kube-apiserver
+              image: k8s.gcr.io/kube-apiserver:v1.20.0
+              command:
+              - kube-apiserver
+              - --advertise-address=10.17.4.21
+              - --allow-privileged=true
+              - --authorization-mode=Node,RBAC
+              - --client-ca-file=/etc/kubernetes/pki/ca.crt
+              - --etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt
+              - --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt
+              - --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key
+              - --etcd-servers=https://10.17.4.21:2379
+              - --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt
+              - --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key
+              - --secure-port=6443
+              - --service-account-key-file=/etc/kubernetes/pki/sa.pub
+              - --service-cluster-ip-range=10.96.0.0/12
+              - --tls-cert-file=/etc/kubernetes/pki/apiserver.crt
+              - --tls-private-key-file=/etc/kubernetes/pki/apiserver.key
+              volumeMounts:
+              - mountPath: /etc/kubernetes/pki
+                name: pki
+                readOnly: true
+            volumes:
+            - name: pki
+              hostPath:
+                path: /etc/kubernetes/pki
+          EOF
 
-    sudo cat <<EOF | sudo tee /etc/kubernetes/kubelet-config.yaml
-    kind: KubeletConfiguration
-    apiVersion: kubelet.config.k8s.io/v1beta1
-    authentication:
-      x509:
-        clientCAFile: "/etc/kubernetes/pki/ca.crt"
-    authorization:
-      mode: Webhook
-    serverTLSBootstrap: true
-    tlsCertFile: "/etc/kubernetes/pki/kubelet.crt"
-    tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet.key"
-    cgroupDriver: systemd
-    runtimeRequestTimeout: "15m"
-    containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
-    EOF
+          sudo cat <<EOF | sudo tee /etc/kubernetes/kubelet-config.yaml
+          kind: KubeletConfiguration
+          apiVersion: kubelet.config.k8s.io/v1beta1
+          authentication:
+            x509:
+              clientCAFile: "/etc/kubernetes/pki/ca.crt"
+          authorization:
+            mode: Webhook
+          serverTLSBootstrap: true
+          tlsCertFile: "/etc/kubernetes/pki/kubelet.crt"
+          tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet.key"
+          cgroupDriver: systemd
+          runtimeRequestTimeout: "15m"
+          containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
+          EOF
 
 # Crear archivos de servicio en /etc/systemd/system
-commands:
-  - |
     sudo cat <<EOF | sudo tee /etc/systemd/system/crio.service
     [Unit]
     Description=CRI-O container runtime
@@ -354,6 +350,8 @@ commands:
     sudo systemctl enable crio.service etcd.service kube-apiserver.service kube-controller-manager.service kube-scheduler.service kubelet.service
     sudo systemctl start crio.service etcd.service kube-apiserver.service kube-controller-manager.service kube-scheduler.service kubelet.service
 
+storage:
+  files:
     - path: /etc/systemd/network/10-eth0.network
       filesystem: root
       mode: 0644
