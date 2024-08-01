@@ -560,7 +560,7 @@ url:   https://console.redhat.com/openshift/create/local
 
 
 ```bash
-                                     +---------------------+
+                                  <<<   +---------------------+
                                      |    IP Pública       |
                                      | (Conexiones HTTPS)  |
                                      |     192.168.0.21    |
@@ -571,7 +571,7 @@ url:   https://console.redhat.com/openshift/create/local
                                     |  Load Balancer (Traefik)  |
                                     |   IP: 10.17.3.12          |
                                     +-----------+----------+
-                                                |
+                                     >>>           |
                        +------------------------+------------------------+
                        |                        |                        |
                        v                        v                        v
