@@ -183,7 +183,7 @@ storage:
           runtimeRequestTimeout: "15m"
           containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
           EOF
-        # Crear archivos de servicio en /etc/systemd/system
+  # Crear archivos de servicio en /etc/systemd/system
 sudo cat <<EOF | sudo tee /etc/systemd/system/crio.service
 [Unit]
 Description=CRI-O container runtime
@@ -347,7 +347,10 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl enable crio.service etcd.service kube-apiserver.service kube-controller-manager.service kube-scheduler.service kubelet.service
 sudo systemctl start crio.service etcd.service kube-apiserver.service kube-controller-manager.service kube-scheduler.service kubelet.service
-          
+
+
+      
+
     - path: /etc/systemd/network/10-eth0.network
       filesystem: root
       mode: 0644
