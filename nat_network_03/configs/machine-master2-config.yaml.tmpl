@@ -184,6 +184,30 @@ storage:
           containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
           EOF
   # Crear archivos de servicio en /etc/systemd/system
+commands:
+  - |
+    sudo cat <<EOF | sudo tee /etc/systemd/system/crio.service
+    [Unit]
+    Description=CRI-O container runtime
+    After=network.target
+
+    [Service]
+    Type=notify
+    ExecStart=/opt/bin/crio/crio
+    Environment="PATH=/opt/bin/crio:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    Restart=always
+    RestartSec=5
+    LimitNOFILE=65536
+    LimitNPROC=4096
+
+    [Install]
+    WantedBy=multi-user.target
+    EOF
+
+    sudo cat <<EOF | sudo tee /etc/systemd/system/etcd.service
+    [Unit]
+    Description=etcd
+    Documentation=
 sudo cat <<EOF | sudo tee /etc/systemd/system/crio.service
 [Unit]
 Description=CRI-O container runtime
