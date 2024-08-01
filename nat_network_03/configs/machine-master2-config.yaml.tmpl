@@ -308,3 +308,48 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
+
+    - name: kube-apiserver.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Kubernetes API Server
+        After=network.target
+
+        [Service]
+        ExecStart=/opt/bin/kube-apiserver --config=/etc/kubernetes/manifests/kube-apiserver.yaml
+        Restart=always
+        RestartSec=10
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: kube-controller-manager.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Kubernetes Controller Manager
+        After=network.target
+
+        [Service]
+        ExecStart=/opt/bin/kube-controller-manager --config=/etc/kubernetes/manifests/kube-controller-manager.yaml
+        Restart=always
+        RestartSec=10
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: kube-scheduler.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Kubernetes Scheduler
+        After=network.target
+
+        [Service]
+        ExecStart=/opt/bin/kube-scheduler --config=/etc/kubernetes/manifests/kube-scheduler.yaml
+        Restart=always
+        RestartSec=10
+
+        [Install]
+        WantedBy=multi-user.target
