@@ -72,7 +72,7 @@ storage:
           sudo chmod +x /opt/bin/kube-scheduler
 
           # Instalar CRI-O
-          sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/crio.amd64.v1.30.3.tar.gz
+          sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.3.tar.gz
           sudo mkdir -p /tmp/crio
           sudo tar -xzf /tmp/crio.tar.gz -C /tmp/crio
           sudo mkdir -p /opt/bin/crio
@@ -113,7 +113,7 @@ storage:
           namespaces_dir = "/var/run"
           enable_criu_support = true
           pinns_path = "/opt/bin/crio/pinns"
-          conmon = "/opt/bin/crio/conmon
+          conmon = "/opt/bin/crio/conmon"
 
           [crio.runtime.runtimes.runc]
           runtime_path = "/opt/bin/crio/crio-runc"
@@ -132,7 +132,11 @@ storage:
           # Crear archivos de configuración en /etc/kubernetes/manifests
           sudo mkdir -p /etc/kubernetes/manifests
 
-          sudo cat <<EOF | sudo tee /etc/kubernetes/manifests/kube-apiserver.yaml
+    - path: /etc/kubernetes/manifests/kube-apiserver.yaml
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
           apiVersion: v1
           kind: Pod
           metadata:
@@ -167,9 +171,12 @@ storage:
             - name: pki
               hostPath:
                 path: /etc/kubernetes/pki
-          EOF
 
-          sudo cat <<EOF | sudo tee /etc/kubernetes/kubelet-config.yaml
+    - path: /etc/kubernetes/kubelet-config.yaml
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
           kind: KubeletConfiguration
           apiVersion: kubelet.config.k8s.io/v1beta1
           authentication:
@@ -183,7 +190,6 @@ storage:
           cgroupDriver: systemd
           runtimeRequestTimeout: "15m"
           containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
-          EOF
 
     - path: /etc/systemd/system/crio.service
       filesystem: root
