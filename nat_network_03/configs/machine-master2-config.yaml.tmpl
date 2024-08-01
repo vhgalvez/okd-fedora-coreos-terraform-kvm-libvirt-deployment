@@ -86,7 +86,7 @@ storage:
 
           # Crear configuración de CRI-O
           sudo mkdir -p /etc/crio
-          cat <<EOF | sudo tee /etc/crio/crio.conf
+                    cat <<EOF | sudo tee /etc/crio/crio.conf
           [crio]
           log_level = "debug"
           root = "/var/lib/crio"
@@ -134,7 +134,7 @@ storage:
 
 commands:
   - |
-          sudo cat <<EOF | sudo tee /etc/kubernetes/manifests/kube-apiserver.yaml
+            sudo cat <<EOF | sudo tee /etc/kubernetes/manifests/kube-apiserver.yaml
           apiVersion: v1
           kind: Pod
           metadata:
@@ -171,7 +171,7 @@ commands:
                 path: /etc/kubernetes/pki
           EOF
 
-          sudo cat <<EOF | sudo tee /etc/kubernetes/kubelet-config.yaml
+                    sudo cat <<EOF | sudo tee /etc/kubernetes/kubelet-config.yaml
           kind: KubeletConfiguration
           apiVersion: kubelet.config.k8s.io/v1beta1
           authentication:
@@ -186,7 +186,7 @@ commands:
           runtimeRequestTimeout: "15m"
           containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
           EOF
-  # Crear archivos de servicio en /etc/systemd/system
+# Crear archivos de servicio en /etc/systemd/system
 commands:
   - |
     sudo cat <<EOF | sudo tee /etc/systemd/system/crio.service
