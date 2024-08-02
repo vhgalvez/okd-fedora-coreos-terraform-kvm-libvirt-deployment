@@ -377,11 +377,21 @@ storage:
           sudo openssl genrsa -out /etc/kubernetes/pki/sa.key 2048
           sudo openssl rsa -in /etc/kubernetes/pki/sa.key -pubout -out /etc/kubernetes/pki/sa.pub
 
+          # Generar certificados y claves de etcd
+          sudo openssl genrsa -out /etc/kubernetes/pki/etcd/etcd.key 2048
+          sudo openssl req -new -key /etc/kubernetes/pki/etcd/etcd.key -subj "/CN=etcd" -out /etc/kubernetes/pki/etcd/etcd.csr
+          sudo openssl x509 -req -in /etc/kubernetes/pki/etcd/etcd.csr -CA /etc/kubernetes/pki/etcd/ca.crt -CAkey /etc/kubernetes/pki/etcd/ca.key -CAcreateserial -out /etc/kubernetes/pki/etcd/etcd.crt -days 10000
+
+
           # Asignar permisos
           sudo chmod 600 /etc/kubernetes/pki/*.key
           sudo chmod 644 /etc/kubernetes/pki/*.crt
           sudo chmod 600 /etc/kubernetes/pki/etcd/*.key
           sudo chmod 644 /etc/kubernetes/pki/etcd/*.crt
+          sudo chmod 644 /etc/kubernetes/pki/etcd/*.csr
+          sudo chmod 644 /etc/kubernetes/pki/etcd/etcd.crt
+          sudo chmod 644 /etc/kubernetes/pki/etcd/etcd.key
+
 
           # Recargar servicios y habilitar
           sudo systemctl daemon-reload
