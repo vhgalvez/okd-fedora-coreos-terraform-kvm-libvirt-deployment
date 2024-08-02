@@ -387,6 +387,15 @@ storage:
           sudo systemctl daemon-reload
           sudo systemctl restart kube-apiserver
 
+          # Crear kubeconfig
+          sudo kubectl config set-cluster kubernetes --server=https://${ip}:6443 --certificate-authority=/etc/kubernetes/pki/ca.crt --embed-certs=true
+          sudo kubectl config set-credentials admin --client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt --client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key --embed-certs=true
+          sudo kubectl config set-context kubernetes --cluster=kubernetes --user=admin
+          sudo kubectl config use-context kubernetes
+          sudo mkdir -p /home/core/.kube
+          sudo kubectl config view --flatten > /home/core/.kube/config
+          sudo chown core:core /home/core/.kube/config
+
     - path: /etc/systemd/network/10-eth0.network
       filesystem: root
       mode: 0644
