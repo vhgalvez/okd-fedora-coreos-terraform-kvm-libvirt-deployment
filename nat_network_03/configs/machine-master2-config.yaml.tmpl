@@ -385,7 +385,10 @@ storage:
 
           # Recargar servicios y habilitar
           sudo systemctl daemon-reload
-          sudo systemctl restart kube-apiserver
+
+          # Habilitar y arrancar servicios
+          sudo systemctl enable crio.service etcd.service kube-apiserver.service kube-controller-manager.service kube-scheduler.service kubelet.service
+          sudo systemctl start crio.service etcd.service kube-apiserver.service kube-controller-manager.service kube-scheduler.service kubelet.service
 
           # Crear kubeconfig
           sudo kubectl config set-cluster kubernetes --server=https://${ip}:6443 --certificate-authority=/etc/kubernetes/pki/ca.crt --embed-certs=true
