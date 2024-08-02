@@ -142,7 +142,7 @@ storage:
           spec:
             containers:
             - name: kube-apiserver
-              image: k8s.gcr.io/kube-apiserver:v1.20.0
+              image: k8s.gcr.io/kube-apiserver:v1.21.0
               command:
               - kube-apiserver
               - --advertise-address=10.17.4.21
@@ -153,7 +153,7 @@ storage:
               - --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt
               - --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key
               - --etcd-servers=https://10.17.4.21:2379
-              - --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt
+                            - --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt
               - --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key
               - --secure-port=6443
               - --service-account-key-file=/etc/kubernetes/pki/sa.pub
@@ -564,3 +564,5 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
+
+
