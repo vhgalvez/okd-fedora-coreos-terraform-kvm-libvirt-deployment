@@ -10,3 +10,12 @@ sudo systemctl status kube-controller-manager
 sudo systemctl status kube-scheduler
 sudo systemctl status kubelet
 ```
+
+```bash
+sudo systemctl restart crio
+sudo systemctl restart etcd
+sudo systemctl restart kube-apiserver
+sudo systemctl restart kube-controller-manager
+sudo systemctl restart kube-scheduler
+sudo systemctl restart kubelet
+```
