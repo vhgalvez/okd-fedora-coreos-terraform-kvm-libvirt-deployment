@@ -28,6 +28,7 @@ sudo ssh -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluste
 Instala `wget` y otros paquetes necesarios:
 
 ```bash
+sudo dnf update -y && sudo dnf upgrade -y
 sudo dnf install -y wget tar
 ```
 
