@@ -277,3 +277,7 @@ Con estos pasos, habrás instalado y configurado Traefik en la máquina LoadBala
 ## Traefik en Rocky Linux
 
 ![alt text](../../image/Rocky_Linux_Traefik.png)
+
+__
+
+

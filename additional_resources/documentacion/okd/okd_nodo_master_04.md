@@ -19,3 +19,23 @@ sudo systemctl restart kube-controller-manager
 sudo systemctl restart kube-scheduler
 sudo systemctl restart kubelet
 ```
+
+
+
+1. Set Up the KUBECONFIG Environment Variable
+To use the oc command without specifying the kubeconfig file each time, set the KUBECONFIG environment variable to point to your kubeconfig file.
+
+bash
+Copiar código
+export KUBECONFIG=/path/to/your/kubeconfig
+Since your kubeconfig file is located at auth/kubeconfig, use the following command:
+
+bash
+Copiar código
+export KUBECONFIG=/home/core/okd-install/auth/kubeconfig
+You can add this command to your ~/.bashrc file to make it persistent:
+
+bash
+Copiar código
+echo 'export KUBECONFIG=/home/core/okd-install/auth/kubeconfig' >> ~/.bashrc
+source ~/.bashrc
