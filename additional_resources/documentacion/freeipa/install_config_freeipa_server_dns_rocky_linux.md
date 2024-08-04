@@ -706,3 +706,4 @@ Password (confirm):
 
 kinit admin
 12345678
+
