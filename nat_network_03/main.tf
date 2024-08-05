@@ -1,3 +1,4 @@
+# main.tf
 terraform {
   required_version = "= 1.9.3"
 
@@ -126,3 +127,6 @@ resource "libvirt_domain" "machine" {
 output "ip_addresses" {
   value = { for key, machine in libvirt_domain.machine : key => machine.network_interface[0].addresses[0] if length(machine.network_interface[0].addresses) > 0 }
 }
+
+
+http://10.17.3.14/okd/master.ign

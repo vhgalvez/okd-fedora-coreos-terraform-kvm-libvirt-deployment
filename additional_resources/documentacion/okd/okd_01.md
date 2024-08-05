@@ -503,3 +503,10 @@ Para cualquier duda o problema, por favor abre un issue en el repositorio o cont
 
 
 **Mantenedor del Proyecto:** Victor Galvez
+
+
+
+# Transferir Archivos Ignition al Nodo Bootstrap
+---bash
+sudo scp -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift /home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/ignition-configs/*.ign core@10.17.3.14:~/okd-install/
+```
