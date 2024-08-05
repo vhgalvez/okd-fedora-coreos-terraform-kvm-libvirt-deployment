@@ -1,4 +1,3 @@
-# main.tf
 terraform {
   required_version = "= 1.9.3"
 
@@ -51,13 +50,13 @@ data "template_file" "vm-configs" {
   template = file("${path.module}/configs/machine-${each.key}-config.yaml.tmpl")
 
   vars = {
-    ssh_keys                        = join(",", var.ssh_keys)
-    name                            = each.key
-    host_name                       = each.value.name_dominio
-    gateway                         = var.gateway
-    dns1                            = var.dns1
-    dns2                            = var.dns2
-    ip                              = each.value.ip
+    ssh_keys  = join(",", var.ssh_keys)
+    name      = each.key
+    host_name = each.value.name_dominio
+    gateway   = var.gateway
+    dns1      = var.dns1
+    dns2      = var.dns2
+    ip        = each.value.ip
   }
 }
 
@@ -108,7 +107,9 @@ resource "libvirt_domain" "machine" {
     volume_id = libvirt_volume.vm_disk[each.key].id
   }
 
-  coreos_ignition = libvirt_ignition.ignition[each.key].id
+  coreos_ignition {
+    url = "http://10.17.3.14/okd/${each.key}.ign"
+  }
 
   graphics {
     type        = "vnc"
@@ -127,6 +128,3 @@ resource "libvirt_domain" "machine" {
 output "ip_addresses" {
   value = { for key, machine in libvirt_domain.machine : key => machine.network_interface[0].addresses[0] if length(machine.network_interface[0].addresses) > 0 }
 }
-
-
-http://10.17.3.14/okd/master.ign

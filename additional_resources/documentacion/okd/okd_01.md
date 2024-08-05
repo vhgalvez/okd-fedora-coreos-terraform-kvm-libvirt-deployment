@@ -507,6 +507,21 @@ Para cualquier duda o problema, por favor abre un issue en el repositorio o cont
 
 
 # Transferir Archivos Ignition al Nodo Bootstrap
----bash
+
+
+
+
+### nodo bootstrap1:
+
+
+sudo firewall-cmd --permanent --add-port=80/tcp
+sudo firewall-cmd --permanent --add-port=443/tcp
+sudo firewall-cmd --reload
+```
+
+
+
+
+```bash
 sudo scp -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift /home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/ignition-configs/*.ign core@10.17.3.14:~/okd-install/
 ```
