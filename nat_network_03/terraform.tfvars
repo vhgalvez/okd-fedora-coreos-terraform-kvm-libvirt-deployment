@@ -1,52 +1,49 @@
-# terraform.tfvars
 base_image = "/var/lib/libvirt/images/flatcar-linux/flatcar_production_qemu_image.img"
 
 vm_definitions = {
-  "master1" = {
+  master1 = {
     cpus         = 2
     memory       = 4096
     ip           = "10.17.4.21"
     name_dominio = "master1.cefaslocalserver.com"
     disk_size    = 51200  # 50 GB in MB
   }
-  "master2" = {
+  master2 = {
     cpus         = 2
     memory       = 4096
     ip           = "10.17.4.22"
     name_dominio = "master2.cefaslocalserver.com"
     disk_size    = 51200  # 50 GB in MB
   }
-  "master3" = {
+  master3 = {
     cpus         = 2
     memory       = 4096
     ip           = "10.17.4.23"
     name_dominio = "master3.cefaslocalserver.com"
     disk_size    = 51200  # 50 GB in MB
   }
-  "worker1" = {
+  worker1 = {
     cpus         = 2
     memory       = 3584
     ip           = "10.17.4.24"
     name_dominio = "worker1.cefaslocalserver.com"
     disk_size    = 51200  # 50 GB in MB
   }
-  "worker2" = {
+  worker2 = {
     cpus         = 2
     memory       = 3584
     ip           = "10.17.4.25"
     name_dominio = "worker2.cefaslocalserver.com"
     disk_size    = 51200  # 50 GB in MB
   }
-  "worker3" = {
+  worker3 = {
     cpus         = 2
     memory       = 3584
     ip           = "10.17.4.26"
     name_dominio = "worker3.cefaslocalserver.com"
     disk_size    = 51200  # 50 GB in MB
   }
-}
-
-"bootstrap" = {
+  bootstrap = {
     cpus         = 2
     memory       = 3584
     ip           = "10.17.4.27"
