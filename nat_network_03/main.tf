@@ -1,23 +1,3 @@
-# main.tf
-terraform {
-  required_version = "= 1.9.3"
-
-  required_providers {
-    libvirt = {
-      source  = "dmacvicar/libvirt"
-      version = "0.7.0"
-    }
-    ct = {
-      source  = "poseidon/ct"
-      version = "0.13.0"
-    }
-    template = {
-      source  = "hashicorp/template"
-      version = "~> 2.2.0"
-    }
-  }
-}
-
 provider "libvirt" {
   uri = "qemu:///system"
 }
@@ -43,42 +23,6 @@ resource "libvirt_volume" "base" {
   source = var.base_image
   pool   = libvirt_pool.volumetmp_03.name
   format = "qcow2"
-}
-
-data "template_file" "vm-configs" {
-  for_each = var.vm_definitions
-
-  template = file("${path.module}/configs/machine-${each.key}-config.yaml.tmpl")
-
-  vars = {
-    ssh_keys  = join(",", var.ssh_keys)
-    name      = each.key
-    host_name = each.value.name_dominio
-    gateway   = var.gateway
-    dns1      = var.dns1
-    dns2      = var.dns2
-    ip        = each.value.ip
-  }
-}
-
-data "ct_config" "vm-ignitions" {
-  for_each = var.vm_definitions
-  content  = data.template_file.vm-configs[each.key].rendered
-}
-
-resource "local_file" "ignition_configs" {
-  for_each = var.vm_definitions
-
-  content  = data.ct_config.vm-ignitions[each.key].rendered
-  filename = "${path.module}/ignition-configs/${each.key}.ign"
-}
-
-resource "libvirt_ignition" "ignition" {
-  for_each = var.vm_definitions
-
-  name    = "${each.key}-ignition"
-  pool    = libvirt_pool.volumetmp_03.name
-  content = data.ct_config.vm-ignitions[each.key].rendered
 }
 
 resource "libvirt_volume" "vm_disk" {
