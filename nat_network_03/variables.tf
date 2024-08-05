@@ -34,3 +34,9 @@ variable "dns2" {
   description = "Secondary DNS server"
   type        = string
 }
+
+
+variable "coreos_ignition " {
+  description = "url to the ignition file"
+  type        = string
+}
