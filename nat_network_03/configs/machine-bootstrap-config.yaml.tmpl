@@ -81,47 +81,6 @@ storage:
           sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.csr -subj "/CN=ServiceAccount"
           sudo openssl x509 -req -in /etc/kubernetes/pki/sa.csr -signkey /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.crt
 
-          # Crear y habilitar el servicio Kubelet
-          cat <<EOF | sudo tee /etc/systemd/system/kubelet.service
-          [Unit]
-          Description=kubelet: The Kubernetes Node Agent
-          Documentation=https://kubernetes.io/docs/
-          After=network-online.target crio.service
-          Wants=network-online.target
-
-          [Service]
-          ExecStart=/opt/bin/kubelet
-          Restart=always
-          StartLimitInterval=0
-          RestartSec=10
-
-          [Install]
-          WantedBy=multi-user.target
-          EOF
-
-          sudo systemctl daemon-reload
-          sudo systemctl enable kubelet
-          sudo systemctl start kubelet
-
-    - path: /etc/systemd/system/kubelet.service
-      filesystem: root
-      mode: 0644
-      contents: |
-        [Unit]
-        Description=kubelet: The Kubernetes Node Agent
-        Documentation=https://kubernetes.io/docs/
-        After=network-online.target crio.service
-        Wants=network-online.target
-
-        [Service]
-        ExecStart=/opt/bin/kubelet
-        Restart=always
-        StartLimitInterval=0
-        RestartSec=10
-
-        [Install]
-        WantedBy=multi-user.target
-
 systemd:
   units:
     - name: crio.service
@@ -185,6 +144,24 @@ systemd:
         Type=oneshot
         ExecStart=/bin/bash /home/core/install-bootstrap-components.sh
         RemainAfterExit=true
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: kubelet.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=kubelet: The Kubernetes Node Agent
+        Documentation=https://kubernetes.io/docs/
+        After=network-online.target crio.service
+        Wants=network-online.target
+
+        [Service]
+        ExecStart=/opt/bin/kubelet
+        Restart=always
+        StartLimitInterval=0
+        RestartSec=10
 
         [Install]
         WantedBy=multi-user.target
