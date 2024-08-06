@@ -61,7 +61,8 @@ storage:
           sudo dnf -y install cri-o || sudo yum -y install cri-o
 
           # Configurar PATH para CRI-O
-          echo 'PATH=/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin' | sudo tee /etc/sysconfig/crio
+          echo 'PATH=/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin' | sudo tee /etc/profile.d/custom_path.sh
+          source /etc/profile.d/custom_path.sh
 
           # Generar certificado individual para kubelet
           sudo mkdir -p /etc/kubernetes/pki/kubelet
@@ -79,6 +80,47 @@ storage:
 
           sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.csr -subj "/CN=ServiceAccount"
           sudo openssl x509 -req -in /etc/kubernetes/pki/sa.csr -signkey /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.crt
+
+          # Crear y habilitar el servicio Kubelet
+          cat <<EOF | sudo tee /etc/systemd/system/kubelet.service
+          [Unit]
+          Description=kubelet: The Kubernetes Node Agent
+          Documentation=https://kubernetes.io/docs/
+          After=network-online.target crio.service
+          Wants=network-online.target
+
+          [Service]
+          ExecStart=/opt/bin/kubelet
+          Restart=always
+          StartLimitInterval=0
+          RestartSec=10
+
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+
+          sudo systemctl daemon-reload
+          sudo systemctl enable kubelet
+          sudo systemctl start kubelet
+
+    - path: /etc/systemd/system/kubelet.service
+      filesystem: root
+      mode: 0644
+      contents: |
+        [Unit]
+        Description=kubelet: The Kubernetes Node Agent
+        Documentation=https://kubernetes.io/docs/
+        After=network-online.target crio.service
+        Wants=network-online.target
+
+        [Service]
+        ExecStart=/opt/bin/kubelet
+        Restart=always
+        StartLimitInterval=0
+        RestartSec=10
+
+        [Install]
+        WantedBy=multi-user.target
 
 systemd:
   units:
