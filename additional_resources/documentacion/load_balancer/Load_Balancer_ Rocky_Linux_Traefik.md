@@ -239,8 +239,13 @@ sudo docker ps
 ### 5.2 Configurar el DNS
 
 
-En el servidor dns freeipa1  Agregue un registro DNS para el dominio load_balancer1.cefaslocalserver.com apuntando a la IP del servidor LoadBalancer1 (
-  
+En el servidor dns freeipa1  Agregue un registro DNS para el dominio load_balancer1.cefaslocalserver.com apuntando a la IP del servidor LoadBalancer1 
+
+```bash
+curl http://10.17.3.12:8080/dashboard/
+```
+
+
   ```bash
 kinit admin
 ipa dnsrecord-add cefaslocalserver.com load_balancer1 --a-rec 10.17.3.12

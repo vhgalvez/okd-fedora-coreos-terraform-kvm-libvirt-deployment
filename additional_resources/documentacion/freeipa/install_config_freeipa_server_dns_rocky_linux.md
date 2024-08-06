@@ -10,6 +10,7 @@ Este documento proporciona una guía detallada para la instalación y configurac
 
 ```bash
 sudo dnf update -y && sudo dnf updagrade -y
+
 ```
 
 ### 1.2 Verificar el Nombre de Host
