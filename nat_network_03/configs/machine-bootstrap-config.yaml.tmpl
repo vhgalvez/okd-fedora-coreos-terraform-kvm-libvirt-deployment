@@ -65,20 +65,39 @@ storage:
 
           # Generar certificado individual para kubelet
           sudo mkdir -p /etc/kubernetes/pki/kubelet
-          openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/kubelet/kubelet.key -out /etc/kubernetes/pki/kubelet/kubelet.csr -subj "/CN=kubelet"
-          openssl x509 -req -in /etc/kubernetes/pki/kubelet/kubelet.csr -signkey /etc/kubernetes/pki/kubelet/kubelet.key -out /etc/kubernetes/pki/kubelet/kubelet.crt
+          sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/kubelet/kubelet.key -out /etc/kubernetes/pki/kubelet/kubelet.csr -subj "/CN=kubelet"
+          sudo openssl x509 -req -in /etc/kubernetes/pki/kubelet/kubelet.csr -signkey /etc/kubernetes/pki/kubelet/kubelet.key -out /etc/kubernetes/pki/kubelet/kubelet.crt
 
           # Certificados compartidos
           sudo mkdir -p /etc/kubernetes/pki/apiserver
-          openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/apiserver/apiserver.key -out /etc/kubernetes/pki/apiserver/apiserver.csr -subj "/CN=apiserver"
-          openssl x509 -req -in /etc/kubernetes/pki/apiserver/apiserver.csr -signkey /etc/kubernetes/pki/apiserver/apiserver.key -out /etc/kubernetes/pki/apiserver/apiserver.crt
+          sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/apiserver/apiserver.key -out /etc/kubernetes/pki/apiserver/apiserver.csr -subj "/CN=apiserver"
+          sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver/apiserver.csr -signkey /etc/kubernetes/pki/apiserver/apiserver.key -out /etc/kubernetes/pki/apiserver/apiserver.crt
 
           sudo mkdir -p /etc/kubernetes/pki
-          openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/ca.key -out /etc/kubernetes/pki/ca.csr -subj "/CN=CA"
-          openssl x509 -req -in /etc/kubernetes/pki/ca.csr -signkey /etc/kubernetes/pki/ca.key -out /etc/kubernetes/pki/ca.crt
+          sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/ca.key -out /etc/kubernetes/pki/ca.csr -subj "/CN=CA"
+          sudo openssl x509 -req -in /etc/kubernetes/pki/ca.csr -signkey /etc/kubernetes/pki/ca.key -out /etc/kubernetes/pki/ca.crt
 
-          openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.csr -subj "/CN=ServiceAccount"
-          openssl x509 -req -in /etc/kubernetes/pki/sa.csr -signkey /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.crt
+          sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.csr -subj "/CN=ServiceAccount"
+          sudo openssl x509 -req -in /etc/kubernetes/pki/sa.csr -signkey /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.crt
+
+    - path: /etc/systemd/system/kubelet.service
+      filesystem: root
+      mode: 0644
+      contents: |
+        [Unit]
+        Description=kubelet: The Kubernetes Node Agent
+        Documentation=https://kubernetes.io/docs/
+        After=network-online.target crio.service
+        Wants=network-online.target
+
+        [Service]
+        ExecStart=/opt/bin/kubelet
+        Restart=always
+        StartLimitInterval=0
+        RestartSec=10
+
+        [Install]
+        WantedBy=multi-user.target
 
 systemd:
   units:
@@ -92,7 +111,7 @@ systemd:
 
         [Service]
         Type=simple
-        ExecStart=/usr/local/bin/crio
+        ExecStart=/usr/bin/crio
         EnvironmentFile=/etc/sysconfig/crio
         Restart=on-failure
 
