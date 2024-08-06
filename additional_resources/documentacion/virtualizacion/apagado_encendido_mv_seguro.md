@@ -47,6 +47,7 @@ sudo virsh shutdown bootstrap1
 sudo virsh shutdown worker2
 sudo virsh shutdown worker3
 sudo virsh shutdown master1
+sudo virsh shutdown helper
 ```
 
 Verifica el estado final:
@@ -60,7 +61,7 @@ sudo virsh list --all
  Id   Nombre                          Estado
 -----------------------------------------------
  -    bastion1.cefaslocalserver.com   apagado
- -    bootstrap1                      apagado
+ -    bootstrap                      apagado
  -    freeipa1                        apagado
  -    load_balancer1                  apagado
  -    master1                         apagado
@@ -70,6 +71,7 @@ sudo virsh list --all
  -    worker1                         apagado
  -    worker2                         apagado
  -    worker3                         apagado
+ -    helper                          apagado
 ```
 
 Nota Adicional
@@ -101,7 +103,8 @@ sudo virsh start bastion1.cefaslocalserver.com
 sudo virsh start freeipa1
 sudo virsh start load_balancer1
 sudo virsh start postgresql1
-sudo virsh start bootstrap1
+sudo virsh start bootstrap
+sudo virsh start helper
 sudo virsh start master1
 sudo virsh start master2
 sudo virsh start master3
