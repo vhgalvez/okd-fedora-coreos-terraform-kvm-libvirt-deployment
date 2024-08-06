@@ -1,4 +1,4 @@
-[core@loadbalancer1 traefik]$ sudo cat *
+
 
 ```bash
 version: "3"
@@ -23,7 +23,6 @@ services:
       - /etc/traefik/traefik.toml:/traefik.toml
       - /etc/traefik/acme.json:/acme.json
     restart: always
-
 ```
 
 
@@ -74,9 +73,3 @@ services:
     [[http.services.api.loadBalancer.servers]]
       url = "http://10.17.4.23:6443"
 ```
-
-[core@loadbalancer1 traefik]$ ls -l
-total 8
--rw-------. 1 root root    0 Aug  3 20:02 acme.json
--rw-r--r--. 1 root root  666 Aug  3 22:36 docker-compose.yml
--rw-r--r--  1 root root 1090 Aug  4 09:23 traefik.toml
