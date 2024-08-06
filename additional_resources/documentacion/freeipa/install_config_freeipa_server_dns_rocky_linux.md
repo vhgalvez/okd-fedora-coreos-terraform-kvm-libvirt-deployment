@@ -236,8 +236,17 @@ Asegúrate de que la opción dnssec-validation esté configurada en no:
 listen-on-v6 { any; };
 
 /* dnssec-enable is obsolete and 'yes' by default */
-
 dnssec-validation no;
+
+/* Permitir recursión para todas las redes */
+allow-recursion { any; };
+
+/* Forwarders */
+forwarders {
+    8.8.8.8;
+    8.8.4.4;
+};
+
 ```
 
 ## Reiniciar el Servicio named
