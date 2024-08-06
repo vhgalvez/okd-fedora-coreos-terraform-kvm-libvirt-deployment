@@ -136,6 +136,32 @@ storage:
           sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.csr -subj "/CN=ServiceAccount"
           sudo openssl x509 -req -in /etc/kubernetes/pki/sa.csr -signkey /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.crt
 
+          # Crear configuración del kubelet
+          sudo mkdir -p /etc/kubernetes
+          cat <<EOF | sudo tee /etc/kubernetes/kubelet-config.yaml
+          kind: KubeletConfiguration
+          apiVersion: kubelet.config.k8s.io/v1beta1
+          authentication:
+            x509:
+              clientCAFile: "/etc/kubernetes/pki/ca.crt"
+          authorization:
+            mode: Webhook
+          serverTLSBootstrap: true
+          tlsCertFile: "/etc/kubernetes/pki/kubelet.crt"
+          tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet.key"
+          cgroupDriver: systemd
+          runtimeRequestTimeout: "15m"
+          containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
+          EOF
+
+          # Crear archivo de configuración crictl
+          sudo mkdir -p /etc/crictl
+          cat <<EOF | sudo tee /etc/crictl/crictl.yaml
+          runtime-endpoint: "unix:///var/run/crio/crio.sock"
+          timeout: 0
+          debug: false
+          EOF
+
           # Crear archivos de servicio en /etc/systemd/system
           sudo cat <<EOF | sudo tee /etc/systemd/system/crio.service
           [Unit]
@@ -163,21 +189,51 @@ storage:
           Wants=network-online.target
 
           [Service]
-          ExecStart=/opt/bin/kubelet
-          Restart=always
-          StartLimitInterval=0
-          RestartSec=10
+          ExecStart=/opt/bin/kubelet --kubeconfig=/etc/kubernetes/kubelet.conf --config=/etc/kubernetes/kubelet-config.yaml --container-runtime=remote --container-runtime-endpoint=unix:///var/run/crio/crio.sock --runtime-request-timeout=15m --image-gc-high-threshold=80 --image-gc-low-threshold=40 --enforce-node-allocatable=cpu,memory --fail-swap-on=false --cgroup-driver=systemd --network-plugin=cni --cni-bin-dir=/opt/cni/bin --cni-conf-dir=/etc/cni/net.d --pod-infra-container-image=k8s.gcr.io/pause:3.1 --v=2
+          Restart=on-failure
 
           [Install]
           WantedBy=multi-user.target
           EOF
 
-          # Recargar y habilitar servicios
-          sudo systemctl daemon-reload
-          sudo systemctl enable crio
-          sudo systemctl start crio
-          sudo systemctl enable kubelet
-          sudo systemctl start kubelet
+          # Crear manifestos de Kubernetes
+          sudo mkdir -p /etc/kubernetes/manifests
+          cat <<EOF | sudo tee /etc/kubernetes/manifests/kube-apiserver.yaml
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: kube-apiserver
+            namespace: kube-system
+          spec:
+            containers:
+            - name: kube-apiserver
+              image: k8s.gcr.io/kube-apiserver:v1.21.0
+              command:
+              - kube-apiserver
+              - --advertise-address=10.17.4.21
+              - --allow-privileged=true
+              - --authorization-mode=Node,RBAC
+              - --client-ca-file=/etc/kubernetes/pki/ca.crt
+              - --etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt
+              - --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt
+              - --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key
+              - --etcd-servers=https://10.17.4.21:2379
+              - --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt
+              - --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key
+              - --secure-port=6443
+              - --service-account-key-file=/etc/kubernetes/pki/sa.pub
+              - --service-cluster-ip-range=10.96.0.0/12
+              - --tls-cert-file=/etc/kubernetes/pki/apiserver.crt
+              - --tls-private-key-file=/etc/kubernetes/pki/apiserver.key
+              volumeMounts:
+              - mountPath: /etc/kubernetes/pki
+                name: pki
+                readOnly: true
+            volumes:
+            - name: pki
+              hostPath:
+                path: /etc/kubernetes/pki
+          EOF
 
 systemd:
   units:
@@ -256,10 +312,8 @@ systemd:
         Wants=network-online.target
 
         [Service]
-        ExecStart=/opt/bin/kubelet
-        Restart=always
-        StartLimitInterval=0
-        RestartSec=10
+        ExecStart=/opt/bin/kubelet --kubeconfig=/etc/kubernetes/kubelet.conf --config=/etc/kubernetes/kubelet-config.yaml --container-runtime=remote --container-runtime-endpoint=unix:///var/run/crio/crio.sock --runtime-request-timeout=15m --image-gc-high-threshold=80 --image-gc-low-threshold=40 --enforce-node-allocatable=cpu,memory --fail-swap-on=false --cgroup-driver=systemd --network-plugin=cni --cni-bin-dir=/opt/cni/bin --cni-conf-dir=/etc/cni/net.d --pod-infra-container-image=k8s.gcr.io/pause:3.1 --v=2
+        Restart=on-failure
 
         [Install]
         WantedBy=multi-user.target
