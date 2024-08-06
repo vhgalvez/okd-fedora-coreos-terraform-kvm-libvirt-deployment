@@ -585,7 +585,7 @@ url:   https://console.redhat.com/openshift/create/local
                                                 v
                                     +-----------+----------+
                                     |  Bootstrap (OKD)     |
-                                    |   IP: 10.17.3.14     |
+                                    |   IP: 10.17.4.27     |
                                     +-----------+----------+
                                                 |
                                                 v
@@ -596,6 +596,12 @@ url:   https://console.redhat.com/openshift/create/local
      |   Worker 1    |   |   Worker 2    |  |   Worker 3    |   |  FreeIPA (DNS)|
      |   IP: 10.17.4.24| |   IP: 10.17.4.25| |   IP: 10.17.4.26| |  IP: 10.17.3.11|
      +-------+-------+   +-------+-------+  +-------+-------+   +-------+-------+
+
+
+            +----------------------------------------------------------------+
+            |                            helper                               |
+            |                       IP: 10.17.3.14                            |
+            +----------------------------------------------------------------+
 
             +----------------------------------------------------------------+
             |                            Bastion Node                        |
@@ -625,12 +631,17 @@ url:   https://console.redhat.com/openshift/create/local
 | Nodo                 | Sistema Operativo          |
 |----------------------|----------------------------|
 | Bastion Node         | Rocky Linux                |
-| Bootstrap Node       | Rocky Linux                |
+| helper Node          | Rocky Linux                |
 | FreeIPA Node         | Rocky Linux                |
 | Load Balancer Node   | Rocky Linux                |
 | PostgreSQL Node      | Rocky Linux                |
 | Master Nodes         | Flatcar Container Linux    |
 | Worker Nodes         | Flatcar Container Linux    |
+| Bootstrap Node       | Flatcar Container Linux    |
+
+
+
+
 
 # Entrada para el Servidor Físico
 
@@ -659,7 +670,7 @@ La red kube_network_02 se utiliza para los servicios básicos del clúster, incl
 | kube_network_02 | freeipa1        | 10.17.3.11    | Servidor de DNS y gestión de identidades | (Virtual - NAT) |
 | kube_network_02 | load_balancer1  | 10.17.3.12    | Balanceo de carga para el clúster | (Virtual - NAT) |
 | kube_network_02 | postgresql1     | 10.17.3.13    | Gestión de bases de datos     | (Virtual - NAT) |
-| kube_network_02 | bootstrap1      | 10.17.3.14    | Inicialización del clúster    | (Virtual - NAT) |
+| kube_network_02 | helper          | 10.17.3.14    | Inicialización del clúster    | (Virtual - NAT) |
 
 ## Red kube_network_03 - NAT Network
 
@@ -673,6 +684,8 @@ La red kube_network_03 se dedica a la gestión y ejecución de aplicaciones dent
 | kube_network_03 | worker1   | 10.17.4.24   | Ejecución de aplicaciones | (Virtual - NAT) |
 | kube_network_03 | worker2   | 10.17.4.25   | Ejecución de aplicaciones | (Virtual - NAT) |
 | kube_network_03 | worker3   | 10.17.4.26   | Ejecución de aplicaciones | (Virtual - NAT) |
+| kube_network_03 | Bootstrap | 10.17.4.27   | Bootstrap | (Virtual - NAT) |
+
 
 # Resumen de los Hostnames e IPs
 
@@ -683,13 +696,16 @@ A continuación se proporciona un resumen de los hostnames e IPs para referencia
 | 10.17.3.11    | freeipa1.cefaslocalserver.com   |
 | 10.17.3.12    | load_balancer1.cefaslocalserver.com |
 | 10.17.3.13    | postgresql1.cefaslocalserver.com |
-| 10.17.3.14    | bootstrap1.cefaslocalserver.com |
+| 10.17.3.14    | helper.cefaslocalserver.com |
 | 10.17.4.21    | master1.cefaslocalserver.com    |
 | 10.17.4.22    | master2.cefaslocalserver.com    |
 | 10.17.4.23    | master3.cefaslocalserver.com    |
 | 10.17.4.24    | worker1.cefaslocalserver.com    |
 | 10.17.4.25    | worker2.cefaslocalserver.com    |
 | 10.17.4.26    | worker3.cefaslocalserver.com    |
+| 10.17.4.27    | bootstrap.cefaslocalserver.com |
+
+
 
 
 
