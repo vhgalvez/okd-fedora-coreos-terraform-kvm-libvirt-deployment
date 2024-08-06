@@ -280,6 +280,13 @@ sudo firewall-cmd --add-port=6443/tcp --permanent
 sudo firewall-cmd --reload
 ```
 
+```bash
+sudo firewall-cmd --permanent --add-port=80/tcp
+sudo firewall-cmd --permanent --add-port=443/tcp
+sudo firewall-cmd --permanent --add-port=6443/tcp
+sudo firewall-cmd --reload
+```
+
 
 Con estos pasos, habrás instalado y configurado Traefik en la máquina LoadBalancer1 utilizando Docker Compose.
 

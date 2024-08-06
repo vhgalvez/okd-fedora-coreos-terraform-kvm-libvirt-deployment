@@ -44,8 +44,9 @@ wget https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-1
 
 ```bash
 tar -xzvf openshift-client-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
-sudo mv oc /usr/local/bin/
-sudo chmod +x /usr/local/bin/oc
+sudo mv openshift-install /opt/bin/
+sudo chmod +x /opt/bin/openshift-install
+
 ```
 
 ##### 1.4 Verificar la Instalación
@@ -523,5 +524,8 @@ sudo firewall-cmd --reload
 
 
 ```bash
-sudo scp -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift /home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/ignition-configs/*.ign core@10.17.3.14:~/okd-install/
+sudo scp -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift /home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/ignition-configs/*.ign core@10.17.4.27:~/okd-install/
 ```
+
+
+
