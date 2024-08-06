@@ -131,6 +131,8 @@ Contenido del archivo `traefik.toml`:
     address = ":80"
   [entryPoints.websecure]
     address = ":443"
+  [entryPoints.k8sApi]
+    address = ":6443"
 
 [api]
   dashboard = true
@@ -156,15 +158,19 @@ Contenido del archivo `traefik.toml`:
     entryPoints = ["websecure"]
     service = "api@internal"
     rule = "Host(`load_balancer1.cefaslocalserver.com`)"
+  [http.routers.k8sApi]
+    entryPoints = ["k8sApi"]
+    service = "k8sApi"
+    rule = "Host(`api.okd-cluster.cefaslocalserver.com`)"
 
 [http.services]
   [http.services.api.loadBalancer]
     [[http.services.api.loadBalancer.servers]]
-      url = "http://10.17.4.21"
+      url = "http://10.17.4.21:6443"
     [[http.services.api.loadBalancer.servers]]
-      url = "http://10.17.4.22"
+      url = "http://10.17.4.22:6443"
     [[http.services.api.loadBalancer.servers]]
-      url = "http://10.17.4.23"
+      url = "http://10.17.4.23:6443"
 ```
 
 ### 4.3 Crear el Archivo `acme.json`
@@ -191,7 +197,7 @@ version: "3"
 
 services:
   traefik:
-    image: traefik:v3.0
+    image: traefik:v3.1
     command:
       - --api.insecure=true
       - --providers.docker
