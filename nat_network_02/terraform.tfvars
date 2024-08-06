@@ -44,12 +44,12 @@ vm_rockylinux_definitions = {
     domain_memory  = "4096",
     short_hostname = "postgresql1"
   },
-  "helper_node" = {
+  "helper" = {
     cpus           = 2,
     memory         = 2048,
     ip             = "10.17.3.14",
-    hostname       = "helper_node.cefaslocalserver.com",
-    volume_name    = "helper_node_volume",
+    hostname       = "helper.cefaslocalserver.com",
+    volume_name    = "helper_volume",
     volume_format  = "qcow2",
     volume_pool    = "default",
     volume_size    = "32212254720",
