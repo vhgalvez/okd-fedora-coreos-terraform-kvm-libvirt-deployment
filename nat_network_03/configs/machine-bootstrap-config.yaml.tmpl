@@ -39,7 +39,7 @@ storage:
           sudo mkdir -p /opt/bin
 
           # Descargar e instalar el Instalador de OKD
-          wget https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
+          wget -q https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
           tar -xzvf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
           sudo mv openshift-install /opt/bin/
           sudo chmod +x /opt/bin/openshift-install
@@ -57,25 +57,42 @@ storage:
           sudo rm -rf /tmp/oc.tar.gz
 
           # Instalar CRI-O
-          sudo wget -O /etc/yum.repos.d/devel:kubic:libcontainers:stable.repo https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/CentOS_8/devel:kubic:libcontainers:stable.repo
-          sudo dnf -y install cri-o
+          sudo wget -q -O /etc/yum.repos.d/devel:kubic:libcontainers:stable.repo https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/CentOS_8/devel:kubic:libcontainers:stable.repo
+          sudo dnf -y install cri-o || sudo yum -y install cri-o
 
           # Generar certificado individual para kubelet
-          mkdir -p /etc/kubernetes/pki/kubelet
+          sudo mkdir -p /etc/kubernetes/pki/kubelet
           openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/kubelet/kubelet.key -out /etc/kubernetes/pki/kubelet/kubelet.csr -subj "/CN=kubelet"
           openssl x509 -req -in /etc/kubernetes/pki/kubelet/kubelet.csr -signkey /etc/kubernetes/pki/kubelet/kubelet.key -out /etc/kubernetes/pki/kubelet/kubelet.crt
 
           # Certificados compartidos
-          mkdir -p /etc/kubernetes/pki/apiserver
+          sudo mkdir -p /etc/kubernetes/pki/apiserver
           openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/apiserver/apiserver.key -out /etc/kubernetes/pki/apiserver/apiserver.csr -subj "/CN=apiserver"
           openssl x509 -req -in /etc/kubernetes/pki/apiserver/apiserver.csr -signkey /etc/kubernetes/pki/apiserver/apiserver.key -out /etc/kubernetes/pki/apiserver/apiserver.crt
 
-          mkdir -p /etc/kubernetes/pki
+          sudo mkdir -p /etc/kubernetes/pki
           openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/ca.key -out /etc/kubernetes/pki/ca.csr -subj "/CN=CA"
           openssl x509 -req -in /etc/kubernetes/pki/ca.csr -signkey /etc/kubernetes/pki/ca.key -out /etc/kubernetes/pki/ca.crt
 
           openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.csr -subj "/CN=ServiceAccount"
           openssl x509 -req -in /etc/kubernetes/pki/sa.csr -signkey /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.crt
+
+    - path: /etc/systemd/system/install-components.service
+      filesystem: root
+      mode: 0644
+      contents: |
+        [Unit]
+        Description=Install Kubernetes components
+        After=network-online.target
+        Wants=network-online.target
+
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/bash /home/core/install-bootstrap-components.sh
+        RemainAfterExit=true
+
+        [Install]
+        WantedBy=multi-user.target
 
 systemd:
   units:
