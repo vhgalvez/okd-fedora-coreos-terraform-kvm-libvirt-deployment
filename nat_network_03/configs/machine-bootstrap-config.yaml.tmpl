@@ -65,7 +65,7 @@ storage:
           openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/kubelet/kubelet.key -out /etc/kubernetes/pki/kubelet/kubelet.csr -subj "/CN=kubelet"
           openssl x509 -req -in /etc/kubernetes/pki/kubelet/kubelet.csr -signkey /etc/kubernetes/pki/kubelet/kubelet.key -out /etc/kubernetes/pki/kubelet/kubelet.crt
 
-          # Certificados compartidos para el cluster
+          # Certificados compartidos
           mkdir -p /etc/kubernetes/pki/apiserver
           openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/apiserver/apiserver.key -out /etc/kubernetes/pki/apiserver/apiserver.csr -subj "/CN=apiserver"
           openssl x509 -req -in /etc/kubernetes/pki/apiserver/apiserver.csr -signkey /etc/kubernetes/pki/apiserver/apiserver.key -out /etc/kubernetes/pki/apiserver/apiserver.crt
