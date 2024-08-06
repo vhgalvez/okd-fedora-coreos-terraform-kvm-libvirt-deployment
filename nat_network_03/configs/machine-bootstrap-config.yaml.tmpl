@@ -77,27 +77,24 @@ storage:
           openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.csr -subj "/CN=ServiceAccount"
           openssl x509 -req -in /etc/kubernetes/pki/sa.csr -signkey /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.crt
 
-    - path: /etc/systemd/system/install-components.service
-      filesystem: root
-      mode: 0644
-      contents: |
-        [Unit]
-        Description=Install Kubernetes components
-        After=network-online.target
-        Wants=network-online.target
-
-        [Service]
-        Type=oneshot
-        ExecStart=/bin/bash /home/core/install-bootstrap-components.sh
-        RemainAfterExit=true
-
-        [Install]
-        WantedBy=multi-user.target
-
 systemd:
   units:
     - name: crio.service
       enabled: true
+      contents: |
+        [Unit]
+        Description=CRI-O Container Runtime
+        After=network-online.target
+        Wants=network-online.target
+
+        [Service]
+        Type=simple
+        ExecStart=/usr/bin/crio
+        Restart=on-failure
+
+        [Install]
+        WantedBy=multi-user.target
+
     - name: apply-network-routes.service
       enabled: true
       contents: |
