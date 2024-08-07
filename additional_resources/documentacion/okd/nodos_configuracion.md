@@ -191,3 +191,10 @@ Aquí se presenta una tabla ordenada en formato Markdown que detalla las herrami
 - **[Etcd Documentation](https://etcd.io/docs/)**: Para configuraciones específicas de etcd y cómo asegurar su comunicación.
 
 ---
+
+
+Configurar correctamente los certificados y las herramientas en cada nodo es crucial para la seguridad y el funcionamiento adecuado de tu clúster OKD. Asegúrate de seguir las mejores prácticas y la documentación oficial para evitar problemas de configuración y seguridad.
+
+sudo systemctl daemon-reload
+sudo systemctl restart crio
+sudo systemctl status crio
