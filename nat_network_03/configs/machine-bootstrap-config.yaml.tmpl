@@ -117,6 +117,8 @@ storage:
           source /etc/profile.d/custom_path.sh
 
           # Generate certificates
+          sudo mkdir -p /etc/kubernetes/pki/kubelet /etc/kubernetes/pki/apiserver /etc/kubernetes/pki/etcd /etc/kubernetes/pki/sa
+          
           sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/kubelet/kubelet.key -out /etc/kubernetes/pki/kubelet/kubelet.csr -subj "/CN=kubelet"
           sudo openssl x509 -req -in /etc/kubernetes/pki/kubelet/kubelet.csr -signkey /etc/kubernetes/pki/kubelet/kubelet.key -out /etc/kubernetes/pki/kubelet/kubelet.crt
 
@@ -139,8 +141,8 @@ storage:
           authorization:
             mode: Webhook
           serverTLSBootstrap: true
-          tlsCertFile: "/etc/kubernetes/pki/kubelet.crt"
-          tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet.key"
+          tlsCertFile: "/etc/kubernetes/pki/kubelet/kubelet.crt"
+          tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet/kubelet.key"
           cgroupDriver: systemd
           runtimeRequestTimeout: "15m"
           containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
