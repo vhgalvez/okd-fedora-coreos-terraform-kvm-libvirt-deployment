@@ -91,6 +91,7 @@ storage:
           # Create CRI-O configuration
           echo "Creating CRI-O configuration..."
           cat <<EOF | sudo tee /etc/crio/crio.conf
+
 [crio]
 log_level = "debug"
 root = "/var/lib/crio"
