@@ -35,14 +35,14 @@ storage:
           set -euo pipefail
           exec > /var/log/install-master-components.log 2>&1
 
-          # Crear directorio para binarios
+          # Create directory for binaries
           sudo mkdir -p /opt/bin
 
-          # Instalar kubelet
+          # Install kubelet
           curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
 
-          # Instalar oc (OpenShift Client)
+          # Install oc (OpenShift Client)
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
           sudo mv /tmp/oc /opt/bin/oc
@@ -56,19 +56,18 @@ storage:
           sudo mv openshift-install /opt/bin/
           sudo chmod +x /opt/bin/openshift-install
           rm -rf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
-     
-          # Instalar kube-apiserver
+
+          # Install kube-apiserver
           curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-apiserver
           sudo mv /tmp/kube-apiserver /opt/bin/kube-apiserver
           sudo chmod +x /opt/bin/kube-apiserver
 
-
-          # Instalar kube-scheduler
+          # Install kube-scheduler
           curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-scheduler
           sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
           sudo chmod +x /opt/bin/kube-scheduler
 
-          # Instalar CRI-O
+          # Install CRI-O
           sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.3.tar.gz
           sudo mkdir -p /tmp/crio
           sudo tar -xzf /tmp/crio.tar.gz -C /tmp/crio
@@ -77,12 +76,12 @@ storage:
           sudo chmod +x /opt/bin/crio/*
           /opt/bin/crio/crio --version
 
-          # Descargar conmon
+          # Download conmon
           wget https://github.com/containers/conmon/releases/download/v2.1.12/conmon.amd64
           sudo mv conmon.amd64 /opt/bin/crio/conmon
           sudo chmod +x /opt/bin/crio/conmon
 
-          # Crear configuración de CRI-O
+          # Create CRI-O configuration
           sudo mkdir -p /etc/crio
           cat <<EOF | sudo tee /etc/crio/crio.conf
           [crio]
@@ -111,7 +110,7 @@ storage:
           namespaces_dir = "/var/run"
           enable_criu_support = true
           pinns_path = "/opt/bin/crio/pinns"
-          conmon = "/opt/bin/crio/conmon"
+          conmon = "/opt/bin/crio/conmon
 
           [crio.runtime.runtimes.runc]
           runtime_path = "/opt/bin/crio/crio-runc"
@@ -127,7 +126,7 @@ storage:
           plugin_dirs = ["/opt/cni/bin/"]
           EOF
 
-          # Crear archivos de configuración en /etc/kubernetes/manifests
+          # Create manifests for Kubernetes components
           sudo mkdir -p /etc/kubernetes/manifests
 
           sudo cat <<EOF | sudo tee /etc/kubernetes/manifests/kube-apiserver.yaml
@@ -183,7 +182,7 @@ storage:
           containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
           EOF
 
-          # Crear archivos de servicio en /etc/systemd/system
+          # Create systemd service files
           sudo cat <<EOF | sudo tee /etc/systemd/system/crio.service
           [Unit]
           Description=CRI-O container runtime
