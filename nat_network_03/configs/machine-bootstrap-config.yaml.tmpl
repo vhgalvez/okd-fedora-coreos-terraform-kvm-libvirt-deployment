@@ -35,28 +35,42 @@ storage:
           set -euo pipefail
           exec > /var/log/install-bootstrap-components.log 2>&1
 
+          echo "Starting bootstrap components installation..."
+
           # Create directories for binaries
           sudo mkdir -p /opt/bin /etc/crio /etc/kubernetes/pki/kubelet /etc/kubernetes/pki/apiserver /etc/kubernetes/pki /etc/kubernetes/pki/etcd /etc/kubernetes/pki/sa /etc/cni/net.d /opt/cni/bin /etc/crictl /etc/kubernetes/manifests
 
+          echo "Directories created."
+
           # Download and install OKD Installer
+          echo "Downloading OKD Installer..."
           wget -q https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
           tar -xzvf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
           sudo mv openshift-install /opt/bin/
           sudo chmod +x /opt/bin/openshift-install
           rm -rf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
 
+          echo "OKD Installer installed."
+
           # Install kubelet
+          echo "Installing kubelet..."
           curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
 
+          echo "kubelet installed."
+
           # Install oc (OpenShift Client)
+          echo "Installing oc (OpenShift Client)..."
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
           sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
 
+          echo "oc installed."
+
           # Install CRI-O
+          echo "Installing CRI-O..."
           sudo wget -q -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.3.tar.gz
           sudo mkdir -p /tmp/crio
           sudo tar -xzf /tmp/crio.tar.gz -C /tmp/crio
@@ -65,11 +79,17 @@ storage:
           sudo chmod +x /opt/bin/crio/*
           /opt/bin/crio/crio --version
 
+          echo "CRI-O installed."
+
           # Download conmon
+          echo "Downloading conmon..."
           wget -q https://github.com/containers/conmon/releases/download/v2.1.12/conmon.amd64 -O /opt/bin/crio/conmon
           sudo chmod +x /opt/bin/crio/conmon
 
+          echo "conmon downloaded."
+
           # Create CRI-O configuration
+          echo "Creating CRI-O configuration..."
           cat <<EOF | sudo tee /etc/crio/crio.conf
           [crio]
           log_level = "debug"
@@ -113,11 +133,16 @@ storage:
           plugin_dirs = ["/opt/cni/bin/"]
           EOF
 
+          echo "CRI-O configuration created."
+
           # Configure PATH for CRI-O
           echo 'PATH=/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin' | sudo tee /etc/profile.d/custom_path.sh
           source /etc/profile.d/custom_path.sh
 
+          echo "PATH configured for CRI-O."
+
           # Generate certificates
+          echo "Generating certificates..."
           sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/kubelet/kubelet.key -out /etc/kubernetes/pki/kubelet/kubelet.csr -subj "/CN=kubelet"
           sudo openssl x509 -req -in /etc/kubernetes/pki/kubelet/kubelet.csr -signkey /etc/kubernetes/pki/kubelet/kubelet.key -out /etc/kubernetes/pki/kubelet/kubelet.crt
 
@@ -130,7 +155,10 @@ storage:
           sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.csr -subj "/CN=ServiceAccount"
           sudo openssl x509 -req -in /etc/kubernetes/pki/sa.csr -signkey /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.crt
 
+          echo "Certificates generated."
+
           # Create kubelet configuration
+          echo "Creating kubelet configuration..."
           cat <<EOF | sudo tee /etc/kubernetes/kubelet-config.yaml
           kind: KubeletConfiguration
           apiVersion: kubelet.config.k8s.io/v1beta1
@@ -147,14 +175,20 @@ storage:
           containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
           EOF
 
+          echo "kubelet configuration created."
+
           # Create crictl configuration
+          echo "Creating crictl configuration..."
           cat <<EOF | sudo tee /etc/crictl/crictl.yaml
           runtime-endpoint: "unix:///var/run/crio/crio.sock"
           timeout: 0
           debug: false
           EOF
 
+          echo "crictl configuration created."
+
           # Create service files in /etc/systemd/system
+          echo "Creating systemd service files..."
           cat <<EOF | sudo tee /etc/systemd/system/crio.service
           [Unit]
           Description=CRI-O container runtime
@@ -188,7 +222,10 @@ storage:
           WantedBy=multi-user.target
           EOF
 
+          echo "systemd service files created."
+
           # Create Kubernetes manifests
+          echo "Creating Kubernetes manifests..."
           cat <<EOF | sudo tee /etc/kubernetes/manifests/kube-apiserver.yaml
           apiVersion: v1
           kind: Pod
@@ -201,14 +238,14 @@ storage:
               image: k8s.gcr.io/kube-apiserver:v1.21.0
               command:
               - kube-apiserver
-              - --advertise-address=10.17.4.21
+              - --advertise-address=${ip}
               - --allow-privileged=true
               - --authorization-mode=Node,RBAC
               - --client-ca-file=/etc/kubernetes/pki/ca.crt
               - --etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt
               - --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt
               - --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key
-              - --etcd-servers=https://10.17.4.21:2379
+              - --etcd-servers=https://${ip}:2379
               - --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt
               - --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key
               - --secure-port=6443
@@ -225,6 +262,8 @@ storage:
               hostPath:
                 path: /etc/kubernetes/pki
           EOF
+
+          echo "Kubernetes manifests created."
 
 systemd:
   units:
