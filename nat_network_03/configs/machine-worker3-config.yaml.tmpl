@@ -1,4 +1,3 @@
-# bootstrap
 variant: flatcar
 version: 1.1.0
 
@@ -27,24 +26,17 @@ storage:
       mode: 0644
       contents:
         inline: ${host_name}
-    - path: /home/core/install-bootstrap-components.sh
+    - path: /home/core/install-components.sh
       filesystem: root
       mode: 0755
       contents:
         inline: |
           #!/bin/bash
           set -euo pipefail
-          exec > /var/log/install-bootstrap-components.log 2>&1
+          exec > /var/log/install-components.log 2>&1
 
           # Crear directorio para binarios
           sudo mkdir -p /opt/bin
-
-          # Descargar e instalar el Instalador de OKD
-          wget -q https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
-          tar -xzvf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
-          sudo mv openshift-install /opt/bin/
-          sudo chmod +x /opt/bin/openshift-install
-          rm -rf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
 
           # Instalar kubelet
           curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
@@ -58,12 +50,11 @@ storage:
           sudo rm -rf /tmp/oc.tar.gz
 
           # Instalar CRI-O
-          sudo wget -q -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.3.tar.gz
+          sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.3.tar.gz
           sudo mkdir -p /tmp/crio
           sudo tar -xzf /tmp/crio.tar.gz -C /tmp/crio
           sudo mkdir -p /opt/bin/crio
           sudo mv /tmp/crio/cri-o/bin/* /opt/bin/crio/
-          sudo chmod +x /opt/bin/crio/*
           /opt/bin/crio/crio --version
 
           # Descargar conmon
@@ -116,29 +107,9 @@ storage:
           plugin_dirs = ["/opt/cni/bin/"]
           EOF
 
-          # Configurar PATH para CRI-O
-          echo 'PATH=/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin' | sudo tee /etc/profile.d/custom_path.sh
-          source /etc/profile.d/custom_path.sh
-
-          # Generar certificado individual para kubelet
-          sudo mkdir -p /etc/kubernetes/pki/kubelet
-          sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/kubelet/kubelet.key -out /etc/kubernetes/pki/kubelet/kubelet.csr -subj "/CN=kubelet"
-          sudo openssl x509 -req -in /etc/kubernetes/pki/kubelet/kubelet.csr -signkey /etc/kubernetes/pki/kubelet/kubelet.key -out /etc/kubernetes/pki/kubelet/kubelet.crt
-
-          # Certificados compartidos
-          sudo mkdir -p /etc/kubernetes/pki/apiserver
-          sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/apiserver/apiserver.key -out /etc/kubernetes/pki/apiserver/apiserver.csr -subj "/CN=apiserver"
-          sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver/apiserver.csr -signkey /etc/kubernetes/pki/apiserver/apiserver.key -out /etc/kubernetes/pki/apiserver/apiserver.crt
-
-          sudo mkdir -p /etc/kubernetes/pki
-          sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/ca.key -out /etc/kubernetes/pki/ca.csr -subj "/CN=CA"
-          sudo openssl x509 -req -in /etc/kubernetes/pki/ca.csr -signkey /etc/kubernetes/pki/ca.key -out /etc/kubernetes/pki/ca.crt
-
-          sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.csr -subj "/CN=ServiceAccount"
-          sudo openssl x509 -req -in /etc/kubernetes/pki/sa.csr -signkey /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.crt
-
-          # Crear archivos de servicio en /etc/systemd/system
-          sudo cat <<EOF | sudo tee /etc/systemd/system/crio.service
+          # Crear servicio systemd para CRI-O
+          sudo mkdir -p /etc/systemd/system/
+          cat <<EOF | sudo tee /etc/systemd/system/crio.service
           [Unit]
           Description=CRI-O container runtime
           After=network.target
@@ -156,49 +127,56 @@ storage:
           WantedBy=multi-user.target
           EOF
 
-          sudo cat <<EOF | sudo tee /etc/systemd/system/kubelet.service
-          [Unit]
-          Description=kubelet: The Kubernetes Node Agent
-          Documentation=https://kubernetes.io/docs/
-          After=network-online.target crio.service
-          Wants=network-online.target
-
-          [Service]
-          ExecStart=/opt/bin/kubelet
-          Restart=always
-          StartLimitInterval=0
-          RestartSec=10
-
-          [Install]
-          WantedBy=multi-user.target
-          EOF
-
-          # Recargar y habilitar servicios
+          # Recargar systemd y activar servicios
           sudo systemctl daemon-reload
-          sudo systemctl enable crio
-          sudo systemctl start crio
           sudo systemctl enable kubelet
           sudo systemctl start kubelet
+          sudo systemctl enable crio
+          sudo systemctl start crio
+
+    - path: /etc/systemd/network/10-eth0.network
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          [Match]
+          Name=eth0
+
+          [Network]
+          Address=${ip}/24
+          Gateway=${gateway}
+          DNS=${dns1}
+          DNS=${dns2}
+
+    - path: /etc/tmpfiles.d/hosts.conf
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          f /etc/hosts 0644 - - - -
+          127.0.0.1   localhost
+          ::1         localhost
+          ${ip}  ${host_name} ${name}
+
+    - path: /run/systemd/resolve/resolv.conf
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          nameserver ${dns1}
+          nameserver ${dns2}
+
+    - path: /etc/tmpfiles.d/resolv.conf
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          L /etc/resolv.conf - - - - /run/systemd/resolve/resolv.conf
 
 systemd:
   units:
     - name: crio.service
       enabled: true
-      contents: |
-        [Unit]
-        Description=CRI-O Container Runtime
-        After=network-online.target
-        Wants=network-online.target
-
-        [Service]
-        Type=simple
-        ExecStart=/opt/bin/crio/crio
-        EnvironmentFile=/etc/sysconfig/crio
-        Restart=on-failure
-
-        [Install]
-        WantedBy=multi-user.target
-
     - name: apply-network-routes.service
       enabled: true
       contents: |
@@ -219,13 +197,12 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Description=Set hosts file
-        After=network-online.target
-        Wants=network-online.target
+        Description=Set /etc/hosts file
+        After=network.target
 
         [Service]
         Type=oneshot
-        ExecStart=/usr/bin/systemd-tmpfiles --create /etc/tmpfiles.d/hosts.conf
+        ExecStart=/bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "${ip}  ${host_name} ${name}" >> /etc/hosts'
         RemainAfterExit=true
 
         [Install]
@@ -241,26 +218,24 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/bin/bash /home/core/install-bootstrap-components.sh
+        ExecStart=/bin/bash /home/core/install-components.sh
         RemainAfterExit=true
 
         [Install]
         WantedBy=multi-user.target
 
-    - name: kubelet.service
+    - name: getty@tty1.service
       enabled: true
       contents: |
         [Unit]
-        Description=kubelet: The Kubernetes Node Agent
-        Documentation=https://kubernetes.io/docs/
-        After=network-online.target crio.service
-        Wants=network-online.target
+        Description=Getty on tty1
+        After=systemd-user-sessions.service plymouth-quit-wait.service rc-local.service
+        Wants=rc-local.service
 
         [Service]
-        ExecStart=/opt/bin/kubelet
+        ExecStart=-/sbin/agetty %I $TERM
+        Type=idle
         Restart=always
-        StartLimitInterval=0
-        RestartSec=10
 
         [Install]
         WantedBy=multi-user.target
