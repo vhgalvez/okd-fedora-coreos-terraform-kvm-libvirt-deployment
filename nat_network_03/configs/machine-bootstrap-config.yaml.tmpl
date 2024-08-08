@@ -91,47 +91,47 @@ storage:
           # Create CRI-O configuration
           echo "Creating CRI-O configuration..."
           cat <<EOF | sudo tee /etc/crio/crio.conf
-          [crio]
-          log_level = "debug"
-          root = "/var/lib/crio"
-          runroot = "/var/run/crio"
-          log_dir = "/var/log/crio/pods"
-          version_file = "/var/run/crio/version"
-          clean_shutdown_file = "/var/lib/crio/clean.shutdown"
+[crio]
+log_level = "debug"
+root = "/var/lib/crio"
+runroot = "/var/run/crio"
+log_dir = "/var/log/crio/pods"
+version_file = "/var/run/crio/version"
+clean_shutdown_file = "/var/lib/crio/clean.shutdown"
 
-          [crio.api]
-          listen = "/var/run/crio/crio.sock"
-          stream_address = "127.0.0.1"
-          stream_port = "0"
-          grpc_max_send_msg_size = 83886080
-          grpc_max_recv_msg_size = 83886080
+[crio.api]
+listen = "/var/run/crio/crio.sock"
+stream_address = "127.0.0.1"
+stream_port = "0"
+grpc_max_send_msg_size = 83886080
+grpc_max_recv_msg_size = 83886080
 
-          [crio.runtime]
-          default_runtime = "runc"
-          no_pivot = false
-          decryption_keys_path = "/etc/crio/keys/"
-          cgroup_manager = "systemd"
-          drop_infra_ctr = true
-          infra_ctr_cpuset = ""
-          shared_cpuset = ""
-          namespaces_dir = "/var/run"
-          enable_criu_support = true
-          pinns_path = "/opt/bin/crio/pinns"
-          conmon = "/opt/bin/crio/conmon"
+[crio.runtime]
+default_runtime = "runc"
+no_pivot = false
+decryption_keys_path = "/etc/crio/keys/"
+cgroup_manager = "systemd"
+drop_infra_ctr = true
+infra_ctr_cpuset = ""
+shared_cpuset = ""
+namespaces_dir = "/var/run"
+enable_criu_support = true
+pinns_path = "/opt/bin/crio/pinns"
+conmon = "/opt/bin/crio/conmon"
 
-          [crio.runtime.runtimes.runc]
-          runtime_path = "/opt/bin/crio/crio-runc"
-          runtime_type = "oci"
-          runtime_root = "/run/runc"
+[crio.runtime.runtimes.runc]
+runtime_path = "/opt/bin/crio/crio-runc"
+runtime_type = "oci"
+runtime_root = "/run/runc"
 
-          [crio.image]
-          pause_image = "k8s.gcr.io/pause:3.2"
-          image_volumes = "mkdir"
+[crio.image]
+pause_image = "k8s.gcr.io/pause:3.2"
+image_volumes = "mkdir"
 
-          [crio.network]
-          network_dir = "/etc/cni/net.d/"
-          plugin_dirs = ["/opt/cni/bin/"]
-          EOF
+[crio.network]
+network_dir = "/etc/cni/net.d/"
+plugin_dirs = ["/opt/cni/bin/"]
+EOF
 
           echo "CRI-O configuration created."
 
@@ -160,108 +160,109 @@ storage:
           # Create kubelet configuration
           echo "Creating kubelet configuration..."
           cat <<EOF | sudo tee /etc/kubernetes/kubelet-config.yaml
-          kind: KubeletConfiguration
-          apiVersion: kubelet.config.k8s.io/v1beta1
-          authentication:
-            x509:
-              clientCAFile: "/etc/kubernetes/pki/ca.crt"
-          authorization:
-            mode: Webhook
-          serverTLSBootstrap: true
-          tlsCertFile: "/etc/kubernetes/pki/kubelet/kubelet.crt"
-          tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet/kubelet.key"
-          cgroupDriver: systemd
-          runtimeRequestTimeout: "15m"
-          containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
-          EOF
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+authentication:
+  x509:
+    clientCAFile: "/etc/kubernetes/pki/ca.crt"
+authorization:
+  mode: Webhook
+serverTLSBootstrap: true
+tlsCertFile: "/etc/kubernetes/pki/kubelet/kubelet.crt"
+tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet/kubelet.key"
+cgroupDriver: systemd
+runtimeRequestTimeout: "15m"
+containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
+EOF
 
           echo "kubelet configuration created."
 
           # Create crictl configuration
           echo "Creating crictl configuration..."
           cat <<EOF | sudo tee /etc/crictl/crictl.yaml
-          runtime-endpoint: "unix:///var/run/crio/crio.sock"
-          timeout: 0
-          debug: false
-          EOF
+runtime-endpoint: "unix:///var/run/crio/crio.sock"
+timeout: 0
+debug: false
+EOF
 
           echo "crictl configuration created."
 
-          # Create service files in /etc/systemd/system
+          # Create systemd service files
           echo "Creating systemd service files..."
+
           cat <<EOF | sudo tee /etc/systemd/system/crio.service
-          [Unit]
-          Description=CRI-O container runtime
-          After=network-online.target
+[Unit]
+Description=CRI-O container runtime
+After=network-online.target
 
-          [Service]
-          Type=notify
-          ExecStart=/opt/bin/crio/crio
-          Environment="PATH=/opt/bin/crio:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-          Restart=always
-          RestartSec=5
-          LimitNOFILE=65536
-          LimitNPROC=4096
+[Service]
+Type=notify
+ExecStart=/opt/bin/crio/crio
+Environment="PATH=/opt/bin/crio:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Restart=always
+RestartSec=5
+LimitNOFILE=65536
+LimitNPROC=4096
 
-          [Install]
-          WantedBy=multi-user.target
-          EOF
+[Install]
+WantedBy=multi-user.target
+EOF
 
           cat <<EOF | sudo tee /etc/systemd/system/kubelet.service
-          [Unit]
-          Description=kubelet: The Kubernetes Node Agent
-          Documentation=https://kubernetes.io/docs/
-          After=network-online.target crio.service
-          Wants=network-online.target
+[Unit]
+Description=kubelet: The Kubernetes Node Agent
+Documentation=https://kubernetes.io/docs/
+After=network-online.target crio.service
+Wants=network-online.target
 
-          [Service]
-          ExecStart=/opt/bin/kubelet --kubeconfig=/etc/kubernetes/kubelet.conf --config=/etc/kubernetes/kubelet-config.yaml --container-runtime=remote --container-runtime-endpoint=unix:///var/run/crio/crio.sock --runtime-request-timeout=15m --image-gc-high-threshold=80 --image-gc-low-threshold=40 --enforce-node-allocatable=cpu,memory --fail-swap-on=false --cgroup-driver=systemd --network-plugin=cni --cni-bin-dir=/opt/cni/bin --cni-conf-dir=/etc/cni/net.d --pod-infra-container-image=k8s.gcr.io/pause:3.1 --v=2
-          Restart=on-failure
+[Service]
+ExecStart=/opt/bin/kubelet --kubeconfig=/etc/kubernetes/kubelet.conf --config=/etc/kubernetes/kubelet-config.yaml --container-runtime=remote --container-runtime-endpoint=unix:///var/run/crio/crio.sock --runtime-request-timeout=15m --image-gc-high-threshold=80 --image-gc-low-threshold=40 --enforce-node-allocatable=cpu,memory --fail-swap-on=false --cgroup-driver=systemd --network-plugin=cni --cni-bin-dir=/opt/cni/bin --cni-conf-dir=/etc/cni/net.d --pod-infra-container-image=k8s.gcr.io/pause:3.1 --v=2
+Restart=on-failure
 
-          [Install]
-          WantedBy=multi-user.target
-          EOF
+[Install]
+WantedBy=multi-user.target
+EOF
 
           echo "systemd service files created."
 
           # Create Kubernetes manifests
           echo "Creating Kubernetes manifests..."
           cat <<EOF | sudo tee /etc/kubernetes/manifests/kube-apiserver.yaml
-          apiVersion: v1
-          kind: Pod
-          metadata:
-            name: kube-apiserver
-            namespace: kube-system
-          spec:
-            containers:
-            - name: kube-apiserver
-              image: k8s.gcr.io/kube-apiserver:v1.21.0
-              command:
-              - kube-apiserver
-              - --advertise-address=${ip}
-              - --allow-privileged=true
-              - --authorization-mode=Node,RBAC
-              - --client-ca-file=/etc/kubernetes/pki/ca.crt
-              - --etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt
-              - --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt
-              - --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key
-              - --etcd-servers=https://${ip}:2379
-              - --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt
-              - --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key
-              - --secure-port=6443
-              - --service-account-key-file=/etc/kubernetes/pki/sa.pub
-              - --service-cluster-ip-range=10.96.0.0/12
-              - --tls-cert-file=/etc/kubernetes/pki/apiserver.crt
-              - --tls-private-key-file=/etc/kubernetes/pki/apiserver.key
-              volumeMounts:
-              - mountPath: /etc/kubernetes/pki
-                name: pki
-                readOnly: true
-            volumes:
-            - name: pki
-              hostPath:
-                path: /etc/kubernetes/pki
-          EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube-apiserver
+  namespace: kube-system
+spec:
+  containers:
+  - name: kube-apiserver
+    image: k8s.gcr.io/kube-apiserver:v1.21.0
+    command:
+    - kube-apiserver
+    - --advertise-address=${ip}
+    - --allow-privileged=true
+    - --authorization-mode=Node,RBAC
+    - --client-ca-file=/etc/kubernetes/pki/ca.crt
+    - --etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt
+    - --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt
+    - --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key
+    - --etcd-servers=https://${ip}:2379
+    - --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt
+    - --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key
+    - --secure-port=6443
+    - --service-account-key-file=/etc/kubernetes/pki/sa.pub
+    - --service-cluster-ip-range=10.96.0.0/12
+    - --tls-cert-file=/etc/kubernetes/pki/apiserver.crt
+    - --tls-private-key-file=/etc/kubernetes/pki/apiserver.key
+    volumeMounts:
+    - mountPath: /etc/kubernetes/pki
+      name: pki
+      readOnly: true
+  volumes:
+  - name: pki
+    hostPath:
+      path: /etc/kubernetes/pki
+EOF
 
           echo "Kubernetes manifests created."
 
@@ -326,8 +327,11 @@ systemd:
         [Service]
         Type=notify
         ExecStart=/opt/bin/crio/crio
-        EnvironmentFile=/etc/sysconfig/crio
-        Restart=on-failure
+        Environment="PATH=/opt/bin/crio:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        Restart=always
+        RestartSec=5
+        LimitNOFILE=65536
+        LimitNPROC=4096
 
         [Install]
         WantedBy=multi-user.target
