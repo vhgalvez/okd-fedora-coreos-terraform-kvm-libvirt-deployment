@@ -130,7 +130,6 @@ storage:
           sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.csr -subj "/CN=ServiceAccount"
           sudo openssl x509 -req -in /etc/kubernetes/pki/sa.csr -signkey /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.crt
 
-          # Create configuration for kube-apiserver
           # Create kubelet configuration
           cat <<EOF | sudo tee /etc/kubernetes/kubelet-config.yaml
           kind: KubeletConfiguration
