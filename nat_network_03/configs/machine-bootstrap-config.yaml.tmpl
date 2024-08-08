@@ -35,28 +35,28 @@ storage:
           set -euo pipefail
           exec > /var/log/install-bootstrap-components.log 2>&1
 
-          # Crear directorio para binarios
-          sudo mkdir -p /opt/bin
+          # Create directories for binaries
+          sudo mkdir -p /opt/bin /etc/crio /etc/kubernetes/pki/kubelet /etc/kubernetes/pki/apiserver /etc/kubernetes/pki /etc/kubernetes/pki/etcd /etc/kubernetes/pki/sa /etc/cni/net.d /opt/cni/bin /etc/crictl /etc/kubernetes/manifests
 
-          # Descargar e instalar el Instalador de OKD
+          # Download and install OKD Installer
           wget -q https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
           tar -xzvf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
           sudo mv openshift-install /opt/bin/
           sudo chmod +x /opt/bin/openshift-install
           rm -rf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
 
-          # Instalar kubelet
+          # Install kubelet
           curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
 
-          # Instalar oc (OpenShift Client)
+          # Install oc (OpenShift Client)
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
           sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
 
-          # Instalar CRI-O
+          # Install CRI-O
           sudo wget -q -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.3.tar.gz
           sudo mkdir -p /tmp/crio
           sudo tar -xzf /tmp/crio.tar.gz -C /tmp/crio
@@ -65,13 +65,11 @@ storage:
           sudo chmod +x /opt/bin/crio/*
           /opt/bin/crio/crio --version
 
-          # Descargar conmon
-          wget https://github.com/containers/conmon/releases/download/v2.1.12/conmon.amd64
-          sudo mv conmon.amd64 /opt/bin/crio/conmon
+          # Download conmon
+          wget -q https://github.com/containers/conmon/releases/download/v2.1.12/conmon.amd64 -O /opt/bin/crio/conmon
           sudo chmod +x /opt/bin/crio/conmon
 
-          # Crear configuración de CRI-O
-          sudo mkdir -p /etc/crio
+          # Create CRI-O configuration
           cat <<EOF | sudo tee /etc/crio/crio.conf
           [crio]
           log_level = "debug"
@@ -115,30 +113,25 @@ storage:
           plugin_dirs = ["/opt/cni/bin/"]
           EOF
 
-          # Configurar PATH para CRI-O
+          # Configure PATH for CRI-O
           echo 'PATH=/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin' | sudo tee /etc/profile.d/custom_path.sh
           source /etc/profile.d/custom_path.sh
 
-          # Generar certificado individual para kubelet
-          sudo mkdir -p /etc/kubernetes/pki/kubelet
+          # Generate certificates
           sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/kubelet/kubelet.key -out /etc/kubernetes/pki/kubelet/kubelet.csr -subj "/CN=kubelet"
           sudo openssl x509 -req -in /etc/kubernetes/pki/kubelet/kubelet.csr -signkey /etc/kubernetes/pki/kubelet/kubelet.key -out /etc/kubernetes/pki/kubelet/kubelet.crt
 
-          # Certificados compartidos
-          sudo mkdir -p /etc/kubernetes/pki/apiserver
           sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/apiserver/apiserver.key -out /etc/kubernetes/pki/apiserver/apiserver.csr -subj "/CN=apiserver"
           sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver/apiserver.csr -signkey /etc/kubernetes/pki/apiserver/apiserver.key -out /etc/kubernetes/pki/apiserver/apiserver.crt
 
-          sudo mkdir -p /etc/kubernetes/pki
           sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/ca.key -out /etc/kubernetes/pki/ca.csr -subj "/CN=CA"
           sudo openssl x509 -req -in /etc/kubernetes/pki/ca.csr -signkey /etc/kubernetes/pki/ca.key -out /etc/kubernetes/pki/ca.crt
 
           sudo openssl req -new -newkey rsa:2048 -nodes -keyout /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.csr -subj "/CN=ServiceAccount"
           sudo openssl x509 -req -in /etc/kubernetes/pki/sa.csr -signkey /etc/kubernetes/pki/sa.key -out /etc/kubernetes/pki/sa.crt
 
-          # Crear archivos de configuración para kube-apiserver
-          # Crear configuración del kubelet
-          sudo mkdir -p /etc/kubernetes
+          # Create configuration for kube-apiserver
+          # Create kubelet configuration
           cat <<EOF | sudo tee /etc/kubernetes/kubelet-config.yaml
           kind: KubeletConfiguration
           apiVersion: kubelet.config.k8s.io/v1beta1
@@ -148,26 +141,25 @@ storage:
           authorization:
             mode: Webhook
           serverTLSBootstrap: true
-          tlsCertFile: "/etc/kubernetes/pki/kubelet.crt"
-          tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet.key"
+          tlsCertFile: "/etc/kubernetes/pki/kubelet/kubelet.crt"
+          tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet/kubelet.key"
           cgroupDriver: systemd
           runtimeRequestTimeout: "15m"
           containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
           EOF
 
-          # Crear archivo de configuración crictl
-          sudo mkdir -p /etc/crictl
+          # Create crictl configuration
           cat <<EOF | sudo tee /etc/crictl/crictl.yaml
           runtime-endpoint: "unix:///var/run/crio/crio.sock"
           timeout: 0
           debug: false
           EOF
 
-          # Crear archivos de servicio en /etc/systemd/system
-          sudo cat <<EOF | sudo tee /etc/systemd/system/crio.service
+          # Create service files in /etc/systemd/system
+          cat <<EOF | sudo tee /etc/systemd/system/crio.service
           [Unit]
           Description=CRI-O container runtime
-          After=network.target
+          After=network-online.target
 
           [Service]
           Type=notify
@@ -182,7 +174,7 @@ storage:
           WantedBy=multi-user.target
           EOF
 
-          sudo cat <<EOF | sudo tee /etc/systemd/system/kubelet.service
+          cat <<EOF | sudo tee /etc/systemd/system/kubelet.service
           [Unit]
           Description=kubelet: The Kubernetes Node Agent
           Documentation=https://kubernetes.io/docs/
@@ -197,8 +189,7 @@ storage:
           WantedBy=multi-user.target
           EOF
 
-          # Crear manifestos de Kubernetes
-          sudo mkdir -p /etc/kubernetes/manifests
+          # Create Kubernetes manifests
           cat <<EOF | sudo tee /etc/kubernetes/manifests/kube-apiserver.yaml
           apiVersion: v1
           kind: Pod
@@ -238,23 +229,6 @@ storage:
 
 systemd:
   units:
-    - name: crio.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=CRI-O Container Runtime
-        After=network-online.target
-        Wants=network-online.target
-
-        [Service]
-        Type=simple
-        ExecStart=/opt/bin/crio/crio
-        EnvironmentFile=/etc/sysconfig/crio
-        Restart=on-failure
-
-        [Install]
-        WantedBy=multi-user.target
-
     - name: apply-network-routes.service
       enabled: true
       contents: |
@@ -287,11 +261,11 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
-    - name: install-components.service
+    - name: install-bootstrap-components.service
       enabled: true
       contents: |
         [Unit]
-        Description=Install Kubernetes components
+        Description=Install Bootstrap Components
         After=network-online.target
         Wants=network-online.target
 
@@ -299,6 +273,23 @@ systemd:
         Type=oneshot
         ExecStart=/bin/bash /home/core/install-bootstrap-components.sh
         RemainAfterExit=true
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: crio.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=CRI-O Container Runtime
+        After=network-online.target
+        Wants=network-online.target
+
+        [Service]
+        Type=notify
+        ExecStart=/opt/bin/crio/crio
+        EnvironmentFile=/etc/sysconfig/crio
+        Restart=on-failure
 
         [Install]
         WantedBy=multi-user.target
