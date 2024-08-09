@@ -26,6 +26,7 @@ storage:
       mode: 0644
       contents:
         inline: ${host_name}
+
     - path: /home/core/install-master-components.sh
       filesystem: root
       mode: 0755
@@ -49,8 +50,7 @@ storage:
           sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
 
-          # Download and install OKD Installer
-          echo "Downloading OKD Installer..."
+          # Descargar e instalar OKD Installer
           wget -q https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
           tar -xzvf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
           sudo mv openshift-install /opt/bin/
@@ -201,7 +201,7 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
-    - name: install-components.service
+    - name: install-bootstrap-components.service
       enabled: true
       contents: |
         [Unit]
@@ -211,7 +211,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/bin/bash /home/core/install-master-components.sh
+        ExecStart=/bin/bash /home/core/install-bootstrap-components.sh
         RemainAfterExit=true
 
         [Install]
@@ -231,6 +231,13 @@ systemd:
           --kubeconfig=/etc/kubernetes/kubelet.conf \
           --config=/etc/kubernetes/kubelet-config.yaml \
           --container-runtime=remote \
+          --container-runtime-endpoint=unix:///var/runIt seems there was an interruption while completing the YAML configuration. Here's the rest of the configuration:
+
+        [Service]
+        ExecStart=/opt/bin/kubelet \
+          --kubeconfig=/etc/kubernetes/kubelet.conf \
+          --config=/etc/kubernetes/kubelet-config.yaml \
+          --container-runtime=remote \
           --container-runtime-endpoint=unix:///var/run/crio/crio.sock \
           --runtime-request-timeout=15m \
           --image-gc-high-threshold=80 \
@@ -244,6 +251,7 @@ systemd:
           --pod-infra-container-image=k8s.gcr.io/pause:3.1 \
           --v=2
         Restart=on-failure
+        RestartSec=10
 
         [Install]
         WantedBy=multi-user.target
