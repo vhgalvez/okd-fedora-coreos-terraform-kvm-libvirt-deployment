@@ -36,21 +36,21 @@ storage:
           set -euo pipefail
           exec > /var/log/install-master-components.log 2>&1
 
-          # Create directories for binaries
+          # Create directory for binaries
           sudo mkdir -p /opt/bin
 
           # Install kubelet
           curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
 
-          # Install OpenShift Client (oc)
+          # Install oc (OpenShift Client)
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
           sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
 
-          # Install OKD Installer
+          # Download and install OKD Installer
           wget -q https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
           tar -xzvf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
           sudo mv openshift-install /opt/bin/
@@ -126,7 +126,7 @@ storage:
           plugin_dirs = ["/opt/cni/bin/"]
           EOF
 
-          # Create necessary directories for certificates
+          # Create directories for certificates
           sudo mkdir -p /etc/kubernetes/pki
           sudo mkdir -p /etc/kubernetes/pki/etcd
 
@@ -144,7 +144,7 @@ storage:
           sudo openssl req -new -key /etc/kubernetes/pki/kubelet.key -subj "/CN=kubelet" -out /etc/kubernetes/pki/kubelet.csr
           sudo openssl x509 -req -in /etc/kubernetes/pki/kubelet.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/kubelet.crt -days 365
 
-          # Generate etcd certificate
+          # Generate Etcd certificate
           sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/etcd/etcd.key -pkeyopt rsa_keygen_bits:2048
           sudo openssl req -new -key /etc/kubernetes/pki/etcd/etcd.key -subj "/CN=etcd" -out /etc/kubernetes/pki/etcd/etcd.csr
           sudo openssl x509 -req -in /etc/kubernetes/pki/etcd/etcd.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/etcd/etcd.crt -days 365
