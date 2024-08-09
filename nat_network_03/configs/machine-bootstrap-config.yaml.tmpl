@@ -126,54 +126,40 @@ storage:
       plugin_dirs = ["/opt/cni/bin/"]
       EOF
 
-      # Generar directorios necesarios para los certificados
-      CERT_DIR="/etc/kubernetes/pki"
-      ETCD_CERT_DIR="${CERT_DIR}/etcd"
-
-      sudo mkdir -p $CERT_DIR
-      sudo mkdir -p $ETCD_CERT_DIR
-
-      # Establecer permisos adecuados
-      sudo chmod 700 $CERT_DIR
-      sudo chmod 700 $ETCD_CERT_DIR
+      # Crear directorios necesarios para los certificados
+      sudo mkdir -p /etc/kubernetes/pki
+      sudo mkdir -p /etc/kubernetes/pki/etcd
 
       # Generar la Autoridad Certificadora (CA)
-      echo "Generando certificado CA..."
-      sudo openssl genpkey -algorithm RSA -out ${CERT_DIR}/ca.key -pkeyopt rsa_keygen_bits:2048
-      sudo openssl req -x509 -new -nodes -key ${CERT_DIR}/ca.key -subj "/CN=kubernetes" -days 10000 -out ${CERT_DIR}/ca.crt
+      sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/ca.key -pkeyopt rsa_keygen_bits:2048
+      sudo openssl req -x509 -new -nodes -key /etc/kubernetes/pki/ca.key -subj "/CN=kubernetes" -days 10000 -out /etc/kubernetes/pki/ca.crt
 
       # Generar certificado para el servidor API
-      echo "Generando certificado para el servidor API..."
-      sudo openssl genpkey -algorithm RSA -out ${CERT_DIR}/apiserver.key -pkeyopt rsa_keygen_bits:2048
-      sudo openssl req -new -key ${CERT_DIR}/apiserver.key -subj "/CN=kube-apiserver" -out ${CERT_DIR}/apiserver.csr
-      sudo openssl x509 -req -in ${CERT_DIR}/apiserver.csr -CA ${CERT_DIR}/ca.crt -CAkey ${CERT_DIR}/ca.key -CAcreateserial -out ${CERT_DIR}/apiserver.crt -days 365
+      sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/apiserver.key -pkeyopt rsa_keygen_bits:2048
+      sudo openssl req -new -key /etc/kubernetes/pki/apiserver.key -subj "/CN=kube-apiserver" -out /etc/kubernetes/pki/apiserver.csr
+      sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver.crt -days 365
 
       # Generar certificado para Kubelet
-      echo "Generando certificado para Kubelet..."
-      sudo openssl genpkey -algorithm RSA -out ${CERT_DIR}/kubelet.key -pkeyopt rsa_keygen_bits:2048
-      sudo openssl req -new -key ${CERT_DIR}/kubelet.key -subj "/CN=kubelet" -out ${CERT_DIR}/kubelet.csr
-      sudo openssl x509 -req -in ${CERT_DIR}/kubelet.csr -CA ${CERT_DIR}/ca.crt -CAkey ${CERT_DIR}/ca.key -CAcreateserial -out ${CERT_DIR}/kubelet.crt -days 365
+      sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/kubelet.key -pkeyopt rsa_keygen_bits:2048
+      sudo openssl req -new -key /etc/kubernetes/pki/kubelet.key -subj "/CN=kubelet" -out /etc/kubernetes/pki/kubelet.csr
+      sudo openssl x509 -req -in /etc/kubernetes/pki/kubelet.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/kubelet.crt -days 365
 
       # Generar certificado para etcd
-      echo "Generando certificado para etcd..."
-      sudo openssl genpkey -algorithm RSA -out ${ETCD_CERT_DIR}/etcd.key -pkeyopt rsa_keygen_bits:2048
-      sudo openssl req -new -key ${ETCD_CERT_DIR}/etcd.key -subj "/CN=etcd" -out ${ETCD_CERT_DIR}/etcd.csr
-      sudo openssl x509 -req -in ${ETCD_CERT_DIR}/etcd.csr -CA ${CERT_DIR}/ca.crt -CAkey ${CERT_DIR}/ca.key -CAcreateserial -out ${ETCD_CERT_DIR}/etcd.crt -days 365
+      sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/etcd/etcd.key -pkeyopt rsa_keygen_bits:2048
+      sudo openssl req -new -key /etc/kubernetes/pki/etcd/etcd.key -subj "/CN=etcd" -out /etc/kubernetes/pki/etcd/etcd.csr
+      sudo openssl x509 -req -in /etc/kubernetes/pki/etcd/etcd.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/etcd/etcd.crt -days 365
 
       # Generar par de claves para la cuenta de servicio
-      echo "Generando par de claves para la cuenta de servicio..."
-      sudo openssl genpkey -algorithm RSA -out ${CERT_DIR}/sa.key -pkeyopt rsa_keygen_bits:2048
-      sudo openssl rsa -in ${CERT_DIR}/sa.key -pubout -out ${CERT_DIR}/sa.pub
+      sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/sa.key -pkeyopt rsa_keygen_bits:2048
+      sudo openssl rsa -in /etc/kubernetes/pki/sa.key -pubout -out /etc/kubernetes/pki/sa.pub
 
       # Establecer permisos y propiedad adecuados para los archivos de certificados
-      sudo chmod 600 ${CERT_DIR}/*.key
-      sudo chmod 644 ${CERT_DIR}/*.crt
-      sudo chmod 600 ${ETCD_CERT_DIR}/*.key
-      sudo chmod 644 ${ETCD_CERT_DIR}/*.crt
-      sudo chown root:root ${CERT_DIR}/*
-
-      echo "Instalación de componentes y configuración de certificados completa."
-
+      sudo chmod 600 /etc/kubernetes/pki/*.key
+      sudo chmod 644 /etc/kubernetes/pki/*.crt
+      sudo chmod 600 /etc/kubernetes/pki/etcd/*.key
+      sudo chmod 644 /etc/kubernetes/pki/etcd/*.crt
+      sudo chown root:root /etc/kubernetes/pki/*
+      sudo chown root:root /etc/kubernetes/pki/etcd/*
 
     - path: /etc/systemd/network/10-eth0.network
       filesystem: root
