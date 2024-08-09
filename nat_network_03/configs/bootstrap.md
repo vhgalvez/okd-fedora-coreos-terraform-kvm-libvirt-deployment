@@ -49,3 +49,27 @@ users:
     client-key: /etc/kubernetes/pki/kubelet.key
 EOF
 ```
+
+
+```bash
+sudo tee /etc/kubernetes/kubelet.conf > /dev/null <<EOF
+apiVersion: v1
+kind: Config
+clusters:
+- cluster:
+    certificate-authority: /etc/kubernetes/pki/ca.crt
+    server: https://10.17.4.21:6443
+  name: local
+contexts:
+- context:
+    cluster: local
+    user: kubelet
+  name: local
+current-context: local
+users:
+- name: kubelet
+  user:
+    client-certificate: /etc/kubernetes/pki/kubelet.crt
+    client-key: /etc/kubernetes/pki/kubelet.key
+EOF
+```
