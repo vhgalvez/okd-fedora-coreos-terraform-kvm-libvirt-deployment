@@ -362,6 +362,8 @@ La red `kube_network_03` se dedica a la gestión y ejecución de aplicaciones de
 | kube_network_03 | worker1        | 10.17.4.24   | Ejecución de aplicaciones  | (Virtual - NAT) |
 | kube_network_03 | worker2        | 10.17.4.25   | Ejecución de aplicaciones  | (Virtual - NAT) |
 | kube_network_03 | worker3        | 10.17.4.26   | Ejecución de aplicaciones  | (Virtual - NAT) |
+| kube_network_03 | bootstrap      | 10.17.4.27   | Ejecución de aplicaciones  | (Virtual - NAT) |
+
 
 ## Resumen de los Hostnames e IPs
 
@@ -372,7 +374,7 @@ A continuación se proporciona un resumen de los hostnames e IPs para referencia
 | 10.17.3.11    | freeipa1.cefaslocalserver.com    |
 | 10.17.3.12    | load_balancer1.cefaslocalserver.com |
 | 10.17.3.13    | postgresql1.cefaslocalserver.com |
-| 10.17.3.14    | bootstrap1.cefaslocalserver.com  |
+| 10.17.3.14    | bootstrap.cefaslocalserver.com  |
 | 10.17.4.21    | master1.cefaslocalserver.com     |
 | 10.17.4.22    | master2.cefaslocalserver.com     |
 | 10.17.4.23    | master3.cefaslocalserver.com     |
@@ -513,13 +515,14 @@ Para asegurar que el servidor físico tiene suficiente memoria para operar de ma
 | freeipa1         | 2    | 2048         | 10.17.3.11   | freeipa1.cefaslocalserver.com    | 30                   |
 | load_balancer1   | 2    | 2048         | 10.17.3.12   | loadbalancer1.cefaslocalserver.com| 30                   |
 | postgresql1      | 2    | 2048         | 10.17.3.13   | postgresql1.cefaslocalserver.com | 30                   |
-| bootstrap1       | 2    | 2048         | 10.17.3.14   | bootstrap1.cefaslocalserver.com  | 30                   |
+| bootstrap        | 2    | 2048         | 10.17.3.14   | bootstrap1.cefaslocalserver.com  | 30                   |
 | bastion1         | 2    | 2048         | 192.168.0.20 | bastion1.cefaslocalserver.com    | 30                   |
 | master1          | 2    | 4096         | 10.17.4.21   | master1.cefaslocalserver.com     | 50                   |
 | master2          | 2    | 4096         | 10.17.4.22   | master2.cefaslocalserver.com     | 50                   |
 | master3          | 2    | 4096         | 10.17.4.23   | master3.cefaslocalserver.com     | 50                   |
 | worker1          | 2    | 3584         | 10.17.4.24   | worker1.cefaslocalserver.com     | 50                   |
 | worker2          | 2    | 3584         | 10.17.4.25   | worker2.cefaslocalserver.com     | 50                   |
+| worker3          | 2    | 3584         | 10.17.4.26   | worker3.cefaslocalserver.com     | 50                   |
 | worker3          | 2    | 3584         | 10.17.4.26   | worker3.cefaslocalserver.com     | 50                   |
 
 ## Total de Memoria Asignada
