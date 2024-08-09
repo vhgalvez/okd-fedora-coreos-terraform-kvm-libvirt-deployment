@@ -1,4 +1,5 @@
 
+# Bootstrap configuration
 ```bash
 sudo tee /etc/kubernetes/kubelet-config.yaml > /dev/null <<EOF
 kind: KubeletConfiguration
@@ -24,6 +25,7 @@ readOnlyPort: 0
 enforceNodeAllocatable: ["pods"]
 EOF
 ```
+### kubelet.conf file
 
 ```bash
 sudo tee /etc/kubernetes/kubelet.conf > /dev/null <<EOF
