@@ -36,38 +36,38 @@ storage:
           set -euo pipefail
           exec > /var/log/install-master-components.log 2>&1
 
-          # Crear directorio para binarios
+          # Create directories for binaries
           sudo mkdir -p /opt/bin
 
-          # Instalar kubelet
+          # Install kubelet
           curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
 
-          # Instalar oc (OpenShift Client)
+          # Install OpenShift Client (oc)
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
           sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
 
-          # Descargar e instalar OKD Installer
+          # Install OKD Installer
           wget -q https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
           tar -xzvf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
           sudo mv openshift-install /opt/bin/
           sudo chmod +x /opt/bin/openshift-install
           rm -rf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
 
-          # Instalar kube-apiserver
+          # Install kube-apiserver
           curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-apiserver
           sudo mv /tmp/kube-apiserver /opt/bin/kube-apiserver
           sudo chmod +x /opt/bin/kube-apiserver
 
-          # Instalar kube-scheduler
+          # Install kube-scheduler
           curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-scheduler
           sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
           sudo chmod +x /opt/bin/kube-scheduler
 
-          # Instalar CRI-O
+          # Install CRI-O
           sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.3.tar.gz
           sudo mkdir -p /tmp/crio
           sudo tar -xzf /tmp/crio.tar.gz -C /tmp/crio
@@ -76,12 +76,12 @@ storage:
           sudo chmod +x /opt/bin/crio/*
           /opt/bin/crio/crio --version
 
-          # Descargar conmon
+          # Download conmon
           wget https://github.com/containers/conmon/releases/download/v2.1.12/conmon.amd64
           sudo mv conmon.amd64 /opt/bin/crio/conmon
           sudo chmod +x /opt/bin/crio/conmon
 
-          # Crear configuración de CRI-O
+          # Create CRI-O configuration
           sudo mkdir -p /etc/crio
           cat <<EOF | sudo tee /etc/crio/crio.conf
           [crio]
@@ -110,7 +110,7 @@ storage:
           namespaces_dir = "/var/run"
           enable_criu_support = true
           pinns_path = "/opt/bin/crio/pinns"
-          conmon = "/opt/bin/crio/conmon
+          conmon = "/opt/bin/crio/conmon"
 
           [crio.runtime.runtimes.runc]
           runtime_path = "/opt/bin/crio/crio-runc"
@@ -126,34 +126,34 @@ storage:
           plugin_dirs = ["/opt/cni/bin/"]
           EOF
 
-          # Crear directorios necesarios para los certificados
+          # Create necessary directories for certificates
           sudo mkdir -p /etc/kubernetes/pki
           sudo mkdir -p /etc/kubernetes/pki/etcd
 
-          # Generar la Autoridad Certificadora (CA)
+          # Generate Certificate Authority (CA)
           sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/ca.key -pkeyopt rsa_keygen_bits:2048
           sudo openssl req -x509 -new -nodes -key /etc/kubernetes/pki/ca.key -subj "/CN=kubernetes" -days 10000 -out /etc/kubernetes/pki/ca.crt
 
-          # Generar certificado para el servidor API
+          # Generate API server certificate
           sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/apiserver.key -pkeyopt rsa_keygen_bits:2048
           sudo openssl req -new -key /etc/kubernetes/pki/apiserver.key -subj "/CN=kube-apiserver" -out /etc/kubernetes/pki/apiserver.csr
           sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver.crt -days 365
 
-          # Generar certificado para Kubelet
+          # Generate Kubelet certificate
           sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/kubelet.key -pkeyopt rsa_keygen_bits:2048
           sudo openssl req -new -key /etc/kubernetes/pki/kubelet.key -subj "/CN=kubelet" -out /etc/kubernetes/pki/kubelet.csr
           sudo openssl x509 -req -in /etc/kubernetes/pki/kubelet.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/kubelet.crt -days 365
 
-          # Generar certificado para etcd
+          # Generate etcd certificate
           sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/etcd/etcd.key -pkeyopt rsa_keygen_bits:2048
           sudo openssl req -new -key /etc/kubernetes/pki/etcd/etcd.key -subj "/CN=etcd" -out /etc/kubernetes/pki/etcd/etcd.csr
           sudo openssl x509 -req -in /etc/kubernetes/pki/etcd/etcd.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/etcd/etcd.crt -days 365
 
-          # Generar par de claves para la cuenta de servicio
+          # Generate Service Account key pair
           sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/sa.key -pkeyopt rsa_keygen_bits:2048
           sudo openssl rsa -in /etc/kubernetes/pki/sa.key -pubout -out /etc/kubernetes/pki/sa.pub
 
-          # Establecer permisos y propiedad adecuados para los archivos de certificados
+          # Set proper permissions and ownership for certificate files
           sudo chmod 600 /etc/kubernetes/pki/*.key
           sudo chmod 644 /etc/kubernetes/pki/*.crt
           sudo chmod 600 /etc/kubernetes/pki/etcd/*.key
