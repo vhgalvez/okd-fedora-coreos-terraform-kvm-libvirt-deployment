@@ -157,7 +157,8 @@ EOF
 
 
 ```bash
-sudo tee /etc/kubernetes/kubelet-config.yaml > /dev/null <<EOF
+
+sudo tee /etc/kubernetes/kubelet-config.yaml > /dev/null << 'EOF'
 kind: KubeletConfiguration
 apiVersion: kubelet.config.k8s.io/v1beta1
 authentication:
@@ -172,6 +173,9 @@ cgroupDriver: systemd
 runtimeRequestTimeout: "15m"
 containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
 EOF
+
+
+
 ```
 
 
