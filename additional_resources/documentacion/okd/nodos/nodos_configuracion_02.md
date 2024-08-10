@@ -91,12 +91,11 @@ El nodo Bootstrap es utilizado para iniciar el clúster y luego su rol puede ser
 
 Este esquema de clasificación y distribución asegura que cada nodo tenga los certificados necesarios para su función en el clúster Kubernetes.
 
+## Estructura de Archivos de Configuración en un Clúster Kubernetes
 
-# Configuración y Servicios de Kubernetes
-
-## 1. `/etc/kubernetes/kubelet-config.yaml`
-
-```yaml
+1. /etc/kubernetes/kubelet-config.yaml
+yaml
+Copiar código
 kind: KubeletConfiguration
 apiVersion: kubelet.config.k8s.io/v1beta1
 authentication:
@@ -110,11 +109,9 @@ tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet.key"
 cgroupDriver: systemd
 runtimeRequestTimeout: "15m"
 containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
-```
-
-## 2. `/etc/kubernetes/manifests/kube-apiserver.yaml`
-
-```yaml
+2. /etc/kubernetes/manifests/kube-apiserver.yaml
+yaml
+Copiar código
 apiVersion: v1
 kind: Pod
 metadata:
@@ -149,8 +146,165 @@ spec:
   - name: pki
     hostPath:
       path: /etc/kubernetes/pki
-```
+3. /etc/systemd/system/crio.service
+ini
+Copiar código
+[Unit]
+Description=CRI-O container runtime
+After=network.target
 
+[Service]
+Type=notify
+ExecStart=/opt/bin/crio/crio
+Environment="PATH=/opt/bin/crio:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Restart=always
+RestartSec=5
+LimitNOFILE=65536
+LimitNPROC=4096
 
+[Install]
+WantedBy=multi-user.target
+4. /etc/systemd/system/kubelet.service
+ini
+Copiar código
+[Unit]
+Description=kubelet: The Kubernetes Node Agent
+Documentation=https://kubernetes.io/docs/
+Wants=crio.service
+After=crio.service
 
+[Service]
+ExecStart=/opt/bin/kubelet --config=/etc/kubernetes/kubelet-config.yaml --kubeconfig=/etc/kubernetes/kubelet.conf
+Restart=always
+StartLimitInterval=0
+RestartSec=10
 
+[Install]
+WantedBy=multi-user.target
+5. /etc/systemd/system/etcd.service
+ini
+Copiar código
+[Unit]
+Description=etcd
+Documentation=https://github.com/coreos/etcd
+After=network.target
+
+[Service]
+User=etcd
+Type=notify
+Environment="ETCD_DATA_DIR=/var/lib/etcd"
+Environment="ETCD_NAME=etcd0"
+Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=https://10.17.4.21:2380"
+Environment="ETCD_LISTEN_PEER_URLS=https://10.17.4.21:2380"
+Environment="ETCD_LISTEN_CLIENT_URLS=https://10.17.4.21:2379,https://127.0.0.1:2379"
+Environment="ETCD_ADVERTISE_CLIENT_URLS=https://10.17.4.21:2379"
+Environment="ETCD_INITIAL_CLUSTER=etcd0=https://10.17.4.21:2380"
+Environment="ETCD_INITIAL_CLUSTER_STATE=new"
+Environment="ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster"
+Environment="ETCD_CERT_FILE=/etc/kubernetes/pki/etcd/etcd.crt"
+Environment="ETCD_KEY_FILE=/etc/kubernetes/pki/etcd/etcd.key"
+Environment="ETCD_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.crt"
+Environment="ETCD_CLIENT_CERT_AUTH=true"
+Environment="ETCD_PEER_CERT_FILE=/etc/kubernetes/pki/etcd/etcd.crt"
+Environment="ETCD_PEER_KEY_FILE=/etc/kubernetes/pki/etcd/etcd.key"
+Environment="ETCD_PEER_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.crt"
+Environment="ETCD_PEER_CLIENT_CERT_AUTH=true"
+ExecStart=/opt/bin/etcd
+Restart=always
+RestartSec=10s
+LimitNOFILE=40000
+
+[Install]
+WantedBy=multi-user.target
+6. /etc/systemd/system/kube-apiserver.service
+ini
+Copiar código
+[Unit]
+Description=Kubernetes API Server
+Documentation=https://kubernetes.io/docs/concepts/overview/components/
+After=network.target
+
+[Service]
+ExecStart=/opt/bin/kube-apiserver \
+  --advertise-address=10.17.4.21 \
+  --allow-privileged=true \
+  --authorization-mode=Node,RBAC \
+  --client-ca-file=/etc/kubernetes/pki/ca.crt \
+  --enable-admission-plugins=NodeRestriction \
+  --etcd-servers=https://127.0.0.1:2379 \
+  --etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt \
+  --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt \
+  --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key \
+  --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt \
+  --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key \
+  --runtime-config=api/all=true \
+  --service-account-key-file=/etc/kubernetes/pki/sa.pub \
+  --service-account-signing-key-file=/etc/kubernetes/pki/sa.key \
+  --service-account-issuer=https://kubernetes.default.svc.cluster.local \
+  --service-cluster-ip-range=10.96.0.0/12 \
+  --tls-cert-file=/etc/kubernetes/pki/apiserver.crt \
+  --tls-private-key-file=/etc/kubernetes/pki/apiserver.key \
+  --v=2
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+7. /etc/systemd/system/kube-controller-manager.service
+ini
+Copiar código
+[Unit]
+Description=Kubernetes Controller Manager
+Documentation=https://kubernetes.io/docs/concepts/overview/components/
+After=network.target
+
+[Service]
+ExecStart=/opt/bin/kube-controller-manager \
+  --kubeconfig=/etc/kubernetes/controller-manager.conf \
+  --bind-address=0.0.0.0 \
+  --leader-elect=true \
+  --use-service-account-credentials=true \
+  --controllers=*,bootstrapsigner,tokencleaner \
+  --cluster-signing-cert-file=/etc/kubernetes/pki/ca.crt \
+  --cluster-signing-key-file=/etc/kubernetes/pki/ca.key \
+  --root-ca-file=/etc/kubernetes/pki/ca.crt \
+  --service-account-private-key-file=/etc/kubernetes/pki/sa.key \
+  --cluster-name=kubernetes \
+  --cluster-cidr=10.244.0.0/16 \
+  --allocate-node-cidrs=true \
+  --node-cidr-mask-size=24 \
+  --service-cluster-ip-range=10.96.0.0/12 \
+  --v=2
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+8. /etc/systemd/system/kube-scheduler.service
+ini
+Copiar código
+[Unit]
+Description=Kubernetes Scheduler
+Documentation=https://kubernetes.io/docs/concepts/overview/components/
+After=network.target
+
+[Service]
+ExecStart=/opt/bin/kube-scheduler   --address=127.0.0.1   --kubeconfig=/etc/kubernetes/scheduler.conf   --leader-elect=true   --v=2
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+9. /etc/systemd/system/set-hosts.service
+ini
+Copiar código
+[Unit]
+Description=Set /etc/hosts file
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "10.17.4.21  master1.cefaslocalserver.com master1" >> /etc/hosts'
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+
+Esta estructura te permitirá identificar rápidamente dónde se encuentra cada configuración y facilita la gestión de los archivos relacionados con tu clúster Kubernetes.
