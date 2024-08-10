@@ -22,33 +22,11 @@ authentication:
 authorization:
   mode: Webhook
 readOnlyPort: 0
-enforceNodeAllocatable: ["pods"]
+enforceNodeAllocatable: []
 EOF
 ```
 ### kubelet.conf file
 
-```bash
-sudo tee /etc/kubernetes/kubelet.conf > /dev/null <<EOF
-apiVersion: v1
-kind: Config
-clusters:
-- cluster:
-    certificate-authority: /etc/kubernetes/pki/ca.crt
-    server: https://127.0.0.1:6443
-  name: local
-contexts:
-- context:
-    cluster: local
-    user: kubelet
-  name: local
-current-context: local
-users:
-- name: kubelet
-  user:
-    client-certificate: /etc/kubernetes/pki/kubelet.crt
-    client-key: /etc/kubernetes/pki/kubelet.key
-EOF
-```
 
 
 ```bash
@@ -71,5 +49,108 @@ users:
   user:
     client-certificate: /etc/kubernetes/pki/kubelet.crt
     client-key: /etc/kubernetes/pki/kubelet.key
+EOF
+```
+
+### crio.conf file
+
+
+```bash
+
+sudo tee /etc/systemd/system/crio.service > /dev/null <<EOF
+[Unit]
+Description=CRI-O container runtime
+After=network.target
+
+[Service]
+Type=notify
+ExecStart=/opt/bin/crio/crio
+Environment="PATH=/opt/bin/crio:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Restart=always
+RestartSec=5
+LimitNOFILE=65536
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+
+
+
+### kubelet.service file
+
+```bash
+sudo tee /etc/systemd/system/kubelet.service > /dev/null <<EOF
+
+[Unit]
+Description=kubelet: The Kubernetes Node Agent
+Documentation=https://kubernetes.io/docs/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/opt/bin/kubelet \
+    --kubeconfig=/etc/kubernetes/kubelet.conf \
+    --config=/etc/kubernetes/kubelet-config.yaml \
+    --container-runtime=remote \
+    --container-runtime-endpoint=unix:///var/run/crio/crio.sock \
+    --fail-swap-on=false \
+    --cgroup-driver=systemd
+Restart=always
+StartLimitIntervalSec=0
+RestartSec=10
+CPUAccounting=true
+MemoryAccounting=true
+# Ensure kubelet has necessary permissions
+ExecStartPre=/sbin/sysctl -w net.ipv4.ip_forward=1
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/systemd/system.slice/kubelet.service
+# Commented out the problematic mount line to prevent errors
+# ExecStartPre=/bin/mount --bind /sys/fs/cgroup/systemd/system.slice/kubelet.service /sys/fs/cgroup/systemd/system.slice/kubelet.service
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+sudo systemctl daemon-reload
+sudo systemctl enable crio
+sudo systemctl start crio
+sudo systemctl enable kubelet
+sudo systemctl start kubelet
+sudo systemctl status kubelet
+sudo systemctl restart kubelet
+
+
+```bash
+sudo tee /etc/systemd/system/kubelet.service > /dev/null <<EOF
+
+[Unit]
+Description=kubelet: The Kubernetes Node Agent
+Documentation=https://kubernetes.io/docs/
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/opt/bin/kubelet \
+    --kubeconfig=/etc/kubernetes/kubelet.conf \
+    --config=/etc/kubernetes/kubelet-config.yaml \
+    --container-runtime=remote \
+    --container-runtime-endpoint=unix:///var/run/crio/crio.sock \
+    --fail-swap-on=false \
+    --cgroup-driver=systemd
+Restart=always
+StartLimitIntervalSec=0
+RestartSec=10
+CPUAccounting=true
+MemoryAccounting=true
+# Ensure kubelet has necessary permissions
+ExecStartPre=/sbin/sysctl -w net.ipv4.ip_forward=1
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/systemd/system.slice/kubelet.service
+ExecStartPre=/bin/mount --bind /sys/fs/cgroup/systemd/system.slice/kubelet.service /sys/fs/cgroup/systemd/system.slice/kubelet.service
+
+[Install]
+WantedBy=multi-user.target
 EOF
 ```
