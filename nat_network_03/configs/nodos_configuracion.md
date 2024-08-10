@@ -167,27 +167,18 @@ containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
 EOF
 ```
 
-
-
+# Recargar la configuración de systemd (solo una vez al inicio)
 sudo systemctl daemon-reload
 
+# Configuración y estado del servicio CRI-O
 sudo systemctl enable crio
 sudo systemctl start crio
 sudo systemctl restart crio
-sudo systemctl status kubelet
 
-sudo systemctl enable kubelet
-sudo systemctl restart kubelet
-
-sudo systemctl status kubelet
-sudo systemctl start kubelet
-
-sudo systemctl status kubelet
-
-sudo systemctl daemon-reload
-sudo systemctl enable crio
-sudo systemctl start crio
+# Configuración y estado del servicio kubelet
 sudo systemctl enable kubelet
 sudo systemctl start kubelet
-sudo systemctl status kubelet
 sudo systemctl restart kubelet
+
+# Verificar el estado del servicio kubelet después de todas las operaciones
+sudo systemctl status kubelet
