@@ -26,6 +26,55 @@ storage:
       mode: 0644
       contents:
         inline: ${host_name}
+
+    - path: /home/core/generate_certs_master.sh
+      filesystem: root
+      mode: 0755
+      contents:
+        inline: |
+          #!/bin/bash
+          # Nombre del Script: generate_certs_master.sh
+
+          # Definir la variable ssh_keys con la ruta a la clave SSH
+          ssh_keys="/path/to/bootstrap/ssh_key"
+
+          # Crear directorios para los certificados
+          sudo mkdir -p /etc/kubernetes/pki
+          sudo mkdir -p /etc/kubernetes/pki/etcd
+
+          # Copiar la CA desde el nodo Bootstrap
+          scp -i "${ssh_keys}" -P 22 core@10.17.4.27:/etc/kubernetes/pki/ca.crt /etc/kubernetes/pki/ca.crt
+
+          # Generar certificado del API server único para este Master
+          sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/apiserver.key -pkeyopt rsa_keygen_bits:2048
+          sudo openssl req -new -key /etc/kubernetes/pki/apiserver.key -subj "/CN=kube-apiserver-master" -out /etc/kubernetes/pki/apiserver.csr
+          sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver.crt -days 365
+
+          # Generar certificado del kubelet específico para este Master
+          sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/kubelet.key -pkeyopt rsa_keygen_bits:2048
+          sudo openssl req -new -key /etc/kubernetes/pki/kubelet.key -subj "/CN=kubelet-master" -out /etc/kubernetes/pki/kubelet.csr
+          sudo openssl x509 -req -in /etc/kubernetes/pki/kubelet.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/kubelet.crt -days 365
+
+          # Copiar certificado y clave de etcd desde el nodo Bootstrap
+          scp -i "${ssh_keys}" -P 22 core@10.17.4.27:/etc/kubernetes/pki/etcd/etcd.crt /etc/kubernetes/pki/etcd/etcd.crt
+          scp -i "${ssh_keys}" -P 22 core@10.17.4.27:/etc/kubernetes/pki/etcd/etcd.key /etc/kubernetes/pki/etcd/etcd.key
+          scp -i "${ssh_keys}" -P 22 core@10.17.4.27:/etc/kubernetes/pki/etcd/ca.crt /etc/kubernetes/pki/etcd/ca.crt
+
+          # Generar certificados del cliente etcd para este Master
+          sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/apiserver-etcd-client.key -pkeyopt rsa_keygen_bits:2048
+          sudo openssl req -new -key /etc/kubernetes/pki/apiserver-etcd-client.key -subj "/CN=apiserver-etcd-client-master" -out /etc/kubernetes/pki/apiserver-etcd-client.csr
+          sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver-etcd-client.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver-etcd-client.crt -days 365
+
+          # Establecer permisos y propiedad adecuados para los archivos de certificados
+          sudo chmod 600 /etc/kubernetes/pki/*.key
+          sudo chmod 644 /etc/kubernetes/pki/*.crt
+          sudo chmod 600 /etc/kubernetes/pki/etcd/*.key
+          sudo chmod 644 /etc/kubernetes/pki/etcd/*.crt
+          sudo chown root:root /etc/kubernetes/pki/*
+          sudo chown root:root /etc/kubernetes/pki/etcd/*
+
+          echo "Certificados específicos generados y configurados en el nodo Master."
+
     - path: /home/core/install-master-components.sh
       filesystem: root
       mode: 0755
@@ -129,9 +178,6 @@ storage:
           network_dir = "/etc/cni/net.d/"
           plugin_dirs = ["/opt/cni/bin/"]
           EOF
-
-          # Crear archivos de configuración en /etc/kubernetes/manifests
-          sudo mkdir -p /etc/kubernetes/manifests
 
           sudo cat <<EOF | sudo tee /etc/kubernetes/manifests/kube-apiserver.yaml
           apiVersion: v1
@@ -431,6 +477,22 @@ systemd:
         [Service]
         Type=oneshot
         ExecStart=/bin/bash /home/core/install-master-components.sh
+        RemainAfterExit=true
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: generate-certs.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Generate Kubernetes certificates for Master node
+        After=network-online.target
+        Wants=network-online.target
+
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/bash /home/core/generate_certs_master.sh
         RemainAfterExit=true
 
         [Install]
