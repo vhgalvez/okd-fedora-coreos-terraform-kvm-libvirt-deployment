@@ -156,13 +156,44 @@ EOF
 ```
 
 
+```bash
+sudo tee /etc/kubernetes/kubelet-config.yaml > /dev/null <<EOF
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+authentication:
+  x509:
+    clientCAFile: "/etc/kubernetes/pki/ca.crt"
+authorization:
+  mode: Webhook
+serverTLSBootstrap: true
+tlsCertFile: "/etc/kubernetes/pki/kubelet.crt"
+tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet.key"
+cgroupDriver: systemd
+runtimeRequestTimeout: "15m"
+containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
+EOF
+```
+
+
+
+
+
+
+
+
+
 sudo systemctl daemon-reload
+
 sudo systemctl enable crio
 sudo systemctl start crio
-sudo systemctl enable kubelet
-sudo systemctl start kubelet
+sudo systemctl restart crio
 sudo systemctl status kubelet
+
+sudo systemctl enable kubelet
 sudo systemctl restart kubelet
+
+sudo systemctl status kubelet
+sudo systemctl start kubelet
 
 ________________________________________________________________________________________________________________________
 
