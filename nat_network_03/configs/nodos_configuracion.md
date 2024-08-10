@@ -165,6 +165,7 @@ sudo systemctl status kubelet
 sudo systemctl restart kubelet
 
 ________________________________________________________________________________________________________________________
+
 Clasificación y Explicación de Certificados en un Clúster Kubernetes
 En un clúster Kubernetes, los nodos se dividen principalmente en tres tipos: Master, Worker, y Bootstrap. Cada uno de estos nodos tiene diferentes roles, y por lo tanto, requieren diferentes certificados para asegurar la comunicación y la autenticidad en el clúster.
 
