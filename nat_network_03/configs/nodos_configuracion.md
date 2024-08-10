@@ -1,92 +1,193 @@
-# Clasificación y Distribución de Certificados en un Clúster Kubernetes
 
-## 1. Certificados que Deben Estar en Todos los Nodos (Masters, Workers, Bootstrap)
+# Bootstrap configuration
 
-Estos certificados son esenciales para la autenticidad y comunicación segura entre los componentes del clúster en todos los nodos.
+```bash
+sudo tee /etc/kubernetes/kubelet-config.yaml > /dev/null <<EOF
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+address: 0.0.0.0
+staticPodPath: /etc/kubernetes/manifests
+clusterDomain: cluster.local
+clusterDNS:
+  - 10.96.0.10
+runtimeRequestTimeout: "15m"
+cgroupDriver: systemd
+failSwapOn: false
+authentication:
+  anonymous:
+    enabled: false
+  webhook:
+    enabled: true
+  x509:
+    clientCAFile: "/etc/kubernetes/pki/ca.crt"
+authorization:
+  mode: Webhook
+readOnlyPort: 0
+enforceNodeAllocatable: []
+EOF
+```
 
-- **CA Certificate (ca.crt)**
-  - **Ubicación:** `/etc/kubernetes/pki/ca.crt`
-  - **Propósito:** Es la autoridad de certificación para todo el clúster, utilizado por todos los nodos para verificar otros certificados.
+### kubelet.conf file
 
-- **Kubelet Certificate (kubelet.crt)**
-  - **Ubicación:** `/etc/kubernetes/pki/kubelet.crt`
-  - **Propósito:** Autentica el kubelet en cada nodo con el API server, asegurando que el nodo es legítimo y está autorizado a unirse al clúster.
 
-- **Kubelet Key (kubelet.key)**
-  - **Ubicación:** `/etc/kubernetes/pki/kubelet.key`
-  - **Propósito:** Es la clave privada correspondiente al certificado del kubelet, permitiendo que el nodo firme su identidad al comunicarse con el API server.
 
-## 2. Certificados Específicos para los Nodos Master
+```bash
+sudo tee /etc/kubernetes/kubelet.conf > /dev/null <<EOF
+apiVersion: v1
+kind: Config
+clusters:
+- cluster:
+    certificate-authority: /etc/kubernetes/pki/ca.crt
+    server: https://10.17.4.21:6443
+  name: local
+contexts:
+- context:
+    cluster: local
+    user: kubelet
+  name: local
+current-context: local
+users:
+- name: kubelet
+  user:
+    client-certificate: /etc/kubernetes/pki/kubelet.crt
+    client-key: /etc/kubernetes/pki/kubelet.key
+EOF
+```
 
-Los nodos Master administran componentes críticos como el API server, el controlador, y etcd, y por lo tanto requieren certificados adicionales.
+### crio.conf file
 
-- **API Server Certificate (apiserver.crt)**
-  - **Ubicación:** `/etc/kubernetes/pki/apiserver.crt`
-  - **Propósito:** Autentica el API server en los nodos Master con los clientes (como kubectl), asegurando la comunicación segura.
 
-- **API Server Key (apiserver.key)**
-  - **Ubicación:** `/etc/kubernetes/pki/apiserver.key`
-  - **Propósito:** Es la clave privada correspondiente al certificado del API server, utilizada para firmar y asegurar las comunicaciones.
+```bash
+sudo tee /etc/systemd/system/crio.service > /dev/null <<EOF
+[Unit]
+Description=CRI-O container runtime
+After=network.target
 
-- **Service Account Key Pair (sa.key, sa.pub)**
-  - **Ubicación:** `/etc/kubernetes/pki/sa.key`, `/etc/kubernetes/pki/sa.pub`
-  - **Propósito:** Utilizados por el API server y el controlador de cuentas de servicio para firmar y verificar los tokens de servicio dentro del clúster.
+[Service]
+Type=notify
+ExecStart=/opt/bin/crio/crio
+Environment="PATH=/opt/bin/crio:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Restart=always
+RestartSec=5
+LimitNOFILE=65536
+LimitNPROC=4096
 
-- **Etcd Certificates**
+[Install]
+WantedBy=multi-user.target
+EOF
+```
 
-  - **Etcd Server Certificate (etcd.crt)**
-    - **Ubicación:** `/etc/kubernetes/pki/etcd/etcd.crt`
-    - **Propósito:** Asegura la comunicación dentro del clúster de etcd en los nodos Master.
 
-  - **Etcd Server Key (etcd.key)**
-    - **Ubicación:** `/etc/kubernetes/pki/etcd/etcd.key`
-    - **Propósito:** Es la clave privada utilizada por el servidor etcd para firmar y asegurar las comunicaciones.
 
-  - **Etcd CA Certificate (etcd/ca.crt)**
-    - **Ubicación:** `/etc/kubernetes/pki/etcd/ca.crt`
-    - **Propósito:** Autoridad de certificación para los certificados utilizados en el clúster de etcd.
 
-- **API Server Etcd Client Certificates**
+### kubelet.service file
 
-  - **API Server Etcd Client Certificate (apiserver-etcd-client.crt)**
-    - **Ubicación:** `/etc/kubernetes/pki/apiserver-etcd-client.crt`
-    - **Propósito:** Utilizado por el API server para autenticarse con el clúster de etcd.
+```bash
+sudo tee /etc/systemd/system/kubelet.service > /dev/null <<EOF
 
-  - **API Server Etcd Client Key (apiserver-etcd-client.key)**
-    - **Ubicación:** `/etc/kubernetes/pki/apiserver-etcd-client.key`
-    - **Propósito:** Clave privada utilizada por el API server para autenticarse con el clúster de etcd.
+[Unit]
+Description=kubelet: The Kubernetes Node Agent
+Documentation=https://kubernetes.io/docs/
+After=network-online.target
+Wants=network-online.target
 
-## 3. Certificados Específicos para el Nodo Bootstrap
+[Service]
+ExecStart=/opt/bin/kubelet \
+    --kubeconfig=/etc/kubernetes/kubelet.conf \
+    --config=/etc/kubernetes/kubelet-config.yaml \
+    --container-runtime=remote \
+    --container-runtime-endpoint=unix:///var/run/crio/crio.sock \
+    --fail-swap-on=false \
+    --cgroup-driver=systemd
+Restart=always
+StartLimitIntervalSec=0
+RestartSec=10
+CPUAccounting=true
+MemoryAccounting=true
+# Ensure kubelet has necessary permissions
+ExecStartPre=/sbin/sysctl -w net.ipv4.ip_forward=1
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/systemd/system.slice/kubelet.service
+# Commented out the problematic mount line to prevent errors
+# ExecStartPre=/bin/mount --bind /sys/fs/cgroup/systemd/system.slice/kubelet.service /sys/fs/cgroup/systemd/system.slice/kubelet.service
 
-El nodo Bootstrap es utilizado para iniciar el clúster y luego su rol puede ser reemplazado por los nodos Master. Inicialmente, requiere los mismos certificados que los Masters, pero una vez que el clúster está configurado, su rol puede cambiar.
+[Install]
+WantedBy=multi-user.target
+EOF
+```
 
-- **Inicialmente:**
-  - Los mismos certificados que los nodos Master:
-    - API Server Certificate (apiserver.crt)
-    - API Server Key (apiserver.key)
-    - Etcd Certificates (etcd.crt, etcd.key, etcd/ca.crt)
-    - API Server Etcd Client Certificates (apiserver-etcd-client.crt, apiserver-etcd-client.key)
 
-- **Posteriormente:**
-  - Puede ser eliminado o reintegrado con los certificados básicos si sigue en operación con un rol diferente:
-    - CA Certificate (ca.crt)
-    - Kubelet Certificate (kubelet.crt)
-    - Kubelet Key (kubelet.key)
+```bash
+sudo tee /etc/systemd/system/kubelet.service > /dev/null <<EOF
 
-## Resumen de Certificados por Nodo
+[Unit]
+Description=kubelet: The Kubernetes Node Agent
+Documentation=https://kubernetes.io/docs/
+After=network-online.target
+Wants=network-online.target
 
-- **Todos los Nodos (Masters, Workers, Bootstrap):**
-  - ca.crt
-  - kubelet.crt, kubelet.key
+[Service]
+ExecStart=/opt/bin/kubelet \
+    --kubeconfig=/etc/kubernetes/kubelet.conf \
+    --config=/etc/kubernetes/kubelet-config.yaml \
+    --container-runtime=remote \
+    --container-runtime-endpoint=unix:///var/run/crio/crio.sock \
+    --fail-swap-on=false \
+    --cgroup-driver=systemd
+Restart=always
+StartLimitIntervalSec=0
+RestartSec=10
+CPUAccounting=true
+MemoryAccounting=true
+# Ensure kubelet has necessary permissions
+ExecStartPre=/sbin/sysctl -w net.ipv4.ip_forward=1
+ExecStartPre=/bin/mkdir -p /sys/fs/cgroup/systemd/system.slice/kubelet.service
+ExecStartPre=/bin/mount --bind /sys/fs/cgroup/systemd/system.slice/kubelet.service /sys/fs/cgroup/systemd/system.slice/kubelet.service
 
-- **Nodos Master (además de los anteriores):**
-  - apiserver.crt, apiserver.key
-  - sa.key, sa.pub
-  - etcd.crt, etcd.key, etcd/ca.crt
-  - apiserver-etcd-client.crt, apiserver-etcd-client.key
+[Install]
+WantedBy=multi-user.target
+EOF
+```
 
-- **Nodo Bootstrap (al iniciar el clúster):**
-  - Inicialmente: Los mismos certificados que los nodos Master.
-  - Posteriormente: Puede ser eliminado o reintegrado con los certificados básicos (ca.crt, kubelet.crt, kubelet.key) si sigue en operación con un rol diferente.
 
-Este esquema de clasificación y distribución asegura que cada nodo tenga los certificados necesarios para su función en el clúster Kubernetes.
+```bash
+sudo tee /etc/kubernetes/kubelet-config.yaml > /dev/null << 'EOF'
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+authentication:
+  x509:
+    clientCAFile: "/etc/kubernetes/pki/ca.crt"
+authorization:
+  mode: Webhook
+serverTLSBootstrap: true
+tlsCertFile: "/etc/kubernetes/pki/kubelet.crt"
+tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet.key"
+cgroupDriver: systemd
+runtimeRequestTimeout: "15m"
+containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
+EOF
+```
+
+
+
+sudo systemctl daemon-reload
+
+sudo systemctl enable crio
+sudo systemctl start crio
+sudo systemctl restart crio
+sudo systemctl status kubelet
+
+sudo systemctl enable kubelet
+sudo systemctl restart kubelet
+
+sudo systemctl status kubelet
+sudo systemctl start kubelet
+
+sudo systemctl status kubelet
+
+sudo systemctl daemon-reload
+sudo systemctl enable crio
+sudo systemctl start crio
+sudo systemctl enable kubelet
+sudo systemctl start kubelet
+sudo systemctl status kubelet
+sudo systemctl restart kubelet
