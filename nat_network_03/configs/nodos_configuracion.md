@@ -29,8 +29,6 @@ EOF
 
 ### kubelet.conf file
 
-
-
 ```bash
 sudo tee /etc/kubernetes/kubelet.conf > /dev/null <<EOF
 apiVersion: v1
@@ -76,8 +74,6 @@ LimitNPROC=4096
 WantedBy=multi-user.target
 EOF
 ```
-
-
 
 
 ### kubelet.service file
