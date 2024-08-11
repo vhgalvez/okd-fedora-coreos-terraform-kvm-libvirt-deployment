@@ -60,10 +60,11 @@ openssl x509 -req -in /usr/share/nginx/certificates/master3/kubelet/kubelet.csr 
 ```
 
 **Worker2 (10.17.4.25)**
+
 ```bash
-openssl genpkey -algorithm RSA -out /usr/share/nginx/certificates/bootstrap/kubelet/kubelet.key -pkeyopt rsa_keygen_bits:2048
-openssl req -new -key /usr/share/nginx/certificates/bootstrap/kubelet/kubelet.key -subj "/CN=kubelet-bootstrap" -out /usr/share/nginx/certificates/bootstrap/kubelet/kubelet.csr
-openssl x509 -req -in /usr/share/nginx/certificates/bootstrap/kubelet/kubelet.csr -CA /usr/share/nginx/certificates/shared/ca/ca.crt -CAkey /usr/share/nginx/certificates/shared/ca/ca.key -CAcreateserial -out /usr/share/nginx/certificates/bootstrap/kubelet/kubelet.crt -days 365
+openssl genpkey -algorithm RSA -out /usr/share/nginx/certificates/worker2/kubelet/kubelet.key -pkeyopt rsa_keygen_bits:2048
+openssl req -new -key /usr/share/nginx/certificates/worker2/kubelet/kubelet.key -subj "/CN=kubelet-worker2" -out /usr/share/nginx/certificates/worker2/kubelet/kubelet.csr
+openssl x509 -req -in /usr/share/nginx/certificates/worker2/kubelet/kubelet.csr -CA /usr/share/nginx/certificates/shared/ca/ca.crt -CAkey /usr/share/nginx/certificates/shared/ca/ca.key -CAcreateserial -out /usr/share/nginx/certificates/worker2/kubelet/kubelet.crt -days 365
 ```
 
 
@@ -71,9 +72,9 @@ openssl x509 -req -in /usr/share/nginx/certificates/bootstrap/kubelet/kubelet.cs
 **Worker3 (10.17.4.26)**
 
 ```bash
-openssl genpkey -algorithm RSA -out /usr/share/nginx/certificates/bootstrap/kubelet/kubelet.key -pkeyopt rsa_keygen_bits:2048
-openssl req -new -key /usr/share/nginx/certificates/bootstrap/kubelet/kubelet.key -subj "/CN=kubelet-bootstrap" -out /usr/share/nginx/certificates/bootstrap/kubelet/kubelet.csr
-openssl x509 -req -in /usr/share/nginx/certificates/bootstrap/kubelet/kubelet.csr -CA /usr/share/nginx/certificates/shared/ca/ca.crt -CAkey /usr/share/nginx/certificates/shared/ca/ca.key -CAcreateserial -out /usr/share/nginx/certificates/bootstrap/kubelet/kubelet.crt -days 365
+openssl genpkey -algorithm RSA -out /usr/share/nginx/certificates/worker3/kubelet/kubelet.key -pkeyopt rsa_keygen_bits:2048
+openssl req -new -key /usr/share/nginx/certificates/worker3/kubelet/kubelet.key -subj "/CN=kubelet-worker3" -out /usr/share/nginx/certificates/worker3/kubelet/kubelet.csr
+openssl x509 -req -in /usr/share/nginx/certificates/worker3/kubelet/kubelet.csr -CA /usr/share/nginx/certificates/shared/ca/ca.crt -CAkey /usr/share/nginx/certificates/shared/ca/ca.key -CAcreateserial -out /usr/share/nginx/certificates/worker3/kubelet/kubelet.crt -days 365
 ```
 
 # 4. Generar Certificados Compartidos
