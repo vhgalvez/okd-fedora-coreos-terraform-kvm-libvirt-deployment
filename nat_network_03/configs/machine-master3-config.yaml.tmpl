@@ -131,7 +131,6 @@ storage:
           EOF
 
           # Crear servicios systemd
-
           sudo cat <<EOF | sudo tee /etc/systemd/system/crio.service
           [Unit]
           Description=CRI-O container runtime
@@ -293,8 +292,6 @@ storage:
 
           # Generación de certificados
 
-          # Nombre del Script: generate_certs_master.sh
-
           # Definir la variable ssh_keys con la ruta a la clave SSH
           ssh_keys="/path/to/bootstrap/ssh_key"
 
@@ -335,11 +332,75 @@ storage:
 
           # Recargar systemd y activar servicios
           sudo systemctl daemon-reload
-
           sudo systemctl enable kubelet
           sudo systemctl start kubelet
           sudo systemctl enable crio
           sudo systemctl start crio
+
+    - path: /etc/kubernetes/pki/etcd-openssl.cnf
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          [req]
+          distinguished_name = req_distinguished_name
+          req_extensions = v3_req
+          prompt = no
+
+          [req_distinguished_name]
+          CN = etcd
+
+          [v3_req]
+          keyUsage = keyEncipherment, dataEncipherment
+          extendedKeyUsage = serverAuth, clientAuth
+          subjectAltName = @alt_names
+
+          [alt_names]
+          IP.1 = 127.0.0.1
+          IP.2 = ${ip}  # Reemplaza esto con la IP de tu nodo
+
+    - path: /etc/kubernetes/kubelet.conf
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          apiVersion: v1
+          kind: Config
+          clusters:
+          - cluster:
+              certificate-authority: /etc/kubernetes/pki/ca.crt
+              server: https://${ip}:6443
+            name: local
+          contexts:
+          - context:
+              cluster: local
+              user: kubelet
+            name: local
+          current-context: local
+          users:
+          - name: kubelet
+            user:
+              client-certificate: /etc/kubernetes/pki/kubelet.crt
+              client-key: /etc/kubernetes/pki/kubelet.key
+
+    - path: /etc/kubernetes/kubelet-config.yaml
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          kind: KubeletConfiguration
+          apiVersion: kubelet.config.k8s.io/v1beta1
+          authentication:
+            x509:
+              clientCAFile: "/etc/kubernetes/pki/ca.crt"
+          authorization:
+            mode: Webhook
+          serverTLSBootstrap: true
+          tlsCertFile: "/etc/kubernetes/pki/kubelet.crt"
+          tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet.key"
+          cgroupDriver: systemd
+          runtimeRequestTimeout: "15m"
+          containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
 
     - path: /etc/systemd/network/10-eth0.network
       filesystem: root
