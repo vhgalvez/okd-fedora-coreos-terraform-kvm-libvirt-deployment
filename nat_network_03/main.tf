@@ -135,10 +135,11 @@ resource "null_resource" "generate_certificates" {
   }
 
   connection {
-    type     = "ssh"
-    user     = "core"
-    host     = libvirt_domain.machine[each.key].network_interface[0].addresses[0]
-    agent    = true  # Utiliza el ssh-agent para la autenticación basada en clave pública
+    type        = "ssh"
+    user        = "core"
+    private_key = file(var.ssh_private_key_path)
+    host        = libvirt_domain.machine[each.key].network_interface[0].addresses[0]
+    agent       = false  # Esto asegura que Terraform use la clave especificada
   }
 
   depends_on = [
@@ -157,10 +158,11 @@ resource "null_resource" "install_okd_components" {
   }
 
   connection {
-    type     = "ssh"
-    user     = "core"
-    host     = libvirt_domain.machine[each.key].network_interface[0].addresses[0]
-    agent    = true  # Utiliza el ssh-agent para la autenticación basada en clave pública
+    type        = "ssh"
+    user        = "core"
+    private_key = file(var.ssh_private_key_path)
+    host        = libvirt_domain.machine[each.key].network_interface[0].addresses[0]
+    agent       = false  # Esto asegura que Terraform use la clave especificada
   }
 
   depends_on = [
