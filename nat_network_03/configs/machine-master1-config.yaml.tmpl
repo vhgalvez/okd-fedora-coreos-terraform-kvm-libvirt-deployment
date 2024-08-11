@@ -26,339 +26,93 @@ storage:
       mode: 0644
       contents:
         inline: ${host_name}
-    - path: /home/core/install-master-components.sh
-      filesystem: root
-      mode: 0755
-      contents:
-        inline: |
-          #!/bin/bash
-          set -euo pipefail
-          exec > /var/log/install-master-components.log 2>&1
-
-          # Crear directorio para binarios
-          sudo mkdir -p /opt/bin
-
-          # Instalar kubelet
-          curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
-          sudo chmod +x /opt/bin/kubelet
-
-          # Instalar oc (OpenShift Client)
-          curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
-          tar -xzf /tmp/oc.tar.gz -C /tmp
-          sudo mv /tmp/oc /opt/bin/oc
-          sudo chmod +x /opt/bin/oc
-          sudo rm -rf /tmp/oc.tar.gz
-
-          # Instalar etcd
-          curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/v3.4.13/etcd-v3.4.13-linux-amd64.tar.gz
-          tar -xzf /tmp/etcd.tar.gz -C /tmp
-          sudo mv /tmp/etcd-v3.4.13-linux-amd64/etcd /opt/bin/etcd
-          sudo chmod +x /opt/bin/etcd
-          sudo rm -rf /tmp/etcd.tar.gz /tmp/etcd-v3.4.13-linux-amd64
-
-          # Instalar kube-apiserver
-          curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-apiserver
-          sudo mv /tmp/kube-apiserver /opt/bin/kube-apiserver
-          sudo chmod +x /opt/bin/kube-apiserver
-
-          # Instalar kube-controller-manager
-          curl -L -o /tmp/kube-controller-manager https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-controller-manager
-          sudo mv /tmp/kube-controller-manager /opt/bin/kube-controller-manager
-          sudo chmod +x /opt/bin/kube-controller-manager
-
-          # Instalar kube-scheduler
-          curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-scheduler
-          sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
-          sudo chmod +x /opt/bin/kube-scheduler
-
-          # Instalar CRI-O
-          sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.3.tar.gz
-          sudo mkdir -p /tmp/crio
-          sudo tar -xzf /tmp/crio.tar.gz -C /tmp/crio
-          sudo mkdir -p /opt/bin/crio
-          sudo mv /tmp/crio/cri-o/bin/* /opt/bin/crio/
-          sudo chmod +x /opt/bin/crio/*
-          /opt/bin/crio/crio --version
-
-          # Descargar conmon
-          wget https://github.com/containers/conmon/releases/download/v2.1.12/conmon.amd64
-          sudo mv conmon.amd64 /opt/bin/crio/conmon
-          sudo chmod +x /opt/bin/crio/conmon
-
-          # Crear configuración de CRI-O
-          sudo mkdir -p /etc/crio
-          cat <<EOF | sudo tee /etc/crio/crio.conf
-          [crio]
-          log_level = "debug"
-          root = "/var/lib/crio"
-          runroot = "/var/run/crio"
-          log_dir = "/var/log/crio/pods"
-          version_file = "/var/run/crio/version"
-          clean_shutdown_file = "/var/lib/crio/clean.shutdown"
-
-          [crio.api]
-          listen = "/var/run/crio/crio.sock"
-          stream_address = "127.0.0.1"
-          stream_port = "0"
-          grpc_max_send_msg_size = 83886080
-          grpc_max_recv_msg_size = 83886080
-
-          [crio.runtime]
-          default_runtime = "runc"
-          no_pivot = false
-          decryption_keys_path = "/etc/crio/keys/"
-          cgroup_manager = "systemd"
-          drop_infra_ctr = true
-          infra_ctr_cpuset = ""
-          shared_cpuset = ""
-          namespaces_dir = "/var/run"
-          enable_criu_support = true
-          pinns_path = "/opt/bin/crio/pinns"
-          conmon = "/opt/bin/crio/conmon"
-
-          [crio.runtime.runtimes.runc]
-          runtime_path = "/opt/bin/crio/crio-runc"
-          runtime_type = "oci"
-          runtime_root = "/run/runc"
-
-          [crio.image]
-          pause_image = "k8s.gcr.io/pause:3.2"
-          image_volumes = "mkdir"
-
-          [crio.network]
-          network_dir = "/etc/cni/net.d/"
-          plugin_dirs = ["/opt/cni/bin/"]
-          EOF
-
-          # Crear servicios systemd
-          sudo cat <<EOF | sudo tee /etc/systemd/system/crio.service
-          [Unit]
-          Description=CRI-O container runtime
-          After=network.target
-
-          [Service]
-          Type=notify
-          ExecStart=/opt/bin/crio/crio
-          Environment="PATH=/opt/bin/crio:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-          Restart=always
-          RestartSec=5
-          LimitNOFILE=65536
-          LimitNPROC=4096
-
-          [Install]
-          WantedBy=multi-user.target
-          EOF
-
-          sudo cat <<EOF | sudo tee /etc/systemd/system/etcd.service
-          [Unit]
-          Description=etcd
-          Documentation=https://github.com/coreos/etcd
-          After=network.target
-
-          [Service]
-          User=etcd
-          Type=notify
-          Environment="ETCD_DATA_DIR=/var/lib/etcd"
-          Environment="ETCD_NAME=etcd0"
-          Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=https://${ip}:2380"
-          Environment="ETCD_LISTEN_PEER_URLS=https://${ip}:2380"
-          Environment="ETCD_LISTEN_CLIENT_URLS=https://${ip}:2379,https://127.0.0.1:2379"
-          Environment="ETCD_ADVERTISE_CLIENT_URLS=https://${ip}:2379"
-          Environment="ETCD_INITIAL_CLUSTER=etcd0=https://${ip}:2380"
-          Environment="ETCD_INITIAL_CLUSTER_STATE=new"
-          Environment="ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster"
-          Environment="ETCD_CERT_FILE=/etc/kubernetes/pki/etcd/etcd.crt"
-          Environment="ETCD_KEY_FILE=/etc/kubernetes/pki/etcd/etcd.key"
-          Environment="ETCD_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.crt"
-          Environment="ETCD_CLIENT_CERT_AUTH=true"
-          Environment="ETCD_PEER_CERT_FILE=/etc/kubernetes/pki/etcd/etcd.crt"
-          Environment="ETCD_PEER_KEY_FILE=/etc/kubernetes/pki/etcd/etcd.key"
-          Environment="ETCD_PEER_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.crt"
-          Environment="ETCD_PEER_CLIENT_CERT_AUTH=true"
-          ExecStart=/opt/bin/etcd
-          Restart=always
-          RestartSec=10s
-          LimitNOFILE=40000
-
-          [Install]
-          WantedBy=multi-user.target
-          EOF
-
-          sudo cat <<EOF | sudo tee /etc/systemd/system/kube-apiserver.service
-          [Unit]
-          Description=Kubernetes API Server
-          Documentation=https://kubernetes.io/docs/concepts/overview/components/
-          After=network.target
-
-          [Service]
-          ExecStart=/opt/bin/kube-apiserver \
-            --advertise-address=${ip} \
-            --allow-privileged=true \
-            --authorization-mode=Node,RBAC \
-            --client-ca-file=/etc/kubernetes/pki/ca.crt \
-            --enable-admission-plugins=NodeRestriction \
-            --etcd-servers=https://127.0.0.1:2379 \
-            --etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt \
-            --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt \
-            --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key \
-            --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt \
-            --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key \
-            --runtime-config=api/all=true \
-            --service-account-key-file=/etc/kubernetes/pki/sa.pub \
-            --service-account-signing-key-file=/etc/kubernetes/pki/sa.key \
-            --service-account-issuer=https://kubernetes.default.svc.cluster.local \
-            --service-cluster-ip-range=10.96.0.0/12 \
-            --tls-cert-file=/etc/kubernetes/pki/apiserver.crt \
-            --tls-private-key-file=/etc/kubernetes/pki/apiserver.key \
-            --v=2
-          Restart=on-failure
-
-          [Install]
-          WantedBy=multi-user.target
-          EOF
-
-          sudo cat <<EOF | sudo tee /etc/systemd/system/kube-controller-manager.service
-          [Unit]
-          Description=Kubernetes Controller Manager
-          Documentation=https://kubernetes.io/docs/concepts/overview/components/
-          After=network.target
-
-          [Service]
-          ExecStart=/opt/bin/kube-controller-manager \
-            --kubeconfig=/etc/kubernetes/controller-manager.conf \
-            --bind-address=0.0.0.0 \
-            --leader-elect=true \
-            --use-service-account-credentials=true \
-            --controllers=*,bootstrapsigner,tokencleaner \
-            --cluster-signing-cert-file=/etc/kubernetes/pki/ca.crt \
-            --cluster-signing-key-file=/etc/kubernetes/pki/ca.key \
-            --root-ca-file=/etc/kubernetes/pki/ca.crt \
-            --service-account-private-key-file=/etc/kubernetes/pki/sa.key \
-            --cluster-name=kubernetes \
-            --cluster-cidr=10.244.0.0/16 \
-            --allocate-node-cidrs=true \
-            --node-cidr-mask-size=24 \
-            --service-cluster-ip-range=10.96.0.0/12 \
-            --v=2
-          Restart=on-failure
-
-          [Install]
-          WantedBy=multi-user.target
-          EOF
-
-          sudo cat <<EOF | sudo tee /etc/systemd/system/kube-scheduler.service
-          [Unit]
-          Description=Kubernetes Scheduler
-          Documentation=https://kubernetes.io/docs/concepts/overview/components/
-          After=network.target
-
-          [Service]
-          ExecStart=/opt/bin/kube-scheduler --address=127.0.0.1 --kubeconfig=/etc/kubernetes/scheduler.conf --leader-elect=true --v=2
-          Restart=on-failure
-
-          [Install]
-          WantedBy=multi-user.target
-          EOF
-
-          sudo cat <<EOF | sudo tee /etc/systemd/system/kubelet.service
-          [Unit]
-          Description=kubelet: The Kubernetes Node Agent
-          Documentation=https://kubernetes.io/docs/
-          Wants=crio.service
-          After=crio.service
-
-          [Service]
-          ExecStart=/opt/bin/kubelet \
-            --kubeconfig=/etc/kubernetes/kubelet.conf \
-            --config=/etc/kubernetes/kubelet-config.yaml \
-            --container-runtime=remote \
-            --container-runtime-endpoint=unix:///var/run/crio/crio.sock \
-            --runtime-request-timeout=15m \
-            --image-gc-high-threshold=80 \
-            --image-gc-low-threshold=40 \
-            --enforce-node-allocatable=cpu,memory \
-            --fail-swap-on=false \
-            --cgroup-driver=systemd \
-            --network-plugin=cni \
-            --cni-bin-dir=/opt/cni/bin \
-            --cni-conf-dir=/etc/cni/net.d \
-            --pod-infra-container-image=k8s.gcr.io/pause:3.1 \
-            --v=2
-          Restart=on-failure
-
-          [Install]
-          WantedBy=multi-user.target
-          EOF
-
-          # Generación de certificados
-
-          # Definir la variable ssh_keys con la ruta a la clave SSH
-          ssh_keys="/path/to/bootstrap/ssh_key"
-
-          # Crear directorios para los certificados
-          sudo mkdir -p /etc/kubernetes/pki
-          sudo mkdir -p /etc/kubernetes/pki/etcd
-
-          # Copiar la CA desde el nodo Bootstrap
-          scp -i "${ssh_keys}" -P 22 core@10.17.4.27:/etc/kubernetes/pki/ca.crt /etc/kubernetes/pki/ca.crt
-
-          # Generar certificado del API server único para este Master
-          sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/apiserver.key -pkeyopt rsa_keygen_bits:2048
-          sudo openssl req -new -key /etc/kubernetes/pki/apiserver.key -subj "/CN=kube-apiserver-master" -out /etc/kubernetes/pki/apiserver.csr
-          sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver.crt -days 365
-
-          # Generar certificado del kubelet específico para este Master
-          sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/kubelet.key -pkeyopt rsa_keygen_bits:2048
-          sudo openssl req -new -key /etc/kubernetes/pki/kubelet.key -subj "/CN=kubelet-master" -out /etc/kubernetes/pki/kubelet.csr
-          sudo openssl x509 -req -in /etc/kubernetes/pki/kubelet.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/kubelet.crt -days 365
-
-          # Copiar certificado y clave de etcd desde el nodo Bootstrap
-          scp -i "${ssh_keys}" -P 22 core@10.17.4.27:/etc/kubernetes/pki/etcd/etcd.crt /etc/kubernetes/pki/etcd/etcd.crt
-          scp -i "${ssh_keys}" -P 22 core@10.17.4.27:/etc/kubernetes/pki/etcd/etcd.key /etc/kubernetes/pki/etcd/etcd.key
-          scp -i "${ssh_keys}" -P 22 core@10.17.4.27:/etc/kubernetes/pki/etcd/ca.crt /etc/kubernetes/pki/etcd/ca.crt
-
-          # Generar certificados del cliente etcd para este Master
-          sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/apiserver-etcd-client.key -pkeyopt rsa_keygen_bits:2048
-          sudo openssl req -new -key /etc/kubernetes/pki/apiserver-etcd-client.key -subj "/CN=apiserver-etcd-client-master" -out /etc/kubernetes/pki/apiserver-etcd-client.csr
-          sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver-etcd-client.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver-etcd-client.crt -days 365
-
-          # Establecer permisos y propiedad adecuados para los archivos de certificados
-          sudo chmod 600 /etc/kubernetes/pki/*.key
-          sudo chmod 644 /etc/kubernetes/pki/*.crt
-          sudo chmod 600 /etc/kubernetes/pki/etcd/*.key
-          sudo chmod 644 /etc/kubernetes/pki/etcd/*.crt
-          sudo chown root:root /etc/kubernetes/pki/*
-          sudo chown root:root /etc/kubernetes/pki/etcd/*
-
-          # Recargar systemd y activar servicios
-          sudo systemctl daemon-reload
-          sudo systemctl enable kubelet
-          sudo systemctl start kubelet
-          sudo systemctl enable crio
-          sudo systemctl start crio
-
-    - path: /etc/kubernetes/pki/etcd-openssl.cnf
+        
+    # Descargar certificados necesarios desde el servidor
+    - path: /etc/kubernetes/pki/ca.crt
       filesystem: root
       mode: 0644
       contents:
-        inline: |
-          [req]
-          distinguished_name = req_distinguished_name
-          req_extensions = v3_req
-          prompt = no
+        source: http://helper.cefaslocalserver.com/shared/ca/ca.crt
+        verification: {}
 
-          [req_distinguished_name]
-          CN = etcd
+    - path: /etc/kubernetes/pki/kubelet.crt
+      filesystem: root
+      mode: 0644
+      contents:
+        source: http://helper.cefaslocalserver.com/${node_name}/kubelet/kubelet.crt
+        verification: {}
 
-          [v3_req]
-          keyUsage = keyEncipherment, dataEncipherment
-          extendedKeyUsage = serverAuth, clientAuth
-          subjectAltName = @alt_names
+    - path: /etc/kubernetes/pki/kubelet.key
+      filesystem: root
+      mode: 0600
+      contents:
+        source: http://helper.cefaslocalserver.com/${node_name}/kubelet/kubelet.key
+        verification: {}
 
-          [alt_names]
-          IP.1 = 127.0.0.1
-          IP.2 = ${ip}  # Reemplaza esto con la IP de tu nodo
+    - path: /etc/kubernetes/pki/apiserver.crt
+      filesystem: root
+      mode: 0644
+      contents:
+        source: http://helper.cefaslocalserver.com/shared/apiserver/apiserver.crt
+        verification: {}
 
+    - path: /etc/kubernetes/pki/apiserver.key
+      filesystem: root
+      mode: 0600
+      contents:
+        source: http://helper.cefaslocalserver.com/shared/apiserver/apiserver.key
+        verification: {}
+
+    - path: /etc/kubernetes/pki/sa.pub
+      filesystem: root
+      mode: 0644
+      contents:
+        source: http://helper.cefaslocalserver.com/shared/sa/sa.pub
+        verification: {}
+
+    - path: /etc/kubernetes/pki/sa.key
+      filesystem: root
+      mode: 0600
+      contents:
+        source: http://helper.cefaslocalserver.com/shared/sa/sa.key
+        verification: {}
+
+    - path: /etc/kubernetes/pki/etcd/etcd.crt
+      filesystem: root
+      mode: 0644
+      contents:
+        source: http://helper.cefaslocalserver.com/shared/etcd/etcd.crt
+        verification: {}
+
+    - path: /etc/kubernetes/pki/etcd/etcd.key
+      filesystem: root
+      mode: 0600
+      contents:
+        source: http://helper.cefaslocalserver.com/shared/etcd/etcd.key
+        verification: {}
+
+    - path: /etc/kubernetes/pki/etcd/ca.crt
+      filesystem: root
+      mode: 0644
+      contents:
+        source: http://helper.cefaslocalserver.com/shared/ca/ca.crt
+        verification: {}
+
+    - path: /etc/kubernetes/pki/apiserver-etcd-client.crt
+      filesystem: root
+      mode: 0644
+      contents:
+        source: http://helper.cefaslocalserver.com/shared/apiserver-etcd-client/apiserver-etcd-client.crt
+        verification: {}
+
+    - path: /etc/kubernetes/pki/apiserver-etcd-client.key
+      filesystem: root
+      mode: 0600
+      contents:
+        source: http://helper.cefaslocalserver.com/shared/apiserver-etcd-client/apiserver-etcd-client.key
+        verification: {}
+
+    # Archivos de configuración del kubelet
     - path: /etc/kubernetes/kubelet.conf
       filesystem: root
       mode: 0644
@@ -402,6 +156,7 @@ storage:
           runtimeRequestTimeout: "15m"
           containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
 
+    # Configuración de la red
     - path: /etc/systemd/network/10-eth0.network
       filesystem: root
       mode: 0644
@@ -445,6 +200,23 @@ systemd:
   units:
     - name: crio.service
       enabled: true
+      contents: |
+        [Unit]
+        Description=CRI-O container runtime
+        After=network.target
+
+        [Service]
+        Type=notify
+        ExecStart=/opt/bin/crio/crio
+        Environment="PATH=/opt/bin/crio:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        Restart=always
+        RestartSec=5
+        LimitNOFILE=65536
+        LimitNPROC=4096
+
+        [Install]
+        WantedBy=multi-user.target
+
     - name: apply-network-routes.service
       enabled: true
       contents: |
@@ -500,9 +272,27 @@ systemd:
         After=network.target
 
         [Service]
-        ExecStart=/opt/bin/kube-apiserver --config=/etc/kubernetes/manifests/kube-apiserver.yaml
-        Restart=always
-        RestartSec=10
+        ExecStart=/opt/bin/kube-apiserver \
+          --advertise-address=${ip} \
+          --allow-privileged=true \
+          --authorization-mode=Node,RBAC \
+          --client-ca-file=/etc/kubernetes/pki/ca.crt \
+          --enable-admission-plugins=NodeRestriction \
+          --etcd-servers=https://127.0.0.1:2379 \
+          --etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt \
+          --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt \
+          --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key \
+          --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt \
+          --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key \
+          --runtime-config=api/all=true \
+          --service-account-key-file=/etc/kubernetes/pki/sa.pub \
+          --service-account-signing-key-file=/etc/kubernetes/pki/sa.key \
+          --service-account-issuer=https://kubernetes.default.svc.cluster.local \
+          --service-cluster-ip-range=10.96.0.0/12 \
+          --tls-cert-file=/etc/kubernetes/pki/apiserver.crt \
+          --tls-private-key-file=/etc/kubernetes/pki/apiserver.key \
+          --v=2
+        Restart=on-failure
 
         [Install]
         WantedBy=multi-user.target
@@ -515,9 +305,23 @@ systemd:
         After=network.target
 
         [Service]
-        ExecStart=/opt/bin/kube-controller-manager --config=/etc/kubernetes/manifests/kube-controller-manager.yaml
-        Restart=always
-        RestartSec=10
+        ExecStart=/opt/bin/kube-controller-manager \
+          --kubeconfig=/etc/kubernetes/controller-manager.conf \
+          --bind-address=0.0.0.0 \
+          --leader-elect=true \
+          --use-service-account-credentials=true \
+          --controllers=*,bootstrapsigner,tokencleaner \
+          --cluster-signing-cert-file=/etc/kubernetes/pki/ca.crt \
+          --cluster-signing-key-file=/etc/kubernetes/pki/ca.key \
+          --root-ca-file=/etc/kubernetes/pki/ca.crt \
+          --service-account-private-key-file=/etc/kubernetes/pki/sa.key \
+          --cluster-name=kubernetes \
+          --cluster-cidr=10.244.0.0/16 \
+          --allocate-node-cidrs=true \
+          --node-cidr-mask-size=24 \
+          --service-cluster-ip-range=10.96.0.0/12 \
+          --v=2
+        Restart=on-failure
 
         [Install]
         WantedBy=multi-user.target
@@ -530,9 +334,8 @@ systemd:
         After=network.target
 
         [Service]
-        ExecStart=/opt/bin/kube-scheduler --config=/etc/kubernetes/manifests/kube-scheduler.yaml
-        Restart=always
-        RestartSec=10
+        ExecStart=/opt/bin/kube-scheduler --address=127.0.0.1 --kubeconfig=/etc/kubernetes/scheduler.conf --leader-elect=true --v=2
+        Restart=on-failure
 
         [Install]
         WantedBy=multi-user.target
