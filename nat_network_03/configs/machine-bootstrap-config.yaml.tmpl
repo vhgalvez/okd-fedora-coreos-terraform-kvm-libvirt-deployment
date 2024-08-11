@@ -27,14 +27,14 @@ storage:
       contents:
         inline: ${host_name}
 
-    - path: /home/core/install-master-components.sh
+    - path: /home/core/install-bootstrap-components.sh
       filesystem: root
       mode: 0755
       contents:
         inline: |
           #!/bin/bash
           set -euo pipefail
-          exec > /var/log/install-master-components.log 2>&1
+          exec > /var/log/install-bootstrap-components.log 2>&1
 
           # Create directory for binaries
           sudo mkdir -p /opt/bin
@@ -126,22 +126,18 @@ storage:
           plugin_dirs = ["/opt/cni/bin/"]
           EOF
 
-          
-          # Crear directorio para certificados
+          # Create directory for certificates
           sudo mkdir -p /etc/kubernetes/pki
 
-          # Generar Kubelet Certificate y Key para el Nodo Bootstrap
+          # Generate Kubelet Certificate and Key for the Bootstrap Node
           sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/kubelet.key -pkeyopt rsa_keygen_bits:2048
           sudo openssl req -new -key /etc/kubernetes/pki/kubelet.key -subj "/CN=kubelet-bootstrap" -out /etc/kubernetes/pki/kubelet.csr
           sudo openssl x509 -req -in /etc/kubernetes/pki/kubelet.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/kubelet.crt -days 365
 
-          # Ajustar permisos
+          # Adjust permissions
           sudo chmod 600 /etc/kubernetes/pki/*.key
           sudo chmod 644 /etc/kubernetes/pki/*.crt
           sudo chown root:root /etc/kubernetes/pki/*
-
-
-         
 
     - path: /etc/systemd/network/10-eth0.network
       filesystem: root

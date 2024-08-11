@@ -55,6 +55,7 @@ storage:
           sudo tar -xzf /tmp/crio.tar.gz -C /tmp/crio
           sudo mkdir -p /opt/bin/crio
           sudo mv /tmp/crio/cri-o/bin/* /opt/bin/crio/
+          sudo chmod +x /opt/bin/crio/*
           /opt/bin/crio/crio --version
 
           # Descargar conmon
@@ -127,6 +128,20 @@ storage:
           WantedBy=multi-user.target
           EOF
 
+          # Generar Certificados para el Nodo Worker:
+          # Crear directorio para certificados
+          sudo mkdir -p /etc/kubernetes/pki
+
+          # Generar Kubelet Certificate y Key para el Nodo Worker
+          sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/kubelet.key -pkeyopt rsa_keygen_bits:2048
+          sudo openssl req -new -key /etc/kubernetes/pki/kubelet.key -subj "/CN=kubelet-${host_name}" -out /etc/kubernetes/pki/kubelet.csr
+          sudo openssl x509 -req -in /etc/kubernetes/pki/kubelet.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/kubelet.crt -days 365
+
+          # Ajustar permisos
+          sudo chmod 600 /etc/kubernetes/pki/*.key
+          sudo chmod 644 /etc/kubernetes/pki/*.crt
+          sudo chown root:root /etc/kubernetes/pki/*
+
           # Recargar systemd y activar servicios
           sudo systemctl daemon-reload
           sudo systemctl enable kubelet
@@ -156,7 +171,7 @@ storage:
           f /etc/hosts 0644 - - - -
           127.0.0.1   localhost
           ::1         localhost
-          ${ip}  ${host_name} ${name}
+          ${ip}  ${host_name} ${host_name}.local
 
     - path: /run/systemd/resolve/resolv.conf
       filesystem: root
@@ -202,7 +217,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "${ip}  ${host_name} ${name}" >> /etc/hosts'
+        ExecStart=/bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "${ip}  ${host_name} ${host_name}.local" >> /etc/hosts'
         RemainAfterExit=true
 
         [Install]
