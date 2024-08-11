@@ -344,48 +344,46 @@ storage:
           EOF
 
           #!/bin/bash
-# Nombre del Script: generate_certs_master.sh
+          
+          # Nombre del Script: generate_certs_master.sh
 
-# Definir la variable ssh_keys con la ruta a la clave SSH
-ssh_keys="/path/to/bootstrap/ssh_key"
+          # Definir la variable ssh_keys con la ruta a la clave SSH
+          ssh_keys="/path/to/bootstrap/ssh_key"
 
-# Crear directorios para los certificados
-sudo mkdir -p /etc/kubernetes/pki
-sudo mkdir -p /etc/kubernetes/pki/etcd
+          # Crear directorios para los certificados
+          sudo mkdir -p /etc/kubernetes/pki
+          sudo mkdir -p /etc/kubernetes/pki/etcd
 
-# Copiar la CA desde el nodo Bootstrap
-scp -i "${ssh_keys}" -P 22 core@10.17.4.27:/etc/kubernetes/pki/ca.crt /etc/kubernetes/pki/ca.crt
+          # Copiar la CA desde el nodo Bootstrap
+          scp -i "${ssh_keys}" -P 22 core@10.17.4.27:/etc/kubernetes/pki/ca.crt /etc/kubernetes/pki/ca.crt
 
-# Generar certificado del API server único para este Master
-sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/apiserver.key -pkeyopt rsa_keygen_bits:2048
-sudo openssl req -new -key /etc/kubernetes/pki/apiserver.key -subj "/CN=kube-apiserver-master" -out /etc/kubernetes/pki/apiserver.csr
-sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver.crt -days 365
+          # Generar certificado del API server único para este Master
+          sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/apiserver.key -pkeyopt rsa_keygen_bits:2048
+          sudo openssl req -new -key /etc/kubernetes/pki/apiserver.key -subj "/CN=kube-apiserver-master" -out /etc/kubernetes/pki/apiserver.csr
+          sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver.crt -days 365
 
-# Generar certificado del kubelet específico para este Master
-sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/kubelet.key -pkeyopt rsa_keygen_bits:2048
-sudo openssl req -new -key /etc/kubernetes/pki/kubelet.key -subj "/CN=kubelet-master" -out /etc/kubernetes/pki/kubelet.csr
-sudo openssl x509 -req -in /etc/kubernetes/pki/kubelet.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/kubelet.crt -days 365
+          # Generar certificado del kubelet específico para este Master
+          sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/kubelet.key -pkeyopt rsa_keygen_bits:2048
+          sudo openssl req -new -key /etc/kubernetes/pki/kubelet.key -subj "/CN=kubelet-master" -out /etc/kubernetes/pki/kubelet.csr
+          sudo openssl x509 -req -in /etc/kubernetes/pki/kubelet.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/kubelet.crt -days 365
 
-# Copiar certificado y clave de etcd desde el nodo Bootstrap
-scp -i "${ssh_keys}" -P 22 core@10.17.4.27:/etc/kubernetes/pki/etcd/etcd.crt /etc/kubernetes/pki/etcd/etcd.crt
-scp -i "${ssh_keys}" -P 22 core@10.17.4.27:/etc/kubernetes/pki/etcd/etcd.key /etc/kubernetes/pki/etcd/etcd.key
-scp -i "${ssh_keys}" -P 22 core@10.17.4.27:/etc/kubernetes/pki/etcd/ca.crt /etc/kubernetes/pki/etcd/ca.crt
+          # Copiar certificado y clave de etcd desde el nodo Bootstrap
+          scp -i "${ssh_keys}" -P 22 core@10.17.4.27:/etc/kubernetes/pki/etcd/etcd.crt /etc/kubernetes/pki/etcd/etcd.crt
+          scp -i "${ssh_keys}" -P 22 core@10.17.4.27:/etc/kubernetes/pki/etcd/etcd.key /etc/kubernetes/pki/etcd/etcd.key
+          scp -i "${ssh_keys}" -P 22 core@10.17.4.27:/etc/kubernetes/pki/etcd/ca.crt /etc/kubernetes/pki/etcd/ca.crt
 
-# Generar certificados del cliente etcd para este Master
-sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/apiserver-etcd-client.key -pkeyopt rsa_keygen_bits:2048
-sudo openssl req -new -key /etc/kubernetes/pki/apiserver-etcd-client.key -subj "/CN=apiserver-etcd-client-master" -out /etc/kubernetes/pki/apiserver-etcd-client.csr
-sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver-etcd-client.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver-etcd-client.crt -days 365
+          # Generar certificados del cliente etcd para este Master
+          sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/apiserver-etcd-client.key -pkeyopt rsa_keygen_bits:2048
+          sudo openssl req -new -key /etc/kubernetes/pki/apiserver-etcd-client.key -subj "/CN=apiserver-etcd-client-master" -out /etc/kubernetes/pki/apiserver-etcd-client.csr
+          sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver-etcd-client.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver-etcd-client.crt -days 365
 
-# Establecer permisos y propiedad adecuados para los archivos de certificados
-sudo chmod 600 /etc/kubernetes/pki/*.key
-sudo chmod 644 /etc/kubernetes/pki/*.crt
-sudo chmod 600 /etc/kubernetes/pki/etcd/*.key
-sudo chmod 644 /etc/kubernetes/pki/etcd/*.crt
-sudo chown root:root /etc/kubernetes/pki/*
-sudo chown root:root /etc/kubernetes/pki/etcd/*
-
-echo "Certificados específicos generados y configurados en el nodo Master."
-
+          # Establecer permisos y propiedad adecuados para los archivos de certificados
+          sudo chmod 600 /etc/kubernetes/pki/*.key
+          sudo chmod 644 /etc/kubernetes/pki/*.crt
+          sudo chmod 600 /etc/kubernetes/pki/etcd/*.key
+          sudo chmod 644 /etc/kubernetes/pki/etcd/*.crt
+          sudo chown root:root /etc/kubernetes/pki/*
+          sudo chown root:root /etc/kubernetes/pki/etcd/*
 
           # Crear archivos de configuración en /etc/kubernetes/manifests
           sudo mkdir -p /etc/kubernetes/manifests
