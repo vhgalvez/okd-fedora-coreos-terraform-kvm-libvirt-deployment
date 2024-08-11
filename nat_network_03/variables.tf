@@ -34,8 +34,3 @@ variable "dns2" {
   description = "Secondary DNS server"
   type        = string
 }
-
-variable "ssh_private_key_path" {
-  description = "Path to the SSH private key"
-  type        = string
-}
