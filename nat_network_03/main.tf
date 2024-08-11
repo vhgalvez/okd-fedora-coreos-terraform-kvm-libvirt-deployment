@@ -1,4 +1,3 @@
-# main.tf
 terraform {
   required_version = "= 1.9.3"
 
@@ -122,6 +121,50 @@ resource "libvirt_domain" "machine" {
   }
 
   qemu_agent = true
+}
+
+# Nueva sección para generar certificados en todos los nodos
+resource "null_resource" "generate_certificates" {
+  for_each = libvirt_domain.machine
+
+  provisioner "remote-exec" {
+    inline = [
+      "bash /home/core/generate_certificates.sh"
+    ]
+  }
+
+  connection {
+    type     = "ssh"
+    user     = "core"
+    private_key = file(var.ssh_private_key_path)
+    host     = libvirt_domain.machine[each.key].network_interface[0].addresses[0]
+  }
+
+  depends_on = [
+    libvirt_domain.machine
+  ]
+}
+
+# Nueva sección para instalar componentes OKD en todos los nodos
+resource "null_resource" "install_okd_components" {
+  for_each = libvirt_domain.machine
+
+  provisioner "remote-exec" {
+    inline = [
+      "bash /home/core/install_okd_components.sh"
+    ]
+  }
+
+  connection {
+    type     = "ssh"
+    user     = "core"
+    private_key = file(var.ssh_private_key_path)
+    host     = libvirt_domain.machine[each.key].network_interface[0].addresses[0]
+  }
+
+  depends_on = [
+    null_resource.generate_certificates
+  ]
 }
 
 output "ip_addresses" {

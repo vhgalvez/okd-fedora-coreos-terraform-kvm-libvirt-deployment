@@ -27,159 +27,52 @@ storage:
       contents:
         inline: ${host_name}
 
-    - path: /home/core/install-bootstrap-components.sh
+    - path: /home/core/generate_certificates.sh
       filesystem: root
       mode: 0755
       contents:
-        inline: |
-          #!/bin/bash
-          set -euo pipefail
-          exec > /var/log/install-bootstrap-components.log 2>&1
+        source: "/path/to/scripts/generate_certificates.sh"
 
-          # Create directory for binaries
-          sudo mkdir -p /opt/bin
-
-          # Install kubelet
-          curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
-          sudo chmod +x /opt/bin/kubelet
-
-          # Install oc (OpenShift Client)
-          curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
-          tar -xzf /tmp/oc.tar.gz -C /tmp
-          sudo mv /tmp/oc /opt/bin/oc
-          sudo chmod +x /opt/bin/oc
-          sudo rm -rf /tmp/oc.tar.gz
-
-          # Download and install OKD Installer
-          wget -q https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
-          tar -xzvf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
-          sudo mv openshift-install /opt/bin/
-          sudo chmod +x /opt/bin/openshift-install
-          rm -rf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
-
-          # Install kube-apiserver
-          curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-apiserver
-          sudo mv /tmp/kube-apiserver /opt/bin/kube-apiserver
-          sudo chmod +x /opt/bin/kube-apiserver
-
-          # Install kube-scheduler
-          curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-scheduler
-          sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
-          sudo chmod +x /opt/bin/kube-scheduler
-
-          # Install CRI-O
-          sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.3.tar.gz
-          sudo mkdir -p /tmp/crio
-          sudo tar -xzf /tmp/crio.tar.gz -C /tmp/crio
-          sudo mkdir -p /opt/bin/crio
-          sudo mv /tmp/crio/cri-o/bin/* /opt/bin/crio/
-          sudo chmod +x /opt/bin/crio/*
-          /opt/bin/crio/crio --version
-
-          # Download conmon
-          wget https://github.com/containers/conmon/releases/download/v2.1.12/conmon.amd64
-          sudo mv conmon.amd64 /opt/bin/crio/conmon
-          sudo chmod +x /opt/bin/crio/conmon
-
-          # Create CRI-O configuration
-          sudo mkdir -p /etc/crio
-          cat <<EOF | sudo tee /etc/crio/crio.conf
-          [crio]
-          log_level = "debug"
-          root = "/var/lib/crio"
-          runroot = "/var/run/crio"
-          log_dir = "/var/log/crio/pods"
-          version_file = "/var/run/crio/version"
-          clean_shutdown_file = "/var/lib/crio/clean.shutdown"
-
-          [crio.api]
-          listen = "/var/run/crio/crio.sock"
-          stream_address = "127.0.0.1"
-          stream_port = "0"
-          grpc_max_send_msg_size = 83886080
-          grpc_max_recv_msg_size = 83886080
-
-          [crio.runtime]
-          default_runtime = "runc"
-          no_pivot = false
-          decryption_keys_path = "/etc/crio/keys/"
-          cgroup_manager = "systemd"
-          drop_infra_ctr = true
-          infra_ctr_cpuset = ""
-          shared_cpuset = ""
-          namespaces_dir = "/var/run"
-          enable_criu_support = true
-          pinns_path = "/opt/bin/crio/pinns"
-          conmon = "/opt/bin/crio/conmon"
-
-          [crio.runtime.runtimes.runc]
-          runtime_path = "/opt/bin/crio/crio-runc"
-          runtime_type = "oci"
-          runtime_root = "/run/runc"
-
-          [crio.image]
-          pause_image = "k8s.gcr.io/pause:3.2"
-          image_volumes = "mkdir"
-
-          [crio.network]
-          network_dir = "/etc/cni/net.d/"
-          plugin_dirs = ["/opt/cni/bin/"]
-          EOF
-
-          # Create directory for certificates
-          sudo mkdir -p /etc/kubernetes/pki
-
-          # Generate Kubelet Certificate and Key for the Bootstrap Node
-          sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/kubelet.key -pkeyopt rsa_keygen_bits:2048
-          sudo openssl req -new -key /etc/kubernetes/pki/kubelet.key -subj "/CN=kubelet-bootstrap" -out /etc/kubernetes/pki/kubelet.csr
-          sudo openssl x509 -req -in /etc/kubernetes/pki/kubelet.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/kubelet.crt -days 365
-
-          # Adjust permissions
-          sudo chmod 600 /etc/kubernetes/pki/*.key
-          sudo chmod 644 /etc/kubernetes/pki/*.crt
-          sudo chown root:root /etc/kubernetes/pki/*
-
-    - path: /etc/systemd/network/10-eth0.network
+    - path: /home/core/install_okd_components.sh
       filesystem: root
-      mode: 0644
+      mode: 0755
       contents:
-        inline: |
-          [Match]
-          Name=eth0
-
-          [Network]
-          Address=${ip}/24
-          Gateway=${gateway}
-          DNS=${dns1}
-          DNS=${dns2}
-
-    - path: /etc/tmpfiles.d/hosts.conf
-      filesystem: root
-      mode: 0644
-      contents:
-        inline: |
-          f /etc/hosts 0644 - - - -
-          127.0.0.1   localhost
-          ::1         localhost
-          ${ip}  ${host_name} ${name}
-
-    - path: /run/systemd/resolve/resolv.conf
-      filesystem: root
-      mode: 0644
-      contents:
-        inline: |
-          nameserver ${dns1}
-          nameserver ${dns2}
-
-    - path: /etc/tmpfiles.d/resolv.conf
-      filesystem: root
-      mode: 0644
-      contents:
-        inline: |
-          L /etc/resolv.conf - - - - /run/systemd/resolve/resolv.conf
+        source: "/path/to/scripts/install_okd_components.sh"
 
 systemd:
   units:
+    - name: generate-certificates.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Generate Kubernetes Certificates
+        After=network-online.target
+        Wants=network-online.target
+
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/bash /home/core/generate_certificates.sh
+        RemainAfterExit=true
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: install-okd-components.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Install OKD Components
+        After=network-online.target
+        Wants=network-online.target
+
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/bash /home/core/install_okd_components.sh
+        RemainAfterExit=true
+
+        [Install]
+        WantedBy=multi-user.target
+
     - name: crio.service
       enabled: true
       contents: |
@@ -210,54 +103,6 @@ systemd:
         Type=oneshot
         ExecStart=/bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "${ip}  ${host_name} ${name}" >> /etc/hosts'
         RemainAfterExit=true
-
-        [Install]
-        WantedBy=multi-user.target
-
-    - name: install-bootstrap-components.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Install Kubernetes components
-        After=network-online.target
-        Wants=network-online.target
-
-        [Service]
-        Type=oneshot
-        ExecStart=/bin/bash /home/core/install-bootstrap-components.sh
-        RemainAfterExit=true
-
-        [Install]
-        WantedBy=multi-user.target
-
-    - name: kubelet.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=kubelet: The Kubernetes Node Agent
-        Documentation=https://kubernetes.io/docs/
-        Wants=crio.service
-        After=crio.service
-
-        [Service]
-        ExecStart=/opt/bin/kubelet \
-          --kubeconfig=/etc/kubernetes/kubelet.conf \
-          --config=/etc/kubernetes/kubelet-config.yaml \
-          --container-runtime=remote \
-          --container-runtime-endpoint=unix:///var/run/crio/crio.sock \
-          --runtime-request-timeout=15m \
-          --image-gc-high-threshold=80 \
-          --image-gc-low-threshold=40 \
-          --enforce-node-allocatable=cpu,memory \
-          --fail-swap-on=false \
-          --cgroup-driver=systemd \
-          --network-plugin=cni \
-          --cni-bin-dir=/opt/cni/bin \
-          --cni-conf-dir=/etc/cni/net.d \
-          --pod-infra-container-image=k8s.gcr.io/pause:3.1 \
-          --v=2
-        Restart=on-failure
-        RestartSec=10
 
         [Install]
         WantedBy=multi-user.target
