@@ -26,6 +26,29 @@ storage:
       mode: 0644
       contents:
         inline: ${host_name}
+
+    # Descargar los certificados necesarios desde el servidor central
+    - path: /etc/kubernetes/pki/ca.crt
+      filesystem: root
+      mode: 0644
+      contents:
+        source: http://helper.cefaslocalserver.com/shared/ca/ca.crt
+        verification: {}
+
+    - path: /etc/kubernetes/pki/kubelet.crt
+      filesystem: root
+      mode: 0644
+      contents:
+        source: http://helper.cefaslocalserver.com/${node_name}/kubelet/kubelet.crt
+        verification: {}
+
+    - path: /etc/kubernetes/pki/kubelet.key
+      filesystem: root
+      mode: 0600
+      contents:
+        source: http://helper.cefaslocalserver.com/${node_name}/kubelet/kubelet.key
+        verification: {}
+
     - path: /home/core/install-components.sh
       filesystem: root
       mode: 0755
@@ -127,20 +150,6 @@ storage:
           [Install]
           WantedBy=multi-user.target
           EOF
-
-          # Generar Certificados para el Nodo Worker:
-          # Crear directorio para certificados
-          sudo mkdir -p /etc/kubernetes/pki
-
-          # Generar Kubelet Certificate y Key para el Nodo Worker
-          sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/kubelet.key -pkeyopt rsa_keygen_bits:2048
-          sudo openssl req -new -key /etc/kubernetes/pki/kubelet.key -subj "/CN=kubelet-${host_name}" -out /etc/kubernetes/pki/kubelet.csr
-          sudo openssl x509 -req -in /etc/kubernetes/pki/kubelet.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/kubelet.crt -days 365
-
-          # Ajustar permisos
-          sudo chmod 600 /etc/kubernetes/pki/*.key
-          sudo chmod 644 /etc/kubernetes/pki/*.crt
-          sudo chown root:root /etc/kubernetes/pki/*
 
           # Recargar systemd y activar servicios
           sudo systemctl daemon-reload
