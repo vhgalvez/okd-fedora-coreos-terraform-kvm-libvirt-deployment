@@ -1,5 +1,5 @@
 {
     "yaml.schemas": {
-        "https://raw.githubusercontent.com/loft-sh/devspace/main/devspace-schema.json": "file:///c%3A/Users/vhgal/Documents/desarrollo/IaC/cluster_openshift/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/configs/machine-bootstrap-config.yaml.tmpl"
+        "https://json.schemastore.org/yamllint.json": "file:///c%3A/Users/vhgal/Documents/desarrollo/IaC/cluster_openshift/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/configs/machine-bootstrap-config.yaml.tmpl"
     }
 }
