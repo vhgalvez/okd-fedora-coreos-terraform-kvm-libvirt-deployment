@@ -39,7 +39,7 @@ storage:
       filesystem: root
       mode: 0644
       contents:
-        inline: ${host_name}
+        inline: "${host_name}"
 
     - path: /etc/kubernetes/pki/ca.crt
       filesystem: root
@@ -118,7 +118,7 @@ files:
     filesystem: root
     mode: 0644
     contents:
-      inline: ${host_name}
+      inline: "${host_name}"
 
   - path: /etc/kubernetes/kubelet.conf
     filesystem: root
