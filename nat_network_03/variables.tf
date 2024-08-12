@@ -38,9 +38,3 @@ variable "initial_cluster" {
   description = "The initial cluster configuration"
   type        = string
 }
-
-variable "service_cidr" {
-  description = "The CIDR range for Kubernetes services"
-  type        = string
-  default     = "10.96.0.0/12"  # Example value, change as needed
-}
