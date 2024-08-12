@@ -36,7 +36,7 @@ kind: Config
 clusters:
 - cluster:
     certificate-authority: /etc/kubernetes/pki/ca.crt
-    server: https://10.17.4.21:6443
+    server: https://10.17.4.27:6443
   name: local
 contexts:
 - context:
