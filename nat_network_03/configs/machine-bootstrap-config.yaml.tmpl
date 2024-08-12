@@ -212,76 +212,76 @@ files:
         exec > /var/log/install-components.log 2>&1
 
         # Crear directorio para binarios
-        sudo mkdir -p /opt/bin
+        mkdir -p /opt/bin
 
         # Descargar e Instalar el Instalador de OKD
         wget https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
         tar -xzvf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
-        sudo mv openshift-install /opt/bin/
-        sudo chmod +x /opt/bin/openshift-install
+        mv openshift-install /opt/bin/
+        chmod +x /opt/bin/openshift-install
         rm -rf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
 
         # Instalar kube-proxy
         curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-proxy
-        sudo mv /tmp/kube-proxy /opt/bin/kube-proxy
-        sudo chmod +x /opt/bin/kube-proxy
+        mv /tmp/kube-proxy /opt/bin/kube-proxy
+        chmod +x /opt/bin/kube-proxy
 
         # Instalar etcd
         curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/v3.4.13/etcd-v3.4.13-linux-amd64.tar.gz
         tar -xzf /tmp/etcd.tar.gz -C /tmp
-        sudo mv /tmp/etcd-v3.4.13-linux-amd64/etcd /opt/bin/etcd
-        sudo chmod +x /opt/bin/etcd
-        sudo rm -rf /tmp/etcd.tar.gz /tmp/etcd-v3.4.13-linux-amd64
+        mv /tmp/etcd-v3.4.13-linux-amd64/etcd /opt/bin/etcd
+        chmod +x /opt/bin/etcd
+        rm -rf /tmp/etcd.tar.gz /tmp/etcd-v3.4.13-linux-amd64
 
         # Instalar kube-apiserver
         curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-apiserver
-        sudo mv /tmp/kube-apiserver /opt/bin/kube-apiserver
-        sudo chmod +x /opt/bin/kube-apiserver
+        mv /tmp/kube-apiserver /opt/bin/kube-apiserver
+        chmod +x /opt/bin/kube-apiserver
 
         # Instalar kube-controller-manager
         curl -L -o /tmp/kube-controller-manager https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-controller-manager
-        sudo mv /tmp/kube-controller-manager /opt/bin/kube-controller-manager
-        sudo chmod +x /opt/bin/kube-controller-manager
+        mv /tmp/kube-controller-manager /opt/bin/kube-controller-manager
+        chmod +x /opt/bin/kube-controller-manager
 
         # Instalar kube-scheduler
         curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-scheduler
-        sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
-        sudo chmod +x /opt/bin/kube-scheduler
+        mv /tmp/kube-scheduler /opt/bin/kube-scheduler
+        chmod +x /opt/bin/kube-scheduler
 
         # Instalar kubelet
         curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
-        sudo chmod +x /opt/bin/kubelet
+        chmod +x /opt/bin/kubelet
 
         # Instalar oc (OpenShift Client)
         curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
         tar -xzf /tmp/oc.tar.gz -C /tmp
-        sudo mv /tmp/oc /opt/bin/oc
-        sudo chmod +x /opt/bin/oc
-        sudo rm -rf /tmp/oc.tar.gz
+        mv /tmp/oc /opt/bin/oc
+        chmod +x /opt/bin/oc
+        rm -rf /tmp/oc.tar.gz
 
         # Instalar CRI-O
-        sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/crio.amd64.v1.30.3.tar.gz
-        sudo mkdir -p /tmp/crio
-        sudo tar -xzf /tmp/crio.tar.gz -C /tmp/crio
-        sudo mkdir -p /opt/bin/crio
-        sudo mv /tmp/crio/cri-o/bin/* /opt/bin/crio/
-        sudo chmod +x /opt/bin/crio/*
+        wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/crio.amd64.v1.30.3.tar.gz
+        mkdir -p /tmp/crio
+        tar -xzf /tmp/crio.tar.gz -C /tmp/crio
+        mkdir -p /opt/bin/crio
+        mv /tmp/crio/cri-o/bin/* /opt/bin/crio/
+        chmod +x /opt/bin/crio/*
         /opt/bin/crio/crio --version
 
         # Descargar conmon
         wget https://github.com/containers/conmon/releases/download/v2.1.12/conmon.amd64
-        sudo mv conmon.amd64 /opt/bin/crio/conmon
-        sudo chmod +x /opt/bin/crio/conmon
+        mv conmon.amd64 /opt/bin/crio/conmon
+        chmod +x /opt/bin/crio/conmon
 
         # Descargar e instalar los plugins de CNI
         curl -L -o /tmp/cni-plugins.tgz https://github.com/containernetworking/plugins/releases/download/v0.9.1/cni-plugins-linux-amd64-v0.9.1.tgz
-        sudo mkdir -p /opt/cni/bin
-        sudo tar -xzf /tmp/cni-plugins.tgz -C /opt/cni/bin
-        sudo rm -rf /tmp/cni-plugins.tgz
+        mkdir -p /opt/cni/bin
+        tar -xzf /tmp/cni-plugins.tgz -C /opt/cni/bin
+        rm -rf /tmp/cni-plugins.tgz
 
         # Crear configuración de CRI-O
-        sudo mkdir -p /etc/crio
-        cat <<EOF | sudo tee /etc/crio/crio.conf
+        mkdir -p /etc/crio
+        cat <<EOF | tee /etc/crio/crio.conf
         [crio]
         log_level = "debug"
         root = "/var/lib/crio"
@@ -325,8 +325,8 @@ files:
         EOF
 
         # Crear servicio systemd para CRI-O
-        sudo mkdir -p /etc/systemd/system/
-        cat <<EOF | sudo tee /etc/systemd/system/crio.service
+        mkdir -p /etc/systemd/system/
+        cat <<EOF | tee /etc/systemd/system/crio.service
         [Unit]
         Description=CRI-O container runtime
         After=network.target
@@ -345,7 +345,7 @@ files:
         EOF
 
         # Crear servicio systemd para kube-proxy
-        sudo tee /etc/systemd/system/kube-proxy.service > /dev/null <<EOF
+        tee /etc/systemd/system/kube-proxy.service > /dev/null <<EOF
         [Unit]
         Description=Kubernetes Kube-Proxy
         After=network.target
@@ -360,23 +360,23 @@ files:
         EOF
 
         # Recargar systemd y activar servicios
-        sudo systemctl daemon-reload
-        sudo systemctl enable kubelet
-        sudo systemctl start kubelet
-        sudo systemctl enable crio
-        sudo systemctl start crio
-        sudo systemctl enable kube-proxy
-        sudo systemctl start kube-proxy
+        systemctl daemon-reload
+        systemctl enable kubelet
+        systemctl start kubelet
+        systemctl enable crio
+        systemctl start crio
+        systemctl enable kube-proxy
+        systemctl start kube-proxy
 
         # Iniciar componentes de control plane temporalmente
-        sudo systemctl enable kube-apiserver
-        sudo systemctl start kube-apiserver
-        sudo systemctl enable kube-controller-manager
-        sudo systemctl start kube-controller-manager
-        sudo systemctl enable kube-scheduler
-        sudo systemctl start kube-scheduler
-        sudo systemctl enable etcd
-        sudo systemctl start etcd
+        systemctl enable kube-apiserver
+        systemctl start kube-apiserver
+        systemctl enable kube-controller-manager
+        systemctl start kube-controller-manager
+        systemctl enable kube-scheduler
+        systemctl start kube-scheduler
+        systemctl enable etcd
+        systemctl start etcd
 
         echo "Bootstrap node configuration complete."
 
