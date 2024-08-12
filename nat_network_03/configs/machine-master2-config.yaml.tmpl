@@ -26,91 +26,6 @@ storage:
       mode: 0644
       contents:
         inline: ${host_name}
-        
-    # Descargar certificados necesarios desde el servidor
-    - path: /etc/kubernetes/pki/ca.crt
-      filesystem: root
-      mode: 0644
-      contents:
-        source: http:/10.17.3.14/shared/ca/ca.crt
-        verification: {}
-
-    - path: /etc/kubernetes/pki/kubelet.crt
-      filesystem: root
-      mode: 0644
-      contents:
-        source: http:/10.17.3.14/${node_name}/kubelet/kubelet.crt
-        verification: {}
-
-    - path: /etc/kubernetes/pki/kubelet.key
-      filesystem: root
-      mode: 0600
-      contents:
-        source: http:/10.17.3.14/${node_name}/kubelet/kubelet.key
-        verification: {}
-
-    - path: /etc/kubernetes/pki/apiserver.crt
-      filesystem: root
-      mode: 0644
-      contents:
-        source: http:/10.17.3.14/shared/apiserver/apiserver.crt
-        verification: {}
-
-    - path: /etc/kubernetes/pki/apiserver.key
-      filesystem: root
-      mode: 0600
-      contents:
-        source: http:/10.17.3.14/shared/apiserver/apiserver.key
-        verification: {}
-
-    - path: /etc/kubernetes/pki/sa.pub
-      filesystem: root
-      mode: 0644
-      contents:
-        source: http:/10.17.3.14/shared/sa/sa.pub
-        verification: {}
-
-    - path: /etc/kubernetes/pki/sa.key
-      filesystem: root
-      mode: 0600
-      contents:
-        source: http:/10.17.3.14/shared/sa/sa.key
-        verification: {}
-
-    - path: /etc/kubernetes/pki/etcd/etcd.crt
-      filesystem: root
-      mode: 0644
-      contents:
-        source: http:/10.17.3.14/shared/etcd/etcd.crt
-        verification: {}
-
-    - path: /etc/kubernetes/pki/etcd/etcd.key
-      filesystem: root
-      mode: 0600
-      contents:
-        source: http:/10.17.3.14/shared/etcd/etcd.key
-        verification: {}
-
-    - path: /etc/kubernetes/pki/etcd/ca.crt
-      filesystem: root
-      mode: 0644
-      contents:
-        source: http:/10.17.3.14/shared/ca/ca.crt
-        verification: {}
-
-    - path: /etc/kubernetes/pki/apiserver-etcd-client.crt
-      filesystem: root
-      mode: 0644
-      contents:
-        source: http:/10.17.3.14/shared/apiserver-etcd-client/apiserver-etcd-client.crt
-        verification: {}
-
-    - path: /etc/kubernetes/pki/apiserver-etcd-client.key
-      filesystem: root
-      mode: 0600
-      contents:
-        source: http:/10.17.3.14/shared/apiserver-etcd-client/apiserver-etcd-client.key
-        verification: {}
 
     # Archivos de configuración del kubelet
     - path: /etc/kubernetes/kubelet.conf
@@ -248,13 +163,41 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
+    # Servicio para descargar certificados antes de iniciar otros componentes
+    - name: download-certificates.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Download Kubernetes Certificates
+        After=network-online.target
+        Wants=network-online.target
+
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/bash -c 'curl -o /etc/kubernetes/pki/ca.crt http://10.17.3.14/shared/ca/ca.crt && \
+                                curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/${node_name}/kubelet/kubelet.crt && \
+                                curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/${node_name}/kubelet/kubelet.key && \
+                                curl -o /etc/kubernetes/pki/apiserver.crt http://10.17.3.14/shared/apiserver/apiserver.crt && \
+                                curl -o /etc/kubernetes/pki/apiserver.key http://10.17.3.14/shared/apiserver/apiserver.key && \
+                                curl -o /etc/kubernetes/pki/sa.pub http://10.17.3.14/shared/sa/sa.pub && \
+                                curl -o /etc/kubernetes/pki/sa.key http://10.17.3.14/shared/sa/sa.key && \
+                                curl -o /etc/kubernetes/pki/etcd/etcd.crt http://10.17.3.14/shared/etcd/etcd.crt && \
+                                curl -o /etc/kubernetes/pki/etcd/etcd.key http://10.17.3.14/shared/etcd/etcd.key && \
+                                curl -o /etc/kubernetes/pki/etcd/ca.crt http://10.17.3.14/shared/ca/ca.crt && \
+                                curl -o /etc/kubernetes/pki/apiserver-etcd-client.crt http://10.17.3.14/shared/apiserver-etcd-client/apiserver-etcd-client.crt && \
+                                curl -o /etc/kubernetes/pki/apiserver-etcd-client.key http://10.17.3.14/shared/apiserver-etcd-client/apiserver-etcd-client.key'
+        RemainAfterExit=true
+
+        [Install]
+        WantedBy=multi-user.target
+
     - name: install-components.service
       enabled: true
       contents: |
         [Unit]
         Description=Install Kubernetes components
-        After=network-online.target
-        Wants=network-online.target
+        After=download-certificates.service
+        Wants=download-certificates.service
 
         [Service]
         Type=oneshot
@@ -269,7 +212,8 @@ systemd:
       contents: |
         [Unit]
         Description=Kubernetes API Server
-        After=network.target
+        After=install-components.service
+        Wants=install-components.service
 
         [Service]
         ExecStart=/opt/bin/kube-apiserver \
@@ -302,7 +246,8 @@ systemd:
       contents: |
         [Unit]
         Description=Kubernetes Controller Manager
-        After=network.target
+        After=kube-apiserver.service
+        Wants=kube-apiserver.service
 
         [Service]
         ExecStart=/opt/bin/kube-controller-manager \
@@ -331,7 +276,8 @@ systemd:
       contents: |
         [Unit]
         Description=Kubernetes Scheduler
-        After=network.target
+        After=kube-controller-manager.service
+        Wants=kube-controller-manager.service
 
         [Service]
         ExecStart=/opt/bin/kube-scheduler --address=127.0.0.1 --kubeconfig=/etc/kubernetes/scheduler.conf --leader-elect=true --v=2
