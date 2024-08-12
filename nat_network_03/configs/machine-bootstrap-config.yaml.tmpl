@@ -163,6 +163,7 @@ systemd:
         After=network.target
 
         [Service]
+        ExecStartPre=/bin/sleep 10
         ExecStart=/opt/bin/kube-apiserver --config=/etc/kubernetes/manifests/kube-apiserver.yaml
         Restart=always
         RestartSec=10
@@ -178,6 +179,7 @@ systemd:
         After=network.target
 
         [Service]
+        ExecStartPre=/bin/sleep 10
         ExecStart=/opt/bin/kube-controller-manager --config=/etc/kubernetes/manifests/kube-controller-manager.yaml
         Restart=always
         RestartSec=10
@@ -193,6 +195,7 @@ systemd:
         After=network.target
 
         [Service]
+        ExecStartPre=/bin/sleep 10
         ExecStart=/opt/bin/kube-scheduler --config=/etc/kubernetes/manifests/kube-scheduler.yaml
         Restart=always
         RestartSec=10
