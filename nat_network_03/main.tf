@@ -58,6 +58,7 @@ data "template_file" "vm-configs" {
     gateway         = var.gateway
     dns1            = var.dns1
     dns2            = var.dns2
+    service_cidr = var.service_cidr
     initial_cluster = var.initial_cluster
   }
 }
