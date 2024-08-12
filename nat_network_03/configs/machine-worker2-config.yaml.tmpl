@@ -134,6 +134,17 @@ storage:
           # Crear directorio para binarios
           sudo mkdir -p /opt/bin
 
+          # Instalar kube-proxy
+          curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-proxy
+          sudo mv /tmp/kube-proxy /opt/bin/kube-proxy
+          sudo chmod +x /opt/bin/kube-proxy
+
+          # Descargar e instalar los plugins de CNI
+          curl -L -o /tmp/cni-plugins.tgz https://github.com/containernetworking/plugins/releases/download/v0.9.1/cni-plugins-linux-amd64-v0.9.1.tgz
+          sudo mkdir -p /opt/cni/bin
+          sudo tar -xzf /tmp/cni-plugins.tgz -C /opt/cni/bin
+          sudo rm -rf /tmp/cni-plugins.tgz
+
           # Instalar kubelet
           curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
@@ -224,12 +235,31 @@ storage:
           WantedBy=multi-user.target
           EOF
 
+
+          # Crear servicio kube-proxy
+          sudo tee /etc/systemd/system/kube-proxy.service > /dev/null <<EOF
+          [Unit]
+          Description=Kubernetes Kube-Proxy
+          After=network.target
+
+          [Service]
+          ExecStart=/opt/bin/kube-proxy --config=/etc/kubernetes/kube-proxy-config.yaml
+          Restart=always
+          RestartSec=5
+
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+
+
           # Recargar systemd y activar servicios
           sudo systemctl daemon-reload
           sudo systemctl enable kubelet
           sudo systemctl start kubelet
           sudo systemctl enable crio
           sudo systemctl start crio
+          sudo systemctl enable kube-proxy
+          sudo systemctl start kube-proxy
 
 systemd:
   units:
