@@ -113,94 +113,44 @@ storage:
       contents:
         inline: ""
 
-files:
-  - path: /etc/hostname
-    filesystem: root
-    mode: 0644
-    contents:
-      inline: ${host_name}
+    - path: /etc/systemd/network/10-eth0.network
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          [Match]
+          Name=eth0
 
-  - path: /etc/kubernetes/kubelet.conf
-    filesystem: root
-    mode: 0644
-    contents:
-      inline: |
-        apiVersion: v1
-        kind: Config
-        clusters:
-        - cluster:
-            certificate-authority: /etc/kubernetes/pki/ca.crt
-            server: https://${ip}:6443
-          name: local
-        contexts:
-        - context:
-            cluster: local
-            user: kubelet
-          name: local
-        current-context: local
-        users:
-        - name: kubelet
-          user:
-            client-certificate: /etc/kubernetes/pki/kubelet.crt
-            client-key: /etc/kubernetes/pki/kubelet.key
+          [Network]
+          Address=${ip}/24
+          Gateway=${gateway}
+          DNS=${dns1}
+          DNS=${dns2}
 
-  - path: /etc/kubernetes/kubelet-config.yaml
-    filesystem: root
-    mode: 0644
-    contents:
-      inline: |
-        kind: KubeletConfiguration
-        apiVersion: kubelet.config.k8s.io/v1beta1
-        authentication:
-          x509:
-            clientCAFile: "/etc/kubernetes/pki/ca.crt"
-        authorization:
-          mode: Webhook
-        serverTLSBootstrap: true
-        tlsCertFile: "/etc/kubernetes/pki/kubelet.crt"
-        tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet.key"
-        cgroupDriver: systemd
-        runtimeRequestTimeout: "15m"
-        containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
+    - path: /etc/tmpfiles.d/hosts.conf
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          f /etc/hosts 0644 - - - -
+          127.0.0.1   localhost
+          ::1         localhost
+          ${ip}  ${host_name} ${node_name}
 
-  - path: /etc/systemd/network/10-eth0.network
-    filesystem: root
-    mode: 0644
-    contents:
-      inline: |
-        [Match]
-        Name=eth0
+    - path: /run/systemd/resolve/resolv.conf
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          nameserver ${dns1}
+          nameserver ${dns2}
 
-        [Network]
-        Address=${ip}/24
-        Gateway=${gateway}
-        DNS=${dns1}
-        DNS=${dns2}
-
-  - path: /etc/tmpfiles.d/hosts.conf
-    filesystem: root
-    mode: 0644
-    contents:
-      inline: |
-        f /etc/hosts 0644 - - - -
-        127.0.0.1   localhost
-        ::1         localhost
-        ${ip}  ${host_name} ${node_name}
-
-  - path: /run/systemd/resolve/resolv.conf
-    filesystem: root
-    mode: 0644
-    contents:
-      inline: |
-        nameserver ${dns1}
-        nameserver ${dns2}
-
-  - path: /etc/tmpfiles.d/resolv.conf
-    filesystem: root
-    mode: 0644
-    contents:
-      inline: |
-        L /etc/resolv.conf - - - - /run/systemd/resolve/resolv.conf
+    - path: /etc/tmpfiles.d/resolv.conf
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          L /etc/resolv.conf - - - - /run/systemd/resolve/resolv.conf
 
   - path: /home/core/install-components.sh
     filesystem: root
