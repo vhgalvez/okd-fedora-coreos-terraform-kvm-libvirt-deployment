@@ -168,37 +168,55 @@ storage:
           sudo mkdir -p /opt/bin
 
           # Instalar etcd
-          wget https://github.com/etcd-io/etcd/releases/download/v3.4.13/etcd-v3.4.13-linux-amd64.tar.gz
-          tar -xzf etcd-v3.4.13-linux-amd64.tar.gz -C /opt/bin
+          wget https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
+          tar -xzvf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
+          sudo mv openshift-install /opt/bin/
+          sudo chmod +x /opt/bin/openshift-install
+          sudo rm -rf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
+
+          # Instalar etcd
+          curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/v3.4.13/etcd-v3.4.13-linux-amd64.tar.gz
+          tar -xzf /tmp/etcd.tar.gz -C /tmp
+          sudo mv /tmp/etcd-v3.4.13-linux-amd64/etcd /opt/bin/etcd
           sudo chmod +x /opt/bin/etcd
-          sudo rm -rf etcd-v3.4.13-linux-amd64.tar.gz
+          sudo rm -rf /tmp/etcd.tar.gz /tmp/etcd-v3.4.13-linux-amd64
 
           # Instalar kube-apiserver
-          curl -L -o /opt/bin/kube-apiserver https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-apiserver
+          curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-apiserver
+          sudo mv /tmp/kube-apiserver /opt/bin/kube-apiserver
           sudo chmod +x /opt/bin/kube-apiserver
 
           # Instalar kube-controller-manager
-          curl -L -o /opt/bin/kube-controller-manager https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-controller-manager
+          curl -L -o /tmp/kube-controller-manager https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-controller-manager
+          sudo mv /tmp/kube-controller-manager /opt/bin/kube-controller-manager
           sudo chmod +x /opt/bin/kube-controller-manager
 
           # Instalar kube-scheduler
-          curl -L -o /opt/bin/kube-scheduler https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-scheduler
+          curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-scheduler
+          sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
           sudo chmod +x /opt/bin/kube-scheduler
+
+
 
           # Instalar kubelet
           curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
 
           # Instalar oc (OpenShift Client)
-          curl -L -o /opt/bin/oc https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
-          tar -xzf oc.tar.gz -C /opt/bin
+          curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
+          tar -xzf /tmp/oc.tar.gz -C /tmp
+          sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
-          sudo rm -rf oc.tar.gz
+          sudo rm -rf /tmp/oc.tar.gz
 
           # Instalar CRI-O
-          curl -L -o /opt/bin/crio https://storage.googleapis.com/cri-o/artifacts/crio.amd64.v1.30.3.tar.gz
-          tar -xzf crio.amd64.v1.30.3.tar.gz -C /opt/bin
-          sudo chmod +x /opt/bin/crio
+          sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.3.tar.gz
+          sudo mkdir -p /tmp/crio
+          sudo tar -xzf /tmp/crio.tar.gz -C /tmp/crio
+          sudo mkdir -p /opt/bin/crio
+          sudo mv /tmp/crio/cri-o/bin/* /opt/bin/crio/
+          sudo chmod +x /opt/bin/crio/*
+          /opt/bin/crio/crio --version
 
           # Descargar conmon
           wget https://github.com/containers/conmon/releases/download/v2.1.12/conmon.amd64
@@ -246,11 +264,6 @@ storage:
           image_volumes = "mkdir"
 
           [crio.network]
-          networkIt seems like the content got cut off. I’ll complete the `machine-bootstrap-config.yaml.tmpl` and review the associated shell script.
-
-### `machine-bootstrap-config.yaml.tmpl` (continued)
-
-```yaml
           network_dir = "/etc/cni/net.d/"
           plugin_dirs = ["/opt/cni/bin/"]
           EOF
