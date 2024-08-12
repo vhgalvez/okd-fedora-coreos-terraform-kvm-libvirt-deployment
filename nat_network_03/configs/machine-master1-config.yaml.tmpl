@@ -179,7 +179,7 @@ storage:
           f /etc/hosts 0644 - - - -
           127.0.0.1   localhost
           ::1         localhost
-          ${ip}  ${host_name} ${name}
+          ${ip}  ${host_name} ${node_name}
 
     - path: /run/systemd/resolve/resolv.conf
       filesystem: root
@@ -242,7 +242,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "${ip}  ${host_name} ${name}" >> /etc/hosts'
+        ExecStart=/bin/bash -c 'echo "127.0.0.1   localhost" > /etc/hosts; echo "::1         localhost" >> /etc/hosts; echo "${ip}  ${host_name} ${node_name}" >> /etc/hosts'
         RemainAfterExit=true
 
         [Install]

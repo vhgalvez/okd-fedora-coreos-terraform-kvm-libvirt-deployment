@@ -201,6 +201,23 @@ systemd:
   units:
     - name: crio.service
       enabled: true
+      contents: |
+        [Unit]
+        Description=CRI-O container runtime
+        After=network.target
+
+        [Service]
+        Type=notify
+        ExecStart=/opt/bin/crio/crio
+        Environment="PATH=/opt/bin/crio:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        Restart=always
+        RestartSec=5
+        LimitNOFILE=65536
+        LimitNPROC=4096
+
+        [Install]
+        WantedBy=multi-user.target
+
     - name: apply-network-routes.service
       enabled: true
       contents: |
