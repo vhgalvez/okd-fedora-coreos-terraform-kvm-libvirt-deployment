@@ -134,6 +134,24 @@ storage:
           # Crear directorio para binarios
           sudo mkdir -p /opt/bin
 
+          # Instalar etcd
+          curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/v3.4.13/etcd-v3.4.13-linux-amd64.tar.gz
+          tar -xzf /tmp/etcd.tar.gz -C /tmp
+          sudo mv /tmp/etcd-v3.4.13-linux-amd64/etcd /opt/bin/etcd
+          sudo chmod +x /opt/bin/etcd
+          sudo rm -rf /tmp/etcd.tar.gz /tmp/etcd-v3.4.13-linux-amd64
+
+          # Descargar e instalar los plugins de CNI
+          curl -L -o /tmp/cni-plugins.tgz https://github.com/containernetworking/plugins/releases/download/v0.9.1/cni-plugins-linux-amd64-v0.9.1.tgz
+          sudo mkdir -p /opt/cni/bin
+          sudo tar -xzf /tmp/cni-plugins.tgz -C /opt/cni/bin
+          sudo rm -rf /tmp/cni-plugins.tgz
+
+          # Instalar kube-proxy
+          curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-proxy
+          sudo mv /tmp/kube-proxy /opt/bin/kube-proxy
+          sudo chmod +x /opt/bin/kube-proxy
+
           # Instalar kube-proxy
           curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-proxy
           sudo mv /tmp/kube-proxy /opt/bin/kube-proxy
@@ -169,6 +187,21 @@ storage:
           wget https://github.com/containers/conmon/releases/download/v2.1.12/conmon.amd64
           sudo mv conmon.amd64 /opt/bin/crio/conmon
           sudo chmod +x /opt/bin/crio/conmon
+
+          # Crear servicio systemd para kube-proxy
+          sudo tee /etc/systemd/system/kube-proxy.service > /dev/null <<EOF
+          [Unit]
+          Description=Kubernetes Kube-Proxy
+          After=network.target
+
+          [Service]
+          ExecStart=/opt/bin/kube-proxy --config=/etc/kubernetes/kube-proxy-config.yaml
+          Restart=always
+          RestartSec=5
+
+          [Install]
+          WantedBy=multi-user.target
+          EOF
 
           # Crear configuración de CRI-O
           sudo mkdir -p /etc/crio
@@ -251,6 +284,28 @@ storage:
           WantedBy=multi-user.target
           EOF
 
+          sudo tee /etc/systemd/system/etcd.service > /dev/null <<EOF
+          [Unit]
+          Description=etcd key-value store
+          Documentation=https://github.com/coreos/etcd
+          After=network.target
+
+          [Service]
+          ExecStart=/opt/bin/etcd \
+            --name ${node_name} \
+            --data-dir /var/lib/etcd \
+            --listen-client-urls https://${ip}:2379 \
+            --advertise-client-urls https://${ip}:2379 \
+            --initial-cluster ${initial_cluster} \
+            --initial-cluster-state new \
+            --initial-advertise-peer-urls https://${ip}:2380
+          Restart=always
+          RestartSec=10
+
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+
 
           # Recargar systemd y activar servicios
           sudo systemctl daemon-reload
@@ -260,6 +315,9 @@ storage:
           sudo systemctl start crio
           sudo systemctl enable kube-proxy
           sudo systemctl start kube-proxy
+          sudo systemctl enable etcd
+          sudo systemctl start etcd
+          
 
 systemd:
   units:

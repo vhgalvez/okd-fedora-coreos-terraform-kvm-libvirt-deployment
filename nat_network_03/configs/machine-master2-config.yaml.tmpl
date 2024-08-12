@@ -132,6 +132,33 @@ storage:
           # Crear directorio para binarios
           sudo mkdir -p /opt/bin
 
+          # Instalar kube-proxy
+          curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-proxy
+          sudo mv /tmp/kube-proxy /opt/bin/kube-proxy
+          sudo chmod +x /opt/bin/kube-proxy
+
+          # Instalar etcd
+          curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/v3.4.13/etcd-v3.4.13-linux-amd64.tar.gz
+          tar -xzf /tmp/etcd.tar.gz -C /tmp
+          sudo mv /tmp/etcd-v3.4.13-linux-amd64/etcd /opt/bin/etcd
+          sudo chmod +x /opt/bin/etcd
+          sudo rm -rf /tmp/etcd.tar.gz /tmp/etcd-v3.4.13-linux-amd64
+
+          # Instalar kube-apiserver
+          curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-apiserver
+          sudo mv /tmp/kube-apiserver /opt/bin/kube-apiserver
+          sudo chmod +x /opt/bin/kube-apiserver
+
+          # Instalar kube-controller-manager
+          curl -L -o /tmp/kube-controller-manager https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-controller-manager
+          sudo mv /tmp/kube-controller-manager /opt/bin/kube-controller-manager
+          sudo chmod +x /opt/bin/kube-controller-manager
+
+          # Instalar kube-scheduler
+          curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-scheduler
+          sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
+          sudo chmod +x /opt/bin/kube-scheduler
+
           # Instalar kubelet
           curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
@@ -156,6 +183,12 @@ storage:
           wget https://github.com/containers/conmon/releases/download/v2.1.12/conmon.amd64
           sudo mv conmon.amd64 /opt/bin/crio/conmon
           sudo chmod +x /opt/bin/crio/conmon
+
+          # Descargar e instalar los plugins de CNI
+          curl -L -o /tmp/cni-plugins.tgz https://github.com/containernetworking/plugins/releases/download/v0.9.1/cni-plugins-linux-amd64-v0.9.1.tgz
+          sudo mkdir -p /opt/cni/bin
+          sudo tar -xzf /tmp/cni-plugins.tgz -C /opt/cni/bin
+          sudo rm -rf /tmp/cni-plugins.tgz
 
           # Crear configuración de CRI-O
           sudo mkdir -p /etc/crio
@@ -222,12 +255,29 @@ storage:
           WantedBy=multi-user.target
           EOF
 
+          # Crear servicio systemd para kube-proxy
+          sudo tee /etc/systemd/system/kube-proxy.service > /dev/null <<EOF
+          [Unit]
+          Description=Kubernetes Kube-Proxy
+          After=network.target
+
+          [Service]
+          ExecStart=/opt/bin/kube-proxy --config=/etc/kubernetes/kube-proxy-config.yaml
+          Restart=always
+          RestartSec=5
+
+          [Install]
+          WantedBy=multi-user.target
+          EOF
+
           # Recargar systemd y activar servicios
           sudo systemctl daemon-reload
           sudo systemctl enable kubelet
           sudo systemctl start kubelet
           sudo systemctl enable crio
           sudo systemctl start crio
+          sudo systemctl enable kube-proxy
+          sudo systemctl start kube-proxy
 
 systemd:
   units:
