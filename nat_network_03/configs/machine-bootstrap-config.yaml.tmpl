@@ -181,7 +181,7 @@ storage:
               client-certificate: /etc/kubernetes/pki/scheduler.crt
               client-key: /etc/kubernetes/pki/scheduler.key
 
-        - path: /etc/kubernetes/manifests/kube-apiserver.yaml
+    - path: /etc/kubernetes/manifests/kube-apiserver.yaml
       filesystem: root
       mode: 0644
       contents:
@@ -210,7 +210,7 @@ storage:
               - --kubelet-client-certificate=/etc/kubernetes/pki/apiserver.crt
               - --kubelet-client-key=/etc/kubernetes/pki/apiserver.key
               - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
-              - --service-cluster-ip-range=10.96.0.0/12
+              - --service-cluster-ip-range=<Your-Service-CIDR>
               - --tls-cert-file=/etc/kubernetes/pki/apiserver.crt
               - --tls-private-key-file=/etc/kubernetes/pki/apiserver.key
               volumeMounts:
@@ -222,7 +222,39 @@ storage:
               hostPath:
                 path: /etc/kubernetes/pki
 
-                
+    - path: /etc/kubernetes/manifests/kube-controller-manager.yaml
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: kube-controller-manager
+            namespace: kube-system
+          spec:
+            containers:
+            - name: kube-controller-manager
+              image: k8s.gcr.io/kube-controller-manager:v1.21.0
+              command:
+              - kube-controller-manager
+              - --bind-address=127.0.0.1
+              - --cluster-cidr=<Your-Pod-CIDR>
+              - --cluster-signing-cert-file=/etc/kubernetes/pki/ca.crt
+              - --cluster-signing-key-file=/etc/kubernetes/pki/ca.key
+              - --kubeconfig=/etc/kubernetes/controller-manager.conf
+              - --leader-elect=true
+              - --root-ca-file=/etc/kubernetes/pki/ca.crt
+              - --service-account-private-key-file=/etc/kubernetes/pki/sa.key
+              - --use-service-account-credentials=true
+              volumeMounts:
+              - mountPath: /etc/kubernetes/pki
+                name: pki
+                readOnly: true
+            volumes:
+            - name: pki
+              hostPath:
+                path: /etc/kubernetes/pki
     - path: /etc/kubernetes/manifests/kube-scheduler.yaml
       filesystem: root
       mode: 0644
@@ -293,40 +325,6 @@ storage:
             - name: etcd-data
               hostPath:
                 path: /var/lib/etcd
-
-    - path: /etc/systemd/system/etcd.service
-      filesystem: root
-      mode: 0644
-      contents:
-        inline: |
-          [Unit]
-          Description=etcd - Highly-available key value store
-          Documentation=https://etcd.io/docs/
-          After=network.target
-
-          [Service]
-          ExecStart=/opt/bin/etcd \\
-            --name etcd0 \\
-            --cert-file=/etc/kubernetes/pki/etcd/etcd.crt \\
-            --key-file=/etc/kubernetes/pki/etcd/etcd.key \\
-            --peer-cert-file=/etc/kubernetes/pki/etcd/etcd.crt \\
-            --peer-key-file=/etc/kubernetes/pki/etcd/etcd.key \\
-            --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt \\
-            --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt \\
-            --initial-advertise-peer-urls=https://127.0.0.1:2380 \\
-            --listen-peer-urls=https://127.0.0.1:2380 \\
-            --listen-client-urls=https://127.0.0.1:2379 \\
-            --advertise-client-urls=https://127.0.0.1:2379 \\
-            --data-dir=/var/lib/etcd \\
-            --initial-cluster=etcd0=https://127.0.0.1:2380 \\
-            --initial-cluster-token etcd-cluster-1 \\
-            --initial-cluster-state new
-          Restart=always
-          RestartSec=5
-          LimitNOFILE=40000
-
-          [Install]
-          WantedBy=multi-user.target
 
 systemd:
   units:
@@ -417,77 +415,3 @@ systemd:
 
         [Service]
         ExecStartPre=/bin/sleep 10
-        ExecStart=/opt/bin/kube-apiserver --config=/etc/kubernetes/manifests/kube-apiserver.yaml
-        Restart=always
-        RestartSec=10
-
-        [Install]
-        WantedBy=multi-user.target
-
-    - name: kube-controller-manager.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Kubernetes Controller Manager
-        After=kube-apiserver.service
-        Wants=kube-apiserver.service
-
-        [Service]
-        ExecStartPreHere’s the completion of the `kube-controller-manager.service` unit and the overall `machine-bootstrap-config.yaml.tmpl` template:
-
-```yaml
-        ExecStartPre=/bin/sleep 10
-        ExecStart=/opt/bin/kube-controller-manager --config=/etc/kubernetes/manifests/kube-controller-manager.yaml
-        Restart=always
-        RestartSec=10
-
-        [Install]
-        WantedBy=multi-user.target
-
-    - name: kube-scheduler.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Kubernetes Scheduler
-        After=kube-controller-manager.service
-        Wants=kube-controller-manager.service
-
-        [Service]
-        ExecStartPre=/bin/sleep 10
-        ExecStart=/opt/bin/kube-scheduler --config=/etc/kubernetes/manifests/kube-scheduler.yaml
-        Restart=always
-        RestartSec=10
-
-        [Install]
-        WantedBy=multi-user.target
-
-    - name: kubelet.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=kubelet: The Kubernetes Node Agent
-        Documentation=https://kubernetes.io/docs/
-        Wants=crio.service
-        After=crio.service
-
-        [Service]
-        ExecStart=/opt/bin/kubelet \
-          --kubeconfig=/etc/kubernetes/kubelet.conf \
-          --config=/etc/kubernetes/kubelet-config.yaml \
-          --container-runtime=remote \
-          --container-runtime-endpoint=unix:///var/run/crio/crio.sock \
-          --runtime-request-timeout=15m \
-          --image-gc-high-threshold=80 \
-          --image-gc-low-threshold=40 \
-          --enforce-node-allocatable=cpu,memory \
-          --fail-swap-on=false \
-          --cgroup-driver=systemd \
-          --network-plugin=cni \
-          --cni-bin-dir=/opt/cni/bin \
-          --cni-conf-dir=/etc/cni/net.d \
-          --pod-infra-container-image=k8s.gcr.io/pause:3.1 \
-          --v=2
-        Restart=on-failure
-
-        [Install]
-        WantedBy=multi-user.target
