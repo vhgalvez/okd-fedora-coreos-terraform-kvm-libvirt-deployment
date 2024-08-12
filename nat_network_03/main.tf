@@ -58,7 +58,7 @@ data "template_file" "vm-configs" {
     gateway   = var.gateway
     dns1      = var.dns1
     dns2      = var.dns2
-  }
+    initial_cluster = var.initial_cluster
 }
 
 data "ct_config" "vm-ignitions" {
