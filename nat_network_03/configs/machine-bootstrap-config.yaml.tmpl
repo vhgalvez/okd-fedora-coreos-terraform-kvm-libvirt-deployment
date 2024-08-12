@@ -455,6 +455,7 @@ systemd:
         Type=oneshot
         ExecStart=/bin/bash /home/core/install-components.sh
         RemainAfterExit=true
+        StandardOutput=journal+console
 
         [Install]
         WantedBy=multi-user.target
