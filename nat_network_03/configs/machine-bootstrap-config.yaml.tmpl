@@ -181,7 +181,7 @@ storage:
               client-certificate: /etc/kubernetes/pki/scheduler.crt
               client-key: /etc/kubernetes/pki/scheduler.key
 
-    - path: /etc/kubernetes/manifests/kube-apiserver.yaml
+        - path: /etc/kubernetes/manifests/kube-apiserver.yaml
       filesystem: root
       mode: 0644
       contents:
@@ -210,7 +210,7 @@ storage:
               - --kubelet-client-certificate=/etc/kubernetes/pki/apiserver.crt
               - --kubelet-client-key=/etc/kubernetes/pki/apiserver.key
               - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
-              - --service-cluster-ip-range=${service_cidr}
+              - --service-cluster-ip-range=10.96.0.0/12
               - --tls-cert-file=/etc/kubernetes/pki/apiserver.crt
               - --tls-private-key-file=/etc/kubernetes/pki/apiserver.key
               volumeMounts:
@@ -221,6 +221,7 @@ storage:
             - name: pki
               hostPath:
                 path: /etc/kubernetes/pki
+
                 
     - path: /etc/kubernetes/manifests/kube-scheduler.yaml
       filesystem: root
