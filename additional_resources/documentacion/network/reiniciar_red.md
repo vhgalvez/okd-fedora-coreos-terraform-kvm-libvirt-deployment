@@ -25,6 +25,9 @@ sudo systemctl restart NetworkManager
 
 Este comando reinicia el servicio `NetworkManager`, que es responsable de gestionar todas las conexiones de red en el sistema. Reiniciarlo puede ayudar a resolver problemas de conectividad de red o aplicar cambios en la configuración de red.
 
+
+```bash
 sudo systemctl enable firewalld
 sudo systemctl start firewalld
 sudo firewall-cmd --reload
+```
