@@ -214,13 +214,6 @@ files:
         # Crear directorio para binarios
         mkdir -p /opt/bin
 
-        # Descargar e instalar el instalador de OKD
-        wget https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
-        tar -xzvf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
-        mv openshift-install /opt/bin/
-        chmod +x /opt/bin/openshift-install
-        rm -rf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
-
         # Instalar kube-proxy
         curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-proxy
         mv /tmp/kube-proxy /opt/bin/kube-proxy
