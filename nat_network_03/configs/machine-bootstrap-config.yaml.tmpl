@@ -1,4 +1,4 @@
-variant: flatcar
+¡variant: flatcar
 version: 1.1.0
 
 ignition:
@@ -28,6 +28,9 @@ storage:
       filesystem: root
       mode: 0755
     - path: /etc/cni/net.d
+      filesystem: root
+      mode: 0755
+    - path: /opt/bin/crio
       filesystem: root
       mode: 0755
 
@@ -130,8 +133,10 @@ storage:
           exec > /var/log/install-components.log 2>&1
 
           # Crear directorios necesarios
-          sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin
-
+          sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin 
+          sudo mkdir -p /opt/bin/crio
+          
+          
           # Descargar e Instalar el Instalador de OKD
           wget https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
           tar -xzvf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
@@ -230,6 +235,41 @@ systemd:
         Type=notify
         ExecStart=/opt/bin/crio/crio
         Environment="PATH=/opt/bin/crio:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        Restart=always
+        RestartSec=5
+        LimitNOFILE=65536
+        LimitNPROC=4096
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: etcd.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=etcd key-value store
+        Documentation=https://github.com/coreos/etcd
+        After=network.target
+
+        [Service]
+        ExecStart=/opt/bin/etcd \
+          --name ${node_name} \
+          --data-dir /var/lib/etcd \
+          --listen-client-urls https://127.0.0.1:2379 \
+          --advertise-client-urls https://127.0.0.1:2379 \
+          --listen-peer-urls https://127.0.0.1:2380 \
+          --initial-advertise-peer-urls https://127.0.0.1:2380 \
+          --client-cert-auth \
+          --trusted-ca-file=/etc/kubernetes/pki/ca.crt \
+          --cert-file=/etc/kubernetes/pki/etcd/etcd.crt \
+          --key-file=/etc/kubernetes/pki/etcd/etcd.key \
+          --peer-cert-auth \
+          --peer-trusted-ca-file=/etc/kubernetes/pki/ca.crt \
+          --peer-cert-file=/etc/kubernetes/pki/etcd/etcd.crt \
+          --peer-key-file=/etc/kubernetes/pki/etcd/etcd.key \
+          --initial-cluster ${node_name}=https://127.0.0.1:2380 \
+          --initial-cluster-state new \
+          --initial-cluster-token etcd-cluster-1
         Restart=always
         RestartSec=5
         LimitNOFILE=65536
