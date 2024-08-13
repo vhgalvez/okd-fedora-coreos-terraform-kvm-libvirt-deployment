@@ -133,7 +133,6 @@ storage:
           sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin 
           sudo mkdir -p /opt/bin/crio
           
-          
           # Descargar e Instalar el Instalador de OKD
           wget https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
           tar -xzvf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
@@ -184,7 +183,7 @@ storage:
           sudo mkdir -p /tmp/crio
           sudo tar -xzf /tmp/crio.tar.gz -C /tmp/crio
           sudo mkdir -p /opt/bin/crio
-          sudo mv /tmp/crio/cri-o/bin/* /opt/bin/crio/
+          sudo mv /tmp/crio/cri-o.amd64/* /opt/bin/crio/
           sudo chmod +x /opt/bin/crio/*
           /opt/bin/crio/crio --version
 
