@@ -129,9 +129,8 @@ storage:
           set -euo pipefail
           exec > /var/log/install-components.log 2>&1
 
-          # Crear directorio para binarios
-          sudo mkdir -p /opt/bin
-
+          # Crear directorios necesarios
+          sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin
 
           # Descargar e Instalar el Instalador de OKD
           wget https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
@@ -139,7 +138,6 @@ storage:
           sudo mv openshift-install /opt/bin/
           sudo chmod +x /opt/bin/openshift-install
           rm -rf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
-          
 
           # Instalar kube-proxy
           curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-proxy
@@ -180,7 +178,7 @@ storage:
           sudo rm -rf /tmp/oc.tar.gz
 
           # Instalar CRI-O
-          sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.3.tar.gz
+          sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/crio.amd64.v1.30.3.tar.gz
           sudo mkdir -p /tmp/crio
           sudo tar -xzf /tmp/crio.tar.gz -C /tmp/crio
           sudo mkdir -p /opt/bin/crio
@@ -199,103 +197,25 @@ storage:
           sudo tar -xzf /tmp/cni-plugins.tgz -C /opt/cni/bin
           sudo rm -rf /tmp/cni-plugins.tgz
 
-          # Crear configuración de CRI-O
-          sudo mkdir -p /etc/crio
-          cat <<EOF | sudo tee /etc/crio/crio.conf
-          [crio]
-          log_level = "debug"
-          root = "/var/lib/crio"
-          runroot = "/var/run/crio"
-          log_dir = "/var/log/crio/pods"
-          version_file = "/var/run/crio/version"
-          clean_shutdown_file = "/var/lib/crio/clean.shutdown"
-
-          [crio.api]
-          listen = "/var/run/crio/crio.sock"
-          stream_address = "127.0.0.1"
-          stream_port = "0"
-          grpc_max_send_msg_size = 83886080
-          grpc_max_recv_msg_size = 83886080
-
-          [crio.runtime]
-          default_runtime = "runc"
-          no_pivot = false
-          decryption_keys_path = "/etc/crio/keys/"
-          cgroup_manager = "systemd"
-          drop_infra_ctr = true
-          infra_ctr_cpuset = ""
-          shared_cpuset = ""
-          namespaces_dir = "/var/run"
-          enable_criu_support = true
-          pinns_path = "/opt/bin/crio/pinns"
-          conmon = "/opt/bin/crio/conmon"
-
-          [crio.runtime.runtimes.runc]
-          runtime_path = "/opt/bin/crio/crio-runc"
-          runtime_type = "oci"
-          runtime_root = "/run/runc"
-
-          [crio.image]
-          pause_image = "k8s.gcr.io/pause:3.2"
-          image_volumes = "mkdir"
-
-          [crio.network]
-          network_dir = "/etc/cni/net.d/"
-          plugin_dirs = ["/opt/cni/bin/"]
-          EOF
-
-          # Crear servicio systemd para CRI-O
-          sudo mkdir -p /etc/systemd/system/
-          cat <<EOF | sudo tee /etc/systemd/system/crio.service
-          [Unit]
-          Description=CRI-O container runtime
-          After=network.target
-
-          [Service]
-          Type=notify
-          ExecStart=/opt/bin/crio/crio
-          Environment="PATH=/opt/bin/crio:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-          Restart=always
-          RestartSec=5
-          LimitNOFILE=65536
-          LimitNPROC=4096
-
-          [Install]
-          WantedBy=multi-user.target
-          EOF
-
-          # Crear servicio systemd para kube-proxy
-          sudo tee /etc/systemd/system/kube-proxy.service > /dev/null <<EOF
-          [Unit]
-          Description=Kubernetes Kube-Proxy
-          After=network.target
-
-          [Service]
-          ExecStart=/opt/bin/kube-proxy --config=/etc/kubernetes/kube-proxy-config.yaml
-          Restart=always
-          RestartSec=5
-
-          [Install]
-          WantedBy=multi-user.target
-          EOF
+          # Descargar y almacenar los certificados necesarios
+          sudo mkdir -p /etc/kubernetes/pki
+          sudo curl -o /etc/kubernetes/pki/ca.crt http://10.17.3.14/shared/ca/ca.crt
+          sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/${node_name}/kubelet/kubelet.crt
+          sudo curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/${node_name}/kubelet/kubelet.key
+          sudo curl -o /etc/kubernetes/pki/apiserver.crt http://10.17.3.14/shared/apiserver/apiserver.crt
+          sudo curl -o /etc/kubernetes/pki/apiserver.key http://10.17.3.14/shared/apiserver/apiserver.key
+          sudo curl -o /etc/kubernetes/pki/sa.pub http://10.17.3.14/shared/sa/sa.pub
+          sudo curl -o /etc/kubernetes/pki/sa.key http://10.17.3.14/shared/sa/sa.key
+          sudo curl -o /etc/kubernetes/pki/etcd/etcd.crt http://10.17.3.14/shared/etcd/etcd.crt
+          sudo curl -o /etc/kubernetes/pki/etcd/etcd.key http://10.17.3.14/shared/etcd/etcd.key
+          sudo curl -o /etc/kubernetes/pki/etcd/ca.crt http://10.17.3.14/shared/ca/ca.crt
+          sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client.crt http://10.17.3.14/shared/apiserver-etcd-client/apiserver-etcd-client.crt
+          sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client.key http://10.17.3.14/shared/apiserver-etcd-client/apiserver-etcd-client.key
 
           # Recargar systemd y activar servicios
-
           sudo systemctl daemon-reload
-          sudo systemctl enable kube-scheduler
-          sudo systemctl start kube-scheduler
-          sudo systemctl enable kubelet
-          sudo systemctl start kubelet
-          sudo systemctl enable crio
-          sudo systemctl start crio
-          sudo systemctl enable kube-proxy
-          sudo systemctl start kube-proxy
-          sudo systemctl enable etcd
-          sudo systemctl start etcd
-          sudo systemctl enable kube-controller-manager
-          sudo systemctl start kube-controller-manager
-          sudo systemctl enable  kube-apiserver
-          sudo systemctl start  kube-apiserver
+          sudo systemctl enable crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
+          sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
 
 systemd:
   units:
@@ -359,18 +279,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/bin/bash -c 'curl -o /etc/kubernetes/pki/ca.crt http://10.17.3.14/shared/ca/ca.crt && \
-                                curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/${node_name}/kubelet/kubelet.crt && \
-                                curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/${node_name}/kubelet/kubelet.key && \
-                                curl -o /etc/kubernetes/pki/apiserver.crt http://10.17.3.14/shared/apiserver/apiserver.crt && \
-                                curl -o /etc/kubernetes/pki/apiserver.key http://10.17.3.14/shared/apiserver/apiserver.key && \
-                                curl -o /etc/kubernetes/pki/sa.pub http://10.17.3.14/shared/sa/sa.pub && \
-                                curl -o /etc/kubernetes/pki/sa.key http://10.17.3.14/shared/sa/sa.key && \
-                                curl -o /etc/kubernetes/pki/etcd/etcd.crt http://10.17.3.14/shared/etcd/etcd.crt && \
-                                curl -o /etc/kubernetes/pki/etcd/etcd.key http://10.17.3.14/shared/etcd/etcd.key && \
-                                curl -o /etc/kubernetes/pki/etcd/ca.crt http://10.17.3.14/shared/ca/ca.crt && \
-                                curl -o /etc/kubernetes/pki/apiserver-etcd-client.crt http://10.17.3.14/shared/apiserver-etcd-client/apiserver-etcd-client.crt && \
-                                curl -o /etc/kubernetes/pki/apiserver-etcd-client.key http://10.17.3.14/shared/apiserver-etcd-client/apiserver-etcd-client.key'
+        ExecStart=/bin/bash /home/core/download-certificates.sh
         RemainAfterExit=true
 
         [Install]
@@ -386,7 +295,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/bin/bash /home/core/install-master-components.sh
+        ExecStart=/bin/bash /home/core/install-components.sh
         RemainAfterExit=true
 
         [Install]
