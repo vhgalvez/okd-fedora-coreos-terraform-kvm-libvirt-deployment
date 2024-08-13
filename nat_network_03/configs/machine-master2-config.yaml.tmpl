@@ -271,13 +271,22 @@ storage:
           EOF
 
           # Recargar systemd y activar servicios
+
           sudo systemctl daemon-reload
+          sudo systemctl enable kube-scheduler
+          sudo systemctl start kube-scheduler
           sudo systemctl enable kubelet
           sudo systemctl start kubelet
           sudo systemctl enable crio
           sudo systemctl start crio
           sudo systemctl enable kube-proxy
           sudo systemctl start kube-proxy
+          sudo systemctl enable etcd
+          sudo systemctl start etcd
+          sudo systemctl enable kube-controller-manager
+          sudo systemctl start kube-controller-manager
+          sudo systemctl enable  kube-apiserver
+          sudo systemctl start  kube-apiserver
 
 systemd:
   units:

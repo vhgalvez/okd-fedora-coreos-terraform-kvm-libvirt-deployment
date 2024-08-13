@@ -164,7 +164,7 @@ storage:
           rm -rf /tmp/oc.tar.gz
 
           # Instalar CRI-O
-          wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.3.tar.gz
+          sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.3.tar.gz
           mkdir -p /tmp/crio
           tar -xzf /tmp/crio.tar.gz -C /tmp/crio
           mkdir -p /opt/bin/crio
