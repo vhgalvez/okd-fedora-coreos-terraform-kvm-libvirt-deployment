@@ -182,7 +182,7 @@ storage:
           sudo mkdir -p /tmp/crio
           sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.3.tar.gz
           sudo tar -xzf /tmp/crio.tar.gz -C /tmp/crio
-          sudo mv /tmp/crio/cri-o.amd64/* /opt/bin/crio/
+          sudo mv /tmp/crio/cri-o/* /opt/bin/crio/
           sudo chmod +x /opt/bin/crio/*
           /opt/bin/crio/crio --version
 
