@@ -214,8 +214,7 @@ storage:
           exec > /var/log/install-components.log 2>&1
 
           # Crear directorios necesarios
-          sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin
-          sudo mkdir -p /etc/kubernetes/pki/etcd
+          sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin /etc/kubernetes/pki/etcd
 
           # Descargar e Instalar el Instalador de OKD
           wget https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
@@ -283,8 +282,6 @@ storage:
           sudo rm -rf /tmp/cni-plugins.tgz
 
           # Descargar y almacenar los certificados necesarios
-          sudo mkdir -p /etc/kubernetes/pki
-          sudo mkdir -p /etc/kubernetes/pki/etcd
           sudo curl -o /etc/kubernetes/pki/ca.crt http://10.17.3.14/shared/ca/ca.crt
           sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/${node_name}/kubelet/kubelet.crt
           sudo curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/${node_name}/kubelet/kubelet.key
