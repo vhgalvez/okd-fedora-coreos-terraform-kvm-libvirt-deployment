@@ -224,5 +224,15 @@ curl -O http://helper.cefaslocalserver.com/shared/apiserver-etcd-client/apiserve
 
 
 
+sudo systemctl status crio
+sudo systemctl status kubelet
+sudo systemctl status kube-proxy
+sudo systemctl status kube-apiserver
+sudo systemctl status kube-controller-manager
+sudo systemctl status kube-scheduler
+sudo systemctl status etcd
+sudo systemctl status openshift-install
+
+
 
 
