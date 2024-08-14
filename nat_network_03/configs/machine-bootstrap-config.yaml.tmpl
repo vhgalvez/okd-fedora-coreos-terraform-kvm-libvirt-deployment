@@ -332,25 +332,28 @@ systemd:
         After=network.target
 
         [Service]
-        ExecStart=/opt/bin/etcd \
-          --advertise-client-urls=https://${ip}:2379 \
-          --cert-file=/etc/kubernetes/pki/etcd/etcd.crt \
-          --key-file=/etc/kubernetes/pki/etcd/etcd.key \
-          --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt \
-          --peer-cert-file=/etc/kubernetes/pki/etcd/etcd.crt \
-          --peer-key-file=/etc/kubernetes/pki/etcd/etcd.key \
-          --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.crt \
-          --peer-client-cert-auth=true \
-          --client-cert-auth=true \
-          --initial-advertise-peer-urls=https://${ip}:2380 \
-          --listen-peer-urls=https://${ip}:2380 \
-          --listen-client-urls=https://${ip}:2379,https://127.0.0.1:2379 \
-          --initial-cluster-token etcd-cluster-1 \
-          --initial-cluster=${host_name}=https://${ip}:2380 \
-          --initial-cluster-state new \
-          --data-dir=/var/lib/etcd
+        User=etcd
+        Type=notify
+        Environment="ETCD_DATA_DIR=/var/lib/etcd"
+        Environment="ETCD_NAME=${host_name}"
+        Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=https://${ip}:2380"
+        Environment="ETCD_LISTEN_PEER_URLS=https://${ip}:2380"
+        Environment="ETCD_LISTEN_CLIENT_URLS=https://${ip}:2379,https://127.0.0.1:2379"
+        Environment="ETCD_ADVERTISE_CLIENT_URLS=https://${ip}:2379"
+        Environment="ETCD_INITIAL_CLUSTER=${host_name}=https://${ip}:2380"
+        Environment="ETCD_INITIAL_CLUSTER_STATE=new"
+        Environment="ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster"
+        Environment="ETCD_CERT_FILE=/etc/kubernetes/pki/etcd/etcd.crt"
+        Environment="ETCD_KEY_FILE=/etc/kubernetes/pki/etcd/etcd.key"
+        Environment="ETCD_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.crt"
+        Environment="ETCD_CLIENT_CERT_AUTH=true"
+        Environment="ETCD_PEER_CERT_FILE=/etc/kubernetes/pki/etcd/etcd.crt"
+        Environment="ETCD_PEER_KEY_FILE=/etc/kubernetes/pki/etcd/etcd.key"
+        Environment="ETCD_PEER_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.crt"
+        Environment="ETCD_PEER_CLIENT_CERT_AUTH=true"
+        ExecStart=/opt/bin/etcd
         Restart=always
-        RestartSec=5
+        RestartSec=5s
         LimitNOFILE=65536
 
         [Install]
@@ -458,8 +461,8 @@ systemd:
       contents: |
         [Unit]
         Description=Kubernetes Controller Manager
-        After=kube-apiserver.service
-        Wants=kube-apiserver.service
+        Documentation=https://kubernetes.io/docs/concepts/overview/components/
+        After=network.target
 
         [Service]
         ExecStart=/opt/bin/kube-controller-manager \
@@ -488,11 +491,11 @@ systemd:
       contents: |
         [Unit]
         Description=Kubernetes Scheduler
-        After=kube-controller-manager.service
-        Wants=kube-controller-manager.service
+        Documentation=https://kubernetes.io/docs/concepts/overview/components/
+        After=network.target
 
         [Service]
-        ExecStart=/opt/bin/kube-scheduler --address=127.0.0.1 --kubeconfig=/etc/kubernetes/scheduler.conf --leader-elect=true --v=2
+        ExecStart=/opt/bin/kube-scheduler   --address=127.0.0.1   --kubeconfig=/etc/kubernetes/scheduler.conf   --leader-elect=true   --v=2
         Restart=on-failure
 
         [Install]
@@ -508,23 +511,10 @@ systemd:
         After=crio.service
 
         [Service]
-        ExecStart=/opt/bin/kubelet \
-          --kubeconfig=/etc/kubernetes/kubelet.conf \
-          --config=/etc/kubernetes/kubelet-config.yaml \
-          --container-runtime=remote \
-          --container-runtime-endpoint=unix:///var/run/crio/crio.sock \
-          --runtime-request-timeout=15m \
-          --image-gc-high-threshold=80 \
-          --image-gc-low-threshold=40 \
-          --enforce-node-allocatable=cpu,memory \
-          --fail-swap-on=false \
-          --cgroup-driver=systemd \
-          --network-plugin=cni \
-          --cni-bin-dir=/opt/cni/bin \
-          --cni-conf-dir=/etc/cni/net.d \
-          --pod-infra-container-image=k8s.gcr.io/pause:3.1 \
-          --v=2
-        Restart=on-failure
+        ExecStart=/opt/bin/kubelet --config=/etc/kubernetes/kubelet-config.yaml --kubeconfig=/etc/kubernetes/kubelet.conf
+        Restart=always
+        StartLimitInterval=0
+        RestartSec=10
 
         [Install]
         WantedBy=multi-user.target
