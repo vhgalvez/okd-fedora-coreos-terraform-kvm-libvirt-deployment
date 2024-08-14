@@ -283,22 +283,29 @@ storage:
 
           # Descargar y almacenar los certificados necesarios
           sudo curl -o /etc/kubernetes/pki/ca.crt http://10.17.3.14/shared/ca/ca.crt
-          sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/${node_name}/kubelet/kubelet.crt
-          sudo curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/${node_name}/kubelet/kubelet.key
+          sudo curl -o /etc/kubernetes/pki/ca.key http://10.17.3.14/shared/ca/ca.key
+          sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/${NODE_NAME}/kubelet/kubelet.crt
+          sudo curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/${NODE_NAME}/kubelet/kubelet.key
           sudo curl -o /etc/kubernetes/pki/apiserver.crt http://10.17.3.14/shared/apiserver/apiserver.crt
           sudo curl -o /etc/kubernetes/pki/apiserver.key http://10.17.3.14/shared/apiserver/apiserver.key
           sudo curl -o /etc/kubernetes/pki/sa.pub http://10.17.3.14/shared/sa/sa.pub
           sudo curl -o /etc/kubernetes/pki/sa.key http://10.17.3.14/shared/sa/sa.key
           sudo curl -o /etc/kubernetes/pki/etcd/etcd.crt http://10.17.3.14/shared/etcd/etcd.crt
           sudo curl -o /etc/kubernetes/pki/etcd/etcd.key http://10.17.3.14/shared/etcd/etcd.key
-          sudo curl -o /etc/kubernetes/pki/etcd/ca.crt http://10.17.3.14/shared/ca/ca.crt
+          sudo curl -o /etc/kubernetes/pki/etcd/ca.crt http://10.17.3.14/shared/etcd/ca.crt
           sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client.crt http://10.17.3.14/shared/apiserver-etcd-client/apiserver-etcd-client.crt
           sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client.key http://10.17.3.14/shared/apiserver-etcd-client/apiserver-etcd-client.key
+          sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.crt http://10.17.3.14/shared/apiserver-kubelet-client/apiserver-kubelet-client.crt
+          sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.key http://10.17.3.14/shared/apiserver-kubelet-client/apiserver-kubelet-client.key
 
+          # Verificar y establecer permisos para las claves privadas
+          sudo chmod 600 /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
+          
           # Recargar systemd y activar servicios
           sudo systemctl daemon-reload
           sudo systemctl enable crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
           sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
+
 
 systemd:
   units:
