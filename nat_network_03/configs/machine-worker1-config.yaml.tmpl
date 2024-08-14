@@ -38,7 +38,6 @@ storage:
       contents:
         inline: ${host_name}
 
-    # Archivos de configuración del kubelet
     - path: /etc/kubernetes/kubelet.conf
       filesystem: root
       mode: 0644
@@ -82,7 +81,6 @@ storage:
           runtimeRequestTimeout: "15m"
           containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
 
-    # Configuración de la red
     - path: /etc/systemd/network/10-eth0.network
       filesystem: root
       mode: 0644
@@ -131,37 +129,24 @@ storage:
           set -euo pipefail
           exec > /var/log/install-components.log 2>&1
 
-          # Crear directorio para binarios
-          mkdir -p /opt/bin
-
-          # Instalar etcd
-          curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/v3.4.13/etcd-v3.4.13-linux-amd64.tar.gz
-          tar -xzf /tmp/etcd.tar.gz -C /tmp
-          mv /tmp/etcd-v3.4.13-linux-amd64/etcd /opt/bin/etcd
-          chmod +x /opt/bin/etcd
-          rm -rf /tmp/etcd.tar.gz /tmp/etcd-v3.4.13-linux-amd64
-
-          # Descargar e instalar los plugins de CNI
-          curl -L -o /tmp/cni-plugins.tgz https://github.com/containernetworking/plugins/releases/download/v0.9.1/cni-plugins-linux-amd64-v0.9.1.tgz
-          mkdir -p /opt/cni/bin
-          tar -xzf /tmp/cni-plugins.tgz -C /opt/cni/bin
-          rm -rf /tmp/cni-plugins.tgz
-
+          # Crear directorios necesarios
+          sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin 
+          
           # Instalar kube-proxy
           curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-proxy
-          mv /tmp/kube-proxy /opt/bin/kube-proxy
-          chmod +x /opt/bin/kube-proxy
+          sudo mv /tmp/kube-proxy /opt/bin/kube-proxy
+          sudo chmod +x /opt/bin/kube-proxy
 
           # Instalar kubelet
           curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
-          chmod +x /opt/bin/kubelet
+          sudo chmod +x /opt/bin/kubelet
 
           # Instalar oc (OpenShift Client)
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
-          mv /tmp/oc /opt/bin/oc
-          chmod +x /opt/bin/oc
-          rm -rf /tmp/oc.tar.gz
+          sudo mv /tmp/oc /opt/bin/oc
+          sudo chmod +x /opt/bin/oc
+          sudo rm -rf /tmp/oc.tar.gz
 
           # Instalar CRI-O
           sudo mkdir -p /opt/bin/crio
@@ -171,80 +156,29 @@ storage:
           sudo mv /tmp/crio/cri-o/bin/* /opt/bin/crio/
           sudo chmod +x /opt/bin/crio/*
           /opt/bin/crio/crio --version
-                    
+          
           # Descargar conmon
           wget https://github.com/containers/conmon/releases/download/v2.1.12/conmon.amd64
           sudo mv conmon.amd64 /opt/bin/crio/conmon
           sudo chmod +x /opt/bin/crio/conmon
 
-          # Crear servicio systemd para CRI-O
-          mkdir -p /etc/systemd/system/
-          cat <<EOF | tee /etc/systemd/system/crio.service
-          [Unit]
-          Description=CRI-O container runtime
-          After=network.target
+          # Descargar e instalar los plugins de CNI
+          curl -L -o /tmp/cni-plugins.tgz https://github.com/containernetworking/plugins/releases/download/v0.9.1/cni-plugins-linux-amd64-v0.9.1.tgz
+          sudo mkdir -p /opt/cni/bin
+          sudo tar -xzf /tmp/cni-plugins.tgz -C /opt/cni/bin
+          sudo rm -rf /tmp/cni-plugins.tgz
 
-          [Service]
-          Type=notify
-          ExecStart=/opt/bin/crio/crio
-          Environment="PATH=/opt/bin/crio:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-          Restart=always
-          RestartSec=5
-          LimitNOFILE=65536
-          LimitNPROC=4096
-
-          [Install]
-          WantedBy=multi-user.target
-          EOF
-
-          # Crear servicio systemd para kube-proxy
-          tee /etc/systemd/system/kube-proxy.service > /dev/null <<EOF
-          [Unit]
-          Description=Kubernetes Kube-Proxy
-          After=network.target
-
-          [Service]
-          ExecStart=/opt/bin/kube-proxy --config=/etc/kubernetes/kube-proxy-config.yaml
-          Restart=always
-          RestartSec=5
-
-          [Install]
-          WantedBy=multi-user.target
-          EOF
-
-          # Crear servicio systemd para etcd
-          tee /etc/systemd/system/etcd.service > /dev/null <<EOF
-          [Unit]
-          Description=etcd key-value store
-          Documentation=https://github.com/coreos/etcd
-          After=network.target
-
-          [Service]
-          ExecStart=/opt/bin/etcd \
-            --name ${node_name} \
-            --data-dir /var/lib/etcd \
-            --listen-client-urls https://${ip}:2379 \
-            --advertise-client-urls https://${ip}:2379 \
-            --initial-cluster ${initial_cluster} \
-            --initial-cluster-state new \
-            --initial-advertise-peer-urls https://${ip}:2380
-          Restart=always
-          RestartSec=10
-
-          [Install]
-          WantedBy=multi-user.target
-          EOF
+          # Descargar y almacenar los certificados necesarios
+          sudo mkdir -p /etc/kubernetes/pki
+          sudo mkdir -p /etc/kubernetes/pki/etcd
+          sudo curl -o /etc/kubernetes/pki/ca.crt http://10.17.3.14/shared/ca/ca.crt
+          sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/${node_name}/kubelet/kubelet.crt
+          sudo curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/${node_name}/kubelet/kubelet.key
 
           # Recargar systemd y activar servicios
-          systemctl daemon-reload
-          systemctl enable kubelet
-          systemctl start kubelet
-          systemctl enable crio
-          systemctl start crio
-          systemctl enable kube-proxy
-          systemctl start kube-proxy
-          systemctl enable etcd
-          systemctl start etcd
+          sudo systemctl daemon-reload
+          sudo systemctl enable crio kubelet kube-proxy
+          sudo systemctl start crio kubelet kube-proxy
 
 systemd:
   units:
@@ -308,18 +242,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/bin/bash -c 'curl -o /etc/kubernetes/pki/ca.crt http://10.17.3.14/shared/ca/ca.crt && \
-                                curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/${node_name}/kubelet/kubelet.crt && \
-                                curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/${node_name}/kubelet/kubelet.key && \
-                                curl -o /etc/kubernetes/pki/apiserver.crt http://10.17.3.14/shared/apiserver/apiserver.crt && \
-                                curl -o /etc/kubernetes/pki/apiserver.key http://10.17.3.14/shared/apiserver/apiserver.key && \
-                                curl -o /etc/kubernetes/pki/sa.pub http://10.17.3.14/shared/sa/sa.pub && \
-                                curl -o /etc/kubernetes/pki/sa.key http://10.17.3.14/shared/sa/sa.key && \
-                                curl -o /etc/kubernetes/pki/etcd/etcd.crt http://10.17.3.14/shared/etcd/etcd.crt && \
-                                curl -o /etc/kubernetes/pki/etcd/etcd.key http://10.17.3.14/shared/etcd/etcd.key && \
-                                curl -o /etc/kubernetes/pki/etcd/ca.crt http://10.17.3.14/shared/ca/ca.crt && \
-                                curl -o /etc/kubernetes/pki/apiserver-etcd-client.crt http://10.17.3.14/shared/apiserver-etcd-client/apiserver-etcd-client.crt && \
-                                curl -o /etc/kubernetes/pki/apiserver-etcd-client.key http://10.17.3.14/shared/apiserver-etcd-client/apiserver-etcd-client.key'
+        ExecStart=/bin/bash /home/core/download-certificates.sh
         RemainAfterExit=true
 
         [Install]
@@ -372,18 +295,20 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
-    - name: getty@tty1.service
+    - name: kube-proxy.service
       enabled: true
       contents: |
         [Unit]
-        Description=Getty on tty1
-        After=systemd-user-sessions.service plymouth-quit-wait.service rc-local.service
-        Wants=rc-local.service
+        Description=Kubernetes Kube-Proxy Server
+        Documentation=https://kubernetes.io/docs/
+        After=network.target
 
         [Service]
-        ExecStart=-/sbin/agetty %I $TERM
-        Type=idle
+        ExecStart=/opt/bin/kube-proxy --config=/etc/kubernetes/kube-proxy-config.yaml
         Restart=always
+        RestartSec=5
+        LimitNOFILE=65536
+        LimitNPROC=4096
 
         [Install]
         WantedBy=multi-user.target
