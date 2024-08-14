@@ -120,6 +120,61 @@ storage:
         inline: |
           L /etc/resolv.conf - - - - /run/systemd/resolve/resolv.conf
 
+
+
+    - path: /etc/kubernetes/scheduler.conf
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+            apiVersion: v1
+    kind: Config
+    clusters:
+    - cluster:
+        certificate-authority: /etc/kubernetes/pki/ca.crt
+        server: https://${ip}:6443
+      name: kubernetes
+    contexts:
+    - context:
+        cluster: kubernetes
+        user: system:kube-scheduler
+      name: system:kube-scheduler@kubernetes
+    current-context: system:kube-scheduler@kubernetes
+    users:
+    - name: system:kube-scheduler
+      user:
+        client-certificate: /etc/kubernetes/pki/kube-scheduler.crt
+        client-key: /etc/kubernetes/pki/kube-scheduler.key
+
+            
+- path: /etc/kubernetes/controller-manager.conf
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+        apiVersion: v1
+kind: Config
+clusters:
+- cluster:
+    certificate-authority: /etc/kubernetes/pki/ca.crt
+    server: https://${ip}:6443
+  name: kubernetes
+contexts:
+- context:
+    cluster: kubernetes
+    user: system:kube-controller-manager
+  name: system:kube-controller-manager@kubernetes
+current-context: system:kube-controller-manager@kubernetes
+users:
+- name: system:kube-controller-manager
+  user:
+    client-certificate: /etc/kubernetes/pki/kube-controller-manager.crt
+    client-key: /etc/kubernetes/pki/kube-controller-manager.key
+
+
+
+
+
     - path: /home/core/install-components.sh
       filesystem: root
       mode: 0755
