@@ -93,7 +93,6 @@ storage:
           mode: "iptables"
           clusterCIDR: "10.244.0.0/16"
 
-
     - path: /etc/systemd/network/10-eth0.network
       filesystem: root
       mode: 0644
@@ -180,7 +179,7 @@ storage:
             user:
               client-certificate: /etc/kubernetes/pki/kube-controller-manager.crt
               client-key: /etc/kubernetes/pki/kube-controller-manager.key
-      
+
     - path: /etc/kubernetes/kube-proxy.kubeconfig
       filesystem: root
       mode: 0644
@@ -204,8 +203,7 @@ storage:
             user:
               client-certificate: /etc/kubernetes/pki/kube-proxy.crt
               client-key: /etc/kubernetes/pki/kube-proxy.key
-            
-    
+
     - path: /home/core/install-components.sh
       filesystem: root
       mode: 0755
@@ -217,7 +215,7 @@ storage:
 
           # Crear directorios necesarios
           sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin
-          
+
           # Descargar e Instalar el Instalador de OKD
           wget https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
           tar -xzvf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
@@ -271,7 +269,7 @@ storage:
           sudo mv /tmp/crio/cri-o/bin/* /opt/bin/crio/
           sudo chmod +x /opt/bin/crio/*
           /opt/bin/crio/crio --version
-          
+
           # Descargar conmon
           wget https://github.com/containers/conmon/releases/download/v2.1.12/conmon.amd64
           sudo mv conmon.amd64 /opt/bin/crio/conmon
@@ -531,20 +529,20 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
-  - name: kube-proxy.service
+    - name: kube-proxy.service
       enabled: true
       contents: |
-      [Unit]
-Description=Kubernetes Kube-Proxy Server
-Documentation=https://kubernetes.io/docs/
-After=network.target
+        [Unit]
+        Description=Kubernetes Kube-Proxy Server
+        Documentation=https://kubernetes.io/docs/
+        After=network.target
 
-[Service]
-ExecStart=/opt/bin/kube-proxy --config=/etc/kubernetes/kube-proxy-config.yaml
-Restart=always
-RestartSec=5
-LimitNOFILE=65536
-LimitNPROC=4096
+        [Service]
+        ExecStart=/opt/bin/kube-proxy --config=/etc/kubernetes/kube-proxy-config.yaml
+        Restart=always
+        RestartSec=5
+        LimitNOFILE=65536
+        LimitNPROC=4096
 
-[Install]
-WantedBy=multi-user.target
+        [Install]
+        WantedBy=multi-user.target
