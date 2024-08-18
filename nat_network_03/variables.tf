@@ -11,6 +11,7 @@ variable "vm_definitions" {
     memory       = number
     ip           = string
     name_dominio = string
+    node_name    = string
     disk_size    = number  # in MB
   }))
 }
@@ -36,9 +37,5 @@ variable "dns2" {
 }
 variable "initial_cluster" {
   description = "The initial cluster configuration"
-  type        = string
-}
-variable "NODE_NAME" {
-  description = "nombre del nodo"
   type        = string
 }
