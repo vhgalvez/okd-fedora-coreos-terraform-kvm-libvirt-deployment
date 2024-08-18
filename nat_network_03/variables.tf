@@ -11,7 +11,6 @@ variable "vm_definitions" {
     memory       = number
     ip           = string
     name_dominio = string
-    node_name    = string
     disk_size    = number  # in MB
   }))
 }
