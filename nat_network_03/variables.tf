@@ -12,6 +12,7 @@ variable "vm_definitions" {
     ip           = string
     name_dominio = string
     disk_size    = number # in MB
+    node_name    = string # node name
   }))
 }
 
