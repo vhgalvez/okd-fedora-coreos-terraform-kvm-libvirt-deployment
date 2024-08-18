@@ -126,13 +126,5 @@ resource "libvirt_domain" "machine" {
 }
 
 output "ip_addresses" {
-  value = {
-    for key, machine in libvirt_domain.machine :
-    key => flatten([
-      for interface in machine.network_interface :
-      interface.addresses
-    ])
-  }
-
+  value = { for key, machine in libvirt_domain.machine : key => machine.network_interface[0].addresses[0] if length(machine.network_interface[0].addresses) > 0 }
 }
-
