@@ -36,6 +36,13 @@ storage:
       filesystem: root
       mode: 0644
       contents:
+        inline: ${node_name}    
+
+  files:
+    - path: /etc/hostname
+      filesystem: root
+      mode: 0644
+      contents:
         inline: ${host_name}
 
     - path: /etc/kubernetes/kubelet.conf
