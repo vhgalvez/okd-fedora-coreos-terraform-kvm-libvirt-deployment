@@ -121,7 +121,7 @@ storage:
           f /etc/hosts 0644 - - - -
           127.0.0.1   localhost
           ::1         localhost
-          ${ip}  ${host_name} ${node_name}
+          ${ip}  ${host_name} ${name}
 
     - path: /run/systemd/resolve/resolv.conf
       filesystem: root
