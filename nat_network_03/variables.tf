@@ -8,11 +8,10 @@ variable "vm_definitions" {
   description = "Definitions of virtual machines including CPU, memory, IP, domain name, and disk size"
   type = map(object({
     cpus         = number
-    node_name    = string
     memory       = number
     ip           = string
     name_dominio = string
-    disk_size    = number  # in MB
+    disk_size    = number # in MB
   }))
 }
 
@@ -38,4 +37,12 @@ variable "dns2" {
 variable "initial_cluster" {
   description = "The initial cluster configuration"
   type        = string
+
+}
+
+
+variable "node_name" {
+  description = "node_name"
+  type        = string
+
 }
