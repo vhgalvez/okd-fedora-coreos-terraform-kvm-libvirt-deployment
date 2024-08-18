@@ -1,5 +1,5 @@
 # terraform.tfvars 
-base_image = "/var/lib/libvirt/images/flatcar-linux/flatcar_production_qemu_image.img"
+base_image = "/mnt/lv_data/flatcar-linux/flatcar_production_qemu_image.img"
 
 vm_definitions = {
   master1 = {

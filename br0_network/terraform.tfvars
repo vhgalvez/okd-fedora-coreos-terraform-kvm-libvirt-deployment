@@ -1,5 +1,5 @@
 # br0_network\terraform.tfvars
-rocky9_image = "/var/lib/libvirt/images/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2"
+rocky9_image = "/mnt/lv_data/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2"
 vm_rockylinux_definitions = {
   "bastion1" = {
     cpus           = 2,
