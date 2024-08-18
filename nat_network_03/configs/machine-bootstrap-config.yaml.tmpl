@@ -31,12 +31,6 @@ storage:
       filesystem: root
       mode: 0755
 
-    - path: /etc/hostname
-      filesystem: root
-      mode: 0644
-      contents:
-        inline: ${node_name}    
-
   files:
     - path: /etc/hostname
       filesystem: root
