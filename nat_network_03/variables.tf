@@ -8,6 +8,7 @@ variable "vm_definitions" {
   description = "Definitions of virtual machines including CPU, memory, IP, domain name, and disk size"
   type = map(object({
     cpus         = number
+    node_name    = string
     memory       = number
     ip           = string
     name_dominio = string
