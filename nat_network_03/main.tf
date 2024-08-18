@@ -52,7 +52,7 @@ data "template_file" "vm-configs" {
 
   vars = {
     ssh_keys        = join(",", var.ssh_keys)
-    node_name       = each.key
+    node_name       = var.node_name
     ip              = each.value.ip
     host_name       = each.value.name_dominio
     gateway         = var.gateway
