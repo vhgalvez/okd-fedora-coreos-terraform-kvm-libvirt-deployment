@@ -39,10 +39,8 @@ variable "initial_cluster" {
   type        = string
 
 }
-
-
 variable "node_name" {
-  description = "node_name"
+  description = "Nombre del nodo"
   type        = string
-
+  default     = null
 }
