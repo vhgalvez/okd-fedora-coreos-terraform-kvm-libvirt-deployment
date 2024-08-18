@@ -38,3 +38,7 @@ variable "initial_cluster" {
   description = "The initial cluster configuration"
   type        = string
 }
+variable "NODE_NAME" {
+  description = "nombre del nodo"
+  type        = string
+}
