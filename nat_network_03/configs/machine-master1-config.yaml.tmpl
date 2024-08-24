@@ -130,7 +130,7 @@ storage:
           exec > /var/log/install-components.log 2>&1
 
           # Crear directorios necesarios
-          sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin 
+          sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin /etc/kubernetes/pki/etcd
           
           # Instalar kube-proxy
           curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-proxy
@@ -191,7 +191,6 @@ storage:
           sudo rm -rf /tmp/cni-plugins.tgz
 
           # Descargar y almacenar los certificados necesarios
-          sudo mkdir -p /etc/kubernetes/pki/etcd/
           sudo curl -o /etc/kubernetes/pki/ca.crt http://10.17.3.14:9999/certificates/shared/ca/ca.crt
           sudo curl -o /etc/kubernetes/pki/ca.key http://10.17.3.14:9999/certificates/shared/ca/ca.key
           sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14:9999/certificates/${node_name}/kubelet/kubelet.crt

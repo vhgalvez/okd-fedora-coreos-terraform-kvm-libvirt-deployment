@@ -130,7 +130,7 @@ storage:
           exec > /var/log/install-components.log 2>&1
 
           # Crear directorios necesarios
-          sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin 
+          sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin /etc/kubernetes/pki/etcd
           
           # Instalar kube-proxy
           curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-proxy
