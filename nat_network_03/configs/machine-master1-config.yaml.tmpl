@@ -191,6 +191,7 @@ storage:
           sudo rm -rf /tmp/cni-plugins.tgz
 
           # Descargar y almacenar los certificados necesarios
+          sudo mkdir -p /etc/kubernetes/pki/etcd/
           sudo curl -o /etc/kubernetes/pki/ca.crt http://10.17.3.14:9999/certificates/shared/ca/ca.crt
           sudo curl -o /etc/kubernetes/pki/ca.key http://10.17.3.14:9999/certificates/shared/ca/ca.key
           sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14:9999/certificates/${node_name}/kubelet/kubelet.crt
