@@ -81,6 +81,19 @@ storage:
           runtimeRequestTimeout: "15m"
           containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
 
+    ath: /var/lib/kube-proxy/config.conf
+      filesystem: root
+      mode: 0644
+      contents:
+        inline: |
+          apiVersion: kubeproxy.config.k8s.io/v1alpha1
+          kind: KubeProxyConfiguration
+          clientConnection:
+            kubeconfig: "/etc/kubernetes/kubelet.conf"
+          mode: "iptables"
+          clusterCIDR: "10.244.0.0/16"
+
+         
     - path: /etc/systemd/network/10-eth0.network
       filesystem: root
       mode: 0644
@@ -450,3 +463,22 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
+
+    - name: kube-proxy.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Kubernetes Kube-Proxy Server
+        Documentation=https://kubernetes.io/docs/concepts/overview/components/
+        After=network.target
+
+        [Service]
+        ExecStart=/opt/bin/kube-proxy --config=/var/lib/kube-proxy/config.conf --hostname-override=${ip}
+        Restart=always
+        RestartSec=5
+        LimitNOFILE=65536
+
+        [Install]
+        WantedBy=multi-user.target
+
+              
