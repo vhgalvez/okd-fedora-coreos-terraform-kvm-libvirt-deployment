@@ -282,22 +282,25 @@ storage:
           sudo rm -rf /tmp/cni-plugins.tgz
 
           # Descargar y almacenar los certificados necesarios
-          sudo curl -o /etc/kubernetes/pki/ca.crt http://10.17.3.14:9999/certificates/shared/ca/ca.crt
-          sudo curl -o /etc/kubernetes/pki/ca.key http://10.17.3.14:9999/certificates/shared/ca/ca.key
+
           sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14:9999/certificates/${node_name}/kubelet/kubelet.crt
           sudo curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14:9999/certificates/${node_name}/kubelet/kubelet.key
+
+          sudo curl -o /etc/kubernetes/pki/ca.crt http://10.17.3.14:9999/certificates/shared/ca/ca.crt
+          sudo curl -o /etc/kubernetes/pki/ca.key http://10.17.3.14:9999/certificates/shared/ca/ca.key
+          sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14:9999/certificates/master1/kubelet/kubelet.crt
+          sudo curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14:9999/certificates/master1/kubelet/kubelet.key
           sudo curl -o /etc/kubernetes/pki/apiserver.crt http://10.17.3.14:9999/certificates/shared/apiserver/apiserver.crt
           sudo curl -o /etc/kubernetes/pki/apiserver.key http://10.17.3.14:9999/certificates/shared/apiserver/apiserver.key
           sudo curl -o /etc/kubernetes/pki/sa.pub http://10.17.3.14:9999/certificates/shared/sa/sa.pub
           sudo curl -o /etc/kubernetes/pki/sa.key http://10.17.3.14:9999/certificates/shared/sa/sa.key
           sudo curl -o /etc/kubernetes/pki/etcd/etcd.crt http://10.17.3.14:9999/certificates/shared/etcd/etcd.crt
           sudo curl -o /etc/kubernetes/pki/etcd/etcd.key http://10.17.3.14:9999/certificates/shared/etcd/etcd.key
-          sudo curl -o /etc/kubernetes/pki/etcd/ca.crt http://10.17.3.14:9999/certificates/shared/etcd/ca.crt
+          sudo curl -o /etc/kubernetes/pki/etcd/ca.crt http://10.17.3.14:9999/certificates/shared/ca/ca.crt
           sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client.crt http://10.17.3.14:9999/certificates/shared/apiserver-etcd-client/apiserver-etcd-client.crt
           sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client.key http://10.17.3.14:9999/certificates/shared/apiserver-etcd-client/apiserver-etcd-client.key
           sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.crt http://10.17.3.14:9999/certificates/shared/apiserver-kubelet-client/apiserver-kubelet-client.crt
           sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.key http://10.17.3.14:9999/certificates/shared/apiserver-kubelet-client/apiserver-kubelet-client.key
-
 
           # Verificar y establecer permisos para las claves privadas
           sudo chmod 600 /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
