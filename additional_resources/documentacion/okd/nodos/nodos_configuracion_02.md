@@ -308,3 +308,27 @@ RemainAfterExit=true
 WantedBy=multi-user.target
 
 Esta estructura te permitirá identificar rápidamente dónde se encuentra cada configuración y facilita la gestión de los archivos relacionados con tu clúster Kubernetes.
+
+
+
+
+
+_
+
+sudo systemctl restart etcd
+sudo systemctl restart kube-apiserver
+sudo systemctl restart kube-controller-manager
+sudo systemctl restart kube-scheduler
+sudo systemctl restart kubelet
+sudo systemctl restart kube-proxy
+sudo systemctl restart crio
+
+
+
+sudo systemctl status etcd
+sudo systemctl status kube-apiserver
+sudo systemctl status kube-controller-manager
+sudo systemctl status kube-scheduler
+sudo systemctl status kubelet
+sudo systemctl status kube-proxy
+sudo systemctl status crio
