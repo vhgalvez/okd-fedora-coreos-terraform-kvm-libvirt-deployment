@@ -384,6 +384,11 @@ storage:
           sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.crt http://10.17.3.14:9999/certificates/shared/apiserver-kubelet-client/apiserver-kubelet-client.crt
           sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.key http://10.17.3.14:9999/certificates/shared/apiserver-kubelet-client/apiserver-kubelet-client.key
 
+          # Descarga de certificados para kube-scheduler
+          sudo curl -o /etc/kubernetes/pki/kube-scheduler.crt http://10.17.3.14:9999/certificates/shared/kube-scheduler/kube-scheduler.crt
+          sudo curl -o /etc/kubernetes/pki/kube-scheduler.key http://10.17.3.14:9999/certificates/shared/kube-scheduler/kube-scheduler.key
+
+
         
 
           # Verify and set permissions for private keys
