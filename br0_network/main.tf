@@ -25,7 +25,7 @@ resource "libvirt_network" "br0" {
 resource "libvirt_pool" "volumetmp_bastion" {
   name = "${var.cluster_name}_bastion"
   type = "dir"
-  path = "/var/lib/libvirt/images/${var.cluster_name}_bastion"
+  path = "/mnt/lv_data/${var.cluster_name}_bastion"
 }
 
 resource "libvirt_volume" "rocky9_image" {
