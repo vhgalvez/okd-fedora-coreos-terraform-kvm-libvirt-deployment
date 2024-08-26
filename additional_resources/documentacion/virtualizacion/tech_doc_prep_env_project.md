@@ -55,7 +55,7 @@ Creación Manual del Pool default
 Primero, definimos, construimos, iniciamos y configuramos el pool default para que se inicie automáticamente con el sistema:
 
 ```bash
-sudo virsh pool-define-as --name default --type dir --target /var/lib/libvirt/images
+sudo virsh pool-define-as --name default --type dir --target /mnt/lv_data
 sudo virsh pool-build default
 sudo virsh pool-start default
 sudo virsh pool-autostart default
