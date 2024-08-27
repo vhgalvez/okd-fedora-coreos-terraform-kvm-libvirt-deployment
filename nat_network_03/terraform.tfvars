@@ -1,4 +1,4 @@
-base_image = "/mnt/lv_data/flatcar-linux/flatcar_production_qemu_image.img"
+base_image = "/mnt/lv_data/organized_storage/images/flatcar_production_qemu_image.img"
 
 vm_definitions = {
   master1 = {

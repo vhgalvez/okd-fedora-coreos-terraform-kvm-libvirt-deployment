@@ -35,7 +35,7 @@ resource "libvirt_network" "kube_network_03" {
 resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
   type = "dir"
-  path = "/mnt/lv_data/volumetmp_03"
+  path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
 }
 
 resource "libvirt_volume" "base" {
