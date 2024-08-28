@@ -198,3 +198,78 @@ Configurar correctamente los certificados y las herramientas en cada nodo es cru
 sudo systemctl daemon-reload
 sudo systemctl restart crio
 sudo systemctl status crio
+
+
+sudo systemctl status crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
+sudo systemctl restart crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
+
+
+
+
+___
+
+El problema que estás experimentando está relacionado con la validación del certificado del servidor etcd. Específicamente, el mensaje de error indica que el certificado del servidor etcd no contiene ninguna SAN (Subject Alternative Name) para la dirección IP 127.0.0.1.
+
+Kubernetes y etcd utilizan certificados para autenticación mutua y encriptación de las comunicaciones. El kube-apiserver está intentando conectarse a etcd en 127.0.0.1:2379, pero el certificado presentado por etcd no tiene un SAN que coincida con la IP 127.0.0.1, lo que está causando el error de validación.
+
+Solución
+Para solucionar este problema, deberás regenerar el certificado etcd.crt y asegurarte de que incluya 127.0.0.1 en las SANs. Aquí están los pasos a seguir:
+
+Crear un archivo de configuración de OpenSSL que especifique las SANs necesarias:
+
+Crea un archivo de configuración, por ejemplo, etcd-openssl.cnf, con el siguiente contenido:
+
+ini
+Copiar código
+[ req ]
+default_bits       = 2048
+prompt             = no
+default_md         = sha256
+req_extensions     = req_ext
+distinguished_name = dn
+
+[ dn ]
+C  = US
+ST = State
+L  = City
+O  = Organization
+OU = Organizational Unit
+CN = etcd
+
+[ req_ext ]
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = etcd
+IP.1 = 127.0.0.1
+IP.2 = 10.17.4.21  # Reemplaza con la IP de tu servidor etcd si es diferente
+Generar una nueva clave y certificado usando OpenSSL:
+
+Utiliza el archivo de configuración para generar una nueva clave privada y un certificado:
+
+bash
+Copiar código
+sudo openssl req -x509 -newkey rsa:2048 -keyout etcd.key -out etcd.crt -days 365 -nodes -config etcd-openssl.cnf
+Esto generará un nuevo par de claves (etcd.key y etcd.crt) con el SAN apropiado.
+
+Reemplaza los archivos de certificados en /etc/kubernetes/pki/etcd/:
+
+bash
+Copiar código
+sudo mv etcd.crt /etc/kubernetes/pki/etcd/etcd.crt
+sudo mv etcd.key /etc/kubernetes/pki/etcd/etcd.key
+sudo chown etcd:etcd /etc/kubernetes/pki/etcd/etcd.key
+sudo chmod 600 /etc/kubernetes/pki/etcd/etcd.key
+Reinicia los servicios de etcd y kube-apiserver:
+
+bash
+Copiar código
+sudo systemctl daemon-reload
+sudo systemctl restart etcd
+sudo systemctl restart kube-apiserver
+Verifica el estado de los servicios:
+
+bash
+Copiar código
+sudo systemctl status etcd
+sudo systemctl status kube-apiserver
