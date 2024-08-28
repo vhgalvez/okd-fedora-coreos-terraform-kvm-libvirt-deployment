@@ -400,7 +400,8 @@ storage:
           # Verify and set permissions for private keys
           sudo chmod 600 /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
           sudo chown root:root /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
-          
+          sudo chown etcd:etcd /etc/kubernetes/pki/etcd/etcd.key
+
           # Reload systemd and activate services
           sudo systemctl daemon-reload
           sudo systemctl enable crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
