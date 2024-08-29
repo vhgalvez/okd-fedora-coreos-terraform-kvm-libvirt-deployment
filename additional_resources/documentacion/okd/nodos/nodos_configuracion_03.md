@@ -20,3 +20,12 @@ sudo systemctl status kube-controller-manager
 sudo systemctl status etcd
 sudo systemctl status kubelet
 sudo systemctl status kube-proxy
+sudo systemctl status crio
+
+
+
+sudo systemctl status crio etcd kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy | grep -i "active (running)"
+
+sudo systemctl restart crio etcd kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy
+
+sudo systemctl status crio etcd kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy
