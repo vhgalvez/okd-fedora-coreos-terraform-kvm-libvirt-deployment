@@ -396,10 +396,6 @@ storage:
           sudo chmod 600 /etc/kubernetes/pki/etcd/etcd.key
           sudo chown etcd:etcd /etc/kubernetes/pki/etcd/etcd.key
 
-
-
-
-
           # Reload systemd and activate services
           sudo systemctl daemon-reload
           sudo systemctl enable crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
