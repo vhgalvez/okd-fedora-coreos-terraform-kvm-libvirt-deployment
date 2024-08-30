@@ -29,3 +29,27 @@ sudo systemctl status crio etcd kube-apiserver kube-controller-manager kube-sche
 sudo systemctl restart crio etcd kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy
 
 sudo systemctl status crio etcd kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy
+
+
+
+[Unit]
+Description=kubelet: The Kubernetes Node Agent
+Documentation=https://kubernetes.io/docs/
+Wants=crio.service
+After=crio.service
+
+[Service]
+ExecStart=/opt/bin/kubelet --config=/etc/kubernetes/kubelet-config.yaml --kubeconfig=/etc/kubernetes/kubelet.conf --hostname-override=master1.cefaslocalserver.com
+Restart=always
+StartLimitInterval=0
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+
+
+sudo virsh start freeipa1
+sudo virsh start load_balancer1
+sudo virsh start bootstrap
+sudo virsh start helper
+sudo virsh start master1
