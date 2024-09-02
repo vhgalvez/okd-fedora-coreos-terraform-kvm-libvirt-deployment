@@ -103,3 +103,42 @@ bash
 Copiar código
 oc get nodes --kubeconfig=/etc/kubernetes/admin.conf
 Este proceso te permitirá asegurarte de que el nodo esté en el estado correcto y listo para recibir cargas de trabajo.
+
+
+
+Para evitar tener que especificar el parámetro --kubeconfig=/etc/kubernetes/admin.conf cada vez que ejecutas un comando oc, puedes hacer que esta configuración sea persistente estableciendo la variable de entorno KUBECONFIG o copiando el archivo de configuración a la ubicación predeterminada.
+
+Opción 1: Establecer la Variable de Entorno KUBECONFIG
+Puedes agregar esta variable a tu sesión de terminal actual o hacerla permanente en tu perfil de shell.
+
+Para la sesión actual:
+
+bash
+Copiar código
+export KUBECONFIG=/etc/kubernetes/admin.conf
+Para hacerla permanente:
+
+Agrega la línea anterior al final del archivo de configuración de tu shell (~/.bashrc, ~/.bash_profile, o ~/.zshrc, dependiendo de cuál estés usando).
+
+bash
+Copiar código
+echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> ~/.bashrc
+Luego, recarga la configuración de tu shell:
+
+bash
+Copiar código
+source ~/.bashrc
+Opción 2: Copiar el Archivo de Configuración a la Ubicación Predeterminada
+Otra opción es copiar el archivo de configuración a la ubicación predeterminada de kubectl y oc, que es ~/.kube/config.
+
+bash
+Copiar código
+mkdir -p ~/.kube
+cp /etc/kubernetes/admin.conf ~/.kube/config
+Verificación
+Después de realizar cualquiera de estas configuraciones, deberías poder ejecutar oc get nodes sin necesidad de especificar --kubeconfig.
+
+bash
+Copiar código
+oc get nodes
+Esto mostrará los nodos sin necesidad de repetir la ruta al archivo de configuración
