@@ -53,3 +53,5 @@ sudo virsh start load_balancer1
 sudo virsh start bootstrap
 sudo virsh start helper
 sudo virsh start master1
+sudo virsh start master2
+
