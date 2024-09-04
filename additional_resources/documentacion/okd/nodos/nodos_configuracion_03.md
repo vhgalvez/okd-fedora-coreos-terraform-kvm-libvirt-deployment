@@ -63,3 +63,10 @@ sudo virsh shutdown  bootstrap
 sudo virsh shutdown  helper
 sudo virsh shutdown  master1
 sudo virsh shutdown  master2
+
+
+sudo virsh start freeipa1
+sudo virsh start load_balancer1
+sudo virsh start helper
+sudo virsh start master1
+sudo virsh start master2
