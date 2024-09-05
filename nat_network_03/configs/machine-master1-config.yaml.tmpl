@@ -294,6 +294,7 @@ storage:
 
           # Create necessary directories
           sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin /etc/kubernetes/pki/etcd
+          sudo mkdir -p /var/lib/kubelet/checkpoints
 
           # Install kube-proxy
           curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-proxy
@@ -363,9 +364,9 @@ storage:
           sudo curl -o /etc/kubernetes/pki/ca.crt http://10.17.3.14/certificates/shared/ca/ca.crt
           sudo curl -o /etc/kubernetes/pki/ca.key http://10.17.3.14/certificates/shared/ca/ca.key
 
-          # Descargar certificados para el nodo master1
-          sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/certificates/master1/kubelet/kubelet.crt
-          sudo curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/certificates/master1/kubelet/kubelet.key
+          # Descargar certificados para el nodo master
+          sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.crt
+          sudo curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.key
 
           # Descargar certificados del servidor API
           sudo curl -o /etc/kubernetes/pki/apiserver.crt http://10.17.3.14/certificates/shared/apiserver/apiserver.crt
@@ -394,6 +395,8 @@ storage:
           sudo chown etcd:etcd /etc/kubernetes/pki/etcd/etcd.key
           sudo chown etcd:etcd /etc/kubernetes/pki/etcd/*.key
           sudo chmod 600 /etc/kubernetes/pki/etcd/etcd.key
+          sudo chown -R root:root /var/lib/kubelet/checkpoints
+
 
           # Recargar systemd y activar servicios
           sudo systemctl daemon-reload
