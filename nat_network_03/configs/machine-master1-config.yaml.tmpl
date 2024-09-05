@@ -355,7 +355,7 @@ storage:
 
           # Download and store certificates
 
-          # Descargar certificados kubelet
+          # Descargar certificados kubelet (específicos para cada nodo)
           sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.crt
           sudo curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.key
 
@@ -388,13 +388,17 @@ storage:
           sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.crt http://10.17.3.14/certificates/shared/apiserver-kubelet-client/apiserver-kubelet-client.crt
           sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.key http://10.17.3.14/certificates/shared/apiserver-kubelet-client/apiserver-kubelet-client.key
 
-          # Verify and set permissions for private keys
+          # Verificar y establecer permisos para las claves privadas
           sudo chmod 600 /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
           sudo chown root:root /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
           sudo chown etcd:etcd /etc/kubernetes/pki/etcd/etcd.key
           sudo chown etcd:etcd /etc/kubernetes/pki/etcd/*.key
           sudo chmod 600 /etc/kubernetes/pki/etcd/etcd.key
-          sudo chown etcd:etcd /etc/kubernetes/pki/etcd/etcd.key
+
+          # Recargar systemd y activar servicios
+          sudo systemctl daemon-reload
+          sudo systemctl enable crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
+          sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
 
           # Reload systemd and activate services
           sudo systemctl daemon-reload
