@@ -14,12 +14,13 @@ sudo systemctl status kubelet
 sudo systemctl status crio
 
 
-sudo systemctl status kube-apiserver
-sudo systemctl status kube-scheduler
+
 sudo systemctl status kube-controller-manager
-sudo systemctl status etcd
-sudo systemctl status kubelet
+sudo systemctl status kube-scheduler
+sudo systemctl status kube-apiserver
 sudo systemctl status kube-proxy
+sudo systemctl status kubelet
+sudo systemctl status etcd
 sudo systemctl status crio
 
 
