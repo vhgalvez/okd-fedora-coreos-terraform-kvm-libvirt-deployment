@@ -83,7 +83,7 @@ sudo openssl req -new -key etcd.key -subj "/CN=etcd-server" -out etcd.csr
 Genera el archivo de configuración etcd-openssl.cnf con las extensiones requeridas:
 
 ```bash
-cat <<EOF > /etc/kubernetes/pki/etcd/etcd-openssl.cnf
+sudo tee /etc/kubernetes/pki/etcd/etcd-openssl.cnf <<EOF
 [ v3_req ]
 keyUsage = critical, digitalSignature, keyEncipherment
 extendedKeyUsage = serverAuth, clientAuth
