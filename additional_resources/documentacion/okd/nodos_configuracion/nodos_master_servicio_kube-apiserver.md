@@ -151,6 +151,17 @@ sudo mkdir -p /etc/kubernetes/manifests/
 ```
 
 
+3. permisos de los certificados
+
+```bash
+sudo chown root:root /etc/kubernetes/pki/*.key /etc/kubernetes/pki/*.crt
+sudo chmod 600 /etc/kubernetes/pki/*.key
+sudo chmod 644 /etc/kubernetes/pki/*.crt
+```
+
+4. Configurar el archivo de manifiesto de kube-apiserver:
+  
+
 ```bash
 sudo vim /etc/kubernetes/manifests/kube-apiserver.yaml
 ```
@@ -192,7 +203,13 @@ spec:
       path: /etc/kubernetes/pki
 ```
 
+
+5. Recargar systemd y arrancar kube-apiserver:
+
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl restart etcd
+sudo systemctl enable etcd
+sudo systemctl start kube-apiserver
+sudo systemctl status kube-apiserver
 ```
