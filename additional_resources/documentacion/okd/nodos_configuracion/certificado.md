@@ -51,7 +51,7 @@ sudo chmod 644 /etc/kubernetes/pki/etcd/etcd.crt
 
 # Cambiar permisos de los certificados y claves en kube-apiserver
 sudo chmod 600 /etc/kubernetes/pki/apiserver-etcd-client.key
-sudo chmod 644 /etc/kubernetes/pki/apiserver-etcd-client.crt.
+sudo chmod 644 /etc/kubernetes/pki/apiserver-etcd-client.crt
 ```
 
 ### Paso 4: Reiniciar los Servicios
