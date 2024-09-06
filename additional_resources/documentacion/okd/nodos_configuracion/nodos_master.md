@@ -2,6 +2,11 @@
 # Configuración de Nodos Master
 
 # Servicio crio
+  
+```bash
+sudo systemctl status crio
+```
+
 
 ```bash
 /etc/systemd/system/crio.service
@@ -25,7 +30,17 @@ LimitNPROC=4096
 WantedBy=multi-user.target
 ```
 
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart etcd
+```
+
 # Servicio etcd
+
+```bash
+sudo systemctl status etcd
+```
 
 ```bash
 sudo vim /etc/systemd/system/etcd.service
@@ -65,6 +80,7 @@ LimitNOFILE=40000
 [Install]
 WantedBy=multi-user.target
 ```
+
 
 ## Certificados
 
@@ -110,6 +126,9 @@ sudo systemctl restart etcd
 
 
 # Servicio kube-apiserver
+```bash
+sudo systemctl status kube-apiserver
+```
 
 
 ```bash
@@ -167,6 +186,28 @@ sudo openssl req -new -key /etc/kubernetes/pki/apiserver.key -out /etc/kubernete
 sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver.crt -days 365 -extensions v3_req -extfile <(printf "[v3_req]\nsubjectAltName=DNS:kubernetes,DNS:kubernetes.default,DNS:kubernetes.default.svc,DNS:kubernetes.default.svc.cluster.local,IP:10.17.4.21,IP:10.96.0.1")
 ```
 
+```bash
+sudo vim /etc/kubernetes/pki/v3_req.cnf
+```
+
+```bash
+[ v3_req ]
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth, clientAuth
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = kubernetes
+DNS.2 = kubernetes.default
+DNS.3 = kubernetes.default.svc
+DNS.4 = kubernetes.default.svc.cluster.local
+IP.1 = 10.17.4.21
+IP.2 = 10.96.0.1
+```
+
+
+
+
 ## 3.  Generar el certificado de cliente para etcd
 
 
@@ -195,9 +236,6 @@ sudo openssl req -new -key /etc/kubernetes/pki/apiserver-kubelet-client.key -out
 sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver-kubelet-client.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver-kubelet-client.crt -days 365
 ```
 
-
-
-
 ##  5. Generar claves y certificados para las cuentas de servicio
 
 ```bash
@@ -205,8 +243,11 @@ sudo openssl genrsa -out /etc/kubernetes/pki/sa.key 2048
 sudo openssl rsa -in /etc/kubernetes/pki/sa.key -pubout -out /etc/kubernetes/pki/sa.pub
 ```
 
+```bash
+sudo mkdir -p /etc/kubernetes/manifests/
+```
 
-## Configuración de kube-apiserver
+
 
 ```bash
 sudo vim /etc/kubernetes/manifests/kube-apiserver.yaml
@@ -249,17 +290,25 @@ spec:
       path: /etc/kubernetes/pki
 ```
 
-#  kube-proxy
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart etcd
+```
 
 
+
+# Servicio kube-proxy
+
+
+```bash
 sudo systemctl status kube-proxy
+```
 
-m k
-
-
+```bash
 apiVersion: kubeproxy.config.k8s.io/v1alpha1
 kind: KubeProxyConfiguration
 clientConnection:
   kubeconfig: "/etc/kubernetes/kube-proxy.kubeconfig"
 mode: "iptables"
 clusterCIDR: "10.244.0.0/16"
+```
