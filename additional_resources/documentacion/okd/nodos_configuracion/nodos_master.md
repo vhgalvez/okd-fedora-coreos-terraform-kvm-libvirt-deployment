@@ -3,7 +3,6 @@
 
 # Servicio crio
 
-
 ```bash
 /etc/systemd/system/crio.service
 ```
@@ -26,7 +25,7 @@ LimitNPROC=4096
 WantedBy=multi-user.target
 ```
 
-# servicio etcd
+# Servicio etcd
 
 ```bash
 sudo vim /etc/systemd/system/etcd.service
@@ -184,19 +183,6 @@ Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
