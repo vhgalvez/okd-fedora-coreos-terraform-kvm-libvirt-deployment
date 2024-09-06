@@ -146,7 +146,6 @@ sudo journalctl -u etcd
 ```
 
 
-
 # Servicio kube-apiserver
 
 ```bash
