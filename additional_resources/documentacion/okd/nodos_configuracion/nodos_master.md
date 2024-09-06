@@ -1,6 +1,10 @@
 
 # Configuración de Nodos Master
 
+
+## 1. Instalación de Servicio CRI-O
+
+```bash
 # Servicio crio
   
 ```bash
@@ -36,7 +40,7 @@ sudo systemctl daemon-reload
 sudo systemctl restart etcd
 ```
 
-# Servicio etcd
+## 2. Instalación de Servicio etcd
 
 ```bash
 sudo systemctl status etcd
@@ -82,7 +86,7 @@ WantedBy=multi-user.target
 ```
 
 
-## Certificados
+## Certificados etcd
 
 ```bash
 mkdir -p /etc/kubernetes/pki/etcd
@@ -118,7 +122,7 @@ EOF
 ```
 
 ```bash
-sudo openssl x509 -req -in etcd.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out etcd.crt -days 365 -extensions v3_req -extfile etcd-openssl.cnf
+sudo openssl x509 -req -in /etc/kubernetes/pki/etcd/etcd.csr -CA /etc/kubernetes/pki/etcd/ca.crt -CAkey /etc/kubernetes/pki/etcd/ca.key -CAcreateserial -out /etc/kubernetes/pki/etcd/etcd.crt -days 365 -extensions v3_req -extfile /etc/kubernetes/pki/etcd/etcd-openssl.cnf
 ```
 
 ```bash
