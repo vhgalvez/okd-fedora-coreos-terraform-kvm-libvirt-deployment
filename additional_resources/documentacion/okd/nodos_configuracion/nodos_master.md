@@ -108,12 +108,33 @@ sudo systemctl daemon-reload
 sudo systemctl restart etcd
 ```
 
-
-
-
-
 # Servicio kube-apiserver
 
+
+
+## Crear el Certificado de Autoridad (CA)
+
+```bash
+sudo openssl genrsa -out /etc/kubernetes/pki/ca.key 2048
+sudo openssl req -x509 -new -nodes -key /etc/kubernetes/pki/ca.key -subj "/CN=kubernetes-ca" -days 365 -out /etc/kubernetes/pki/ca.crt
+```
+
+
+## Generar el certificado y clave privada del kube-apiserver
+
+```bash
+sudo openssl genrsa -out /etc/kubernetes/pki/apiserver.key 2048
+
+sudo openssl req -new -key /etc/kubernetes/pki/apiserver.key -out /etc/kubernetes/pki/apiserver.csr -subj "/CN=kube-apiserver"
+
+sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver.crt -days 365 -extensions v3_req -extfile <(printf "[v3_req]\nsubjectAltName=DNS:kubernetes,DNS:kubernetes.default,DNS:kubernetes.default.svc,DNS:kubernetes.default.svc.cluster.local,IP:10.17.4.21,IP:10.96.0.1")
+```
+
+
+
+
+
+## Generar el certificado de cliente para etcd
 
 
 
@@ -121,6 +142,7 @@ sudo systemctl restart etcd
 ```bash
 sudo vim /etc/systemd/system/kube-apiserver.service
 ```
+
 
 
 ```bash
@@ -155,6 +177,17 @@ Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 ```
+
+
+
+
+
+
+
+
+
+
+
 
 
 
