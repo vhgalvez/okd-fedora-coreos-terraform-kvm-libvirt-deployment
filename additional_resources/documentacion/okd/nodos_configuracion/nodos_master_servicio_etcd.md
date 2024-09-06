@@ -54,7 +54,9 @@ cd /etc/kubernetes/pki/etcd
 ```bash
 
 
-sudo openssl genpkey -algorithm RSA -out ca.key -pkeyopt rsa_keygen_bits:2048
+# Generar clave privada
+
+sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/etcd/etcd.key -pkeyopt rsa_keygen_bits:20488
 
 sudo openssl req -x509 -new -nodes -key ca.key -subj "/CN=etcd-ca" -days 3650 -out ca.crt
 
