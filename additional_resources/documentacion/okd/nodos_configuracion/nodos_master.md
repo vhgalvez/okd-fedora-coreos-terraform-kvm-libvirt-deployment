@@ -3,6 +3,7 @@
 
 # Servicio crio
 
+
 ```bash
 /etc/systemd/system/crio.service
 ```
@@ -75,6 +76,7 @@ mkdir -p /etc/kubernetes/pki/etcd
 ```bash
 sudo openssl genpkey -algorithm RSA -out ca.key -pkeyopt rsa_keygen_bits:2048
 sudo openssl req -x509 -new -nodes -key ca.key -subj "/CN=etcd-ca" -days 3650 -out ca.crt
+sudo openssl genpkey -algorithm RSA -out etcd.key -pkeyopt rsa_keygen_bits:2048
 sudo openssl req -new -key etcd.key -subj "/CN=etcd-server" -out etcd.csr
 ```
 
@@ -96,7 +98,6 @@ IP.1 = 127.0.0.1
 IP.2 = 10.17.4.22
 EOF
 ```
-
 
 ```bash
 sudo openssl x509 -req -in etcd.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out etcd.crt -days 365 -extensions v3_req -extfile etcd-openssl.cnf
