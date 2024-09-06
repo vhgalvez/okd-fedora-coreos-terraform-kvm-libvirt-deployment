@@ -1,7 +1,6 @@
 
 # Configuración de nodos master
 
-
 # servicio crio
 
 ```bash
