@@ -70,14 +70,19 @@ WantedBy=multi-user.target
 
 ```bash
 mkdir -p /etc/kubernetes/pki/etcd
+```
 
+```bash
 sudo openssl genpkey -algorithm RSA -out ca.key -pkeyopt rsa_keygen_bits:2048
 sudo openssl req -x509 -new -nodes -key ca.key -subj "/CN=etcd-ca" -days 3650 -out ca.crt
 sudo openssl req -new -key etcd.key -subj "/CN=etcd-server" -out etcd.csr
+```
 
+```bash
+sudo vim /etc/kubernetes/pki/etcd/etcd-openssl.cnf
+```
 
-/etc/kubernetes/pki/etcd/etcd-openssl.cnf
-
+```bash
 cat <<EOF > /etc/kubernetes/pki/etcd/etcd-openssl.cnf
 [ v3_req ]
 keyUsage = critical, digitalSignature, keyEncipherment
@@ -90,10 +95,14 @@ DNS.2 = etcd.local
 IP.1 = 127.0.0.1
 IP.2 = 10.17.4.22
 EOF
+```
 
 
+```bash
 sudo openssl x509 -req -in etcd.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out etcd.crt -days 365 -extensions v3_req -extfile etcd-openssl.cnf
+```
 
-
+```bash
 sudo systemctl daemon-reload
 sudo systemctl restart etcd
+```
