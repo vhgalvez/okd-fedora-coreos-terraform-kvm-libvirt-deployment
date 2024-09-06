@@ -57,8 +57,6 @@ cd /etc/kubernetes/pki/etcd
 
 ### 2.1. Generar la clave privada y el certificado de la Autoridad Certificadora (CA)
 
-
-
 ```bash
 sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/etcd/ca.key -pkeyopt rsa_keygen_bits:2048
 sudo openssl req -x509 -new -nodes -key /etc/kubernetes/pki/etcd/ca.key -subj "/CN=etcd-ca" -days 3650 -out /etc/kubernetes/pki/etcd/ca.crt
