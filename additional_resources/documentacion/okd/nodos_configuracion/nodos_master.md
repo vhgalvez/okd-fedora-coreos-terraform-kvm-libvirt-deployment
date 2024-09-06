@@ -38,6 +38,7 @@ WantedBy=multi-user.target
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl restart etcd
+sudo journalctl -u etcd
 ```
 
 ## 2. Instalación de Servicio etcd
@@ -128,6 +129,7 @@ sudo openssl x509 -req -in /etc/kubernetes/pki/etcd/etcd.csr -CA /etc/kubernetes
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl restart etcd
+sudo journalctl -u etcd
 ```
 
 
@@ -216,6 +218,12 @@ IP.2 = 10.96.0.1
 sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver.crt -days 365 -extensions v3_req -extfile /etc/kubernetes/pki/v3_req.cnf
 ```
 
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart kube-apiserver
+sudo journalctl -u kube-apiserver
+```
 
 
 
