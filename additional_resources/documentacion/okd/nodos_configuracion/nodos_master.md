@@ -1,7 +1,6 @@
 
 # Configuración de Nodos Master
 
-
 ## 1. Instalación de Servicio CRI-O
 
 ```bash
@@ -86,7 +85,6 @@ LimitNOFILE=40000
 WantedBy=multi-user.target
 ```
 
-
 ## Certificados etcd
 
 ```bash
@@ -131,9 +129,6 @@ sudo systemctl daemon-reload
 sudo systemctl restart etcd
 sudo journalctl -u etcd
 ```
-
-
-
 
 # Servicio kube-apiserver
 
