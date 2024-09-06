@@ -56,7 +56,7 @@ sudo virsh start helper
 sudo virsh start master1
 sudo virsh start master2
 
-
+sudo virsh list --all
 
 sudo virsh shutdown  freeipa1
 sudo virsh shutdown  load_balancer1

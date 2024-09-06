@@ -112,45 +112,6 @@ sudo systemctl restart etcd
 # Servicio kube-apiserver
 
 
-## Crear el Certificado de Autoridad (CA)
-
-```bash
-sudo openssl genrsa -out /etc/kubernetes/pki/ca.key 2048
-sudo openssl req -x509 -new -nodes -key /etc/kubernetes/pki/ca.key -subj "/CN=kubernetes-ca" -days 365 -out /etc/kubernetes/pki/ca.crt
-```
-
-
-## Generar el certificado y clave privada del kube-apiserver
-
-```bash
-sudo openssl genrsa -out /etc/kubernetes/pki/apiserver.key 2048
-
-sudo openssl req -new -key /etc/kubernetes/pki/apiserver.key -out /etc/kubernetes/pki/apiserver.csr -subj "/CN=kube-apiserver"
-
-sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver.crt -days 365 -extensions v3_req -extfile <(printf "[v3_req]\nsubjectAltName=DNS:kubernetes,DNS:kubernetes.default,DNS:kubernetes.default.svc,DNS:kubernetes.default.svc.cluster.local,IP:10.17.4.21,IP:10.96.0.1")
-```
-
-
-
-
-
-
-
-
-
-
-
-## Generar el certificado de cliente para etcd
-
-
-
-
-```bash
-sudo vim /etc/systemd/system/kube-apiserver.service
-```
-
-
-
 ```bash
 [Unit]
 Description=Kubernetes API Server
@@ -188,29 +149,64 @@ WantedBy=multi-user.target
 
 
 
+## 1. Crear el Certificado de Autoridad (CA)
+
+```bash
+sudo openssl genrsa -out /etc/kubernetes/pki/ca.key 2048
+sudo openssl req -x509 -new -nodes -key /etc/kubernetes/pki/ca.key -subj "/CN=kubernetes-ca" -days 365 -out /etc/kubernetes/pki/ca.crt
+```
+
+
+## 2. Generar el certificado y clave privada del kube-apiserver
+
+```bash
+sudo openssl genrsa -out /etc/kubernetes/pki/apiserver.key 2048
+
+sudo openssl req -new -key /etc/kubernetes/pki/apiserver.key -out /etc/kubernetes/pki/apiserver.csr -subj "/CN=kube-apiserver"
+
+sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver.crt -days 365 -extensions v3_req -extfile <(printf "[v3_req]\nsubjectAltName=DNS:kubernetes,DNS:kubernetes.default,DNS:kubernetes.default.svc,DNS:kubernetes.default.svc.cluster.local,IP:10.17.4.21,IP:10.96.0.1")
+```
+
+## 3.  Generar el certificado de cliente para etcd
+
+
+```bash
+sudo vim /etc/systemd/system/kube-apiserver.service
+```
+
+
+```bash
+sudo openssl genrsa -out /etc/kubernetes/pki/apiserver-etcd-client.key 2048
+
+sudo openssl req -new -key /etc/kubernetes/pki/apiserver-etcd-client.key -out /etc/kubernetes/pki/apiserver-etcd-client.csr -subj "/CN=etcd-client"
+
+sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver-etcd-client.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver-etcd-client.crt -days 365
+```
+
+
+## 4. Crear el certificado para la conexión entre kube-apiserver y kubelet
+
+
+```bash
+sudo openssl genrsa -out /etc/kubernetes/pki/apiserver-kubelet-client.key 2048
+
+sudo openssl req -new -key /etc/kubernetes/pki/apiserver-kubelet-client.key -out /etc/kubernetes/pki/apiserver-kubelet-client.csr -subj "/CN=kube-apiserver-kubelet-client"
+
+sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver-kubelet-client.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver-kubelet-client.crt -days 365
+```
 
 
 
 
+##  5. Generar claves y certificados para las cuentas de servicio
+
+```bash
+sudo openssl genrsa -out /etc/kubernetes/pki/sa.key 2048
+sudo openssl rsa -in /etc/kubernetes/pki/sa.key -pubout -out /etc/kubernetes/pki/sa.pub
+```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Configuración de kube-apiserver
+## Configuración de kube-apiserver
 
 ```bash
 sudo vim /etc/kubernetes/manifests/kube-apiserver.yaml
@@ -252,3 +248,18 @@ spec:
     hostPath:
       path: /etc/kubernetes/pki
 ```
+
+#  kube-proxy
+
+
+sudo systemctl status kube-proxy
+
+m k
+
+
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+clientConnection:
+  kubeconfig: "/etc/kubernetes/kube-proxy.kubeconfig"
+mode: "iptables"
+clusterCIDR: "10.244.0.0/16"
