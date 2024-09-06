@@ -186,6 +186,30 @@ WantedBy=multi-user.target
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Configuración de kube-apiserver
 
 ```bash
