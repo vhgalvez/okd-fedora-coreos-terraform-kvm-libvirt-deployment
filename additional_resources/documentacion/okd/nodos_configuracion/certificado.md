@@ -1,4 +1,5 @@
 Solución para "TLS: Bad Certificate"
+
 Paso 1: Asegurarse de que el Certificado del Cliente para etcd sea el Correcto
 El problema está relacionado con el certificado cliente (apiserver-etcd-client.crt) que kube-apiserver está usando para conectarse a etcd. Debes asegurarte de que este certificado ha sido firmado por la misma CA que está siendo utilizada por etcd.
 
@@ -41,7 +42,8 @@ sudo chmod 644 /etc/kubernetes/pki/etcd/etcd.crt
 
 # Cambiar permisos de los certificados y claves en kube-apiserver
 sudo chmod 600 /etc/kubernetes/pki/apiserver-etcd-client.key
-sudo chmod 644 /etc/kubernetes/pki/apiserver-etcd-client.crt
+sudo chmod 644 /etc/kubernetes/pki/apiserver-etcd-client.crt.
+
 Paso 4: Reiniciar los Servicios
 Después de hacer los ajustes, recarga y reinicia los servicios:
 
@@ -60,8 +62,10 @@ sudo systemctl restart kube-apiserver
 sudo journalctl -u etcd -f
 
 # Verificar los logs de kube-apiserver
+
 sudo journalctl -u kube-apiserver -f
 Paso 5: Verificar la Conexión
+
 Después de reiniciar los servicios, asegúrate de que kube-apiserver pueda conectarse correctamente a etcd revisando los logs de ambos servicios.
 
 Verificar si la Conexión es Exitosa
