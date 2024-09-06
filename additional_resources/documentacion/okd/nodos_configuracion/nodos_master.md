@@ -90,8 +90,11 @@ mkdir -p /etc/kubernetes/pki/etcd
 
 ```bash
 sudo openssl genpkey -algorithm RSA -out ca.key -pkeyopt rsa_keygen_bits:2048
+
 sudo openssl req -x509 -new -nodes -key ca.key -subj "/CN=etcd-ca" -days 3650 -out ca.crt
+
 sudo openssl genpkey -algorithm RSA -out etcd.key -pkeyopt rsa_keygen_bits:2048
+
 sudo openssl req -new -key etcd.key -subj "/CN=etcd-server" -out etcd.csr
 ```
 
@@ -126,6 +129,7 @@ sudo systemctl restart etcd
 
 
 # Servicio kube-apiserver
+
 ```bash
 sudo systemctl status kube-apiserver
 ```
@@ -166,12 +170,11 @@ WantedBy=multi-user.target
 
 
 
-
-
 ## 1. Crear el Certificado de Autoridad (CA)
 
 ```bash
 sudo openssl genrsa -out /etc/kubernetes/pki/ca.key 2048
+
 sudo openssl req -x509 -new -nodes -key /etc/kubernetes/pki/ca.key -subj "/CN=kubernetes-ca" -days 365 -out /etc/kubernetes/pki/ca.crt
 ```
 

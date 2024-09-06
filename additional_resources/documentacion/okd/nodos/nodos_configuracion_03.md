@@ -73,6 +73,8 @@ sudo virsh start master1
 sudo virsh start master2
 
 
+
+
 cat /etc/kubernetes/kubelet-config.yaml
 kind: KubeletConfiguration
 apiVersion: kubelet.config.k8s.io/v1beta1
