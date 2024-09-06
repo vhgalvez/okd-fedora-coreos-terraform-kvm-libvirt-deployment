@@ -67,7 +67,7 @@ LimitNOFILE=40000
 WantedBy=multi-user.target
 ```
 
-# Certificados
+## Certificados
 
 ```bash
 mkdir -p /etc/kubernetes/pki/etcd
@@ -108,8 +108,9 @@ sudo systemctl daemon-reload
 sudo systemctl restart etcd
 ```
 
-# Servicio kube-apiserver
 
+
+# Servicio kube-apiserver
 
 
 ## Crear el Certificado de Autoridad (CA)
@@ -129,6 +130,12 @@ sudo openssl req -new -key /etc/kubernetes/pki/apiserver.key -out /etc/kubernete
 
 sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver.crt -days 365 -extensions v3_req -extfile <(printf "[v3_req]\nsubjectAltName=DNS:kubernetes,DNS:kubernetes.default,DNS:kubernetes.default.svc,DNS:kubernetes.default.svc.cluster.local,IP:10.17.4.21,IP:10.96.0.1")
 ```
+
+
+
+
+
+
 
 
 
