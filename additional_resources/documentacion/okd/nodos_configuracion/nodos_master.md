@@ -107,9 +107,13 @@ sudo systemctl daemon-reload
 sudo systemctl restart etcd
 ```
 
-# Servicio 
+# Servicio kube-apiserver
 
+```bash
 sudo vim /etc/kubernetes/manifests/kube-apiserver.yaml
+```
+
+```yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -144,3 +148,4 @@ spec:
   - name: pki
     hostPath:
       path: /etc/kubernetes/pki
+```
