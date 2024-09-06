@@ -1,7 +1,7 @@
 
-# Configuración de nodos master
+# Configuración de Nodos Master
 
-# servicio crio
+# Servicio crio
 
 ```bash
 /etc/systemd/system/crio.service
