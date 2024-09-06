@@ -82,11 +82,7 @@ sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes
 ```
 
 
-```bash
-sudo systemctl daemon-reload
-sudo systemctl restart kube-apiserver
-sudo journalctl -u kube-apiserver
-```
+
 
 
 
@@ -178,4 +174,10 @@ sudo systemctl restart etcd
 sudo systemctl restart kube-apiserver
 sudo journalctl -u etcd -f
 sudo journalctl -u kube-apiserver -f
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart kube-apiserver
+sudo journalctl -u kube-apiserver
 ```
