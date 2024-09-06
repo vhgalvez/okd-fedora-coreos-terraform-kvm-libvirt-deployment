@@ -104,6 +104,14 @@ EOF
 sudo openssl x509 -req -in etcd.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out etcd.crt -days 365 -extensions v3_req -extfile etcd-openssl.cnf
 ```
 
+### 2.6. Cambiar los permisos de los certificados
+
+```bash
+sudo chown etcd:etcd /etc/kubernetes/pki/etcd/*.*
+sudo chmod 600 /etc/kubernetes/pki/etcd/*.key
+sudo chmod 644 /etc/kubernetes/pki/etcd/*.crt
+```
+
 
 ## 3. Iniciar y Verificar el Servicio etcd
 
@@ -115,12 +123,15 @@ sudo systemctl daemon-reload
 
 # Iniciar el servicio etcd
 sudo systemctl start etcd
+sudo systemctl restart etcd
 
 # Habilitar el servicio para que se inicie en el arranque
 sudo systemctl enable etcd
 
 # Verificar el estado del servicio
 sudo systemctl status etcd
+
+sudo systemctl restart etcd
 
 # Ver los logs del servicio etcd
 sudo journalctl -u etcd -f
