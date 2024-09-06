@@ -7,7 +7,6 @@
 /etc/systemd/system/crio.service
 ```
 
-
 ```bash
 [Unit]
 Description=CRI-O container runtime
@@ -25,7 +24,6 @@ LimitNPROC=4096
 [Install]
 WantedBy=multi-user.target
 ```
-
 
 # servicio etcd
 
@@ -67,3 +65,4 @@ LimitNOFILE=40000
 [Install]
 WantedBy=multi-user.target
 ```
+
