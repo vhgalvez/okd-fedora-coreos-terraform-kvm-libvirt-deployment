@@ -1,9 +1,11 @@
 # Solución para "TLS: Bad Certificate"
 
 ## Paso 1: Asegurarse de que el Certificado del Cliente para etcd sea el Correcto
+
 El problema está relacionado con el certificado cliente (`apiserver-etcd-client.crt`) que `kube-apiserver` está usando para conectarse a `etcd`. Debes asegurarte de que este certificado ha sido firmado por la misma CA que está siendo utilizada por `etcd`.
 
 ### Verificar el Certificado del Cliente para etcd:
+
 Asegúrate de que el certificado `apiserver-etcd-client.crt` está correctamente firmado por la CA de `etcd`. Si no es así, genera un nuevo certificado.
 
 ### Regenerar el Certificado del Cliente `apiserver-etcd-client` Usando la CA de `etcd`:
