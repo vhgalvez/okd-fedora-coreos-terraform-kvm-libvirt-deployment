@@ -4,8 +4,10 @@
 
 # servicio crio
 
-
+```bash
 /etc/systemd/system/crio.service
+```
+
 
 ```bash
 [Unit]
@@ -26,7 +28,11 @@ WantedBy=multi-user.target
 ```
 
 
-/etc/systemd/system/etcd.service
+# servicio etcd
+
+```bash
+sudo vim /etc/systemd/system/etcd.service
+```
 
 ```bash
 [Unit]
@@ -62,5 +68,3 @@ LimitNOFILE=40000
 [Install]
 WantedBy=multi-user.target
 ```
-
-
