@@ -110,6 +110,10 @@ sudo openssl x509 -req -in /etc/kubernetes/pki/etcd/etcd.csr -CA /etc/kubernetes
 sudo chown etcd:etcd /etc/kubernetes/pki/etcd/*.*
 sudo chmod 600 /etc/kubernetes/pki/etcd/*.key
 sudo chmod 644 /etc/kubernetes/pki/etcd/*.crt
+
+sudo chown etcd:etcd *.*
+sudo chmod 600 etcd.key
+sudo chmod 644 etcd.crt ca.crt
 ```
 
 

@@ -1,8 +1,99 @@
-# Servicio kube-apiserver
+# Servicio kube-apiserver – Instalación y Configuración Actualizada
+
+
+## 2. Instalación y Configuración de kube-apiserver
+
+### 2.1 Crear Certificados para kube-apiserver
+
 
 ```bash
 sudo systemctl status kube-apiserver
 ```
+
+**Generar la Clave Privada y Certificado de la CA para kube-apiserver**
+
+1. Generar la clave privada y el certificado de la CA para `kube-apiserver`:
+
+```bash
+sudo openssl genrsa -out /etc/kubernetes/pki/ca.key 2048
+sudo openssl req -x509 -new -nodes -key /etc/kubernetes/pki/ca.key -subj "/CN=kubernetes-ca" -days 365 -out /etc/kubernetes/pki/ca.crt
+```
+
+2. Generar la clave privada para `kube-apiserver`:
+
+
+```bash
+sudo openssl genrsa -out /etc/kubernetes/pki/apiserver.key 2048
+```
+
+3. Crear la solicitud de firma de certificado (CSR) para `kube-apiserver`:
+
+```bash
+sudo openssl req -new -key /etc/kubernetes/pki/apiserver.key -subj "/CN=kube-apiserver" -out /etc/kubernetes/pki/apiserver.csr
+```
+
+4. Crear el archivo de configuración de OpenSSL para `kube-apiserver`:
+
+sudo tee /etc/kubernetes/pki/v3_req.cnf <<EOF
+[ v3_req ]
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth, clientAuth
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = kubernetes
+DNS.2 = kubernetes.default
+DNS.3 = kubernetes.default.svc
+DNS.4 = kubernetes.default.svc.cluster.local
+IP.1 = 10.17.4.22
+IP.2 = 10.96.0.1
+EOF
+
+
+5. Firmar el CSR de kube-apiserver con la CA:
+
+   
+```bash
+sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver.crt -days 365 -extensions v3_req -extfile /etc/kubernetes/pki/v3_req.cnf
+```
+
+
+
+### 2.2 Generar el Certificado de Cliente para etcd
+
+1. Generar la clave privada para apiserver-etcd-client:
+
+
+```bash
+sudo openssl genrsa -out /etc/kubernetes/pki/apiserver-etcd-client.key 2048
+```
+
+
+
+2. Crear el CSR para el cliente apiserver-etcd-client:
+
+```bash
+sudo openssl req -new -key /etc/kubernetes/pki/apiserver-etcd-client.key -subj "/CN=apiserver-etcd-client" -out /etc/kubernetes/pki/apiserver-etcd-client.csr
+```
+
+
+
+3. Firmar el CSR con la CA de etcd:
+
+```bash
+sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver-etcd-client.csr -CA /etc/kubernetes/pki/etcd/ca.crt -CAkey /etc/kubernetes/pki/etcd/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver-etcd-client.crt -days 365
+```
+
+
+### 2.3 Crear el Servicio para kube-apiserver
+
+1. Configurar el archivo de servicio de kube-apiserver:
+  
+```bash
+sudo vim /etc/systemd/system/kube-apiserver.service
+```
+
+2. Contenido del archivo kube-apiserver.service:
 
 
 ```bash
@@ -37,6 +128,47 @@ Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 ```
+
+### 2.4 Iniciar y Verificar el Servicio kube-apiserver
+
+1. Recargar systemd y arrancar kube-apiserver:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl start kube-apiserver
+sudo systemctl enable kube-apiserver
+```
+
+2. Verificar el estado de kube-apiserver:
+
+```bash
+sudo systemctl status kube-apiserver
+sudo journalctl -u kube-apiserver -f
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
