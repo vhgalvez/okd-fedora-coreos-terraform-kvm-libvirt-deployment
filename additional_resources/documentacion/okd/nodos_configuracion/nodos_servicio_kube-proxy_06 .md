@@ -137,3 +137,9 @@ bash
 Copiar código
 oc get nodes
 Si el comando devuelve una lista de nodos, kube-proxy está funcionando correctamente en tu clúster.
+
+sudo oc get nodes --kubeconfig /etc/kubernetes/admin.conf
+
+sudo oc get clusterrolebinding --kubeconfig /etc/kubernetes/admin.conf
+
+sudo oc --kubeconfig=/etc/kubernetes/admin.conf create clusterrolebinding kubelet-bootstrap --clusterrole=system:node --user=kubelet
