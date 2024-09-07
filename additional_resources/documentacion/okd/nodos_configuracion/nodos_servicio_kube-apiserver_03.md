@@ -6,7 +6,10 @@ Este archivo define el servicio kube-apiserver y cómo se comunica con etcd usan
 
 Archivo: `/etc/systemd/system/kube-apiserver.service`
 
-```bash 
+sudo vim /etc/systemd/system/kube-apiserver.service
+
+```bash
+sudo tee /etc/systemd/system/kube-apiserver.service <<EOF
 [Unit]
 Description=Kubernetes API Server
 Documentation=https://kubernetes.io/docs/concepts/overview/components/
@@ -37,6 +40,7 @@ Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
 
 ## 5. Certificados para kube-apiserver
@@ -69,6 +73,7 @@ sudo vim /etc/kubernetes/pki/v3_req.cnf
 
 
 ```bash
+sudo tee /etc/kubernetes/pki/v3_req.cnf <<EOF
 [ v3_req ]
 keyUsage = critical, digitalSignature, keyEncipherment
 extendedKeyUsage = serverAuth, clientAuth
@@ -81,6 +86,7 @@ DNS.3 = kubernetes.default.svc
 DNS.4 = kubernetes.default.svc.cluster.local
 IP.1 = 10.17.4.22
 IP.2 = 10.96.0.1
+EOF
 ```
 
 **Firmar el CSR para generar el certificado:**
