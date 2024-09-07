@@ -9,6 +9,7 @@ Primero, definimos el archivo de servicio para `etcd`:
 Archivo: `/etc/systemd/system/etcd.service`
 
 ```bash
+sudo tee /etc/systemd/system/etcd.service <<EOF
 [Unit]
 Description=etcd
 Documentation=https://github.com/coreos/etcd
@@ -17,41 +18,31 @@ After=network.target
 [Service]
 User=etcd
 Type=notify
-# Directorio de datos para etcd
 Environment="ETCD_DATA_DIR=/var/lib/etcd"
-# Nombre del nodo etcd
 Environment="ETCD_NAME=etcd0"
-# URL de publicidad inicial entre pares
-Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=https://10.17.4.22:2380"
-# Dirección donde escucha el nodo etcd
-Environment="ETCD_LISTEN_PEER_URLS=https://10.17.4.21:2380"
-# URLs donde el cliente puede conectar al servicio etcd
-Environment="ETCD_LISTEN_CLIENT_URLS=https://10.17.4.21:2379,https://127.0.0.1:2379"
-# URL que se anuncia a otros nodos para los clientes
-Environment="ETCD_ADVERTISE_CLIENT_URLS=https://10.17.4.21:2379"
-# Definir el estado inicial del clúster
-Environment="ETCD_INITIAL_CLUSTER=etcd0=https://10.17.4.21:2380"
+Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=https://10.17.4.23:2380"
+Environment="ETCD_LISTEN_PEER_URLS=https://10.17.4.23:2380"
+Environment="ETCD_LISTEN_CLIENT_URLS=https://10.17.4.23:2379,https://127.0.0.1:2379"
+Environment="ETCD_ADVERTISE_CLIENT_URLS=https://10.17.4.23:2379"
+Environment="ETCD_INITIAL_CLUSTER=etcd0=https://10.17.4.23:2380"
 Environment="ETCD_INITIAL_CLUSTER_STATE=new"
 Environment="ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster"
-# Certificados y claves TLS para la autenticación entre nodos y clientes
 Environment="ETCD_CERT_FILE=/etc/kubernetes/pki/etcd/etcd.crt"
 Environment="ETCD_KEY_FILE=/etc/kubernetes/pki/etcd/etcd.key"
 Environment="ETCD_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.crt"
 Environment="ETCD_CLIENT_CERT_AUTH=true"
-# Certificados para la comunicación entre pares
 Environment="ETCD_PEER_CERT_FILE=/etc/kubernetes/pki/etcd/etcd.crt"
 Environment="ETCD_PEER_KEY_FILE=/etc/kubernetes/pki/etcd/etcd.key"
 Environment="ETCD_PEER_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.crt"
 Environment="ETCD_PEER_CLIENT_CERT_AUTH=true"
-# Comando de ejecución de etcd
 ExecStart=/opt/bin/etcd
 Restart=always
 RestartSec=10s
-# Limite de archivos abiertos
 LimitNOFILE=40000
 
 [Install]
 WantedBy=multi-user.target
+EOF
 ```
 
 
