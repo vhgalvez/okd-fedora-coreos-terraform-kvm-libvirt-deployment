@@ -133,6 +133,7 @@ sudo systemctl enable etcd
 # Verificar el estado del servicio
 sudo systemctl status etcd
 
+
 # Ver los logs del servicio etcd
 sudo journalctl -u etcd -f
 ```
