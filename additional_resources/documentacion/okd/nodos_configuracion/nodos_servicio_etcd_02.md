@@ -62,7 +62,7 @@ Sigue estos pasos para generar los certificados y claves necesarios para etcd:
 **Crear el directorio de certificados:**
 
 ```bash
-mkdir -p /etc/kubernetes/pki/etcd
+sudo mkdir -p /etc/kubernetes/pki/etcd
 cd /etc/kubernetes/pki/etcd
 ```
 
