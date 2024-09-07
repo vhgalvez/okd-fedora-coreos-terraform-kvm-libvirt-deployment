@@ -77,7 +77,7 @@ sudo openssl req -x509 -new -nodes -key ca.key -subj "/CN=etcd-ca" -days 3650 -o
 **Generar la clave privada y la solicitud de firma (CSR) para etcd:**
 
 ```bash
-    sudo openssl genpkey -algorithm RSA -out etcd.key -pkeyopt rsa_keygen_bits:2048
+sudo openssl genpkey -algorithm RSA -out etcd.key -pkeyopt rsa_keygen_bits:2048
 sudo openssl req -new -key etcd.key -subj "/CN=etcd-server" -out etcd.csr
 ```
 
@@ -120,6 +120,7 @@ Recargar el daemon de systemd y reiniciar el servicio etcd:
 
 ```bash
 sudo systemctl daemon-reload
+sudo systemctl restart etcd
 sudo systemctl start etcd
 sudo systemctl enable etcd
 sudo systemctl status etcd
@@ -245,7 +246,7 @@ sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver-etcd-client.csr -CA /et
 **Verificar los permisos:**
 
 ```bash
-    sudo chmod 600 /etc/kubernetes/pki/apiserver-etcd-client.key
+sudo chmod 600 /etc/kubernetes/pki/apiserver-etcd-client.key
 sudo chmod 644 /etc/kubernetes/pki/apiserver-etcd-client.crt
 ```
 
@@ -254,7 +255,7 @@ sudo chmod 644 /etc/kubernetes/pki/apiserver-etcd-client.crt
 **Recarga y reinicia ambos servicios:**
 
 ```bash
-    sudo systemctl daemon-reload
+sudo systemctl daemon-reload
 sudo systemctl restart etcd
 sudo systemctl restart kube-apiserver
 ```
