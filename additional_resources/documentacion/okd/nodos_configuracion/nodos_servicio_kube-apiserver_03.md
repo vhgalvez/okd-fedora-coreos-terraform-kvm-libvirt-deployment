@@ -47,11 +47,6 @@ EOF
 
 ## 5. Certificados para kube-apiserver
 
-Eliminar certificados anteriores:
-    
-```bash
-sudo rm /etc/kubernetes/pki/apiserver.key /etc/kubernetes/pki/apiserver.crt /etc/kubernetes/pki/apiserver.csr
-```
 
 **Generar nueva clave privada:**
 
@@ -114,11 +109,6 @@ sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes
 
 ## 6. Certificado de cliente para etcd
 
-**Eliminar los certificados y claves anteriores:**
-    
-```bash
-sudo rm /etc/kubernetes/pki/apiserver-etcd-client.key /etc/kubernetes/pki/apiserver-etcd-client.crt /etc/kubernetes/pki/apiserver-etcd-client.csr
-```
 
 **Generar nueva clave privada para apiserver-etcd-client:**
 
@@ -147,25 +137,8 @@ sudo chmod 600 /etc/kubernetes/pki/apiserver-etcd-client.key
 sudo chmod 644 /etc/kubernetes/pki/apiserver-etcd-client.crt
 ```
 
-## 7. Reiniciar servicios
 
-**Recarga y reinicia ambos servicios:**
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl restart etcd
-sudo systemctl restart kube-apiserver
-```
-
-
-## 8. Verificar los logs
-
-Verifica que no haya errores de certificados en los logs:
-
-```bash
-sudo journalctl -u etcd -f
-sudo journalctl -u kube-apiserver -f
-```
+## 7. Certificados para kubelet
 
 ```bash
 sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/sa.key -pkeyopt rsa_keygen_bits:2048
@@ -177,3 +150,27 @@ sudo chown root:root /etc/kubernetes/pki/sa.key /etc/kubernetes/pki/sa.pub
 sudo chmod 600 /etc/kubernetes/pki/sa.key
 sudo chmod 644 /etc/kubernetes/pki/sa.pub
 ```
+
+
+## 8. Reiniciar servicios
+
+**Recarga y reinicia ambos servicios:**
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart etcd
+sudo systemctl restart kube-apiserver
+```
+
+
+
+
+## 9. Verificar los logs
+
+Verifica que no haya errores de certificados en los logs:
+
+```bash
+sudo journalctl -u etcd -f
+sudo journalctl -u kube-apiserver -f
+```
+
