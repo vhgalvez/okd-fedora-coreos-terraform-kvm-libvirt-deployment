@@ -6,7 +6,12 @@
 
 Primero, definimos el archivo de servicio para `etcd`:
 
-Archivo: `/etc/systemd/system/etcd.service`
+Archivo: `cat /etc/systemd/system/etcd.service`
+
+```bash
+sudo vim /etc/systemd/system/etcd.service
+```
+
 
 ```bash
 sudo tee /etc/systemd/system/etcd.service <<EOF
