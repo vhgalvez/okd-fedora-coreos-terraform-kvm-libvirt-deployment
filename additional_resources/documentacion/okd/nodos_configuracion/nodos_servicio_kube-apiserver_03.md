@@ -86,12 +86,27 @@ DNS.1 = kubernetes
 DNS.2 = kubernetes.default
 DNS.3 = kubernetes.default.svc
 DNS.4 = kubernetes.default.svc.cluster.local
-IP.1 = 10.17.4.22
+IP.1 = 10.17.4.23
 IP.2 = 10.96.0.1
 EOF
 ```
 
 **Firmar el CSR para generar el certificado:**
+
+```bash
+sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/ca.key -pkeyopt rsa_keygen_bits:2048
+```
+
+```bash
+sudo openssl req -x509 -new -key /etc/kubernetes/pki/ca.key -subj "/CN=Kubernetes-CA" -days 3650 -out /etc/kubernetes/pki/ca.crt
+```
+
+```bash
+sudo chown etcd:etcd /etc/kubernetes/pki/ca.crt
+sudo chmod 644 /etc/kubernetes/pki/ca.crt
+sudo chown etcd:etcd /etc/kubernetes/pki/ca.key
+sudo chmod 600 /etc/kubernetes/pki/ca.key
+```
 
 ```bash
 sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver.crt -days 365 -extensions v3_req -extfile /etc/kubernetes/pki/v3_req.cnf
@@ -123,6 +138,8 @@ sudo openssl req -new -key /etc/kubernetes/pki/apiserver-etcd-client.key -subj "
 sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver-etcd-client.csr -CA /etc/kubernetes/pki/etcd/ca.crt -CAkey /etc/kubernetes/pki/etcd/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver-etcd-client.crt -days 365
 ```
 
+
+
 **Verificar los permisos:**
 
 ```bash
@@ -148,4 +165,15 @@ Verifica que no haya errores de certificados en los logs:
 ```bash
 sudo journalctl -u etcd -f
 sudo journalctl -u kube-apiserver -f
+```
+
+```bash
+sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/sa.key -pkeyopt rsa_keygen_bits:2048
+sudo openssl rsa -in /etc/kubernetes/pki/sa.key -pubout -out /etc/kubernetes/pki/sa.pub
+```
+
+```bash
+sudo chown root:root /etc/kubernetes/pki/sa.key /etc/kubernetes/pki/sa.pub
+sudo chmod 600 /etc/kubernetes/pki/sa.key
+sudo chmod 644 /etc/kubernetes/pki/sa.pub
 ```

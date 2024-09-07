@@ -95,7 +95,7 @@ subjectAltName = @alt_names
 DNS.1 = etcd
 DNS.2 = etcd.local
 IP.1 = 127.0.0.1
-IP.2 = 10.17.4.22
+IP.2 = 10.17.4.23
 EOF
 ```
 
@@ -111,6 +111,12 @@ sudo openssl x509 -req -in etcd.csr -CA ca.crt -CAkey ca.key -CAcreateserial -ou
 sudo chown etcd:etcd *.*
 sudo chmod 600 *.key
 sudo chmod 644 *.crt
+```
+
+
+```bash
+ls -ld /var/lib/etcd
+sudo chown -R etcd:etcd /var/lib/etcd
 ```
 
 
