@@ -4,7 +4,7 @@
 
 Este archivo define el servicio kube-apiserver y cómo se comunica con etcd usando TLS.
 
-Archivo: `/etc/systemd/system/kube-apiserver.service`
+Archivo: `cat /etc/systemd/system/kube-apiserver.service`
 
 ```bash
 sudo vim /etc/systemd/system/kube-apiserver.service
@@ -19,7 +19,7 @@ After=network.target
 
 [Service]
 ExecStart=/opt/bin/kube-apiserver \
-  --advertise-address=10.17.4.21 \
+  --advertise-address=10.17.4.23 \
   --allow-privileged=true \
   --authorization-mode=Node,RBAC \
   --client-ca-file=/etc/kubernetes/pki/ca.crt \
@@ -142,6 +142,7 @@ sudo chmod 644 /etc/kubernetes/pki/apiserver-etcd-client.crt
 
 ```bash
 sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/sa.key -pkeyopt rsa_keygen_bits:2048
+
 sudo openssl rsa -in /etc/kubernetes/pki/sa.key -pubout -out /etc/kubernetes/pki/sa.pub
 ```
 
@@ -175,6 +176,8 @@ sudo journalctl -u kube-apiserver -f
 ```
 
 
+
+
 Genera la clave privada para el cliente kubelet:
 
 bash
@@ -190,6 +193,7 @@ Firma el certificado utilizando la CA (Certificate Authority):
 bash
 Copiar código
 sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver-kubelet-client.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver-kubelet-client.crt -days 365
+
 Después de generar estos archivos, asegúrate de ajustar los permisos correctamente:
 
 bash
