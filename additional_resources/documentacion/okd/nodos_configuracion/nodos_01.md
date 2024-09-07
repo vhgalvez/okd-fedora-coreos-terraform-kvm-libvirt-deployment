@@ -181,4 +181,3 @@ Para monitorear los logs en tiempo real y asegurarte de que no haya errores, eje
 ```bash
 sudo journalctl -u kube-controller-manager -f
 ```
-
