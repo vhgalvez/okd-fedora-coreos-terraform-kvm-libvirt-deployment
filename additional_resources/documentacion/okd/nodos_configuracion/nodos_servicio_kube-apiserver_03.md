@@ -6,7 +6,9 @@ Este archivo define el servicio kube-apiserver y cómo se comunica con etcd usan
 
 Archivo: `/etc/systemd/system/kube-apiserver.service`
 
+```bash
 sudo vim /etc/systemd/system/kube-apiserver.service
+```
 
 ```bash
 sudo tee /etc/systemd/system/kube-apiserver.service <<EOF
