@@ -120,6 +120,7 @@ Recargar el daemon de systemd y reiniciar el servicio etcd:
 
 ```bash
 sudo systemctl daemon-reload
+sudo systemctl start etcd
 sudo systemctl restart etcd
 sudo systemctl start etcd
 sudo systemctl enable etcd

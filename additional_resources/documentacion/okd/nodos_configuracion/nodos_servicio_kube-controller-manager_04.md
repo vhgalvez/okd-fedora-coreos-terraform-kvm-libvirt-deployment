@@ -158,6 +158,8 @@ Inicia el servicio y habilítalo para que se ejecute automáticamente al inicio:
 ```bash
 sudo systemctl start kube-controller-manager
 sudo systemctl enable kube-controller-manager
+sudo systemctl status kube-controller-manager
+
 ```
 
 
