@@ -162,6 +162,7 @@ Comprueba que kube-proxy esté conectado correctamente al servidor API de Kubern
 
 ```bash
 oc get nodes --kubeconfig /etc/kubernetes/admin.conf
+```
 
 ## 6. Crear un ClusterRoleBinding para kube-proxy
 
