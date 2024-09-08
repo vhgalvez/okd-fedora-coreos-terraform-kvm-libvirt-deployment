@@ -312,6 +312,9 @@ storage:
           sed -i 's;/usr/libexec;/opt/libexec;g' /opt/bin/crio/cri-o/install
           sed -i 's;/usr/local/share;/opt/share;g' /opt/bin/crio/cri-o/install
 
+          # Instalar CRI-O 
+          sudo /opt/bin/crio/cri-o/install
+
           # OpenShift Client (oc)
           sudo curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
