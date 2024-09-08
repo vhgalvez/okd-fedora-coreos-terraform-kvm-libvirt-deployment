@@ -297,12 +297,11 @@ storage:
           # Crear directorios necesarios
           sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin /etc/kubernetes/pki/etcd
 
-          # Descargar e Instalar el Instalador de OKD
-          wget https://github.com/okd-project/okd/releases/download/4.12.0-0.okd-2023-03-18-084815/openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
-          tar -xzvf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
+          # OKD Installer (v4.14.0)
+          sudo wget https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz
+          tar -xzvf openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz
           sudo mv openshift-install /opt/bin/
           sudo chmod +x /opt/bin/openshift-install
-          rm -rf openshift-install-linux-4.12.0-0.okd-2023-03-18-084815.tar.gz
 
           # Instalar kube-proxy
           curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-proxy
@@ -335,32 +334,19 @@ storage:
           curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.31.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
           
-          # Instalar oc (OpenShift Client)
-          curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
+          # OpenShift Client (oc)
+          sudo curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
           sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
-          sudo rm -rf /tmp/oc.tar.gz
+          export PATH=$PATH:/opt/bin
+          echo "export PATH=\$PATH:/opt/bin" >> ~/.bashrc
 
-          # Instalar CRI-O
+          # CRI-O (v1.30.5) - URL que funciona correctamente
+          sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz
           sudo mkdir -p /opt/bin/crio
-          sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.3.tar.gz
-          sudo mkdir -p /tmp/crio
-          sudo tar -xzf /tmp/crio.tar.gz -C /tmp/crio
-          sudo mv /tmp/crio/cri-o/bin/* /opt/bin/crio/
-          sudo chmod +x /opt/bin/crio/*
-          /opt/bin/crio/crio --version
-
-          # Descargar conmon
-          wget https://github.com/containers/conmon/releases/download/v2.1.12/conmon.amd64
-          sudo mv conmon.amd64 /opt/bin/crio/conmon
-          sudo chmod +x /opt/bin/crio/conmon
-
-          # Descargar e instalar los plugins de CNI
-          curl -L -o /tmp/cni-plugins.tgz https://github.com/containernetworking/plugins/releases/download/v0.9.1/cni-plugins-linux-amd64-v0.9.1.tgz
-          sudo mkdir -p /opt/cni/bin
-          sudo tar -xzf /tmp/cni-plugins.tgz -C /opt/cni/bin
-          sudo rm -rf /tmp/cni-plugins.tgz
+          sudo tar -xzf /tmp/crio.tar.gz -C /opt/bin/crio/
+          sudo /opt/bin/crio/cri-o/instal
 
           # Descargar y almacenar los certificados necesarios
 
@@ -404,8 +390,10 @@ storage:
 
           # Reload systemd and activate services
           sudo systemctl daemon-reload
+          sudo systemctl enable --now crio
           sudo systemctl enable crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
           sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
+
 
 
 systemd:
