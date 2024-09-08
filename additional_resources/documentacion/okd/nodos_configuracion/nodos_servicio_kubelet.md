@@ -1,63 +1,172 @@
+Tutorial para configurar kubelet y generar certificados en Kubernetes con OpenShift SDN
+Paso 1: Revisión y ajuste de la configuración de kubelet
+1.1 Verificar el estado del servicio kubelet
+Revisa si el servicio kubelet está en ejecución. Si falla, continúa con los siguientes pasos.
 
-# Guía para la Preparación de Nodos para la Instalación de OKD
-============================================================
-Esta guía cubre los pasos para preparar correctamente los nodos master y worker en un clúster OKD. Esto incluye la configuración del servicio kubelet, la red CNI, y otros componentes necesarios para asegurar que los nodos se unan correctamente al clúster durante la instalación de OKD.
+bash
+Copiar código
+sudo systemctl status kubelet
+1.2 Verificar el archivo de configuración del kubelet
+Revisa la configuración de kubelet para asegurarte de que sea correcta.
 
-____________________________________________________________
+bash
+Copiar código
+cat /etc/kubernetes/kubelet-config.yaml
+El contenido debería ser similar a:
 
-## 1. Introducción al Servicio Kubelet
+yaml
+Copiar código
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+authentication:
+  x509:
+    clientCAFile: "/etc/kubernetes/pki/ca.crt"
+authorization:
+  mode: Webhook
+serverTLSBootstrap: true
+tlsCertFile: "/etc/kubernetes/pki/kubelet.crt"
+tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet.key"
+cgroupDriver: systemd
+runtimeRequestTimeout: "15m"
+containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
+featureGates:
+  RotateKubeletServerCertificate: true
+evictionHard:
+  memory.available: "200Mi"
+  nodefs.available: "10%"
+  nodefs.inodesFree: "5%"
+maxPods: 110
+failSwapOn: false
+cniConfDir: /etc/cni/net.d
+cniBinDir: /opt/cni/bin
+logging:
+  format: json
+1.3 Verificar la configuración de kubelet.conf
+Este archivo debe incluir la IP del nodo maestro.
 
-El servicio kubelet es fundamental en cada nodo del clúster OKD. Es responsable de:
+bash
+Copiar código
+cat /etc/kubernetes/kubelet.conf
+El archivo debe tener un contenido similar a este:
 
-* Registrar el nodo en el clúster
-* Gestionar los pods y contenedores
-* Comunicar el estado del nodo al kube-apiserver
+yaml
+Copiar código
+apiVersion: v1
+kind: Config
+clusters:
+- cluster:
+    certificate-authority: /etc/kubernetes/pki/ca.crt
+    server: https://10.17.4.23:6443
+  name: local
+contexts:
+- context:
+    cluster: local
+    user: kubelet
+  name: local
+current-context: local
+users:
+- name: kubelet
+  user:
+    client-certificate: /etc/kubernetes/pki/kubelet.crt
+    client-key: /etc/kubernetes/pki/kubelet.key
+Paso 2: Crear el archivo kubeadm-flags.env
+Si el archivo /var/lib/kubelet/kubeadm-flags.env no existe, créalo con el siguiente contenido:
 
-Si el kubelet no está correctamente configurado o no puede comunicarse con el API de Kubernetes, los nodos no aparecerán en el clúster y los recursos no podrán ser gestionados adecuadamente.
+bash
+Copiar código
+sudo tee /var/lib/kubelet/kubeadm-flags.env <<EOF
+KUBELET_KUBEADM_ARGS="--container-runtime=remote --container-runtime-endpoint=unix:///var/run/crio/crio.sock --fail-swap-on=false --cgroup-driver=systemd --max-pods=110 --eviction-hard=memory.available<200Mi,nodefs.available<10%,nodefs.inodesFree<5% --node-ip=10.17.4.23 --config=/etc/kubernetes/kubelet-config.yaml"
+EOF
+Paso 3: Verificar la configuración de red de OpenShift SDN
+Verifica que el archivo de configuración de red esté correctamente configurado.
 
-## 2. Configurar el Servicio Kubelet
+Si estás utilizando Flannel:
 
-### 2.1 Archivo de Servicio `kubelet.service`
+bash
+Copiar código
+cat /etc/cni/net.d/10-flannel.conf
+Debe tener este contenido:
 
+json
+Copiar código
+{
+  "cniVersion": "0.3.1",
+  "name": "cbr0",
+  "type": "flannel",
+  "delegate": {
+    "isDefaultGateway": true
+  }
+}
+Si estás utilizando OpenShift SDN, configura la red correspondiente. Para OpenShift SDN, verifica que el plugin SDN esté bien configurado.
 
-Este archivo de servicio asegura que `kubelet` se inicie junto con el runtime de contenedores `CRI-O` y se reinicie automáticamente si falla.
+Paso 4: Generar los certificados necesarios para kubelet
+4.1 Crear el archivo de configuración de la CSR para kubelet
 
+bash
+Copiar código
+sudo tee /etc/kubernetes/pki/kubelet-csr.conf <<EOF
+[req]
+req_extensions = v3_req
+distinguished_name = req_distinguished_name
+prompt = no
 
-```bash
-cat /etc/systemd/system/kubelet.service
-```
+[req_distinguished_name]
+CN = system:node:master3.cefaslocalserver.com
+O = system:nodes
 
-```bash
-[Unit]
-Description=kubelet: The Kubernetes Node Agent
-Documentation=https://kubernetes.io/docs/
-Wants=crio.service
-After=crio.service
+[v3_req]
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = clientAuth
+EOF
 
-[Service]
-ExecStart=/opt/bin/kubelet --config=/etc/kubernetes/kubelet-config.yaml --kubeconfig=/etc/kubernetes/kubelet.conf
-Restart=always
-StartLimitInterval=0
-RestartSec=10
+4.2 Generar la clave privada de kubelet
 
-[Install]
-WantedBy=multi-user.target
-```
+bash
+Copiar código
+openssl genrsa -out /etc/kubernetes/pki/kubelet.key 2048
+4.3 Generar la CSR (Solicitud de Firma de Certificado)
+bash
+Copiar código
+openssl req -new -key /etc/kubernetes/pki/kubelet.key -out /etc/kubernetes/pki/kubelet.csr -config /etc/kubernetes/pki/kubelet-csr.conf
+4.4 Firmar el certificado con la CA del clúster
 
-**Puntos Clave:**
+bash
+Copiar código
+openssl x509 -req -in /etc/kubernetes/pki/kubelet.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/kubelet.crt -days 365 -extensions v3_req -extfile /etc/kubernetes/pki/kubelet-csr.conf
 
-* `crio.service` es el contenedor runtime.
+Paso 5: Reiniciar los servicios
 
-* La configuración del `kubelet` está en `/etc/kubernetes/kubelet-config.yaml` y `/etc/kubernetes/kubelet.conf`.
-  
+Reinicia el servicio kubelet y asegúrate de que se recarguen los archivos de configuración.
 
+bash
+Copiar código
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
 
+Revisa el estado después del reinicio:
 
+bash
+Copiar código
+sudo systemctl status kubelet
 
+Paso 6: Verificar los nodos en el clúster
 
+Después de haber completado los pasos anteriores, revisa si el nodo aparece en el clúster:
 
+bash
+Copiar código
 
+sudo oc get nodes --kubeconfig=/etc/kubernetes/admin.conf
 
+Paso 7: Solución de problemas adicionales
+
+Si el servicio kubelet sigue fallando, revisa los logs para obtener más detalles sobre el error:
+
+bash
+Copiar código
+sudo journalctl -xeu kubelet
+Conclusión
+Este tutorial cubre todos los pasos necesarios para configurar y solucionar problemas de kubelet en un nodo de Kubernetes con OpenShift SDN. Incluye la creación de los certificados necesarios, la configuración de los archivos de kubelet y el ajuste de la red con OpenShift SDN.
 
 
 
@@ -66,6 +175,15 @@ WantedBy=multi-user.target
 
 ```bash
 sudo tee /var/lib/kubelet/kubeadm-flags.env <<EOF
-KUBELET_KUBEADM_ARGS="--container-runtime=remote --container-runtime-endpoint=unix:///var/run/crio/crio.sock --fail-swap-on=false --cgroup-driver=systemd --max-pods=110 --eviction-hard=memory.available<200Mi,nodefs.available<10%,nodefs.inodesFree<5% --node-ip=<NODE_IP> --config=/etc/kubernetes/kubelet-config.yaml"
+KUBELET_KUBEADM_ARGS="--container-runtime=remote --container-runtime-endpoint=unix:///var/run/crio/crio.sock --fail-swap-on=false --cgroup-driver=systemd --max-pods=110 --eviction-hard=memory.available<200Mi,nodefs.available<10%,nodefs.inodesFree<5% --node-ip=10.17.4.23 --config=/etc/kubernetes/kubelet-config.yaml"
 EOF
 ```
+
+
+hay usar OpenShift SDN, para OKD. OpenShift SDN es una red definida por software (SDN) que utiliza Open vSwitch (OVS) como su componente de red subyacente. OpenShift SDN crea una red de contenedores que permite la comunicación entre los pods en diferentes nodos del clúster. OpenShift SDN también proporciona una red de servicios que permite la comunicación entre los pods y los servicios en el clúster.
+
+# Download and install CNI plugins
+curl -L -o /tmp/cni-plugins.tgz https://github.com/containernetworking/plugins/releases/download/v0.9.1/cni-plugins-linux-amd64-v0.9.1.tgz
+sudo mkdir -p /opt/cni/bin
+sudo tar -xzf /tmp/cni-plugins.tgz -C /opt/cni/bin
+sudo rm -rf /tmp/cni-plugins.tgz
