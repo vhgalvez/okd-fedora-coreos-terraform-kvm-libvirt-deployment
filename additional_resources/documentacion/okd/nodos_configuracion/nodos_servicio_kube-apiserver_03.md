@@ -203,3 +203,10 @@ Verificar y ajustar los permisos:
 sudo chmod 600 /etc/kubernetes/pki/apiserver-kubelet-client.key
 sudo chmod 644 /etc/kubernetes/pki/apiserver-kubelet-client.crt
 ```
+
+Reiniciar los servicios:
+
+```bash 
+sudo systemctl daemon-reload
+sudo systemctl restart kube-apiserver
+```
