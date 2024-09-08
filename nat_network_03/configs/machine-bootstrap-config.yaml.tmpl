@@ -303,18 +303,6 @@ storage:
           export PATH=$PATH:/opt/bin
           echo "export PATH=\$PATH:/opt/bin" >> ~/.bashrc
 
-          # Descargar e instalar CRI-O (v1.30.5)
-          sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz
-          sudo mkdir -p /opt/bin/crio
-          sudo tar -xzf /tmp/crio.tar.gz -C /opt/bin/crio/
-
-          # Ajustar el script de instalación para Flatcar
-          sed -i 's;/usr/libexec;/opt/libexec;g' /opt/bin/crio/cri-o/install
-          sed -i 's;/usr/local/share;/opt/share;g' /opt/bin/crio/cri-o/install
-
-          # Instalar CRI-O 
-          sudo /opt/bin/crio/cri-o/install
-
           # OpenShift Client (oc)
           sudo curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
@@ -358,7 +346,24 @@ storage:
 
           export PATH=$PATH:/opt/bin
           echo "export PATH=\$PATH:/opt/bin" >> ~/.bashrc
-      
+
+          # Descargar e instalar CRI-O (v1.30.5)
+          sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz
+          sudo mkdir -p /usr/local/bin/crio
+          sudo mkdir -p /opt/cni/bin
+          sudo tar -xzf /tmp/crio.tar.gz -C /usr/local/bin/crio/
+
+          # Ajustar el script de instalación para Flatcar
+          sed -i 's;/usr/libexec;/opt/libexec;g' /usr/local/bin/crio/cri-o/install
+          sed -i 's;/usr/local/share;/opt/share;g' /usr/local/bin/crio/cri-o/install
+          sed -i 's;/opt/cni/bin;/usr/local/bin/cni/bin;g' /usr/local/bin/crio/cri-o/install
+
+          # Instalar CRI-O 
+          sudo /usr/local/bin/crio/cri-o/install
+          sudo cp -r /usr/local/bin/crio/cri-o/cni-plugins/* /opt/cni/bin/
+          sudo systemctl daemon-reload
+          sudo systemctl enable --now crio
+
           # Download and store certificates
 
           # Descargar certificados kubelet (específicos para cada nodo)

@@ -64,6 +64,12 @@ sudo virsh shutdown  bootstrap
 sudo virsh shutdown  helper
 sudo virsh shutdown  master1
 sudo virsh shutdown  master2
+sudo virsh shutdown  master2
+sudo virsh shutdown  master3
+sudo virsh shutdown  worker1
+sudo virsh shutdown  worker2
+sudo virsh shutdown  worker3
+
 
 
 sudo virsh start freeipa1
