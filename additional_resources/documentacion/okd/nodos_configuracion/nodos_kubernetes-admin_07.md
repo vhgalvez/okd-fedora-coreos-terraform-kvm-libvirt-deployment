@@ -29,16 +29,33 @@ A continuación, firma el CSR utilizando la CA del clúster de Kubernetes para o
 sudo openssl x509 -req -in /etc/kubernetes/pki/admin.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/admin.crt -days 365
 ```
 
-## 4. Ajustar los Permisos de los Archivos Generados
+## 4. Ajustar los Permisos de los Archivos Generados y la Propiedad del Archivo
 
 Es importante ajustar los permisos de los archivos generados para asegurar que la clave privada esté protegida y el certificado sea accesible.
 
+
+Ajustar los permisos de los archivos generados
 
 ```bash
 sudo chmod 600 /etc/kubernetes/pki/admin.key
 sudo chmod 644 /etc/kubernetes/pki/admin.crt
 ```
 
+Ajustar la propiedad del archivo
+
+```bash
+sudo chmod 644 /etc/kubernetes/pki/admin.key
+sudo chown core:core /etc/kubernetes/pki/admin.key
+```
+
+Ajustar la propiedad del directorio
+
+```bash
+sudo chmod 755 /etc/kubernetes
+sudo chmod 755 /etc/kubernetes/pki
+sudo chown root:root /etc/kubernetes
+sudo chown root:root /etc/kubernetes/pki
+```
 
 ## 5. Configurar el Archivo kubeconfig para kubernetes-admin
 
@@ -75,7 +92,7 @@ users:
     client-key: /etc/kubernetes/pki/admin.key
 ```
 
-6. Probar la Conexión al Clúster
+1. Probar la Conexión al Clúster
    
 Una vez que los certificados estén configurados y el archivo kubeconfig esté en su lugar, puedes probar la conexión al clúster con el siguiente comando:
 
@@ -101,4 +118,3 @@ sudo oc --kubeconfig=/etc/kubernetes/admin.conf create clusterrolebinding kubele
 ## Conclusión
 
 Siguiendo esta guía, habrás generado y configurado correctamente los certificados necesarios para el usuario kubernetes-admin. Además, te habrás asegurado de que kube-proxy tenga los permisos adecuados para interactuar con el servidor API de Kubernetes. Con esto, deberías poder gestionar y operar el clúster sin inconvenientes.
-
