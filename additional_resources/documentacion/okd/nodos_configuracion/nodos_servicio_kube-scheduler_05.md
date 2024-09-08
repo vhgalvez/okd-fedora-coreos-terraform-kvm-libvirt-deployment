@@ -1,4 +1,6 @@
+
 Tutorial: Creación y Configuración del Servicio kube-scheduler en Kubernetes
+
 Este tutorial te guiará a través de los pasos necesarios para crear y configurar el servicio kube-scheduler en un clúster de Kubernetes, generando los certificados requeridos y asegurando que el servicio esté correctamente configurado.
 
 1. Crear el Archivo de Servicio para kube-scheduler
