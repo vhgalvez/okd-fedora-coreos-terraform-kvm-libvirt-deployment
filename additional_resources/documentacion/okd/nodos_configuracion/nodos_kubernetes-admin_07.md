@@ -115,6 +115,11 @@ Para asegurarte de que `kube-proxy` tenga los permisos necesarios para interactu
 sudo oc --kubeconfig=/etc/kubernetes/admin.conf create clusterrolebinding kubelet-bootstrap --clusterrole=system:node --user=kubelet
 ```
 
+```bash
+core@master3 ~ $ sudo oc --kubeconfig=/etc/kubernetes/admin.conf create clusterrolebinding kubelet-bootstrap --clusterrole=system:node --user=kubelet
+clusterrolebinding.rbac.authorization.k8s.io/kubelet-bootstrap created
+```
+
 ## Conclusión
 
 Siguiendo esta guía, habrás generado y configurado correctamente los certificados necesarios para el usuario kubernetes-admin. Además, te habrás asegurado de que kube-proxy tenga los permisos adecuados para interactuar con el servidor API de Kubernetes. Con esto, deberías poder gestionar y operar el clúster sin inconvenientes.
