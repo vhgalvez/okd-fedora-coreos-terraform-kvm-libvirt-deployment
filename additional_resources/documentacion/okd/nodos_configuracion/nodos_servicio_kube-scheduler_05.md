@@ -141,8 +141,6 @@ Verifica si el servicio `kube-scheduler` se ha iniciado correctamente:
 sudo systemctl status kube-scheduler
 ```
 
- 
-
 ## 5. Verificar la Configuración del kube-scheduler
 
 
