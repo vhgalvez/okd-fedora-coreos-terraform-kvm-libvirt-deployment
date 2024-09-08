@@ -112,7 +112,6 @@ sudo chmod 644 /etc/kubernetes/pki/kube-scheduler.crt
 
 ## 4. Iniciar y Habilitar el Servicio
 
-
 ### 4.1 Recargar el demonio de systemd
 
 Después de crear el archivo de servicio, recarga el demonio de systemd para que reconozca el nuevo servicio:
@@ -121,9 +120,7 @@ Después de crear el archivo de servicio, recarga el demonio de systemd para que
 sudo systemctl daemon-reload
 ```
 
-```bash
-4.2 Iniciar el servicio kube-scheduler
-```
+### 4.2 Iniciar el servicio kube-scheduler
 
 Inicia el servicio kube-scheduler y habilítalo para que se inicie automáticamente al reiniciar el sistema:
   
@@ -134,7 +131,6 @@ sudo systemctl enable kube-scheduler
 
 ### 4.3 Verificar el estado del servicio
 
-
 Verifica si el servicio `kube-scheduler` se ha iniciado correctamente:
 
 ```bash
@@ -142,7 +138,6 @@ sudo systemctl status kube-scheduler
 ```
 
 ## 5. Verificar la Configuración del kube-scheduler
-
 
 ### 5.1 Verificar la conectividad con kube-apiserver
 
