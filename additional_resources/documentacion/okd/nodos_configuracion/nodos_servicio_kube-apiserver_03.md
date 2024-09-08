@@ -178,3 +178,28 @@ Verifica que no haya errores de certificados en los logs:
 sudo journalctl -u etcd -f
 sudo journalctl -u kube-apiserver -f
 ```
+
+## 10 Generar la clave privada para el cliente kubelet:
+
+```bash
+sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/apiserver-kubelet-client.key -pkeyopt rsa_keygen_bits:2048
+```
+
+Crear la solicitud de firma de certificado (CSR):
+
+```bash
+sudo openssl req -new -key /etc/kubernetes/pki/apiserver-kubelet-client.key -out /etc/kubernetes/pki/apiserver-kubelet-client.csr -subj="/CN=apiserver-kubelet-client"
+```
+
+Firmar el certificado utilizando la CA (Certificate Authority) del cluster:
+
+```bash
+sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver-kubelet-client.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver-kubelet-client.crt -days 365
+```
+
+Verificar y ajustar los permisos:
+
+```bash
+sudo chmod 600 /etc/kubernetes/pki/apiserver-kubelet-client.key
+sudo chmod 644 /etc/kubernetes/pki/apiserver-kubelet-client.crt
+```
