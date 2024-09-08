@@ -41,13 +41,15 @@ sudo chmod 644 /etc/kubernetes/pki/kube-proxy.crt
 ```
 
 ## 2. Crear el Archivo de Configuración de kube-proxy
-   
+
 ### 2.1 Crear el archivo de configuración kube-proxy-config.yaml
 
 Crea el archivo de configuración para kube-proxy:
 
 ```bash
 sudo vim /etc/kubernetes/kube-proxy-config.yaml
+```
+
 Añade el siguiente contenido:
 
 ```yaml
@@ -120,8 +122,8 @@ WantedBy=multi-user.target
 ```
 
 ## 4. Iniciar y Verificar el Servicio
-   
-### 4.1 Recargar systemd
+
+## 4.1 Recargar systemd
 
 Recarga systemd para aplicar los cambios:
 
@@ -147,7 +149,7 @@ sudo systemctl status kube-proxy
 ```
 
 ## 5. Verificar los Logs y la Conectividad
-   
+
 ### 5.1 Verificar los logs de kube-proxy
 
 Monitorea los logs del servicio para identificar posibles errores o advertencias:
