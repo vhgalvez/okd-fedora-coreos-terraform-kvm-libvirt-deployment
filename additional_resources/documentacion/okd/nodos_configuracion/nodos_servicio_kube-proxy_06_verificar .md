@@ -174,4 +174,4 @@ sudo oc --kubeconfig=/etc/kubernetes/admin.conf create clusterrolebinding kubele
 
 # Conclusión
 
-Este tutorial te permite configurar el servicio kube-proxy con los certificados necesarios para que se ejecute correctamente en tu clúster de Kubernetes. Siguiendo los pasos descritos, asegurarás que el servicio kube-proxy esté correctamente configurado y autenticado.
+Este tutorial te permite configurar el servicio `kube-proxy` con los certificados necesarios para que se ejecute correctamente en tu clúster de Kubernetes. Siguiendo los pasos descritos, asegurarás que el servicio `kube-proxy` esté correctamente configurado y autenticado.
