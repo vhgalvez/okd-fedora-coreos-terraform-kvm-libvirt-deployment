@@ -163,7 +163,11 @@ sudo systemctl restart etcd
 sudo systemctl restart kube-apiserver
 ```
 
+**Verifica el estado de los servicios:**
 
+```bash
+sudo systemctl status kube-apiserver
+```
 
 
 ## 9. Verificar los logs
