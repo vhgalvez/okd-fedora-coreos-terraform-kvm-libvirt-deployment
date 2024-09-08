@@ -79,7 +79,6 @@ sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/etcd/etcd.key -pkey
 sudo openssl req -new -key /etc/kubernetes/pki/etcd/etcd.key -subj "/CN=etcd-server" -out /etc/kubernetes/pki/etcd/etcd.csr
 ```
 
-
 **Crear archivo de configuración para OpenSSL:**
 
 ```bash
