@@ -1,22 +1,24 @@
-
-Tutorial: Creación y Configuración del Servicio kube-scheduler en Kubernetes
+# Tutorial: Creación y Configuración del Servicio kube-scheduler en Kubernetes
 
 Este tutorial te guiará a través de los pasos necesarios para crear y configurar el servicio kube-scheduler en un clúster de Kubernetes, generando los certificados requeridos y asegurando que el servicio esté correctamente configurado.
 
-1. Crear el Archivo de Servicio para kube-scheduler
-1.1 Crear el archivo de servicio en systemd:
+## 1. Crear el Archivo de Servicio para kube-scheduler
 
-Primero, necesitamos crear el archivo de servicio en el directorio /etc/systemd/system/ para que systemd pueda gestionar el servicio kube-scheduler.
+### 1.1 Crear el archivo de servicio en systemd
 
-bash
-Copiar código
+Primero, necesitamos crear el archivo de servicio en el directorio `/etc/systemd/system/` para que systemd pueda gestionar el servicio kube-scheduler.
+
+```bash
 sudo vim /etc/systemd/system/kube-scheduler.service
-1.2 Añadir el contenido del servicio:
+```
+
+
+
+### 1.2 Añadir el contenido del servicio:
 
 Copia y pega el siguiente contenido en el archivo de servicio:
 
-bash
-Copiar código
+```bash
 [Unit]
 Description=Kubernetes Scheduler
 Documentation=https://kubernetes.io/docs/concepts/overview/components/
@@ -28,9 +30,11 @@ Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
+```
+
 Este archivo define cómo debe ejecutarse el kube-scheduler, su configuración de alta disponibilidad (opción --leader-elect=true) y dónde está ubicado su archivo de configuración (/etc/kubernetes/scheduler.conf).
 
-2. Crear el Archivo de Configuración de kube-scheduler
+1. Crear el Archivo de Configuración de kube-scheduler
 2.1 Crear el archivo de configuración del kube-scheduler:
 
 El siguiente paso es crear el archivo de configuración que permitirá al kube-scheduler conectarse al kube-apiserver. Crea el archivo en /etc/kubernetes/scheduler.conf:
