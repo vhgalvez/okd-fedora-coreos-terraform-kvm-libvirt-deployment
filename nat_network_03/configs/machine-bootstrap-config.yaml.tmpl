@@ -353,12 +353,11 @@ storage:
           sudo mkdir -p /opt/cni/bin
           sudo tar -xzf /tmp/crio.tar.gz -C /usr/local/bin/crio/
 
-          # Ajustar el script de instalación para Flatcar
           sed -i 's;/usr/libexec;/opt/libexec;g' /usr/local/bin/crio/cri-o/install
           sed -i 's;/usr/local/share;/opt/share;g' /usr/local/bin/crio/cri-o/install
-          sed -i 's;/opt/cni/bin;/usr/local/bin/cni/bin;g' /usr/local/bin/crio/cri-o/install
+          sed -i 's;/opt/cni/bin;/opt/cni/bin;g' /usr/local/bin/crio/cri-o/install
 
-          # Instalar CRI-O 
+          # Instalar CRI-O
           sudo /usr/local/bin/crio/cri-o/install
           sudo cp -r /usr/local/bin/crio/cri-o/cni-plugins/* /opt/cni/bin/
           sudo systemctl daemon-reload
