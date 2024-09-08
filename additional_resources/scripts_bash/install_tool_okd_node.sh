@@ -10,17 +10,14 @@ sudo chmod +x /opt/bin/kubelet
 export PATH=$PATH:/opt/bin
 echo "export PATH=\$PATH:/opt/bin" >> ~/.bashrc
 
-# CRI-O (v1.30.5) - URL que funciona correctamente
+# Descargar e instalar CRI-O (v1.30.5)
 sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz
 sudo mkdir -p /opt/bin/crio
 sudo tar -xzf /tmp/crio.tar.gz -C /opt/bin/crio/
-sudo /opt/bin/crio/cri-o/instal
 
-export PATH=$PATH:/opt/bin
-echo "export PATH=\$PATH:/opt/bin" >> ~/.bashrc
-
-export PATH=$PATH:/opt/bin/crio
-echo "export PATH=\$PATH:/opt/bin/crio" >> ~/.bashrc
+# Ajustar el script de instalación para Flatcar
+sed -i 's;/usr/libexec;/opt/libexec;g' /opt/bin/crio/cri-o/install
+sed -i 's;/usr/local/share;/opt/share;g' /opt/bin/crio/cri-o/install
 
 # OpenShift Client (oc)
 sudo curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
