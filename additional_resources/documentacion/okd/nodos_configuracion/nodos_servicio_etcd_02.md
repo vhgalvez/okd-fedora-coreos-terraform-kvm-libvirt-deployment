@@ -63,17 +63,18 @@ cd /etc/kubernetes/pki/etcd
 
 **Generar la clave y certificado de la CA:**
 
+
 ```bash
-sudo openssl genpkey -algorithm RSA -out ca.key -pkeyopt rsa_keygen_bits:2048
-sudo openssl req -x509 -new -nodes -key ca.key -subj "/CN=etcd-ca" -days 3650 -out ca.crt
+sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/etcd/ca.key -pkeyopt rsa_keygen_bits:2048
+sudo openssl req -x509 -new -nodes -key /etc/kubernetes/pki/etcd/ca.key -subj "/CN=etcd-ca" -days 3650 -out ca.crt
 ```
 
 
 **Generar la clave privada y la solicitud de firma (CSR) para etcd:**
 
 ```bash
-sudo openssl genpkey -algorithm RSA -out etcd.key -pkeyopt rsa_keygen_bits:2048
-sudo openssl req -new -key etcd.key -subj "/CN=etcd-server" -out etcd.csr
+sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/etcd/etcd.key -pkeyopt rsa_keygen_bits:2048
+sudo openssl req -new -key /etc/kubernetes/pki/etcd/etcd.key -subj "/CN=etcd-server" -out /etc/kubernetes/pki/etcd/etcd.csr
 ```
 
 
@@ -97,7 +98,7 @@ EOF
 **Firmar el CSR con la CA:**
 
 ```bash
-sudo openssl x509 -req -in etcd.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out etcd.crt -days 365 -extensions v3_req -extfile etcd-openssl.cnf
+sudo openssl x509 -req -in etcd.csr -CA /etc/kubernetes/pki/etcd/ca.crt -CAkey ca.key -CAcreateserial -out /etc/kubernetes/pki/etcd/etcd.crt -days 365 -extensions v3_req -extfile /etc/kubernetes/pki/etcd/etcd-openssl.cnf
 ```
 
 **Cambiar permisos:**
