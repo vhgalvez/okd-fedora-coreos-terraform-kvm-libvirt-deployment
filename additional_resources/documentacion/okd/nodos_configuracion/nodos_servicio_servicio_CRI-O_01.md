@@ -39,6 +39,7 @@ sudo systemctl status crio
 sudo journalctl -u crio
 ```
 
+
 ```bash
 sudo mkdir -p /etc/crio/
 ```
@@ -60,6 +61,7 @@ Run the following command to temporarily add the path to your session:
 ```bash
 export PATH=$PATH:/opt/bin/crio
 ```
+
 To make the change permanent, you can add this line to your shell profile
 
 (for example, ~/.bashrc or /etc/profile):
@@ -68,11 +70,14 @@ To make the change permanent, you can add this line to your shell profile
 echo 'export PATH=$PATH:/opt/bin/crio' >> ~/.bashrc
 ```
 
-Then reload the profile:
-
 
 Then reload the profile:
 
 ```bash
 source ~/.bashrc
 ```
+
+```bash
+crio --version
+```
+
