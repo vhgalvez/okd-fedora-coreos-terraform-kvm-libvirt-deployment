@@ -63,13 +63,11 @@ cd /etc/kubernetes/pki/etcd
 
 **Generar la clave y certificado de la CA:**
 
-
 ```bash
 sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/etcd/ca.key -pkeyopt rsa_keygen_bits:2048
 
-sudo openssl req -x509 -new -nodes -key /etc/kubernetes/pki/etcd/ca.key -subj "/CN=etcd-ca" -days 3650 -out ca.crt
+sudo openssl req -x509 -new -nodes -key /etc/kubernetes/pki/etcd/ca.key -subj "/CN=etcd-ca" -days 3650 -out /etc/kubernetes/pki/etcd/ca.crt
 ```
-
 
 **Generar la clave privada y la solicitud de firma (CSR) para etcd:**
 
@@ -99,15 +97,15 @@ EOF
 **Firmar el CSR con la CA:**
 
 ```bash
-sudo openssl x509 -req -in etcd.csr -CA /etc/kubernetes/pki/etcd/ca.crt -CAkey ca.key -CAcreateserial -out /etc/kubernetes/pki/etcd/etcd.crt -days 365 -extensions v3_req -extfile /etc/kubernetes/pki/etcd/etcd-openssl.cnf
+sudo openssl x509 -req -in /etc/kubernetes/pki/etcd/etcd.csr -CA /etc/kubernetes/pki/etcd/ca.crt -CAkey /etc/kubernetes/pki/etcd/ca.key -CAcreateserial -out /etc/kubernetes/pki/etcd/etcd.crt -days 365 -extensions v3_req -extfile /etc/kubernetes/pki/etcd/etcd-openssl.cnf
 ```
 
 **Cambiar permisos:**
 
 ```bash
-sudo chown etcd:etcd *.*
-sudo chmod 600 *.key
-sudo chmod 644 *.crt
+sudo chown etcd:etcd /etc/kubernetes/pki/etcd/*
+sudo chmod 600 /etc/kubernetes/pki/etcd/*.key
+sudo chmod 644 /etc/kubernetes/pki/etcd/*.crt
 ```
 
 
@@ -119,13 +117,25 @@ sudo chown -R etcd:etcd /var/lib/etcd
 
 ## 3. Iniciar y verificar el servicio etcd
 
-Recargar el daemon de systemd y reiniciar el servicio etcd:
+Recargar el daemon de systemd y reiniciar el servicio `etcd`:
 
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl start etcd
-sudo systemctl restart etcd
-sudo systemctl start etcd
 sudo systemctl enable etcd
+```
+
+Verificar el estado del servicio `etcd`:
+
+```bash
 sudo systemctl status etcd
+```
+
+
+4. Verificar los logs de etcd
+ 
+Para asegurar que no haya errores, revisa los logs del servicio:
+
+```bash
+sudo journalctl -u etcd -f
 ```
