@@ -123,9 +123,6 @@ WantedBy=multi-user.target
 
 ### 3.2 
 
-
-
-
 ## 4. Iniciar y Verificar el Servicio
 
 ## 4.1 Recargar systemd
@@ -163,6 +160,19 @@ Monitorea los logs del servicio para identificar posibles errores o advertencias
 sudo journalctl -u kube-proxy -f
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 ### 5.2 Verificar la conectividad con el servidor API de Kubernetes
 
 Comprueba que kube-proxy esté conectado correctamente al servidor API de Kubernetes:
@@ -182,3 +192,33 @@ sudo oc --kubeconfig=/etc/kubernetes/admin.conf create clusterrolebinding kubele
 # Conclusión
 
 Este tutorial te permite configurar el servicio `kube-proxy` con los certificados necesarios para que se ejecute correctamente en tu clúster de Kubernetes. Siguiendo los pasos descritos, asegurarás que el servicio `kube-proxy` esté correctamente configurado y autenticado.
+
+
+
+
+```bash
+sudo vim /etc/systemd/system/kube-proxy.service
+```
+
+```yaml
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority: /etc/kubernetes/pki/ca.crt
+    server: https://10.17.4.23:6443
+  name: kubernetes
+contexts:
+- context:
+    cluster: kubernetes
+    user: kubernetes-admin
+  name: kubernetes-admin@kubernetes
+current-context: kubernetes-admin@kubernetes
+kind: Config
+preferences: {}
+users:
+- name: kubernetes-admin
+  user:
+    client-certificate: /etc/kubernetes/pki/admin.crt
+    client-key: /etc/kubernetes/pki/admin.key
+```
+
