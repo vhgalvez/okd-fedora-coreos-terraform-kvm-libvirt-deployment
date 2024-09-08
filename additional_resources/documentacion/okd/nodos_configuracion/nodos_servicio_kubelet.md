@@ -51,3 +51,21 @@ WantedBy=multi-user.target
 * La configuración del `kubelet` está en `/etc/kubernetes/kubelet-config.yaml` y `/etc/kubernetes/kubelet.conf`.
   
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+```bash
+sudo tee /var/lib/kubelet/kubeadm-flags.env <<EOF
+KUBELET_KUBEADM_ARGS="--container-runtime=remote --container-runtime-endpoint=unix:///var/run/crio/crio.sock --fail-swap-on=false --cgroup-driver=systemd --max-pods=110 --eviction-hard=memory.available<200Mi,nodefs.available<10%,nodefs.inodesFree<5% --node-ip=<NODE_IP> --config=/etc/kubernetes/kubelet-config.yaml"
+EOF
+```
