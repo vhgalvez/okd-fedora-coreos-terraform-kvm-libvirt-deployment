@@ -141,8 +141,22 @@ Verifica si el servicio `kube-scheduler` se ha iniciado correctamente:
 sudo systemctl status kube-scheduler
 ```
 
-### 
+ 
 
-5. Verificar la Configuración del kube-scheduler
+## 5. Verificar la Configuración del kube-scheduler
 
 
+### 5.1 Verificar la conectividad con kube-apiserver
+
+Asegúrate de que el kube-scheduler esté correctamente conectado al kube-apiserver comprobando el estado de los nodos en el clúster:
+  
+```bash
+oc get nodes
+```
+### 5.2 Verificar los logs del servicio
+
+Monitorea los logs del servicio kube-scheduler para identificar cualquier posible error o advertencia:
+
+```bash
+sudo journalctl -u kube-scheduler -f
+```
