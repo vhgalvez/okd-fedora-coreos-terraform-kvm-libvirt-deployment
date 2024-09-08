@@ -12,7 +12,6 @@ Archivo: `cat /etc/systemd/system/etcd.service`
 sudo vim /etc/systemd/system/etcd.service
 ```
 
-
 ```bash
 sudo tee /etc/systemd/system/etcd.service <<EOF
 [Unit]
