@@ -62,7 +62,7 @@ storage:
               client-certificate: /etc/kubernetes/pki/kubelet.crt
               client-key: /etc/kubernetes/pki/kubelet.key
     
-    - path: /home/core/install.sh
+    - path: /home/core/install
       filesystem: root
       mode: 0755
       contents:
@@ -654,23 +654,6 @@ systemd:
         RestartSec=5
         LimitNOFILE=65536
         LimitNPROC=4096
-
-        [Install]
-        WantedBy=multi-user.target
-
-    - name: run-local-install.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Ejecutar script de instalación local
-        After=network-online.target
-        Wants=network-online.target
-
-        [Service]
-        Type=oneshot
-        ExecStart=/home/core/install.sh
-        RemainAfterExit=true
-        StandardOutput=journal+console
 
         [Install]
         WantedBy=multi-user.target
