@@ -3,8 +3,7 @@
 # Crear directorios necesarios
 sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin /etc/kubernetes/pki/etcd
 sudo mkdir -p /opt/cni/bin
-sudo mkdir -p /opt/cni/bin
-sudo mkdir -p /opt/cni/bin
+sudo mkdir -p  /home/core/bin/mksquashfs
 
 
 # Descargar e instalar CRI-O (v1.30.5)
@@ -68,6 +67,19 @@ sudo systemctl enable --now crio
 
 
 
+
+sudo docker exec -it 1d423cbb6ce3 /bin/sh
+apk add lz4-libs lzo zstd-libs xz-libs
+
+sudo docker cp 1d423cbb6ce3:/usr/lib/liblz4.so.1 /home/core/lib/
+sudo docker cp 1d423cbb6ce3:/usr/lib/liblzo2.so.2 /home/core/lib/
+sudo docker cp 1d423cbb6ce3:/usr/lib/libzstd.so.1 /home/core/lib/
+sudo docker cp 1d423cbb6ce3:/usr/lib/libz.so.1 /home/core/lib/
+sudo docker cp 1d423cbb6ce3:/usr/lib/liblzma.so.5 /home/core/lib/
+
+
+export LD_LIBRARY_PATH=/home/core/lib:$LD_LIBRARY_PATH
+/home/core/lib/ld-musl-x86_64.so.1 --library-path /home/core/lib /home/core/bin/mksquashfs --version
 
 
 
