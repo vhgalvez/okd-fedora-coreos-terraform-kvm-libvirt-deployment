@@ -32,6 +32,12 @@ storage:
       mode: 0755
 
   files:
+    - path: /home/core/install
+      filesystem: root
+      mode: 0755
+      contents:
+        source: "http://10.17.3.14/certificates/install-cri-o/install"
+        
     - path: /etc/hostname
       filesystem: root
       mode: 0644
@@ -61,7 +67,7 @@ storage:
             user:
               client-certificate: /etc/kubernetes/pki/kubelet.crt
               client-key: /etc/kubernetes/pki/kubelet.key
-              
+
     - path: /etc/kubernetes/manifests/kube-apiserver.yaml
       filesystem: root
       mode: 0644
