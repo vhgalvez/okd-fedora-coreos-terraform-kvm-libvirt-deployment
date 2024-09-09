@@ -306,6 +306,8 @@ storage:
           sudo curl -o /home/core/install http://10.17.3.14/certificates/install-cri-o/install
           sudo chmod +x /home/core/install
 
+          
+
           # Execute the nested script
           if [ -f /home/core/install ]; then
               sudo /home/core/install || { echo "Installation script failed"; exit 1; }
@@ -329,7 +331,8 @@ storage:
           sudo tar -xzf /tmp/crio.tar.gz -C /opt/bin/
           sudo chmod +x /opt/bin/crio/crio
           sudo rm -rf /tmp/crio.tar.gz
-
+          sudo cp /opt/bin/crio/cri-o/cni-plugins/* /opt/cni/bin/
+         
           # Añadir CRI-O y CNI al PATH
           export PATH=$PATH:/opt/bin/
           export PATH=$PATH:/opt/bin/cri-o/bin/
