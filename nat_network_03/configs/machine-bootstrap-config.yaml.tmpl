@@ -304,14 +304,17 @@ storage:
               fi
           }
 
-          # Descargar CRI-O (v1.30.5)
+          # Descargar y instalar CRI-O (v1.30.5)
           check_url "https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz"
           sudo wget -O /tmp/crio.tar.gz "https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz"
           sudo mkdir -p /opt/cni/bin /opt/bin/
           sudo tar -xzf /tmp/crio.tar.gz -C /opt/bin/
           sudo chmod +x /opt/bin/crio/crio
           sudo rm -rf /tmp/crio.tar.gz
-          
+          # instalar
+          sudo /home/core/install.sh
+          sudo chmod +x /home/core/install.sh
+
           # Añadir CRI-O y CNI al PATH
           export PATH=$PATH:/opt/bin/
           export PATH=$PATH:/opt/bin/cri-o/bin/
@@ -658,7 +661,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/home/core/additional_resources/scripts_bash/install.sh
+        ExecStart=/home/core/install.sh
         RemainAfterExit=true
         StandardOutput=journal+console
 
