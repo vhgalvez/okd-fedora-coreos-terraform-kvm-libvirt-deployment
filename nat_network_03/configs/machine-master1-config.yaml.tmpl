@@ -294,7 +294,6 @@ storage:
 
           # Create necessary directories
           sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin /etc/kubernetes/pki/etcd
-          sudo mkdir -p /var/lib/kubelet/checkpoints
 
           # Install kube-proxy
           curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-proxy
@@ -324,9 +323,9 @@ storage:
           sudo chmod +x /opt/bin/kube-scheduler
 
           # Install kubelet
-          curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.31.0/bin/linux/amd64/kubelet
+          curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
-          
+
           # Install oc (OpenShift Client)
           curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
           tar -xzf /tmp/oc.tar.gz -C /tmp
@@ -356,7 +355,7 @@ storage:
 
           # Download and store certificates
 
-          # Descargar certificados kubelet (específicos para cada nodo)
+          # Descargar certificados kubelet
           sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.crt
           sudo curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.key
 
@@ -364,9 +363,9 @@ storage:
           sudo curl -o /etc/kubernetes/pki/ca.crt http://10.17.3.14/certificates/shared/ca/ca.crt
           sudo curl -o /etc/kubernetes/pki/ca.key http://10.17.3.14/certificates/shared/ca/ca.key
 
-          # Descargar certificados para el nodo master
-          sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.crt
-          sudo curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.key
+          # Descargar certificados para el nodo master1
+          sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/certificates/master1/kubelet/kubelet.crt
+          sudo curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/certificates/master1/kubelet/kubelet.key
 
           # Descargar certificados del servidor API
           sudo curl -o /etc/kubernetes/pki/apiserver.crt http://10.17.3.14/certificates/shared/apiserver/apiserver.crt
@@ -389,20 +388,10 @@ storage:
           sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.crt http://10.17.3.14/certificates/shared/apiserver-kubelet-client/apiserver-kubelet-client.crt
           sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.key http://10.17.3.14/certificates/shared/apiserver-kubelet-client/apiserver-kubelet-client.key
 
-          # Verificar y establecer permisos para las claves privadas
+          # Verify and set permissions for private keys
           sudo chmod 600 /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
           sudo chown root:root /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
-          sudo chown etcd:etcd /etc/kubernetes/pki/etcd/etcd.key
-          sudo chown etcd:etcd /etc/kubernetes/pki/etcd/*.key
-          sudo chmod 600 /etc/kubernetes/pki/etcd/etcd.key
-          sudo chown -R root:root /var/lib/kubelet/checkpoints
-
-
-          # Recargar systemd y activar servicios
-          sudo systemctl daemon-reload
-          sudo systemctl enable crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
-          sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
-
+          
           # Reload systemd and activate services
           sudo systemctl daemon-reload
           sudo systemctl enable crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
