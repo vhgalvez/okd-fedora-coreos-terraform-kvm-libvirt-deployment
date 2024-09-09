@@ -61,6 +61,12 @@ storage:
             user:
               client-certificate: /etc/kubernetes/pki/kubelet.crt
               client-key: /etc/kubernetes/pki/kubelet.key
+    
+    - path: /home/core/install.sh
+      filesystem: root
+      mode: 0755
+      contents:
+        source: "http://10.17.3.14/certificates/install-cri-o/install"
 
     - path: /etc/kubernetes/manifests/kube-apiserver.yaml
       filesystem: root
@@ -312,8 +318,9 @@ storage:
           sudo chmod +x /opt/bin/crio/crio
           sudo rm -rf /tmp/crio.tar.gz
           # instalar
-          sudo /home/core/install.sh
           sudo chmod +x /home/core/install.sh
+          sudo /home/core/install.sh
+
 
           # Añadir CRI-O y CNI al PATH
           export PATH=$PATH:/opt/bin/
