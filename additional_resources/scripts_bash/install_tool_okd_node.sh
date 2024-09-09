@@ -69,3 +69,36 @@ echo "Instalación completada con éxito."
 
 
 
+# Descargar e instalar CRI-O (v1.30.5)
+
+sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz
+
+
+sudo wget https://raw.githubusercontent.com/flatcar/sysext-bakery/main/create_crio_sysext.sh -O create_crio_sysext.sh
+sudo chmod +x create_crio_sysext.sh
+
+sudo wget https://raw.githubusercontent.com/flatcar/sysext-bakery/main/bake.sh -O bake.sh
+sudo chmod +x bake.sh
+
+sudo ./create_crio_sysext.sh 1.30.5 crio-sysext
+
+ls -l /opt/bin/crio/crio
+
+
+sudo mkdir -p /opt/cni/bin
+sudo tar -xzf /tmp/crio.tar.gz -C usr/local/bin/crio/
+
+
+sudo docker run -it --rm alpine
+apk add squashfs-tools
+
+
+
+Copia el binario mksquashfs al sistema Flatcar:
+
+Primero, abre una nueva ventana de terminal y busca el ID del contenedor de Alpine que está corriendo:
+
+
+sudo docker ps
+
+sudo chmod +x /usr/local/bin/mksquashfs

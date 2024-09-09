@@ -348,6 +348,8 @@ storage:
           echo "export PATH=\$PATH:/opt/bin" >> ~/.bashrc
 
           # Descargar e instalar CRI-O (v1.30.5)
+
+          sudo mount -o remount,rw /
           sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz
           sudo mount -o remount,rw /
 
@@ -360,10 +362,10 @@ storage:
           sudo ./create_crio_sysext.sh 1.30.5 crio-sysext
 
           sudo mkdir -p /usr/local/bin/crio
-
           sudo mkdir -p /opt/cni/bin
-          sudo tar -xzf /tmp/crio.tar.gz -C /opt/bin/crio/
-          sudo mkdir -p /usr/local/bin/crio
+          sudo tar -xzf /tmp/crio.tar.gz -C usr/local/bin/crio/
+  
+          sudo /usr/local/bin/crio/cri-o/install
 
           sudo sed -i 's;/usr/libexec;/opt/libexec;g' /usr/local/bin/crio/cri-o/install
           sudo sed -i 's;/usr/local/share;/opt/share;g' /usr/local/bin/crio/cri-o/install
