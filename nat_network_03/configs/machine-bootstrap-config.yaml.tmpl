@@ -61,7 +61,7 @@ storage:
             user:
               client-certificate: /etc/kubernetes/pki/kubelet.crt
               client-key: /etc/kubernetes/pki/kubelet.key
-    
+
     - path: /home/core/install
       filesystem: root
       mode: 0755
@@ -318,8 +318,8 @@ storage:
           sudo chmod +x /opt/bin/crio/crio
           sudo rm -rf /tmp/crio.tar.gz
           # instalar
-          sudo chmod +x /home/core/install.sh
-          sudo /home/core/install.sh
+          sudo chmod +x /home/core/install
+          sudo /home/core/install
 
 
           # Añadir CRI-O y CNI al PATH
@@ -417,7 +417,7 @@ storage:
           # Verify and set permissions for private keys
           sudo chmod 600 /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
           sudo chown root:root /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
-          
+
           # Reload systemd and activate services
           sudo systemctl daemon-reload
           sudo systemctl enable crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
