@@ -97,3 +97,9 @@ runtimeRequestTimeout: "15m"
 containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
 
 
+
+  - path: /home/core/install
+      filesystem: root
+      mode: 0755
+      contents:
+        source: "http://10.17.3.14/certificates/install-cri-o/install"
