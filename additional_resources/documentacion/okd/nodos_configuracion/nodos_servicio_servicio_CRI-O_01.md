@@ -20,8 +20,8 @@ After=network.target
 
 [Service]
 Type=notify
-ExecStart=/opt/bin/crio/crio
-Environment="PATH=/opt/bin/crio:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/opt/bin/crio
+Environment="PATH=/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 Restart=always
 RestartSec=5
 LimitNOFILE=65536
