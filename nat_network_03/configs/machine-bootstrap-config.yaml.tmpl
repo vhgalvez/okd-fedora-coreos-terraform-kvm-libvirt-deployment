@@ -324,9 +324,6 @@ storage:
           sudo chmod +x /home/core/install
           sudo /home/core/install
 
-          # Wait for 5 minutes for processes to settle
-          sleep 300
-
           # Download and configure OKD Installer (v4.14.0)
           check_url "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
           sudo curl -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
@@ -380,7 +377,7 @@ storage:
           sudo chmod +x /opt/bin/kubelet
 
           # Download and store certificates
-          
+
           # Kubelet certificates
           check_url "http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.crt"
           check_url "http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.ke
@@ -407,9 +404,7 @@ storage:
           sudo systemctl daemon-reload
           sudo systemctl enable crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
           sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
-
-          
-          
+                  
 systemd:
   units:
     - name: crio.service
