@@ -296,6 +296,35 @@ storage:
           # Create necessary directories
           sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin /etc/kubernetes/pki/etcd
 
+          # Descargar e instalar CRI-O (v1.30.5)
+          CRIO_URL="https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz"
+          check_url "$CRIO_URL"
+          sudo wget -O /tmp/crio.tar.gz "$CRIO_URL"
+          sudo tar -xzf /tmp/crio.tar.gz -C /opt/bin/
+          sudo chmod +x /opt/bin/crio/crio
+          sudo rm -rf /tmp/crio.tar.gz
+
+          # Aplicar configuraciones SELinux si es necesario
+          if command -v selinuxenabled &> /dev/null && selinuxenabled; then
+              if command -v chcon &> /dev/null; then
+                  sudo chcon -u system_u -r object_r -t container_runtime_exec_t /opt/bin/crio
+              fi
+          fi
+
+          # Recargar daemon de systemd y habilitar crio
+          sudo systemctl daemon-reload || { echo "Error al recargar daemon de systemd"; exit 1; }
+          sudo systemctl enable --now crio || { echo "Error al habilitar crio"; exit 1; }
+
+
+          # Descargar y configurar OKD Installer (v4.14.0)
+          OKD_INSTALLER_URL="https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
+          check_url "$OKD_INSTALLER_URL"
+          sudo wget -O /tmp/openshift-install.tar.gz "$OKD_INSTALLER_URL"
+          tar -xzvf /tmp/openshift-install.tar.gz -C /tmp
+          sudo mv /tmp/openshift-install /opt/bin/
+          sudo chmod +x /opt/bin/openshift-install
+
+
           # Install kube-proxy
           curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-proxy
           sudo mv /tmp/kube-proxy /opt/bin/kube-proxy
