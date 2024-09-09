@@ -319,6 +319,10 @@ storage:
           sudo chmod +x /home/core/install
           sudo /home/core/install
           
+          # Esperar 5 minutos antes de continuar con el resto de la instalación
+          sleep 300
+
+
           # Añadir CRI-O y CNI al PATH
           export PATH=$PATH:/opt/bin/
           export PATH=$PATH:/opt/bin/cri-o/bin/
