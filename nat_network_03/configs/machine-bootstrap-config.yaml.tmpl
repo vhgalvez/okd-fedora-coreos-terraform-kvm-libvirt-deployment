@@ -349,13 +349,13 @@ storage:
 
           # Descargar e instalar CRI-O (v1.30.5)
           sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz
-          sudo mkdir -p /usr/local/bin/crio
           sudo mkdir -p /opt/cni/bin
-          sudo tar -xzf /tmp/crio.tar.gz -C /usr/local/bin/crio/
+          sudo tar -xzf /tmp/crio.tar.gz -C /opt/bin/crio/
 
-          sed -i 's;/usr/libexec;/opt/libexec;g' /usr/local/bin/crio/cri-o/install
-          sed -i 's;/usr/local/share;/opt/share;g' /usr/local/bin/crio/cri-o/install
-          sed -i 's;/opt/cni/bin;/opt/cni/bin;g' /usr/local/bin/crio/cri-o/install
+          sudo sed -i 's;/usr/libexec;/opt/libexec;g' /usr/local/bin/crio/cri-o/install
+          sudo sed -i 's;/usr/local/share;/opt/share;g' /usr/local/bin/crio/cri-o/install
+          sudo sed -i 's;/opt/cni/bin;/opt/cni/bin;g' /usr/local/bin/crio/cri-o/install
+          sudo sed -i 's|install -D -m 755 -t "$DESTDIR$OPT_CNI_BIN_DIR" cni-plugins/\*|install -D -m 755 -t "$DESTDIR$OPT_CNI_BIN_DIR" /opt/crio/cri-o/cni-plugins/\*|g' /opt/crio/cri-o/install
 
           # Instalar CRI-O
           sudo /usr/local/bin/crio/cri-o/install
