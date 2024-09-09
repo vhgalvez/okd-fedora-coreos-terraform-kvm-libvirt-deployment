@@ -357,6 +357,10 @@ storage:
           sudo sed -i 's;/opt/cni/bin;/opt/cni/bin;g' /usr/local/bin/crio/cri-o/install
           sudo sed -i 's|install -D -m 755 -t "$DESTDIR$OPT_CNI_BIN_DIR" cni-plugins/\*|install -D -m 755 -t "$DESTDIR$OPT_CNI_BIN_DIR" /opt/crio/cri-o/cni-plugins/\*|g' /opt/crio/cri-o/install
 
+          # Habilitar y arrancar la extensión de CRI-O
+          sudo systemctl enable extensions-crio.slice
+          sudo systemctl start extensions-crio.slice
+
           # Instalar CRI-O
           sudo /usr/local/bin/crio/cri-o/install
           sudo cp -r /usr/local/bin/crio/cri-o/cni-plugins/* /opt/cni/bin/
