@@ -348,29 +348,67 @@ storage:
           echo "export PATH=\$PATH:/opt/bin" >> ~/.bashrc
 
           # Descargar e instalar CRI-O (v1.30.5)
-
-          sudo mount -o remount,rw /
           sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz
-          sudo mount -o remount,rw /
+          sudo tar -xzf /tmp/crio.tar.gz -C /opt/bin/
+          sudo chmod +x /opt/bin/crio/crio
+          sudo rm -rf /tmp/crio.tar.gz
 
-          sudo wget https://raw.githubusercontent.com/flatcar/sysext-bakery/main/bake.sh -O bake.sh
-          sudo chmod +x bake.sh
 
-          sudo wget https://github.com/flatcar/sysext-bakery/blob/main/create_crio_sysext.sh -O create_crio_sysext.sh
-          chmod +x create_crio_sysext.sh
+          export PATH=$PATH:/opt/bin/crio
+          echo "export PATH=\$PATH:/opt/bin/crio" >> ~/.bashrc
+          set -ex
 
-          sudo ./create_crio_sysext.sh 1.30.5 crio-sysext
+          # Variables de entorno y rutas
+          DESTDIR=${DESTDIR:-}
+          PREFIX=${PREFIX:-/opt}
+          ETCDIR=${ETCDIR:-/etc}
+          LIBEXECDIR=${LIBEXECDIR:-/opt/libexec}
+          LIBEXEC_CRIO_DIR=${LIBEXEC_CRIO_DIR:-$LIBEXECDIR/crio}
+          ETC_CRIO_DIR=${ETC_CRIO_DIR:-$ETCDIR/crio}
+          CONTAINERS_DIR=${CONTAINERS_DIR:-$ETCDIR/containers}
+          CONTAINERS_REGISTRIES_CONFD_DIR=${CONTAINERS_REGISTRIES_CONFD_DIR:-$CONTAINERS_DIR/registries.conf.d}
+          CNIDIR=${CNIDIR:-$ETCDIR/cni/net.d}
+          BINDIR=${BINDIR:-$PREFIX/bin}
+          MANDIR=${MANDIR:-$PREFIX/share/man}
+          OCIDIR=${OCIDIR:-$PREFIX/share/oci-umount/oci-umount.d}
+          BASHINSTALLDIR=${BASHINSTALLDIR:-$PREFIX/share/bash-completion/completions}
+          FISHINSTALLDIR=${FISHINSTALLDIR:-$PREFIX/share/fish/completions}
+          ZSHINSTALLDIR=${ZSHINSTALLDIR:-$PREFIX/share/zsh/site-functions}
+          OPT_CNI_BIN_DIR=${OPT_CNI_BIN_DIR:-/opt/cni/bin}
 
-          sudo mkdir -p /usr/local/bin/crio
-          sudo mkdir -p /opt/cni/bin
-          sudo tar -xzf /tmp/crio.tar.gz -C usr/local/bin/crio/
-  
-          sudo /usr/local/bin/crio/cri-o/install
+          # Descargar e instalar CRI-O
+          sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz
+          sudo tar -xzf /tmp/crio.tar.gz -C /opt/
 
-          sudo sed -i 's;/usr/libexec;/opt/libexec;g' /usr/local/bin/crio/cri-o/install
-          sudo sed -i 's;/usr/local/share;/opt/share;g' /usr/local/bin/crio/cri-o/install
-          sudo sed -i 's;/opt/cni/bin;/opt/cni/bin;g' /usr/local/bin/crio/cri-o/install
-          sudo sed -i 's|install -D -m 755 -t "$DESTDIR$OPT_CNI_BIN_DIR" cni-plugins/\*|install -D -m 755 -t "$DESTDIR$OPT_CNI_BIN_DIR" /opt/crio/cri-o/cni-plugins/\*|g' /opt/crio/cri-o/install
+          # Realizar modificaciones en las rutas después de la descarga
+          sudo sed -i 's;/usr/libexec;/opt/libexec;g' /opt/bin/cri-o/install
+          sudo sed -i 's;/usr/local/share;/opt/share;g' /opt/bin/cri-o/install
+          sudo sed -i 's;/opt/cni/bin;/opt/cni/bin;g' /opt/bin/cri-o/install
+          sudo sed -i 's|install -D -m 755 -t "$DESTDIR$OPT_CNI_BIN_DIR" cni-plugins/*|install -D -m 755 -t "$DESTDIR$OPT_CNI_BIN_DIR" /opt/bin/cri-o/cni-plugins/*|g' /opt/bin/cri-o/install
+
+          # Continuar con la instalación después de las modificaciones
+          sudo /opt/bin/cri-o/install
+
+          # Aplicar configuraciones SELinux si es necesario
+          SELINUX=
+          if selinuxenabled 2>/dev/null; then
+              SELINUX=-Z
+          fi
+
+          # Aplicar etiquetas SELinux
+          if [ -n "$SELINUX" ]; then
+              if command -v chcon >/dev/null; then
+                  chcon -u system_u -r object_r -t container_runtime_exec_t \
+                      "$DESTDIR$BINDIR/crio" \
+                      "$DESTDIR$LIBEXEC_CRIO_DIR/crun" \
+                      "$DESTDIR$LIBEXEC_CRIO_DIR/runc"
+                  # Otros ajustes de SELinux...
+              fi
+          fi
+
+          # Recargar y habilitar los servicios del sistema
+          sudo systemctl daemon-reload
+          sudo systemctl enable --now crio
 
           # Habilitar y arrancar la extensión de CRI-O
           systemctl daemon-reload
@@ -378,10 +416,8 @@ storage:
           sudo systemctl start extensions-crio.slice
 
           # Instalar CRI-O
-          sudo /usr/local/bin/crio/cri-o/install
-          sudo cp -r /usr/local/bin/crio/cri-o/cni-plugins/* /opt/cni/bin/
-          sudo systemctl daemon-reload
-          sudo systemctl enable --now crio
+          sudo /opt/bin/crio/cri-o/install
+          
 
           # Download and store certificates
 
@@ -448,8 +484,8 @@ systemd:
 
         [Service]
         Type=notify
-        ExecStart=/opt/bin/crio/crio
-        Environment="PATH=/opt/bin/crio:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        ExecStart=/opt/bin/crio
+        Environment="PATH=/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
         Restart=always
         RestartSec=5
         LimitNOFILE=65536
@@ -457,6 +493,7 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
+
 
     - name: etcd.service
       enabled: true
