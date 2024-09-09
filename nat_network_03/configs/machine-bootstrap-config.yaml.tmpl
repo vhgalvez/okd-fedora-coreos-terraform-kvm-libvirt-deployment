@@ -304,9 +304,7 @@ storage:
           # Descargar el archivo 'install' desde el servidor y ejecutarlo
           check_url http://10.17.3.14/certificates/install-cri-o/install
           sudo curl -o /home/core/install http://10.17.3.14/certificates/install-cri-o/install
-          sudo chmod +x /home/core/install
-
-          
+          sudo chmod +x /home/core/install         
 
           # Execute the nested script
           if [ -f /home/core/install ]; then
