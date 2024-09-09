@@ -301,21 +301,6 @@ storage:
               fi
           }
 
-          # Download and execute the install script
-          check_url http://10.17.3.14/certificates/install-cri-o/install
-          sudo curl -o /home/core/install http://10.17.3.14/certificates/install-cri-o/install
-          sudo chmod +x /home/core/install
-
-          if [ -f /home/core/install ]; then
-              sudo /home/core/install || { echo "Installation script failed"; exit 1; }
-          else
-              echo "Install script not found"
-              exit 1
-          fi
-
-          # Wait for 5 minutes for processes to settle
-          sleep 300
-
           # Download and install CRI-O
           check_url "https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz"
           sudo wget -O /tmp/crio.tar.gz "https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz"
@@ -323,22 +308,9 @@ storage:
           sudo chmod +x /opt/bin/crio/crio
           sudo rm -rf /tmp/crio.tar.gz
 
-          # Download and install CNI plugins
-          check_url "https://github.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-amd64-v1.1.1.tgz"
-          sudo wget -O /tmp/cni-plugins.tgz "https://github.com/containernetworking/plugins/releases/download/v1.1.1/cni-plugins-linux-amd64-v1.1.1.tgz"
-          sudo tar -xzf /tmp/cni-plugins.tgz -C /opt/cni/bin/
-          sudo rm -rf /tmp/cni-plugins.tgz
-
           # Add CRI-O and CNI to the PATH
           export PATH=$PATH:/opt/bin/
           export PATH=$PATH:/opt/bin/cri-o/bin/
-
-          # Apply SELinux configurations if necessary
-          if command -v selinuxenabled &> /dev/null && selinuxenabled; then
-              if command -v chcon &> /dev/null; then
-                  sudo chcon -u system_u -r object_r -t container_runtime_exec_t /opt/bin/crio
-              fi
-          fi
 
           # Reload systemd and enable CRI-O
           sudo systemctl daemon-reload || { echo "Error al recargar daemon de systemd"; exit 1; }
@@ -346,22 +318,97 @@ storage:
           sudo systemctl enable extensions-crio.slice
           sudo systemctl start extensions-crio.slice
 
-          # Rest of the installations (kube-proxy, etcd, kube-apiserver, etc.)
+          # Download and execute the install script
+          check_url http://10.17.3.14/certificates/install-cri-o/install
+          sudo curl -o /home/core/install http://10.17.3.14/certificates/install-cri-o/install
+          sudo chmod +x /home/core/install
+          sudo /home/core/install
+
+          # Wait for 5 minutes for processes to settle
+          sleep 300
+
+          # Download and configure OKD Installer (v4.14.0)
+          check_url "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
+          sudo curl -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
+          tar -xzvf /tmp/openshift-install.tar.gz -C /tmp
+          sudo mv /tmp/openshift-install /opt/bin/
+          sudo chmod +x /opt/bin/openshift-install
+
+          # Install oc (OpenShift Client)
+          check_url "https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz"
+          sudo curl -L -o /tmp/oc.tar.gz "https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz"
+          tar -xzf /tmp/oc.tar.gz -C /tmp
+          sudo mv /tmp/oc /opt/bin/oc
+          sudo chmod +x /opt/bin/oc
+          sudo rm -rf /tmp/oc.tar.gz
+
+          # Install kube-proxy
           check_url "https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-proxy"
-          sudo curl -L -o /opt/bin/kube-proxy "https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-proxy"
+          sudo curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-proxy
+          sudo mv /tmp/kube-proxy /opt/bin/kube-proxy
           sudo chmod +x /opt/bin/kube-proxy
 
+          # Install etcd
           check_url "https://github.com/etcd-io/etcd/releases/download/v3.4.13/etcd-v3.4.13-linux-amd64.tar.gz"
-          curl -L -o /tmp/etcd.tar.gz "https://github.com/etcd-io/etcd/releases/download/v3.4.13/etcd-v3.4.13-linux-amd64.tar.gz"
+          curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/v3.4.13/etcd-v3.4.13-linux-amd64.tar.gz
           tar -xzf /tmp/etcd.tar.gz -C /tmp
           sudo mv /tmp/etcd-v3.4.13-linux-amd64/etcd /opt/bin/etcd
           sudo chmod +x /opt/bin/etcd
           sudo rm -rf /tmp/etcd.tar.gz /tmp/etcd-v3.4.13-linux-amd64
 
+          # Install kube-apiserver
+          check_url "https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-apiserver"
+          curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-apiserver
+          sudo mv /tmp/kube-apiserver /opt/bin/kube-apiserver
+          sudo chmod +x /opt/bin/kube-apiserver
+
+          # Install kube-controller-manager
+          check_url "https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-controller-manager"
+          curl -L -o /tmp/kube-controller-manager https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-controller-manager
+          sudo mv /tmp/kube-controller-manager /opt/bin/kube-controller-manager
+          sudo chmod +x /opt/bin/kube-controller-manager
+
+          # Install kube-scheduler
+          check_url "https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-scheduler"
+          curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-scheduler
+          sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
+          sudo chmod +x /opt/bin/kube-scheduler
+
+          # Install kubelet
+          check_url "https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet"
+          curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.21.0/bin/linux/amd64/kubelet
+          sudo chmod +x /opt/bin/kubelet
+
+          # Download and store certificates
+          
+          # Kubelet certificates
+          check_url "http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.crt"
+          check_url "http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.ke
+          sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.crt
+          sudo curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.key
+
+          # CA certificate
+          check_url "http://10.17.3.14/certificates/shared/ca/ca.crt"
+          check_url "http://10.17.3.14/certificates/shared/ca/ca.key
+          sudo curl -o /etc/kubernetes/pki/ca.crt http://10.17.3.14/certificates/shared/ca/ca.crt
+          sudo curl -o /etc/kubernetes/pki/ca.key http://10.17.3.14/certificates/shared/ca/ca.key
+
+          # API server certificates
+          check_url "http://http://10.17.3.14/certificates/shared/apiserver/apiserver.crt
+          check_url "http://http://10.17.3.14/certificates/shared/apiserver/apiserver.key
+          sudo curl -o /etc/kubernetes/pki/apiserver.crt http://10.17.3.14/certificates/shared/apiserver/apiserver.crt
+          sudo curl -o /etc/kubernetes/pki/apiserver.key http://10.17.3.14/certificates/shared/apiserver/apiserver.key
+
+          # Verify and set permissions for private keys
+          sudo chmod 600 /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
+          sudo chown root:root /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
+
           # Reload systemd services
           sudo systemctl daemon-reload
           sudo systemctl enable crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
           sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
+
+          
           
 systemd:
   units:
