@@ -292,132 +292,101 @@ storage:
           set -euo pipefail
           exec > /var/log/install-components.log 2>&1
 
-
           # Crear directorios necesarios
           sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin /etc/kubernetes/pki/etcd
 
+          # Función para verificar si una URL es accesible
+          check_url() {
+            url=$1
+            if ! curl --head --fail --silent "$url" > /dev/null; then
+              echo "Error: La URL $url no es accesible"
+              exit 1
+            fi
+          }
+
           # Kubelet (v1.31.0)
-          sudo curl -L -o /opt/bin/kubelet https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kubelet
+          KUBELET_URL="https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kubelet"
+          check_url $KUBELET_URL
+          sudo curl -L -o /opt/bin/kubelet $KUBELET_URL
           sudo chmod +x /opt/bin/kubelet
 
-          export PATH=$PATH:/opt/bin
-          echo "export PATH=\$PATH:/opt/bin" >> ~/.bashrc
+          # Añadir /opt/bin al PATH si no está ya
+          if ! echo "$PATH" | grep -q "/opt/bin"; then
+            export PATH=$PATH:/opt/bin
+            echo 'export PATH=$PATH:/opt/bin' >> ~/.bashrc
+          fi
 
           # OpenShift Client (oc)
-          sudo curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
+          OC_URL="https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz"
+          check_url $OC_URL
+          sudo curl -L -o /tmp/oc.tar.gz $OC_URL
           tar -xzf /tmp/oc.tar.gz -C /tmp
           sudo mv /tmp/oc /opt/bin/oc
           sudo chmod +x /opt/bin/oc
-          export PATH=$PATH:/opt/bin
-          echo "export PATH=\$PATH:/opt/bin" >> ~/.bashrc
 
           # OKD Installer (v4.14.0)
-          sudo wget https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz
+          OKD_INSTALLER_URL="https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
+          check_url $OKD_INSTALLER_URL
+          sudo wget $OKD_INSTALLER_URL
           tar -xzvf openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz
           sudo mv openshift-install /opt/bin/
           sudo chmod +x /opt/bin/openshift-install
 
-          export PATH=$PATH:/opt/bin
-          echo "export PATH=\$PATH:/opt/bin" >> ~/.bashrc
-
-          # Kube-Proxy, Kube-Apiserver, Kube-Scheduler, y Kube-Controller-Manager (v1.31.0)
-
-          # Instalar Kube-Proxy:
-          sudo curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kube-proxy
-          sudo mv /tmp/kube-proxy /opt/bin/kube-proxy
-          sudo chmod +x /opt/bin/kube-proxy
-
-          # Instalar Kube-Scheduler:
-          sudo curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kube-scheduler
-          sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
-          sudo chmod +x /opt/bin/kube-scheduler
-
-          # Instalar Kube-Controller-Manager:
-          sudo curl -L -o /tmp/kube-controller-manager https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kube-controller-manager
-          sudo mv /tmp/kube-controller-manager /opt/bin/kube-controller-manager
-          sudo chmod +x /opt/bin/kube-controller-manager
+          # Descargar y configurar componentes de Kubernetes (v1.31.0)
+          KUBE_COMPONENTS=("kube-proxy" "kube-scheduler" "kube-controller-manager")
+          for component in "${KUBE_COMPONENTS[@]}"; do
+            URL="https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/$component"
+            check_url $URL
+            sudo curl -L -o /opt/bin/$component $URL
+            sudo chmod +x /opt/bin/$component
+          done
 
           # Etcd (v3.5.7)
-          sudo curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/v3.5.7/etcd-v3.5.7-linux-amd64.tar.gz
+          ETCD_URL="https://github.com/etcd-io/etcd/releases/download/v3.5.7/etcd-v3.5.7-linux-amd64.tar.gz"
+          check_url $ETCD_URL
+          sudo curl -L -o /tmp/etcd.tar.gz $ETCD_URL
           tar -xzf /tmp/etcd.tar.gz -C /tmp
           sudo mv /tmp/etcd-v3.5.7-linux-amd64/etcd /opt/bin/etcd
           sudo chmod +x /opt/bin/etcd
-          sudo rm -rf /tmp/etcd.tar.gz /tmp/etcd-v3.5.7-linux-amd64
-
-          export PATH=$PATH:/opt/bin
-          echo "export PATH=\$PATH:/opt/bin" >> ~/.bashrc
+          sudo rm -rf /tmp/etcd*
 
           # Descargar e instalar CRI-O (v1.30.5)
-          sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz
+          CRIO_URL="https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz"
+          check_url $CRIO_URL
+          sudo wget -O /tmp/crio.tar.gz $CRIO_URL
           sudo tar -xzf /tmp/crio.tar.gz -C /opt/bin/
           sudo chmod +x /opt/bin/crio/crio
           sudo rm -rf /tmp/crio.tar.gz
 
-
-          export PATH=$PATH:/opt/bin/crio
-          echo "export PATH=\$PATH:/opt/bin/crio" >> ~/.bashrc
-          set -ex
-
-          # Variables de entorno y rutas
-          DESTDIR=${DESTDIR:-}
-          PREFIX=${PREFIX:-/opt}
-          ETCDIR=${ETCDIR:-/etc}
-          LIBEXECDIR=${LIBEXECDIR:-/opt/libexec}
-          LIBEXEC_CRIO_DIR=${LIBEXEC_CRIO_DIR:-$LIBEXECDIR/crio}
-          ETC_CRIO_DIR=${ETC_CRIO_DIR:-$ETCDIR/crio}
-          CONTAINERS_DIR=${CONTAINERS_DIR:-$ETCDIR/containers}
-          CONTAINERS_REGISTRIES_CONFD_DIR=${CONTAINERS_REGISTRIES_CONFD_DIR:-$CONTAINERS_DIR/registries.conf.d}
-          CNIDIR=${CNIDIR:-$ETCDIR/cni/net.d}
-          BINDIR=${BINDIR:-$PREFIX/bin}
-          MANDIR=${MANDIR:-$PREFIX/share/man}
-          OCIDIR=${OCIDIR:-$PREFIX/share/oci-umount/oci-umount.d}
-          BASHINSTALLDIR=${BASHINSTALLDIR:-$PREFIX/share/bash-completion/completions}
-          FISHINSTALLDIR=${FISHINSTALLDIR:-$PREFIX/share/fish/completions}
-          ZSHINSTALLDIR=${ZSHINSTALLDIR:-$PREFIX/share/zsh/site-functions}
-          OPT_CNI_BIN_DIR=${OPT_CNI_BIN_DIR:-/opt/cni/bin}
-
-          # Descargar e instalar CRI-O
-          sudo wget -O /tmp/crio.tar.gz https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz
-          sudo tar -xzf /tmp/crio.tar.gz -C /opt/
-
-          # Realizar modificaciones en las rutas después de la descarga
-          sudo sed -i 's;/usr/libexec;/opt/libexec;g' /opt/bin/cri-o/install
-          sudo sed -i 's;/usr/local/share;/opt/share;g' /opt/bin/cri-o/install
-          sudo sed -i 's;/opt/cni/bin;/opt/cni/bin;g' /opt/bin/cri-o/install
-          sudo sed -i 's|install -D -m 755 -t "$DESTDIR$OPT_CNI_BIN_DIR" cni-plugins/*|install -D -m 755 -t "$DESTDIR$OPT_CNI_BIN_DIR" /opt/bin/cri-o/cni-plugins/*|g' /opt/bin/cri-o/install
-
-          # Continuar con la instalación después de las modificaciones
-          sudo /opt/bin/cri-o/install
-
           # Aplicar configuraciones SELinux si es necesario
-          SELINUX=
           if selinuxenabled 2>/dev/null; then
-              SELINUX=-Z
-          fi
-
-          # Aplicar etiquetas SELinux
-          if [ -n "$SELINUX" ]; then
-              if command -v chcon >/dev/null; then
-                  chcon -u system_u -r object_r -t container_runtime_exec_t \
-                      "$DESTDIR$BINDIR/crio" \
-                      "$DESTDIR$LIBEXEC_CRIO_DIR/crun" \
-                      "$DESTDIR$LIBEXEC_CRIO_DIR/runc"
-                  # Otros ajustes de SELinux...
-              fi
+            if command -v chcon >/dev/null; then
+              chcon -u system_u -r object_r -t container_runtime_exec_t /opt/bin/crio
+            fi
           fi
 
           # Recargar y habilitar los servicios del sistema
           sudo systemctl daemon-reload
           sudo systemctl enable --now crio
 
-          # Habilitar y arrancar la extensión de CRI-O
-          systemctl daemon-reload
-          sudo systemctl enable extensions-crio.slice
-          sudo systemctl start extensions-crio.slice
+          # Descargar certificados kubelet (específicos para cada nodo)
+          CERT_BASE_URL="http://10.17.3.14/certificates"
+          NODES_CERTS=("kubelet" "ca" "apiserver" "sa" "etcd")
+          for cert in "${NODES_CERTS[@]}"; do
+            sudo curl -o /etc/kubernetes/pki/${cert}.crt ${CERT_BASE_URL}/${cert}/${cert}.crt
+            sudo curl -o /etc/kubernetes/pki/${cert}.key ${CERT_BASE_URL}/${cert}/${cert}.key
+          done
 
-          # Instalar CRI-O
-          sudo /opt/bin/crio/cri-o/install
-          
+          # Verificar permisos de claves privadas
+          sudo chmod 600 /etc/kubernetes/pki/*.key
+          sudo chown root:root /etc/kubernetes/pki/*.key
+
+          # Recargar y activar los servicios de Kubernetes
+          KUBE_SERVICES=("crio" "kubelet" "kube-proxy" "etcd" "kube-controller-manager" "kube-apiserver" "kube-scheduler")
+          for service in "${KUBE_SERVICES[@]}"; do
+            sudo systemctl enable $service
+            sudo systemctl start $service
+          done            
 
           # Download and store certificates
 
