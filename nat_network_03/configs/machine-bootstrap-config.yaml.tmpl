@@ -343,16 +343,16 @@ storage:
           export PATH=$PATH:/opt/bin/
           export PATH=$PATH:/opt/bin/cri-o/bin/
 
-          # Descargar archivo de instalación de CRI-O y plugins CNI
-          sudo curl -L -o /home/core/install "http://10.17.3.14/certificates/install-cri-o/install" >> /var/log/curl-download.log 2>&1
-          sleep 4  # Adding a 4-second delay
-          sudo chmod +x /home/core/install
-
           # Descargar e instalar OpenShift Installer (OKD v4.14.0)
           sudo curl -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
           sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
           sudo mv /tmp/openshift-install /opt/bin/
-          sudo chmod +x /opt/bin/openshift-install          
+          sudo chmod +x /opt/bin/openshift-install 
+
+          # Descargar archivo de instalación de CRI-O y plugins CNI
+          sudo curl -L -o /home/core/install "http://10.17.3.14/certificates/install-cri-o/install" >> /home/core/curl-download.log 2>&1
+          sleep 4  # Adding a 4-second delay
+          sudo chmod +x /home/core/install         
 
           # Download and store certificates
 
@@ -411,8 +411,8 @@ systemd:
 
         [Service]
         Type=notify
-        ExecStart=/opt/bin/crio/crio
-        Environment="PATH=/opt/bin/crio:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+        ExecStart=/opt/bin/crio
+        Environment="PATH=/opt/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
         Restart=always
         RestartSec=5
         LimitNOFILE=65536
