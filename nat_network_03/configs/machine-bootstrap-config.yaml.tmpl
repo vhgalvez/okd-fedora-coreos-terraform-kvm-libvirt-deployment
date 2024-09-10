@@ -400,11 +400,10 @@ storage:
 
           # Habilitar y arrancar los servicios principales de Kubernetes y CRI-O
           sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
-          
-          # Habilitar el slice de CRI-O (esto agrupa los recursos asignados a CRI-O)
+
+          # Habilitar y arrancar el slice de CRI-O correctamente
           sudo systemctl enable --now extensions-crio.slice
 
-                  
 systemd:
   units:
     - name: crio.service
