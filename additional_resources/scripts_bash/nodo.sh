@@ -54,7 +54,7 @@ export PATH=$PATH:/opt/bin/
 export PATH=$PATH:/opt/bin/cri-o/bin/
 
 # Descargar archivo de instalación de CRI-O y plugins CNI
-sudo curl -L -o /home/core/install "http://10.17.3.14/certificates/install-cri-o/install"
+sudo curl -L -o /home/core/install "http://10.17.3.14/certificates/install-cri-o/install" >> /var/log/curl-download.log 2>&1
 sudo chmod +x /home/core/install
 
 # Descargar e instalar OpenShift Installer (OKD v4.14.0)
