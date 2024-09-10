@@ -319,12 +319,6 @@ storage:
           # Dar permisos de ejecución al script de instalación
           sudo chmod +x /home/core/install
 
-          # Reload systemd and enable CRI-O
-          sudo systemctl daemon-reload || { echo "Error al recargar daemon de systemd"; exit 1; }
-          sudo systemctl enable --now crio || { echo "Error al habilitar crio"; exit 1; }
-          sudo systemctl enable extensions-crio.slice
-          sudo systemctl start extensions-crio.slice
-
           # Download and configure OKD Installer (v4.14.0)
           check_url "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
           sudo curl -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
@@ -381,7 +375,7 @@ storage:
 
           # Kubelet certificates
           check_url "http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.crt"
-          check_url "http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.ke"
+          check_url "http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.key"
           sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.crt
           sudo curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/certificates/${node_name}/kubelet/kubelet.key
 
@@ -401,10 +395,15 @@ storage:
           sudo chmod 600 /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
           sudo chown root:root /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
 
-          # Reload systemd services
+          # Recargar systemd para reconocer nuevos servicios y configuraciones
           sudo systemctl daemon-reload
-          sudo systemctl enable crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
-          sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
+
+          # Habilitar y arrancar los servicios principales de Kubernetes y CRI-O
+          sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
+          
+          # Habilitar el slice de CRI-O (esto agrupa los recursos asignados a CRI-O)
+          sudo systemctl enable --now extensions-crio.slice
+
                   
 systemd:
   units:
