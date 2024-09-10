@@ -294,9 +294,13 @@ storage:
 
           # Descargar e instalar CRI-O
           curl -L -o /tmp/crio.tar.gz "https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz"
-          tar -xzf /tmp/crio.tar.gz -C /opt/bin/ || { echo "Error al extraer CRI-O"; exit 1; }
-          chmod +x /opt/bin/cri-o/crio
-          rm -rf /tmp/crio.tar.gz
+          if tar -xzf /tmp/crio.tar.gz -C /opt/bin/; then
+              chmod +x /opt/bin/cri-o/crio
+              rm -rf /tmp/crio.tar.gz
+          else
+              echo "Error al extraer CRI-O"
+              exit 1
+          fi
 
           # Añadir CRI-O y CNI al PATH
           export PATH=$PATH:/opt/bin/
@@ -308,16 +312,24 @@ storage:
 
           # Descargar e instalar OpenShift Installer (OKD v4.14.0)
           curl -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
-          tar -xzf /tmp/openshift-install.tar.gz -C /tmp
-          mv /tmp/openshift-install /opt/bin/
-          chmod +x /opt/bin/openshift-install
+          if tar -xzf /tmp/openshift-install.tar.gz -C /tmp; then
+              mv /tmp/openshift-install /opt/bin/
+              chmod +x /opt/bin/openshift-install
+          else
+              echo "Error al extraer OpenShift Installer"
+              exit 1
+          fi
 
           # Instalar el cliente oc (OpenShift Client)
           curl -L -o /tmp/oc.tar.gz "https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz"
-          tar -xzf /tmp/oc.tar.gz -C /tmp
-          mv /tmp/oc /opt/bin/oc
-          chmod +x /opt/bin/oc
-          rm -rf /tmp/oc.tar.gz
+          if tar -xzf /tmp/oc.tar.gz -C /tmp; then
+              mv /tmp/oc /opt/bin/oc
+              chmod +x /opt/bin/oc
+              rm -rf /tmp/oc.tar.gz
+          else
+              echo "Error al extraer OpenShift Client"
+              exit 1
+          fi
 
           # Instalar kube-proxy
           curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-proxy
@@ -326,10 +338,14 @@ storage:
 
           # Instalar etcd
           curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/v3.4.13/etcd-v3.4.13-linux-amd64.tar.gz
-          tar -xzf /tmp/etcd.tar.gz -C /tmp
-          mv /tmp/etcd-v3.4.13-linux-amd64/etcd /opt/bin/etcd
-          chmod +x /opt/bin/etcd
-          rm -rf /tmp/etcd.tar.gz /tmp/etcd-v3.4.13-linux-amd64
+          if tar -xzf /tmp/etcd.tar.gz -C /tmp; then
+              mv /tmp/etcd-v3.4.13-linux-amd64/etcd /opt/bin/etcd
+              chmod +x /opt/bin/etcd
+              rm -rf /tmp/etcd.tar.gz /tmp/etcd-v3.4.13-linux-amd64
+          else
+              echo "Error al extraer etcd"
+              exit 1
+          fi
 
           # Instalar kube-apiserver
           curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kube-apiserver
@@ -376,7 +392,7 @@ storage:
 
           # Habilitar y arrancar el slice de CRI-O correctamente
           systemctl enable --now extensions-crio.slice
-
+         
 systemd:
   units:
     - name: crio.service
