@@ -312,10 +312,11 @@ storage:
           export PATH=$PATH:/opt/bin/
           export PATH=$PATH:/opt/bin/cri-o/bin/
 
+
+
           # Download file of  install to CRI-O and CNI plugins
           check_url "http://10.17.3.14/certificates/install-cri-o/install"
-          sudo wget -O /tmp/ "http://10.17.3.14/certificates/install-cri-o/install"
-          sudo mv /tmp/install /home/core/install
+          sudo wget -O /home/core/install "http://10.17.3.14/certificates/install-cri-o/install"
           # Dar permisos de ejecución al script de instalación
           sudo chmod +x /home/core/install
 
