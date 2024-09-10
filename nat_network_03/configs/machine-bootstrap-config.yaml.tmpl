@@ -525,8 +525,8 @@ systemd:
       contents: |
         [Unit]
         Description=Kubernetes API Server
-        After=install-components.service
-        Wants=install-components.service
+        Documentation=https://kubernetes.io/docs/concepts/overview/components/
+        After=network.target
 
         [Service]
         ExecStart=/opt/bin/kube-apiserver \
