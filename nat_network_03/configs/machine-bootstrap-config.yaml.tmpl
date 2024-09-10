@@ -593,7 +593,7 @@ systemd:
         After=network.target
 
         [Service]
-        ExecStart=/opt/bin/kube-scheduler   --address=127.0.0.1   --kubeconfig=/etc/kubernetes/scheduler.conf   --leader-elect=true   --v=2
+        ExecStart=/opt/bin/kube-scheduler --address=127.0.0.1 --kubeconfig=/etc/kubernetes/scheduler.conf --leader-elect=true --v=2
         Restart=on-failure
 
         [Install]
@@ -622,7 +622,7 @@ systemd:
       contents: |
         [Unit]
         Description=Kubernetes Kube-Proxy Server
-        Documentation=https://kubernetes.io/docs/ 
+        Documentation=https://kubernetes.io/docs/
         After=network.target
 
         [Service]

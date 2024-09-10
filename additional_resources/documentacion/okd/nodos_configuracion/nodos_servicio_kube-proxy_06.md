@@ -161,18 +161,6 @@ sudo journalctl -u kube-proxy -f
 ```
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 ### 5.2 Verificar la conectividad con el servidor API de Kubernetes
 
 Comprueba que kube-proxy esté conectado correctamente al servidor API de Kubernetes:
