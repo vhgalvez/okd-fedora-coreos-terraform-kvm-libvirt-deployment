@@ -90,7 +90,7 @@ subjectAltName = @alt_names
 DNS.1 = etcd
 DNS.2 = etcd.local
 IP.1 = 127.0.0.1
-IP.2 = 10.17.4.23
+IP.2 = 10.17.4.27
 EOF
 ```
 
