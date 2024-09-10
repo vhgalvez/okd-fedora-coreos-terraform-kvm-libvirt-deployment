@@ -425,20 +425,20 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Description=etcd key-value store
-        Documentation=https://etcd.io
+        Description=etcd
+        Documentation=https://github.com/coreos/etcd
         After=network.target
 
         [Service]
         User=etcd
         Type=notify
         Environment="ETCD_DATA_DIR=/var/lib/etcd"
-        Environment="ETCD_NAME=${host_name}"
+        Environment="ETCD_NAME=etcd0"
         Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=https://${ip}:2380"
         Environment="ETCD_LISTEN_PEER_URLS=https://${ip}:2380"
-        Environment="ETCD_LISTEN_CLIENT_URLS=https://${ip}:2379,https://127.0.0.1:2379"
+        Environment="ETCD_LISTEN_CLIENT_URLS=https://${ip},https://127.0.0.1:2379"
         Environment="ETCD_ADVERTISE_CLIENT_URLS=https://${ip}:2379"
-        Environment="ETCD_INITIAL_CLUSTER=${host_name}=https://${ip}:2380"
+        Environment="ETCD_INITIAL_CLUSTER=etcd0=https://${ip}.23:2380"
         Environment="ETCD_INITIAL_CLUSTER_STATE=new"
         Environment="ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster"
         Environment="ETCD_CERT_FILE=/etc/kubernetes/pki/etcd/etcd.crt"
@@ -451,8 +451,8 @@ systemd:
         Environment="ETCD_PEER_CLIENT_CERT_AUTH=true"
         ExecStart=/opt/bin/etcd
         Restart=always
-        RestartSec=5s
-        LimitNOFILE=65536
+        RestartSec=10s
+        LimitNOFILE=40000
 
         [Install]
         WantedBy=multi-user.target
