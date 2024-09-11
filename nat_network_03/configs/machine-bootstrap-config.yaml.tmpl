@@ -589,11 +589,13 @@ systemd:
         After=network.target
 
         [Service]
-        ExecStart=/opt/bin/kube-scheduler --address=127.0.0.1 --kubeconfig=/etc/kubernetes/scheduler.conf --leader-elect=true --v=2
+        ExecStart=/opt/bin/kube-scheduler --kubeconfig=/etc/kubernetes/scheduler.conf --leader-elect=true --v=2
         Restart=on-failure
 
         [Install]
         WantedBy=multi-user.target
+
+        
 
     - name: kubelet.service
       enabled: true
