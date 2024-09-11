@@ -388,23 +388,15 @@ storage:
 
           # Establecer permisos y propietario de los archivos de claves y certificados
 
-          # Asigna permisos de lectura y escritura adecuados para los archivos de claves privadas
-          sudo chmod 600 /etc/kubernetes/pki/*.key
-          sudo chmod 600 /etc/kubernetes/pki/etcd/*.key
-
-          # Asigna permisos de lectura adecuados para los certificados
-          sudo chmod 644 /etc/kubernetes/pki/*.crt
-          sudo chmod 644 /etc/kubernetes/pki/etcd/*.crt
+          # Asigna permisos de lectura y escritura para los archivos de claves privadas y de lectura para los certificados
+          sudo chmod 600 /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
+          sudo chmod 644 /etc/kubernetes/pki/*.crt /etc/kubernetes/pki/etcd/*.crt
 
           # Asegúrate de que los archivos de claves y certificados tengan los propietarios correctos
-          # Los archivos principales deben pertenecer al usuario root
           sudo chown root:root /etc/kubernetes/pki/*.key /etc/kubernetes/pki/*.crt
-
-          # Los archivos de etcd deben pertenecer al usuario etcd
-          sudo chown etcd:etcd /etc/kubernetes/pki/etcd/*.key /etc/kubernetes/pki/etcd/*.crt
-          sudo chown etcd:etcd /etc/kubernetes/pki/etcd/ca.crt
-
-          # Reload systemd and activate services
+          sudo chown etcd:etcd /etc/kubernetes/pki/etcd/*.key /etc/kubernetes/pki/etcd/*.crt /etc/kubernetes/pki/etcd/ca.crt
+          sudo chown etcd:etcd /etc/kubernetes/pki/apiserver-etcd-client.crt /etc/kubernetes/pki/apiserver-etcd-client.key
+        
           sudo systemctl daemon-reload
           sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
           sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
