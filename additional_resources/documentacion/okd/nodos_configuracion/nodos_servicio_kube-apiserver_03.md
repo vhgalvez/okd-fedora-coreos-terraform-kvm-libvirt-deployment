@@ -163,6 +163,11 @@ sudo systemctl restart etcd
 sudo systemctl restart kube-apiserver
 ```
 
+
+
+
+
+
 **Verifica el estado de los servicios:**
 
 ```bash
@@ -178,8 +183,10 @@ Verifica que no haya errores de certificados en los logs:
 sudo journalctl -u etcd -f
 sudo journalctl -u kube-apiserver -f
 ```
+ _____________________
 
-## 10 Generar la clave privada para el cliente kubelet:
+
+## 10  Generar la clave privada para el cliente kubelet:
 
 ```bash
 sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/apiserver-kubelet-client.key -pkeyopt rsa_keygen_bits:2048
