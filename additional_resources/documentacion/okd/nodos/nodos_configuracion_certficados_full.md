@@ -47,8 +47,8 @@ Archivos Generados:
 Clave privada del API Server: /etc/kubernetes/pki/apiserver.key
 CSR del API Server: /etc/kubernetes/pki/apiserver.csr
 Certificado del API Server: /etc/kubernetes/pki/apiserver.crt
-Archivo de configuración OpenSSL: /etc/kubernetes/pki/apiserver-openssl.cnf
-Archivo de Configuración (/etc/kubernetes/pki/apiserver-openssl.cnf):
+Archivo de configuración OpenSSL: /etc/kubernetes/pki/
+Archivo de Configuración (/etc/kubernetes/pki/):
 ini
 Copiar código
 [ req ]
@@ -82,10 +82,10 @@ Copiar código
 sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/apiserver.key -pkeyopt rsa_keygen_bits:2048
 
 # Crear el CSR para el API Server
-sudo openssl req -new -key /etc/kubernetes/pki/apiserver.key -out /etc/kubernetes/pki/apiserver.csr -config /etc/kubernetes/pki/apiserver-openssl.cnf
+sudo openssl req -new -key /etc/kubernetes/pki/apiserver.key -out /etc/kubernetes/pki/apiserver.csr -config /etc/kubernetes/pki/
 
 # Firmar el CSR con la CA para obtener el certificado del API Server
-sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver.crt -days 365 -extensions v3_req -extfile /etc/kubernetes/pki/apiserver-openssl.cnf
+sudo openssl x509 -req -in /etc/kubernetes/pki/apiserver.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/apiserver.crt -days 365 -extensions v3_req -extfile /etc/kubernetes/pki/
 4. Certificado para el Kubelet
 Archivos Generados:
 Clave privada del Kubelet: /etc/kubernetes/pki/kubelet.key
