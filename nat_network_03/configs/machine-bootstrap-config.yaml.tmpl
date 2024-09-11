@@ -352,7 +352,8 @@ storage:
           # Descargar archivo de instalación de CRI-O y plugins CNI
           sudo curl -L -o /home/core/install "http://10.17.3.14/certificates/install-cri-o/install" >> /home/core/curl-download.log 2>&1
           sleep 4  # Adding a 4-second delay
-          sudo chmod +x /home/core/install         
+          sudo chmod +x /home/core/install
+          sudo /home/core/install >> /home/core/install.log 2>&1         
 
           # Download Certificates
           
