@@ -289,7 +289,6 @@ storage:
       contents:
         inline: |
           #!/bin/bash
-          set -euo pipefail
           exec > /var/log/install-components.log 2>&1
 
           # Crear directorios necesarios
@@ -343,7 +342,7 @@ storage:
           # Descargar e instalar CRI-O (mantener la versión v1.30.5)
           sudo curl -L -o /tmp/crio.tar.gz "https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz"
           sudo tar -xzf /tmp/crio.tar.gz -C /opt/bin/
-          sudo chmod +x /opt/bin/cri-o/crio
+          sudo chmod +x /opt/bin/cri-o/crio/bin/*
           sudo rm -rf /tmp/crio.tar.gz
 
           # Añadir CRI-O y CNI al PATH
