@@ -386,12 +386,8 @@ storage:
           sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.crt http://10.17.3.14/certificates/shared/apiserver-kubelet-client/apiserver-kubelet-client.crt
           sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.key http://10.17.3.14/certificates/shared/apiserver-kubelet-client/apiserver-kubelet-client.key
 
-         
-          sudo chmod 600 /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
-          sudo chown root:root /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
-          sudo chown root:root /etc/kubernetes/pki/etcd/*.crt /etc/kubernetes/pki/etcd/*.key
-          sudo chmod 600 /etc/kubernetes/pki/etcd/*.crt /etc/kubernetes/pki/etcd/*.key
-
+          sudo chmod 600 /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key /etc/kubernetes/pki/etcd/*.crt
+          sudo chown root:root /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key /etc/kubernetes/pki/etcd/*.crt
 
           # Reload systemd and activate services
           sudo systemctl daemon-reload
@@ -456,7 +452,6 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
-
 
     - name: apply-network-routes.service
       enabled: true
