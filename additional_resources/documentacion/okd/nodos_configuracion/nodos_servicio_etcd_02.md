@@ -139,3 +139,10 @@ Para asegurar que no haya errores, revisa los logs del servicio:
 ```bash
 sudo journalctl -u etcd -f
 ```
+
+
+
+sudo chmod 600 /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
+sudo chmod 644 /etc/kubernetes/pki/*.crt /etc/kubernetes/pki/etcd/*.crt
+sudo chown etcd:etcd /etc/kubernetes/pki/etcd/*.key /etc/kubernetes/pki/etcd/*.crt
+sudo chown etcd:etcd /etc/kubernetes/pki/apiserver-etcd-client.crt /etc/kubernetes/pki/apiserver-etcd-client.key
