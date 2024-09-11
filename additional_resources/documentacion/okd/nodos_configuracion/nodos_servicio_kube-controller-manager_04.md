@@ -172,3 +172,15 @@ Para monitorear los logs en tiempo real y asegurarte de que no haya errores, eje
 ```bash
 sudo journalctl -u kube-controller-manager -f
 ```
+
+
+Generar cerficados para el kube-controller-manager
+
+```bash
+sudo openssl genpkey -algorithm RSA -out /etc/kubernetes/pki/kube-controller-manager.key -pkeyopt rsa_keygen_bits:2048
+sudo openssl req -new -key /etc/kubernetes/pki/kube-controller-manager.key -subj "/CN=system:kube-controller-manager" -out /etc/kubernetes/pki/kube-controller-manager.csr
+```
+
+```bash
+sudo openssl x509 -req -in /etc/kubernetes/pki/kube-controller-manager.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out /etc/kubernetes/pki/kube-controller-manager.crt -days 365
+```
