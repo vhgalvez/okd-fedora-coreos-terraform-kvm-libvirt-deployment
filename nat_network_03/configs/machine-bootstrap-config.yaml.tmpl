@@ -86,7 +86,7 @@ storage:
               - --authorization-mode=Node,RBAC
               - --client-ca-file=/etc/kubernetes/pki/ca.crt
               - --enable-admission-plugins=NodeRestriction
-              - --etcd-servers=https://127.0.0.1:2379
+              - --etcd-servers=https://${ip}:2379
               - --etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt
               - --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt
               - --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key
@@ -447,7 +447,7 @@ systemd:
         Environment="ETCD_NAME=etcd0"
         Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=https://${ip}:2380"
         Environment="ETCD_LISTEN_PEER_URLS=https://${ip}:2380"
-        Environment="ETCD_LISTEN_CLIENT_URLS=https://${ip}:2379,https://127.0.0.1:2379"
+        Environment="ETCD_LISTEN_CLIENT_URLS=https://${ip}:2379,https://${ip}:2379"
         Environment="ETCD_ADVERTISE_CLIENT_URLS=https://${ip}:2379"
         Environment="ETCD_INITIAL_CLUSTER=etcd0=https://${ip}:2380"
         Environment="ETCD_INITIAL_CLUSTER_STATE=new"
@@ -546,7 +546,7 @@ systemd:
           --authorization-mode=Node,RBAC \
           --client-ca-file=/etc/kubernetes/pki/ca.crt \
           --enable-admission-plugins=NodeRestriction \
-          --etcd-servers=https://127.0.0.1:2379 \
+          --etcd-servers=https://${ip}:2379 \
           --etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt \
           --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt \
           --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key \
