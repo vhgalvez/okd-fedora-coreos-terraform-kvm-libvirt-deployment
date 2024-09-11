@@ -333,6 +333,14 @@ storage:
           sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
 
+          # Descargar e instalar OpenShift Installer (OKD v4.14.0)
+          sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
+          sleep 20  # Adding a 4-second delay
+          sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
+          sudo mv /tmp/openshift-install /opt/bin/
+          sudo chmod +x /opt/bin/openshift-install /opt/bin/oc         
+          sudo rm -rf /tmp/openshift-install.tar.gz
+
           # Descargar e instalar CRI-O (mantener la versión v1.30.5)
           sudo curl -L -o /tmp/crio.tar.gz "https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz"
           sudo tar -xzf /tmp/crio.tar.gz -C /opt/bin/
@@ -344,18 +352,12 @@ storage:
           export PATH=$PATH:/opt/bin/cri-o/bin/
 
           # Descargar archivo de instalación de CRI-O y plugins CNI
-          sudo curl -L -o /home/core/install "http://10.17.3.14/certificates/install-cri-o/install" >> /home/core/curl-download.log 2>&1
+          sudo curl --retry 5 --retry-delay 10 -L -o /home/core/install "http://10.17.3.14/certificates/install-cri-o/install" >> /home/core/curl-download.log 2>&1
           sleep 4  # Adding a 4-second delay
           sudo chmod +x /home/core/install
           sudo /home/core/install >> /home/core/install.log 2>&1
 
-          # Descargar e instalar OpenShift Installer (OKD v4.14.0)
-          sudo curl -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
-          sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
-          sleep 20  # Adding a 4-second delay
-          sudo mv /tmp/openshift-install /opt/bin/
-          sudo chmod +x /opt/bin/openshift-install /opt/bin/oc         
-
+       
           # Download Certificates
           
           # Kubelet certificates for the node
