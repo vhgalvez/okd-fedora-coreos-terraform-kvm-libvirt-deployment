@@ -389,6 +389,9 @@ storage:
          
           sudo chmod 600 /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
           sudo chown root:root /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
+          sudo chown root:root /etc/kubernetes/pki/etcd/*.crt /etc/kubernetes/pki/etcd/*.key
+          sudo chmod 600 /etc/kubernetes/pki/etcd/*.crt /etc/kubernetes/pki/etcd/*.key
+
 
           # Reload systemd and activate services
           sudo systemctl daemon-reload
@@ -435,7 +438,7 @@ systemd:
         Environment="ETCD_LISTEN_PEER_URLS=https://${ip}:2380"
         Environment="ETCD_LISTEN_CLIENT_URLS=https://${ip},https://127.0.0.1:2379"
         Environment="ETCD_ADVERTISE_CLIENT_URLS=https://${ip}:2379"
-        Environment="ETCD_INITIAL_CLUSTER=etcd0=https://${ip}.23:2380"
+        Environment="ETCD_INITIAL_CLUSTER=etcd0=https://${ip}:2380"
         Environment="ETCD_INITIAL_CLUSTER_STATE=new"
         Environment="ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster"
         Environment="ETCD_CERT_FILE=/etc/kubernetes/pki/etcd/etcd.crt"
@@ -453,6 +456,7 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
+
 
     - name: apply-network-routes.service
       enabled: true
