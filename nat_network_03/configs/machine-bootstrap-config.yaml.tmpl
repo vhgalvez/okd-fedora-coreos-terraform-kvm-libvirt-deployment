@@ -295,6 +295,28 @@ storage:
           # Crear directorios necesarios
           sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin /etc/kubernetes/pki/etcd
 
+          # Descargar e instalar CRI-O (mantener la versión v1.30.5)
+          sudo curl -L -o /tmp/crio.tar.gz "https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz"
+          sudo tar -xzf /tmp/crio.tar.gz -C /opt/bin/
+          sudo chmod +x /opt/bin/cri-o/crio
+          sudo rm -rf /tmp/crio.tar.gz
+
+          # Añadir CRI-O y CNI al PATH
+          export PATH=$PATH:/opt/bin/
+          export PATH=$PATH:/opt/bin/cri-o/bin/
+
+          # Descargar archivo de instalación de CRI-O y plugins CNI
+          sudo curl -L -o /home/core/install "http://10.17.3.14/certificates/install-cri-o/install" >> /home/core/curl-download.log 2>&1
+          sleep 4  # Adding a 4-second delay
+          sudo chmod +x /home/core/install
+          sudo /home/core/install >> /home/core/install.log 2>&1  
+
+          # Descargar e instalar OpenShift Installer (OKD v4.14.0)
+          sudo curl -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
+          sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
+          sudo mv /tmp/openshift-install /opt/bin/
+          sudo chmod +x /opt/bin/openshift-install /opt/bin/oc
+
           # Instalar kube-proxy (v1.31.0)
           sudo curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kube-proxy
           sudo mv /tmp/kube-proxy /opt/bin/kube-proxy
@@ -333,69 +355,46 @@ storage:
           sudo chmod +x /opt/bin/oc
           sudo rm -rf /tmp/oc.tar.gz
 
-          # Descargar e instalar CRI-O (mantener la versión v1.30.5)
-          sudo curl -L -o /tmp/crio.tar.gz "https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz"
-          sudo tar -xzf /tmp/crio.tar.gz -C /opt/bin/
-          sudo chmod +x /opt/bin/cri-o/crio
-          sudo rm -rf /tmp/crio.tar.gz
+          # Descargar Certificados
 
-          # Añadir CRI-O y CNI al PATH
-          export PATH=$PATH:/opt/bin/
-          export PATH=$PATH:/opt/bin/cri-o/bin/
-
-          # Descargar e instalar OpenShift Installer (OKD v4.14.0)
-          sudo curl -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
-          sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
-          sudo mv /tmp/openshift-install /opt/bin/
-          sudo chmod +x /opt/bin/openshift-install 
-
-          # Descargar archivo de instalación de CRI-O y plugins CNI
-          sudo curl -L -o /home/core/install "http://10.17.3.14/certificates/install-cri-o/install" >> /home/core/curl-download.log 2>&1
-          sleep 4  # Adding a 4-second delay
-          sudo chmod +x /home/core/install
-          sudo /home/core/install >> /home/core/install.log 2>&1         
-
-          # Download Certificates
-          
-          # Kubelet certificates for the node
+          # Certificados de Kubelet para el nodo
           sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/certificates/kubelet/${node_name}.crt
           sudo curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/certificates/kubelet/${node_name}.key
 
-          # Download CA certificates
+          # Certificados CA
           sudo curl -o /etc/kubernetes/pki/ca.crt http://10.17.3.14/certificates/shared/ca/ca.crt
           sudo curl -o /etc/kubernetes/pki/ca.key http://10.17.3.14/certificates/shared/ca/ca.key
 
-          # API Server certificates
+          # Certificados del API Server
           sudo curl -o /etc/kubernetes/pki/apiserver.crt http://10.17.3.14/certificates/shared/apiserver/apiserver.crt
           sudo curl -o /etc/kubernetes/pki/apiserver.key http://10.17.3.14/certificates/shared/apiserver/apiserver.key
 
-          # Service Account keys
+          # Llaves de la cuenta de servicio (Service Account)
           sudo curl -o /etc/kubernetes/pki/sa.pub http://10.17.3.14/certificates/shared/sa/sa.pub
           sudo curl -o /etc/kubernetes/pki/sa.key http://10.17.3.14/certificates/shared/sa/sa.key
 
-          # etcd certificates
+          # Certificados etcd
           sudo curl -o /etc/kubernetes/pki/etcd/etcd.key http://10.17.3.14/certificates/shared/etcd/etcd.key
           sudo curl -o /etc/kubernetes/pki/etcd/etcd.crt http://10.17.3.14/certificates/shared/etcd/etcd.crt
           sudo curl -o /etc/kubernetes/pki/etcd/ca.crt http://10.17.3.14/certificates/shared/ca/ca.crt
 
-          # API Server etcd-client certificates
+          # Certificados del cliente etcd para el API Server
           sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client.crt http://10.17.3.14/certificates/shared/apiserver-etcd-client/apiserver-etcd-client.crt
           sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client.key http://10.17.3.14/certificates/shared/apiserver-etcd-client/apiserver-etcd-client.key
 
-          # API Server kubelet-client certificates
+          # Certificados del cliente Kubelet para el API Server
           sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.crt http://10.17.3.14/certificates/shared/apiserver-kubelet-client/apiserver-kubelet-client.crt
           sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.key http://10.17.3.14/certificates/shared/apiserver-kubelet-client/apiserver-kubelet-client.key
 
-         
+          # Ajustar permisos
           sudo chmod 600 /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
           sudo chown root:root /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
 
-          # Reload systemd and activate services
+          # Recargar systemd y activar servicios
           sudo systemctl daemon-reload
           sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
           sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
           systemctl enable --now extensions-crio.slice
-          
          
 systemd:
   units:
