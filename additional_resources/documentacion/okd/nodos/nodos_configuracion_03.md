@@ -61,7 +61,3 @@ sudo virsh start helper
 sudo virsh start master1
 sudo virsh start master2
 
-
-
-
-

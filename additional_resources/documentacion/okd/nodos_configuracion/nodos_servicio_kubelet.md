@@ -186,6 +186,45 @@ Si el servicio kubelet sigue fallando, revisa los logs para obtener más detalle
 sudo journalctl -xeu kubelet
 ```
 
+
+cat /etc/kubernetes/kubelet-config.yaml
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+authentication:
+  x509:
+    clientCAFile: "/etc/kubernetes/pki/ca.crt"
+authorization:
+  mode: Webhook
+serverTLSBootstrap: true
+tlsCertFile: "/etc/kubernetes/pki/kubelet.crt"
+tlsPrivateKeyFile: "/etc/kubernetes/pki/kubelet.key"
+cgroupDriver: systemd
+runtimeRequestTimeout: "15m"
+containerRuntimeEndpoint: "unix:///var/run/crio/crio.sock"
+
+
+
+
+
+cat /etc/systemd/system/kubelet.service
+
+[Unit]
+Description=kubelet: The Kubernetes Node Agent
+Documentation=https://kubernetes.io/docs/
+Wants=crio.service
+After=crio.service
+
+[Service]
+ExecStart=/opt/bin/kubelet --config=/etc/kubernetes/kubelet-config.yaml --kubeconfig=/etc/kubernetes/kubelet.conf --hostname-override=master1.cefaslocalserver.com
+Restart=always
+StartLimitInterval=0
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+
+
+
 ## Conclusión
 
 Este tutorial cubre todos los pasos necesarios para configurar y solucionar problemas de kubelet en un nodo de Kubernetes con OpenShift SDN. Incluye la creación de los certificados necesarios, la configuración de los archivos de kubelet y el ajuste de la red con OpenShift SDN.
@@ -210,3 +249,6 @@ curl -L -o /tmp/cni-plugins.tgz https://github.com/containernetworking/plugins/r
 sudo mkdir -p /opt/cni/bin
 sudo tar -xzf /tmp/cni-plugins.tgz -C /opt/cni/bin
 sudo rm -rf /tmp/cni-plugins.tgz
+
+
+
