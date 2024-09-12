@@ -356,42 +356,51 @@ storage:
 
        
           # Download Certificates
-          
-          # Kubelet certificates for the node
-          sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/certificates/kubelet/${node_name}.crt
-          sudo curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/certificates/kubelet/${node_name}.key
+          # Kubelet certificates for each node
+          sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/certificates/kubelet/${node_name}/kubelet.crt
+          sudo curl -o /etc/kubernetes/pki/kubelet.key http://10.17.3.14/certificates/kubelet/${node_name}/kubelet.key
 
-          # Download CA certificates
+          # CA certificates
           sudo curl -o /etc/kubernetes/pki/ca.crt http://10.17.3.14/certificates/shared/ca/ca.crt
           sudo curl -o /etc/kubernetes/pki/ca.key http://10.17.3.14/certificates/shared/ca/ca.key
 
           # API Server certificates
-          sudo curl -o /etc/kubernetes/pki/apiserver.crt http://10.17.3.14/certificates/shared/apiserver/apiserver.crt
-          sudo curl -o /etc/kubernetes/pki/apiserver.key http://10.17.3.14/certificates/shared/apiserver/apiserver.key
+          sudo curl -o /etc/kubernetes/pki/apiserver.crt http://10.17.3.14/certificates/apiserver/apiserver.crt
+          sudo curl -o /etc/kubernetes/pki/apiserver.key http://10.17.3.14/certificates/apiserver/apiserver.key
+
+          # API Server etcd-client certificates
+          sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client.crt http://10.17.3.14/certificates/apiserver-etcd-client/apiserver-etcd-client.crt
+          sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client.key http://10.17.3.14/certificates/apiserver-etcd-client/apiserver-etcd-client.key
+
+          # API Server kubelet-client certificates
+          sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.crt http://10.17.3.14/certificates/shared/apiserver-kubelet-client/apiserver-kubelet-client.crt
+          sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.key http://10.17.3.14/certificates/shared/apiserver-kubelet-client/apiserver-kubelet-client.key
 
           # Service Account keys
           sudo curl -o /etc/kubernetes/pki/sa.pub http://10.17.3.14/certificates/shared/sa/sa.pub
           sudo curl -o /etc/kubernetes/pki/sa.key http://10.17.3.14/certificates/shared/sa/sa.key
 
           # etcd certificates
-          sudo curl -o /etc/kubernetes/pki/etcd/etcd.key http://10.17.3.14/certificates/shared/etcd/etcd.key
-          sudo curl -o /etc/kubernetes/pki/etcd/etcd.crt http://10.17.3.14/certificates/shared/etcd/etcd.crt
+          sudo curl -o /etc/kubernetes/pki/etcd.crt http://10.17.3.14/certificates/etcd/etcd.crt
+          sudo curl -o /etc/kubernetes/pki/etcd.key http://10.17.3.14/certificates/etcd/etcd.key
           sudo curl -o /etc/kubernetes/pki/etcd/ca.crt http://10.17.3.14/certificates/shared/ca/ca.crt
 
-          # API Server etcd-client certificates
-          sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client.crt http://10.17.3.14/certificates/shared/apiserver-etcd-client/apiserver-etcd-client.crt
-          sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client.key http://10.17.3.14/certificates/shared/apiserver-etcd-client/apiserver-etcd-client.key
+          # Kubernetes admin certificates
+          sudo curl -o /etc/kubernetes/pki/admin.crt http://10.17.3.14/certificates/shared/admin.crt
+          sudo curl -o /etc/kubernetes/pki/admin.key http://10.17.3.14/certificates/shared/admin.key
 
-          # API Server kubelet-client certificates
-          sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.crt http://10.17.3.14/certificates/shared/apiserver-kubelet-client/apiserver-kubelet-client.crt
-          sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.key http://10.17.3.14/certificates/shared/apiserver-kubelet-client/apiserver-kubelet-client.key
+          # kube-controller-manager certificates
+          sudo curl -o /etc/kubernetes/pki/kube-controller-manager.crt http://10.17.3.14/certificates/shared/kube-controller-manager/kube-controller-manager.crt
+          sudo curl -o /etc/kubernetes/pki/kube-controller-manager.key http://10.17.3.14/certificates/shared/kube-controller-manager/kube-controller-manager.key
 
-          # Establecer permisos y propietario de los archivos de claves y certificados
+          # kube-scheduler certificates
+          sudo curl -o /etc/kubernetes/pki/kube-scheduler.crt http://10.17.3.14/certificates/shared/kube-scheduler/kube-scheduler.crt
+          sudo curl -o /etc/kubernetes/pki/kube-scheduler.key http://10.17.3.14/certificates/shared/kube-scheduler/kube-scheduler.key
 
-          # Asigna permisos de lectura y escritura para los archivos de claves privadas y de lectura para los certificados
-          sudo chmod 600 /etc/kubernetes/pki/*.key /etc/kubernetes/pki/etcd/*.key
-          sudo chmod 644 /etc/kubernetes/pki/*.crt /etc/kubernetes/pki/etcd/*.crt
-
+          # kube-proxy certificates
+          sudo curl -o /etc/kubernetes/pki/kube-proxy.crt http://10.17.3.14/certificates/shared/kube-proxy/kube-proxy.crt
+          sudo curl -o /etc/kubernetes/pki/kube-proxy.key http://10.17.3.14/certificates/shared/kube-proxy/kube-proxy.key        
+          
           # Asegúrate de que los archivos de claves y certificados tengan los propietarios correctos
           sudo chown root:root /etc/kubernetes/pki/*.key /etc/kubernetes/pki/*.crt
           sudo chown etcd:etcd /etc/kubernetes/pki/etcd/*.key /etc/kubernetes/pki/etcd/*.crt /etc/kubernetes/pki/etcd/ca.crt
