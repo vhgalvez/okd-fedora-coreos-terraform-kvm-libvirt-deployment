@@ -38,14 +38,6 @@ storage:
       contents:
         inline: ${host_name}
 
-    - path: /etc/systemd/timesyncd.conf
-      filesystem: root
-      mode: 0644
-      contents:
-        inline: |
-          [Time]
-          NTP=10.17.3.11
-
     - path: /etc/kubernetes/kubelet.conf
       filesystem: root
       mode: 0644
@@ -362,7 +354,7 @@ storage:
           sudo chmod +x /home/core/install
           sudo /home/core/install >> /home/core/install.log 2>&1
 
-
+       
           # Download Certificates
           # Kubelet certificates for each node
           sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/certificates/kubelet/${node_name}/kubelet.crt
@@ -408,17 +400,18 @@ storage:
           # kube-proxy certificates
           sudo curl -o /etc/kubernetes/pki/kube-proxy.crt http://10.17.3.14/certificates/shared/kube-proxy/kube-proxy.crt
           sudo curl -o /etc/kubernetes/pki/kube-proxy.key http://10.17.3.14/certificates/shared/kube-proxy/kube-proxy.key        
-
+          
           # Asegúrate de que los archivos de claves y certificados tengan los propietarios correctos
           sudo chown root:root /etc/kubernetes/pki/*.key /etc/kubernetes/pki/*.crt
           sudo chown etcd:etcd /etc/kubernetes/pki/etcd/*.key /etc/kubernetes/pki/etcd/*.crt /etc/kubernetes/pki/etcd/ca.crt
           sudo chown etcd:etcd /etc/kubernetes/pki/apiserver-etcd-client.crt /etc/kubernetes/pki/apiserver-etcd-client.key
-
+        
           sudo systemctl daemon-reload
           sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
           sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
           systemctl enable --now extensions-crio.slice
-
+          
+         
 systemd:
   units:
     - name: crio.service
@@ -618,6 +611,8 @@ systemd:
         [Install]
         WantedBy=multi-user.target
 
+        
+
     - name: kubelet.service
       enabled: true
       contents: |
@@ -653,16 +648,3 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
-
-    - name: systemd-timesyncd.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Network Time Synchronization
-        After=network.target
-        [Service]
-        ExecStart=/usr/lib/systemd/systemd-timesyncd
-        Restart=always
-        RestartSec=0
-        [Install]
-        WantedBy=sysinit.target
