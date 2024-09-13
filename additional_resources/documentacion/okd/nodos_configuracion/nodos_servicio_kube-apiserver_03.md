@@ -168,6 +168,8 @@ sudo systemctl restart kube-apiserver
 
 
 
+
+
 **Verifica el estado de los servicios:**
 
 ```bash
