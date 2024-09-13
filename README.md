@@ -720,6 +720,61 @@ A continuación se proporciona un resumen de los hostnames e IPs para referencia
 
 
 
+# Componentes de la Arquitectura
+
+## FreeIPA (10.17.3.11)
+
+- **Servidor DNS y NTP (chronyc)**: 
+    FreeIPA actúa como el servidor DNS, gestionando la resolución de nombres y autenticación dentro del clúster. Además, **chronyc** está configurado para sincronizar el tiempo en todo el clúster, utilizando FreeIPA como uno de los servidores NTP principales.
+  
+## Chronyc / NTP
+
+- **Sincronización de tiempo**: 
+    FreeIPA también proporciona servicios NTP. Todos los nodos del clúster, incluyendo los nodos maestros, workers y el Bootstrap Node, sincronizan su tiempo utilizando **chronyc** y el servidor NTP de FreeIPA (`10.17.3.11`). Esto garantiza que todos los nodos mantengan una sincronización temporal precisa, lo cual es crucial para la operación correcta de Kubernetes y otros servicios distribuidos.
+
+---
+
+# Flujo Ordenado de la Arquitectura
+
+1. **Conexiones Externas**:
+   - Las solicitudes ingresan a través de la **IP pública (192.168.0.21)**, donde se reciben las conexiones HTTPS.
+
+2. **Bastion Node (192.168.0.20)**:
+   - El tráfico pasa por el Bastion Node, que actúa como puerta de enlace segura antes de redirigir el tráfico hacia la red interna.
+
+3. **Load Balancer (Traefik) (10.17.3.12)**:
+   - El tráfico es distribuido hacia los nodos maestros y workers a través del Load Balancer, asegurando la distribución equilibrada de la carga entre los servicios.
+
+4. **Nodos Maestros (Master 1, Master 2, Master 3)**:
+   - Los nodos maestros gestionan el clúster y el control plane de Kubernetes, coordinando las tareas y servicios críticos.
+
+5. **Bootstrap Node (10.17.4.27)**:
+   - El Bootstrap Node inicia la instalación de OKD, obteniendo los certificados desde el Helper Node y configurando los nodos maestros y workers.
+
+6. **Helper Node (10.17.3.14)**:
+   - Este nodo utiliza un servidor web en Docker para **generar y servir certificados** a los nodos del clúster.
+
+7. **Nodos Workers (Worker 1, Worker 2, Worker 3)**:
+   - Ejecutan las aplicaciones y servicios en el clúster de Kubernetes.
+
+8. **FreeIPA (10.17.3.11)**:
+   - FreeIPA gestiona la resolución de nombres (DNS) y la autenticación. Además, actúa como **servidor NTP**, garantizando la sincronización temporal en todos los nodos mediante **chronyc**.
+
+9. **Servidor Físico (192.168.0.21)**:
+   - Es el anfitrión principal para todas las máquinas virtuales y nodos del clúster, conectado directamente al Bastion Node.
+
+---
+
+# Resumen del Flujo
+
+1. Las **conexiones HTTPS** externas ingresan por la **IP pública (192.168.0.21)**.
+2. El tráfico pasa por el **Bastion Node (192.168.0.20)** para acceder de manera segura a la red interna.
+3. El **Load Balancer (Traefik)** distribuye el tráfico hacia los nodos maestros y workers.
+4. El **Bootstrap Node** inicia la instalación de OKD, solicitando los certificados al **Helper Node**.
+5. El **Helper Node** genera y distribuye los certificados a los nodos del clúster.
+6. **FreeIPA** actúa como **servidor DNS y NTP**, asegurando la resolución de nombres y la sincronización temporal en todo el clúster.
+7. Los **nodos workers** ejecutan las aplicaciones, manteniendo la sincronización temporal con FreeIPA a través de **chronyc**.
+
 
 
 # Contacto
