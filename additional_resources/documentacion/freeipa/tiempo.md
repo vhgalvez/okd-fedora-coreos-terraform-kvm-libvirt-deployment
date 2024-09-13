@@ -1,138 +1,118 @@
-# Configuración de NTP con Chrony usando FreeIPA como servidor NTP
+Configuración de NTP en FreeIPA (Servidor) y Clientes
+Configuración del Servidor NTP (FreeIPA)
+Paso 1: Instalar chrony
+En el nodo donde se encuentra instalado FreeIPA (servidor 10.17.3.11):
 
-Índice
-Introducción
-Configuración del servidor NTP en FreeIPA
-Configuración de los clientes NTP
-Verificación de sincronización
-Configuración manual de cliente NTP
-Conclusión+
+Instala chrony si no está instalado:
 
-1. Introducción
-   
-El Protocolo de Tiempo de Red (NTP) es crucial para mantener la hora exacta entre todas las máquinas en una red. Aquí, usaremos chrony para configurar FreeIPA como el servidor NTP, y todas las demás máquinas en la red (Bastion, Helper, Masters, Workers, etc.) se sincronizarán con FreeIPA.
+bash
+Copiar código
+sudo dnf install chrony -y
+Habilita y arranca el servicio de chronyd:
 
-1. Configuración del servidor NTP en FreeIPA
-   
-Paso 1: Verifica la configuración del archivo de chrony en FreeIPA
-
-El archivo de configuración de chrony en el servidor FreeIPA se encuentra en /etc/chrony.conf. Necesitamos asegurarnos de que chrony esté configurado para permitir el acceso a otros dispositivos de la red.
-
-Abre el archivo de configuración de chrony en FreeIPA:
+bash
+Copiar código
+sudo systemctl enable chronyd --now
+sudo systemctl start chronyd
+Asegúrate de que chrony está configurado para usar los servidores correctos. Edita el archivo de configuración /etc/chrony.conf:
 
 bash
 Copiar código
 sudo nano /etc/chrony.conf
-Agrega la línea siguiente para permitir el acceso desde la red 10.17.x.x:
+Agrega o modifica las siguientes líneas para usar servidores NTP públicos y la IP de FreeIPA como fuente interna:
 
-bash
+ini
 Copiar código
-allow 10.17.0.0/16
-Esta línea permitirá que todas las máquinas de la red 10.17.x.x utilicen el servidor FreeIPA como fuente de tiempo.
-
-Guarda los cambios y cierra el archivo.
-
-Paso 2: Reinicia el servicio chronyd
-Para aplicar los cambios en la configuración, reinicia el servicio chronyd:
+pool europe.pool.ntp.org iburst
+server 10.17.3.11 iburst
+Reinicia el servicio para aplicar los cambios:
 
 bash
 Copiar código
 sudo systemctl restart chronyd
-Paso 3: Verifica el estado del servicio chronyd
-Asegúrate de que el servicio chronyd esté corriendo sin problemas:
+Verifica el estado de sincronización:
 
 bash
 Copiar código
+sudo chronyc sources -v
 sudo systemctl status chronyd
-1. Configuración de los clientes NTP
-En todas las demás máquinas de la red (Bastion, Helper, Masters, Workers, etc.), debes configurarlas para que apunten al servidor FreeIPA como su fuente NTP.
-
-Paso 1: Edita el archivo de configuración chrony.conf
-En cada una de las máquinas clientes, sigue estos pasos para apuntarlas al servidor NTP FreeIPA.
-
-Abre el archivo de configuración de chrony:
+Habilita el puerto NTP en el firewall:
 
 bash
 Copiar código
-sudo vim /etc/chrony.conf
-Añade o modifica la siguiente línea para que el servidor FreeIPA sea la fuente de tiempo:
+sudo firewall-cmd --permanent --add-service=ntp
+sudo firewall-cmd --reload
+Paso 2: Verificar la Sincronización de la Hora
+Verifica que el servicio de chrony está funcionando correctamente:
 
 bash
 Copiar código
-server 10.17.3.11 iburst
-Esto configurará FreeIPA (IP: 10.17.3.11) como el servidor NTP principal para la máquina cliente.
-
-Guarda los cambios y cierra el archivo.
-
-Paso 2: Reinicia el servicio chronyd en cada cliente
-Reinicia el servicio chronyd en cada máquina cliente para aplicar los cambios:
+sudo chronyc sources -v
+Verifica que el puerto 123 está abierto para NTP:
 
 bash
 Copiar código
-sudo systemctl restart chronyd
-4. Verificación de sincronización
-Después de realizar la configuración, es importante verificar que todas las máquinas estén sincronizadas correctamente con el servidor NTP.
+sudo netstat -uln | grep :123
+Configuración de los Clientes NTP (Bootstrap, Master, Workers)
+Paso 1: Configurar systemd-timesyncd
+En los nodos clientes (Bootstrap, Master, Workers):
 
-Paso 1: Verifica las fuentes NTP en cada máquina
-En cada máquina, ejecuta el siguiente comando para verificar las fuentes de tiempo configuradas:
-
-bash
-Copiar código
-chronyc sources -v
-Asegúrate de que la IP del servidor FreeIPA (10.17.3.11) aparezca como la fuente de tiempo principal.
-
-Paso 2: Verifica el estado de la sincronización
-Para verificar si la máquina está sincronizada correctamente con el servidor NTP, ejecuta el siguiente comando:
+Verifica la configuración de systemd-timesyncd. Abre el archivo /etc/systemd/timesyncd.conf y configura la IP del servidor NTP (FreeIPA) como la fuente principal:
 
 bash
 Copiar código
-chronyc tracking
-Este comando te mostrará detalles sobre la sincronización de tiempo, incluida la desviación actual respecto a la fuente de tiempo.
+sudo nano /etc/systemd/timesyncd.conf
+Modifica el archivo para incluir el servidor NTP (10.17.3.11):
 
-5. Configuración manual de cliente NTP
-Para configurar un cliente NTP manualmente y asegurarte de que esté sincronizado con el servidor FreeIPA, sigue estos pasos:
-
-Paso 1: Configura el servidor NTP en /etc/chrony.conf
-Abre el archivo de configuración chrony en el cliente:
+ini
+Copiar código
+[Time]
+NTP=10.17.3.11
+FallbackNTP=0.pool.ntp.org
+Guarda el archivo y reinicia el servicio para aplicar los cambios:
 
 bash
 Copiar código
-sudo nano /etc/chrony.conf
-Añade la siguiente línea para usar FreeIPA como servidor NTP:
+sudo systemctl restart systemd-timesyncd
+Habilita systemd-timesyncd para que arranque al iniciar el sistema:
 
 bash
 Copiar código
-server 10.17.3.11 iburst
-Guarda los cambios y cierra el archivo.
-
-Paso 2: Reinicia el servicio chronyd
-Reinicia el servicio chronyd en la máquina cliente:
+sudo systemctl enable systemd-timesyncd
+Paso 2: Verificar Sincronización en el Cliente
+Verifica el estado de la sincronización en los nodos clientes:
 
 bash
 Copiar código
-sudo systemctl restart chronyd
-Paso 3: Verifica la sincronización
-Verifica que el cliente esté sincronizado correctamente:
-
-Ejecuta:
+timedatectl status
+Debes ver algo similar a:
 
 bash
 Copiar código
-chronyc sources -v
-Asegúrate de que el servidor FreeIPA (10.17.3.11) esté listado como la fuente NTP.
+System clock synchronized: yes
+NTP service: active
+Paso 3: Comprobación Final
+Verifica que los nodos estén sincronizando la hora correctamente con el servidor NTP (10.17.3.11):
 
-Luego, ejecuta:
+Realiza un ping desde cualquier cliente al servidor NTP:
 
 bash
 Copiar código
-chronyc tracking
-Este comando debe indicar que la máquina está correctamente sincronizada con FreeIPA.
+ping -c 4 10.17.3.11
+Usa timedatectl para verificar que el reloj del sistema está sincronizado:
 
-6. Conclusión
-Este documento detalla los pasos para configurar un servidor NTP utilizando FreeIPA como servidor central y cómo sincronizar las demás máquinas en la red para que utilicen este servidor como fuente de tiempo. Con chrony instalado y configurado en cada máquina, puedes asegurarte de que todas las máquinas de tu entorno estén sincronizadas con precisión.
+bash
+Copiar código
+timedatectl status
+Resumen
+Servidor FreeIPA (10.17.3.11):
 
-Este documento debería cubrir todos los aspectos necesarios para configurar correctamente la sincronización de tiempo entre FreeIPA y las demás máquinas en tu red utilizando chrony.
+Instalar y configurar chrony.
+Asegurar que el puerto 123 está abierto en el firewall.
+Verificar la sincronización.
+Clientes (Bootstrap, Master, Workers):
 
-
-
-sudo systemctl status systemd-timesyncd
+Configurar systemd-timesyncd para usar el servidor NTP (10.17.3.11).
+Reiniciar y habilitar el servicio de sincronización.
+Verificar que la sincronización esté activa con timedatectl.
+Este procedimiento garantiza que todos los nodos se sincronicen con el servidor NTP central y que se mantenga la consistencia horaria en todo el sistema.
