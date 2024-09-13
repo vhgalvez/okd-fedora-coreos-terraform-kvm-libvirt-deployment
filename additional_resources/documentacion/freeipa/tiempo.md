@@ -1,4 +1,5 @@
 Configuración de NTP con Chrony usando FreeIPA como servidor NTP
+
 Índice
 Introducción
 Configuración del servidor NTP en FreeIPA
