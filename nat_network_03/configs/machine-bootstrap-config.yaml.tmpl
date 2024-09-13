@@ -617,9 +617,7 @@ systemd:
         Restart=on-failure
 
         [Install]
-        WantedBy=multi-user.target
-
-        
+        WantedBy=multi-user.target      
 
     - name: kubelet.service
       enabled: true
@@ -678,4 +676,4 @@ systemd:
         RestartSec=0
 
         [Install]
-        WantedBy=sysinit.target      
+        WantedBy=sysinit.target
