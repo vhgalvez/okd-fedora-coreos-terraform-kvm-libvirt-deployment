@@ -1,4 +1,4 @@
-Configuración de NTP con Chrony usando FreeIPA como servidor NTP
+# Configuración de NTP con Chrony usando FreeIPA como servidor NTP
 
 Índice
 Introducción
@@ -6,12 +6,16 @@ Configuración del servidor NTP en FreeIPA
 Configuración de los clientes NTP
 Verificación de sincronización
 Configuración manual de cliente NTP
-Conclusión
+Conclusión+
+
 1. Introducción
+   
 El Protocolo de Tiempo de Red (NTP) es crucial para mantener la hora exacta entre todas las máquinas en una red. Aquí, usaremos chrony para configurar FreeIPA como el servidor NTP, y todas las demás máquinas en la red (Bastion, Helper, Masters, Workers, etc.) se sincronizarán con FreeIPA.
 
-2. Configuración del servidor NTP en FreeIPA
+1. Configuración del servidor NTP en FreeIPA
+   
 Paso 1: Verifica la configuración del archivo de chrony en FreeIPA
+
 El archivo de configuración de chrony en el servidor FreeIPA se encuentra en /etc/chrony.conf. Necesitamos asegurarnos de que chrony esté configurado para permitir el acceso a otros dispositivos de la red.
 
 Abre el archivo de configuración de chrony en FreeIPA:
@@ -40,7 +44,7 @@ Asegúrate de que el servicio chronyd esté corriendo sin problemas:
 bash
 Copiar código
 sudo systemctl status chronyd
-3. Configuración de los clientes NTP
+1. Configuración de los clientes NTP
 En todas las demás máquinas de la red (Bastion, Helper, Masters, Workers, etc.), debes configurarlas para que apunten al servidor FreeIPA como su fuente NTP.
 
 Paso 1: Edita el archivo de configuración chrony.conf
