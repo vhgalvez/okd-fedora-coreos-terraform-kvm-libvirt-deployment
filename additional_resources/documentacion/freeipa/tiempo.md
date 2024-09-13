@@ -54,7 +54,7 @@ Abre el archivo de configuración de chrony:
 
 bash
 Copiar código
-sudo nano /etc/chrony.conf
+sudo vim /etc/chrony.conf
 Añade o modifica la siguiente línea para que el servidor FreeIPA sea la fuente de tiempo:
 
 bash
@@ -132,3 +132,7 @@ Este comando debe indicar que la máquina está correctamente sincronizada con F
 Este documento detalla los pasos para configurar un servidor NTP utilizando FreeIPA como servidor central y cómo sincronizar las demás máquinas en la red para que utilicen este servidor como fuente de tiempo. Con chrony instalado y configurado en cada máquina, puedes asegurarte de que todas las máquinas de tu entorno estén sincronizadas con precisión.
 
 Este documento debería cubrir todos los aspectos necesarios para configurar correctamente la sincronización de tiempo entre FreeIPA y las demás máquinas en tu red utilizando chrony.
+
+
+
+sudo systemctl status systemd-timesyncd
