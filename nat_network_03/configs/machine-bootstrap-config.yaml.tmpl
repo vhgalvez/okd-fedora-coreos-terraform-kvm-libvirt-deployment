@@ -325,6 +325,13 @@ storage:
           sudo curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.31.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
 
+          # Descargar e instalar OpenShift Installer (OKD v4.14.0)
+          sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
+          sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
+          sudo mv /tmp/openshift-install /opt/bin/
+          sudo chmod +x /opt/bin/openshift-install /opt/bin/oc         
+          sudo rm -rf /tmp/openshift-install.tar.gz
+
           # Descargar e instalar CRI-O (v1.30.5)
           sudo curl -L -o /tmp/crio.tar.gz "https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz"
           sudo tar -xzf /tmp/crio.tar.gz -C /opt/bin/
