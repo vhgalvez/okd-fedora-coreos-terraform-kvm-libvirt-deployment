@@ -359,7 +359,7 @@ storage:
           sudo systemctl daemon-reload
           sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
           sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
-         
+
 systemd:
   units:
     - name: crio.service
@@ -558,7 +558,7 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
-       
+
     - name: kubelet.service
       enabled: true
       contents: |
