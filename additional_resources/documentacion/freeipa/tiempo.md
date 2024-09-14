@@ -1,17 +1,13 @@
-# Configuración de NTP en FreeIPA (Servidor) y Clientes
+Configuración de NTP en FreeIPA (Servidor) y Clientes
+Este documento detalla los pasos para configurar el servidor NTP en FreeIPA y los clientes del clúster utilizando chrony y systemd-timesyncd para asegurar una sincronización horaria precisa.
 
-Este documento detalla los pasos para configurar el servidor NTP en FreeIPA y los clientes del clúster utilizando **chrony** y **systemd-timesyncd** para asegurar una sincronización horaria precisa.
+Configuración del Servidor NTP (FreeIPA)
+Paso 1: Instalar chrony
+En el nodo donde se encuentra instalado FreeIPA (servidor con IP 10.17.3.11), instala chrony si no está instalado:
 
-## Configuración del Servidor NTP (FreeIPA)
-
-### Paso 1: Instalar chrony
-
-1. En el nodo donde se encuentra instalado **FreeIPA** (servidor con IP `10.17.3.11`), instala **chrony** si no está instalado:
-
-   ```bash
-   sudo dnf install chrony -y
-    ```
-
+bash
+Copiar código
+sudo dnf install chrony -y
 Habilita y arranca el servicio de chronyd:
 
 bash
@@ -107,20 +103,9 @@ Usa timedatectl para verificar que el reloj del sistema esté sincronizado:
 bash
 Copiar código
 timedatectl status
-Resumen
-Servidor FreeIPA (10.17.3.11):
-Instalar y configurar chrony.
-Asegurar que el puerto NTP (123) esté abierto en el firewall.
-Verificar la sincronización con chronyc sources -v.
-Clientes (Bootstrap, Master, Workers):
-Configurar systemd-timesyncd para usar el servidor NTP (10.17.3.11).
-Reiniciar y habilitar el servicio de sincronización.
-Verificar la sincronización usando timedatectl status.
-Este procedimiento asegura que todos los nodos se sincronicen con el servidor NTP central, manteniendo la consistencia horaria en todo el sistema.
-
 Guía para Verificación y Configuración de DNS en FreeIPA
-1. Comprueba la Resolución DNS
-Después de haber configurado los reenviadores y reiniciado named, es momento de comprobar si la resolución DNS funciona correctamente.
+Paso 1: Comprueba la Resolución DNS
+Después de haber configurado los reenviadores y reiniciado named, comprueba si la resolución DNS funciona correctamente.
 
 bash
 Copiar código
@@ -129,7 +114,7 @@ curl https://google.com
 
 # Verifica la resolución DNS con ping
 ping google.com
-2. Verifica el Archivo /etc/resolv.conf
+Paso 2: Verifica el Archivo /etc/resolv.conf
 Es importante que el archivo /etc/resolv.conf esté correctamente configurado. Este archivo debe apuntar a tu servidor DNS local (FreeIPA) y, opcionalmente, a servidores DNS externos como Google DNS.
 
 bash
@@ -156,7 +141,7 @@ nameserver 127.0.0.1
 nameserver 8.8.8.8
 Guarda los cambios y cierra el archivo.
 
-3. Prueba la Conectividad Nuevamente
+Paso 3: Prueba la Conectividad Nuevamente
 Una vez que hayas configurado correctamente el archivo /etc/resolv.conf, prueba de nuevo la resolución de nombres.
 
 bash
@@ -168,7 +153,7 @@ curl https://google.com
 ping google.com
 Si todo está correctamente configurado, deberías poder resolver los nombres de dominio sin problemas.
 
-4. Verifica los Logs si Persiste el Problema
+Paso 4: Verifica los Logs si Persiste el Problema
 Si el problema persiste, es recomendable revisar los logs de BIND para obtener más detalles sobre posibles errores de configuración de DNS.
 
 bash
@@ -177,4 +162,4 @@ Copiar código
 sudo journalctl -u named
 Los logs deberían proporcionar información adicional sobre cualquier fallo relacionado con la configuración de DNS en tu sistema.
 
-Con esta guía puedes asegurar que la configuración de DNS en tu servidor FreeIPA esté correctamente establecida.
+Con esta guía puedes asegurar que la configuración de NTP y DNS en tu servidor FreeIPA esté correctamente establecida, y que los clientes estén correctamente sincronizados tanto en tiempo como en resolución de nombres.
