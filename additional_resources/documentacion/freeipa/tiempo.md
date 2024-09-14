@@ -117,3 +117,64 @@ Configurar systemd-timesyncd para usar el servidor NTP (10.17.3.11).
 Reiniciar y habilitar el servicio de sincronización.
 Verificar la sincronización usando timedatectl status.
 Este procedimiento asegura que todos los nodos se sincronicen con el servidor NTP central, manteniendo la consistencia horaria en todo el sistema.
+
+Guía para Verificación y Configuración de DNS en FreeIPA
+1. Comprueba la Resolución DNS
+Después de haber configurado los reenviadores y reiniciado named, es momento de comprobar si la resolución DNS funciona correctamente.
+
+bash
+Copiar código
+# Verifica la resolución DNS con curl
+curl https://google.com
+
+# Verifica la resolución DNS con ping
+ping google.com
+2. Verifica el Archivo /etc/resolv.conf
+Es importante que el archivo /etc/resolv.conf esté correctamente configurado. Este archivo debe apuntar a tu servidor DNS local (FreeIPA) y, opcionalmente, a servidores DNS externos como Google DNS.
+
+bash
+Copiar código
+# Visualiza el contenido de /etc/resolv.conf
+cat /etc/resolv.conf
+El archivo debe verse similar a lo siguiente:
+
+bash
+Copiar código
+nameserver 127.0.0.1  # O la IP de tu servidor FreeIPA
+nameserver 8.8.8.8  # Google DNS
+Si el archivo no está correctamente configurado, edítalo:
+
+bash
+Copiar código
+# Edita /etc/resolv.conf
+sudo nano /etc/resolv.conf
+Agrega las siguientes líneas (modifica según sea necesario):
+
+bash
+Copiar código
+nameserver 127.0.0.1
+nameserver 8.8.8.8
+Guarda los cambios y cierra el archivo.
+
+3. Prueba la Conectividad Nuevamente
+Una vez que hayas configurado correctamente el archivo /etc/resolv.conf, prueba de nuevo la resolución de nombres.
+
+bash
+Copiar código
+# Prueba la conectividad con curl
+curl https://google.com
+
+# Prueba la conectividad con ping
+ping google.com
+Si todo está correctamente configurado, deberías poder resolver los nombres de dominio sin problemas.
+
+4. Verifica los Logs si Persiste el Problema
+Si el problema persiste, es recomendable revisar los logs de BIND para obtener más detalles sobre posibles errores de configuración de DNS.
+
+bash
+Copiar código
+# Verifica los logs del servicio named
+sudo journalctl -u named
+Los logs deberían proporcionar información adicional sobre cualquier fallo relacionado con la configuración de DNS en tu sistema.
+
+Con esta guía puedes asegurar que la configuración de DNS en tu servidor FreeIPA esté correctamente establecida.
