@@ -354,7 +354,6 @@ storage:
           sudo chmod +x /home/core/install
           sudo /home/core/install >> /home/core/install.log 2>&1
 
-
           # Download Certificates
           # Kubelet certificates for each node
           sudo curl -o /etc/kubernetes/pki/kubelet.crt http://10.17.3.14/certificates/kubelet/${node_name}/kubelet.crt
