@@ -372,12 +372,9 @@ storage:
           sudo curl -o /etc/kubernetes/pki/sa.pub http://10.17.3.14/certificates/sa/sa.pem
           sudo curl -o /etc/kubernetes/pki/etcd/etcd.pem http://10.17.3.14/certificates/etcd/etcd-10.17.4.21.pem
           sudo curl -o /etc/kubernetes/pki/etcd/etcd-key.pem http://10.17.3.14/certificates/etcd/etcd-10.17.4.21-key.pem
-
-            
-
+          
           sudo chown root:root /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
           sudo chmod 600 /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
-
 
           sudo systemctl daemon-reload
           sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
