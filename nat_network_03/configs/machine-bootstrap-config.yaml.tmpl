@@ -343,7 +343,7 @@ storage:
           export PATH=$PATH:/opt/bin/cri-o/bin/
 
           # Descargar archivo de instalación de CRI-O y plugins CNI
-          sudo curl --retry 5 --retry-delay 10 -L -o /home/core/install "http://10.17.3.14/certificates/install-cri-o/install" >> /home/core/curl-download.log 2>&1
+          sudo curl --retry 5 --retry-delay 10 -L -o /home/core/install "http://10.17.3.14/install-cri-o/install" >> /home/core/curl-download.log 2>&1
           sudo chmod +x /home/core/install
           sudo /home/core/install >> /home/core/install.log 2>&1
 
