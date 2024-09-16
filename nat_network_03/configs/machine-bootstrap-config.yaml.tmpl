@@ -368,6 +368,11 @@ storage:
           sudo curl -o /etc/kubernetes/pki/kube-proxy-key.pem http://10.17.3.14/certificates/kube-proxy/kube-proxy-key.pem
           sudo curl -o /etc/kubernetes/pki/kubelet-${node_name}.pem http://10.17.3.14/certificates/kubelet/kubelet-${node_name}.pem
           sudo curl -o /etc/kubernetes/pki/kubelet-${node_name}-key.pem http://10.17.3.14/certificates/kubelet/kubelet-${node_name}-key.pem
+          sudo curl -o /etc/kubernetes/pki/sa.key http://10.17.3.14/certificates/sa/sa-key.pem
+          sudo curl -o /etc/kubernetes/pki/sa.pub http://10.17.3.14/certificates/sa/sa.pem
+          sudo curl -o /etc/kubernetes/pki/etcd/etcd.pem http://10.17.3.14/certificates/etcd/etcd-10.17.4.21.pem
+          sudo curl -o /etc/kubernetes/pki/etcd/etcd-key.pem http://10.17.3.14/certificates/etcd/etcd-10.17.4.21-key.pem
+          sudo curl -o /etc/kubernetes/pki/etcd/ca.pem http://        
 
           sudo chown root:root /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
           sudo chmod 600 /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
