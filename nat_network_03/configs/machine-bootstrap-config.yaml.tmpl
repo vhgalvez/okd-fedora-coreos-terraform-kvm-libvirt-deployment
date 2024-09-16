@@ -421,13 +421,13 @@ systemd:
         Environment="ETCD_INITIAL_CLUSTER=etcd0=https://${ip}:2380"
         Environment="ETCD_INITIAL_CLUSTER_STATE=new"
         Environment="ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster"
-        Environment="ETCD_CERT_FILE=/etc/kubernetes/pki/etcd/etcd.crt"
-        Environment="ETCD_KEY_FILE=/etc/kubernetes/pki/etcd/etcd.key"
-        Environment="ETCD_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.crt"
+        Environment="ETCD_CERT_FILE=/etc/kubernetes/pki/etcd/etcd.pem"
+        Environment="ETCD_KEY_FILE=/etc/kubernetes/pki/etcd/etcd-key.pem"
+        Environment="ETCD_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.pem"
         Environment="ETCD_CLIENT_CERT_AUTH=true"
-        Environment="ETCD_PEER_CERT_FILE=/etc/kubernetes/pki/etcd/etcd.crt"
-        Environment="ETCD_PEER_KEY_FILE=/etc/kubernetes/pki/etcd/etcd.key"
-        Environment="ETCD_PEER_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.crt"
+        Environment="ETCD_PEER_CERT_FILE=/etc/kubernetes/pki/etcd/etcd.pem"
+        Environment="ETCD_PEER_KEY_FILE=/etc/kubernetes/pki/etcd/etcd-key.pem"
+        Environment="ETCD_PEER_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.pem"
         Environment="ETCD_PEER_CLIENT_CERT_AUTH=true"
         ExecStart=/opt/bin/etcd
         Restart=always
@@ -513,21 +513,21 @@ systemd:
           --advertise-address=${ip} \
           --allow-privileged=true \
           --authorization-mode=Node,RBAC \
-          --client-ca-file=/etc/kubernetes/pki/ca.crt \
+          --client-ca-file=/etc/kubernetes/pki/ca.pem \
           --enable-admission-plugins=NodeRestriction \
           --etcd-servers=https://${ip}:2379 \
-          --etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt \
-          --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt \
-          --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key \
-          --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt \
-          --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key \
+          --etcd-cafile=/etc/kubernetes/pki/etcd/ca.pem \
+          --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.pem \
+          --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client-key.pem \
+          --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.pem \
+          --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client-key.pem \
           --runtime-config=api/all=true \
           --service-account-key-file=/etc/kubernetes/pki/sa.pub \
           --service-account-signing-key-file=/etc/kubernetes/pki/sa.key \
           --service-account-issuer=https://kubernetes.default.svc.cluster.local \
           --service-cluster-ip-range=10.96.0.0/12 \
-          --tls-cert-file=/etc/kubernetes/pki/apiserver.crt \
-          --tls-private-key-file=/etc/kubernetes/pki/apiserver.key \
+          --tls-cert-file=/etc/kubernetes/pki/apiserver.pem \
+          --tls-private-key-file=/etc/kubernetes/pki/apiserver-key.pem \
           --v=2
         Restart=on-failure
 
