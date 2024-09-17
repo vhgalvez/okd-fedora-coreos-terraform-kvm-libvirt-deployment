@@ -531,9 +531,11 @@ systemd:
           --tls-private-key-file=/etc/kubernetes/pki/apiserver-key.pem \
           --v=2
         Restart=on-failure
+        Type=notify
+        LimitNOFILE=65536
 
         [Install]
-        WantedBy=multi-user.target
+        WantedBy=multi-user.target       
 
     - name: kube-controller-manager.service
       enabled: true
