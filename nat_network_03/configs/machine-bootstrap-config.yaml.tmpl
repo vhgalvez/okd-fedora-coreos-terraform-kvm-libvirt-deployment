@@ -549,10 +549,10 @@ systemd:
           --leader-elect=true \
           --use-service-account-credentials=true \
           --controllers=*,bootstrapsigner,tokencleaner \
-          --cluster-signing-cert-file=/etc/kubernetes/pki/ca.crt \
-          --cluster-signing-key-file=/etc/kubernetes/pki/ca.key \
-          --root-ca-file=/etc/kubernetes/pki/ca.crt \
-          --service-account-private-key-file=/etc/kubernetes/pki/sa.key \
+          --cluster-signing-cert-file=/etc/kubernetes/pki/ca.pem \
+          --cluster-signing-key-file=/etc/kubernetes/pki/ca-key.pem \
+          --root-ca-file=/etc/kubernetes/pki/ca.pem \
+          --service-account-private-key-file=/etc/kubernetes/pki/sa-key.pem \
           --cluster-name=kubernetes \
           --cluster-cidr=10.244.0.0/16 \
           --allocate-node-cidrs=true \
@@ -561,9 +561,10 @@ systemd:
           --v=2
         Restart=on-failure
 
-        [Install]
-        WantedBy=multi-user.target
+[Install]
+WantedBy=multi-user.target
 
+        
     - name: kube-scheduler.service
       enabled: true
       contents: |
