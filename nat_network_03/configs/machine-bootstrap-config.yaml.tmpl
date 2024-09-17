@@ -100,7 +100,7 @@ storage:
               - --tls-cert-file=/etc/kubernetes/pki/apiserver.pem
               - --tls-private-key-file=/etc/kubernetes/pki/apiserver-key.pem
               - --v=2
-            ports:
+              ports:
               - containerPort: 6443
                 hostPort: 6443
                 name: https
@@ -354,6 +354,7 @@ storage:
           sudo chmod +x /home/core/install
           sudo /home/core/install >> /home/core/install.log 2>&1
 
+          # Descargar certificados necesarios
           sudo curl -o /etc/kubernetes/pki/ca.pem http://10.17.3.14/certificates/shared/ca.pem
           sudo curl -o /etc/kubernetes/pki/apiserver.pem http://10.17.3.14/certificates/apiserver/apiserver.pem
           sudo curl -o /etc/kubernetes/pki/apiserver-key.pem http://10.17.3.14/certificates/apiserver/apiserver-key.pem
@@ -372,6 +373,7 @@ storage:
           sudo curl -o /etc/kubernetes/pki/etcd/etcd-${ip}.pem http://10.17.3.14/certificates/etcd/etcd-${ip}.pem
           sudo curl -o /etc/kubernetes/pki/etcd/etcd-${ip}-key.pem http://10.17.3.14/certificates/etcd/etcd-${ip}-key.pem
         
+
           sudo chown root:root /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
           sudo chmod 600 /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
 
@@ -404,28 +406,28 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Description=etcd
-        Documentation=https://github.com/coreos/etcd
+        Description=etcd - Distributed Key-Value Store
+        Documentation=https://github.com/etcd-io/etcd
         After=network.target
 
         [Service]
         User=etcd
         Type=notify
         Environment="ETCD_DATA_DIR=/var/lib/etcd"
-        Environment="ETCD_NAME=etcd0"
+        Environment="ETCD_NAME=etcd-${ip}"
         Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=https://${ip}:2380"
         Environment="ETCD_LISTEN_PEER_URLS=https://${ip}:2380"
-        Environment="ETCD_LISTEN_CLIENT_URLS=https://${ip}:2379,https://${ip}:2379"
+        Environment="ETCD_LISTEN_CLIENT_URLS=https://${ip}:2379,https://127.0.0.1:2379"
         Environment="ETCD_ADVERTISE_CLIENT_URLS=https://${ip}:2379"
-        Environment="ETCD_INITIAL_CLUSTER=etcd0=https://${ip}:2380"
+        Environment="ETCD_INITIAL_CLUSTER=etcd-${ip}=https://${ip}:2380"
         Environment="ETCD_INITIAL_CLUSTER_STATE=new"
-        Environment="ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster"
-        Environment="ETCD_CERT_FILE=/etc/kubernetes/pki/etcd/etcd.pem"
-        Environment="ETCD_KEY_FILE=/etc/kubernetes/pki/etcd/etcd-key.pem"
+        Environment="ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster-token"
+        Environment="ETCD_CERT_FILE=/etc/kubernetes/pki/etcd/etcd-${ip}.pem"
+        Environment="ETCD_KEY_FILE=/etc/kubernetes/pki/etcd/etcd-${ip}-key.pem"
         Environment="ETCD_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.pem"
         Environment="ETCD_CLIENT_CERT_AUTH=true"
-        Environment="ETCD_PEER_CERT_FILE=/etc/kubernetes/pki/etcd/etcd.pem"
-        Environment="ETCD_PEER_KEY_FILE=/etc/kubernetes/pki/etcd/etcd-key.pem"
+        Environment="ETCD_PEER_CERT_FILE=/etc/kubernetes/pki/etcd/etcd-${ip}.pem"
+        Environment="ETCD_PEER_KEY_FILE=/etc/kubernetes/pki/etcd/etcd-${ip}-key.pem"
         Environment="ETCD_PEER_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.pem"
         Environment="ETCD_PEER_CLIENT_CERT_AUTH=true"
         ExecStart=/opt/bin/etcd
@@ -435,6 +437,7 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
+
 
     - name: apply-network-routes.service
       enabled: true
@@ -529,11 +532,9 @@ systemd:
           --tls-private-key-file=/etc/kubernetes/pki/apiserver-key.pem \
           --v=2
         Restart=on-failure
-        Type=notify
-        LimitNOFILE=65536
 
         [Install]
-        WantedBy=multi-user.target       
+        WantedBy=multi-user.target
 
     - name: kube-controller-manager.service
       enabled: true
@@ -562,8 +563,8 @@ systemd:
           --v=2
         Restart=on-failure
 
-        [Install]
-        WantedBy=multi-user.target
+[Install]
+WantedBy=multi-user.target
 
         
     - name: kube-scheduler.service
