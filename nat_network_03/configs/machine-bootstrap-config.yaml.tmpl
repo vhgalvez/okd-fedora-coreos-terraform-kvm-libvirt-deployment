@@ -564,8 +564,8 @@ systemd:
           --v=2
         Restart=on-failure
 
-[Install]
-WantedBy=multi-user.target
+        [Install]
+        WantedBy=multi-user.target
 
         
     - name: kube-scheduler.service
