@@ -290,15 +290,15 @@ storage:
         inline: |
           #!/bin/bash
           exec > /var/log/install-components.log 2>&1
-
+          
           # Crear directorios necesarios
           sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin /etc/kubernetes/pki/etcd
-
+          
           # Instalar kube-proxy (v1.31.0)
           sudo curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kube-proxy
           sudo mv /tmp/kube-proxy /opt/bin/kube-proxy
           sudo chmod +x /opt/bin/kube-proxy
-
+          
           # Instalar etcd (v3.5.9)
           sudo curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/v3.5.9/etcd-v3.5.9-linux-amd64.tar.gz
           sudo tar -xzf /tmp/etcd.tar.gz -C /tmp
@@ -372,8 +372,7 @@ storage:
           sudo curl -o /etc/kubernetes/pki/sa.pub http://10.17.3.14/certificates/sa/sa.pem
           sudo curl -o /etc/kubernetes/pki/etcd/etcd-${ip}.pem http://10.17.3.14/certificates/etcd/etcd-${ip}.pem
           sudo curl -o /etc/kubernetes/pki/etcd/etcd-${ip}-key.pem http://10.17.3.14/certificates/etcd/etcd-${ip}-key.pem
-        
-
+          
           sudo chown root:root /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
           sudo chmod 600 /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
 
@@ -437,7 +436,6 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
-
 
     - name: apply-network-routes.service
       enabled: true
@@ -563,10 +561,9 @@ systemd:
           --v=2
         Restart=on-failure
 
-[Install]
-WantedBy=multi-user.target
+        [Install]
+        WantedBy=multi-user.target
 
-        
     - name: kube-scheduler.service
       enabled: true
       contents: |
