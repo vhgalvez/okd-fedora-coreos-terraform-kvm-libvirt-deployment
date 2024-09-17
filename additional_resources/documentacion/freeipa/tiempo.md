@@ -1,13 +1,17 @@
-Configuración de NTP en FreeIPA (Servidor) y Clientes
+
+# Configuración de NTP en FreeIPA (Servidor) y Clientes
+
 Este documento detalla los pasos para configurar el servidor NTP en FreeIPA y los clientes del clúster utilizando chrony y systemd-timesyncd para asegurar una sincronización horaria precisa.
 
-Configuración del Servidor NTP (FreeIPA)
-Paso 1: Instalar chrony
+## Configuración del Servidor NTP (FreeIPA)
+
+### Paso 1: Instalar chrony
 En el nodo donde se encuentra instalado FreeIPA (servidor con IP 10.17.3.11), instala chrony si no está instalado:
 
-bash
-Copiar código
+```bash
 sudo dnf install chrony -y
+```
+
 Habilita y arranca el servicio de chronyd:
 
 bash
