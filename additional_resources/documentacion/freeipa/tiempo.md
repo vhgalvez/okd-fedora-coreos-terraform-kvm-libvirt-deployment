@@ -6,6 +6,7 @@ Este documento detalla los pasos para configurar el servidor NTP en FreeIPA y lo
 ## Configuración del Servidor NTP (FreeIPA)
 
 ### Paso 1: Instalar chrony
+
 En el nodo donde se encuentra instalado FreeIPA (servidor con IP 10.17.3.11), instala chrony si no está instalado:
 
 ```bash
