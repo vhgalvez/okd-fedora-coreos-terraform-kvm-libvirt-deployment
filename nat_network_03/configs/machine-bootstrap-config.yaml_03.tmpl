@@ -405,30 +405,39 @@ systemd:
       enabled: true
       contents: |
         [Unit]
-        Description=etcd
-        Documentation=https://github.com/coreos/etcd
+        Description=etcd - Distributed Key-Value Store
+        Documentation=https://github.com/etcd-io/etcd
         After=network.target
 
         [Service]
         User=etcd
         Type=notify
+        # Directorio de almacenamiento de datos de etcd
         Environment="ETCD_DATA_DIR=/var/lib/etcd"
-        Environment="ETCD_NAME=etcd0"
+        # Nombre de la instancia de etcd
+        Environment="ETCD_NAME=etcd-${ip}"
+        # URL de anuncios y conexiones para los pares (peer)
         Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=https://${ip}:2380"
         Environment="ETCD_LISTEN_PEER_URLS=https://${ip}:2380"
-        Environment="ETCD_LISTEN_CLIENT_URLS=https://${ip}:2379,https://${ip}:2379"
+        # URLs de cliente para conectar a este nodo etcd
+        Environment="ETCD_LISTEN_CLIENT_URLS=https://${ip}:2379,https://127.0.0.1:2379"
         Environment="ETCD_ADVERTISE_CLIENT_URLS=https://${ip}:2379"
-        Environment="ETCD_INITIAL_CLUSTER=etcd0=https://${ip}:2380"
+        # Configuración inicial del clúster (puede necesitar incluir más nodos si es un clúster de varios nodos)
+        Environment="ETCD_INITIAL_CLUSTER=etcd-${ip}=https://${ip}:2380"
         Environment="ETCD_INITIAL_CLUSTER_STATE=new"
-        Environment="ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster"
-        Environment="ETCD_CERT_FILE=/etc/kubernetes/pki/etcd/etcd.pem"
-        Environment="ETCD_KEY_FILE=/etc/kubernetes/pki/etcd/etcd-key.pem"
+        Environment="ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster-token"
+        # Rutas de certificados para la autenticación TLS
+        Environment="ETCD_CERT_FILE=/etc/kubernetes/pki/etcd/etcd-${ip}.pem"
+        Environment="ETCD_KEY_FILE=/etc/kubernetes/pki/etcd/etcd-${ip}-key.pem"
         Environment="ETCD_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.pem"
+        # Autenticación del cliente usando certificados
         Environment="ETCD_CLIENT_CERT_AUTH=true"
-        Environment="ETCD_PEER_CERT_FILE=/etc/kubernetes/pki/etcd/etcd.pem"
-        Environment="ETCD_PEER_KEY_FILE=/etc/kubernetes/pki/etcd/etcd-key.pem"
+        # Certificados para la conexión de pares (peer certificates)
+        Environment="ETCD_PEER_CERT_FILE=/etc/kubernetes/pki/etcd/etcd-${ip}.pem"
+        Environment="ETCD_PEER_KEY_FILE=/etc/kubernetes/pki/etcd/etcd-${ip}-key.pem"
         Environment="ETCD_PEER_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.pem"
         Environment="ETCD_PEER_CLIENT_CERT_AUTH=true"
+        # Ejecución del binario de etcd
         ExecStart=/opt/bin/etcd
         Restart=always
         RestartSec=10s
@@ -436,6 +445,7 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
+
 
     - name: apply-network-routes.service
       enabled: true

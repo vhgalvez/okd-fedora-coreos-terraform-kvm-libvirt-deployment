@@ -294,9 +294,67 @@ storage:
           # Crear directorios necesarios
           sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin /etc/kubernetes/pki/etcd
 
-          # Descargar e instalar los binarios y certificados requeridos (ver sección de descarga de certificados actualizada)
-          # ...
+          # Instalar kube-proxy (v1.31.0)
+          sudo curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kube-proxy
+          sudo mv /tmp/kube-proxy /opt/bin/kube-proxy
+          sudo chmod +x /opt/bin/kube-proxy
 
+          # Instalar etcd (v3.5.9)
+          sudo curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/v3.5.9/etcd-v3.5.9-linux-amd64.tar.gz
+          sudo tar -xzf /tmp/etcd.tar.gz -C /tmp
+          sudo mv /tmp/etcd-v3.5.9-linux-amd64/etcd /opt/bin/etcd
+          sudo chmod +x /opt/bin/etcd
+          sudo rm -rf /tmp/etcd.tar.gz /tmp/etcd-v3.5.9-linux-amd64
+
+          # Instalar kube-apiserver (v1.31.0)
+          sudo curl -L -o /tmp/kube-apiserver https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kube-apiserver
+          sudo mv /tmp/kube-apiserver /opt/bin/kube-apiserver
+          sudo chmod +x /opt/bin/kube-apiserver
+
+          # Instalar kube-controller-manager (v1.31.0)
+          sudo curl -L -o /tmp/kube-controller-manager https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kube-controller-manager
+          sudo mv /tmp/kube-controller-manager /opt/bin/kube-controller-manager
+          sudo chmod +x /opt/bin/kube-controller-manager
+
+          # Instalar kube-scheduler (v1.31.0)
+          sudo curl -L -o /tmp/kube-scheduler https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kube-scheduler
+          sudo mv /tmp/kube-scheduler /opt/bin/kube-scheduler
+          sudo chmod +x /opt/bin/kube-scheduler
+
+          # Instalar oc (OpenShift Client)
+          sudo curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
+          sudo tar -xzf /tmp/oc.tar.gz -C /tmp
+          sudo mv /tmp/oc /opt/bin/oc
+          sudo chmod +x /opt/bin/oc
+          sudo rm -rf /tmp/oc.tar.gz
+
+          # Instalar kubelet (v1.31.0)
+          sudo curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.31.0/bin/linux/amd64/kubelet
+          sudo chmod +x /opt/bin/kubelet
+
+          # Descargar e instalar OpenShift Installer (OKD v4.14.0)
+          sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
+          sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
+          sudo mv /tmp/openshift-install /opt/bin/
+          sudo chmod +x /opt/bin/openshift-install /opt/bin/oc         
+          sudo rm -rf /tmp/openshift-install.tar.gz
+
+          # Descargar e instalar CRI-O (v1.30.5)
+          sudo curl -L -o /tmp/crio.tar.gz "https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz"
+          sudo tar -xzf /tmp/crio.tar.gz -C /opt/bin/
+          sudo chmod +x /opt/bin/cri-o/crio/bin/*
+          sudo rm -rf /tmp/crio.tar.gz
+
+          # Añadir CRI-O y CNI al PATH
+          export PATH=$PATH:/opt/bin/
+          export PATH=$PATH:/opt/bin/cri-o/bin/
+
+          # Descargar archivo de instalación de CRI-O y plugins CNI
+          sudo curl --retry 5 --retry-delay 10 -L -o /home/core/install "http://10.17.3.14/install-cri-o/install" >> /home/core/curl-download.log 2>&1
+          sudo chmod +x /home/core/install
+          sudo /home/core/install >> /home/core/install.log 2>&1
+
+          
           # Descargar certificados necesarios desde el servidor Helper
           sudo curl -o /etc/kubernetes/pki/ca.pem http://10.17.3.14/certificates/shared/ca.pem
           sudo curl -o /etc/kubernetes/pki/apiserver.pem http://10.17.3.14/certificates/apiserver/apiserver.pem
