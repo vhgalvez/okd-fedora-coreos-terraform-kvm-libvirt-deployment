@@ -379,7 +379,7 @@ storage:
           sudo chmod 600 /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
           sudo chown root:root /etc/kubernetes/pki/etcd/*.pem
           sudo chmod 600 /etc/kubernetes/pki/etcd/*.pem
-
+         
           sudo systemctl daemon-reload
           sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
           sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
@@ -420,7 +420,6 @@ systemd:
         WorkingDirectory=/var/lib/etcd
         Environment="ETCD_DATA_DIR=/var/lib/etcd"
         Environment="ETCD_NAME=etcd-${ip}"
-        ExecStartPre=/usr/bin/wait-for-certificate.sh /etc/kubernetes/pki/etcd/etcd-${ip}.pem
         ExecStart=/opt/bin/etcd \
           --name=etcd-${ip} \
           --data-dir=/var/lib/etcd \
