@@ -547,7 +547,7 @@ systemd:
           --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client-key.pem \
           --runtime-config=api/all=true \
           --service-account-key-file=/etc/kubernetes/pki/sa.pub \
-          --service-account-signing-key-file=/etc/kubernetes/pki/sa.key.pem \
+          --service-account-signing-key-file=/etc/kubernetes/pki/sa.key \
           --service-account-issuer=https://kubernetes.default.svc.cluster.local \
           --service-cluster-ip-range=10.96.0.0/12 \
           --tls-cert-file=/etc/kubernetes/pki/apiserver.pem \
@@ -557,6 +557,7 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
+        
 
     - name: kube-controller-manager.service
       enabled: true
