@@ -412,7 +412,7 @@ systemd:
         [Unit]
         Description=etcd - Distributed Key-Value Store
         Documentation=https://github.com/etcd-io/etcd
-        After=network.target
+        After=network.target download-certificates.service
         Wants=network-online.target
 
         [Service]
@@ -421,22 +421,7 @@ systemd:
         WorkingDirectory=/var/lib/etcd
         Environment="ETCD_DATA_DIR=/var/lib/etcd"
         Environment="ETCD_NAME=etcd-${ip}"
-        Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=https://${ip}:2380"
-        Environment="ETCD_LISTEN_PEER_URLS=https://${ip}:2380"
-        Environment="ETCD_LISTEN_CLIENT_URLS=https://${ip}:2379,https://127.0.0.1:2379"
-        Environment="ETCD_ADVERTISE_CLIENT_URLS=https://${ip}:2379"
-        Environment="ETCD_INITIAL_CLUSTER=etcd-${ip}=https://${ip}:2380"
-        Environment="ETCD_INITIAL_CLUSTER_STATE=new"
-        Environment="ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster-token"
-        Environment="ETCD_CERT_FILE=/etc/kubernetes/pki/etcd/etcd-${ip}.pem"
-        Environment="ETCD_KEY_FILE=/etc/kubernetes/pki/etcd/etcd-${ip}-key.pem"
-        Environment="ETCD_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.pem"
-        Environment="ETCD_CLIENT_CERT_AUTH=true"
-        Environment="ETCD_PEER_CERT_FILE=/etc/kubernetes/pki/etcd/etcd-${ip}.pem"
-        Environment="ETCD_PEER_KEY_FILE=/etc/kubernetes/pki/etcd/etcd-${ip}-key.pem"
-        Environment="ETCD_PEER_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.pem"
-        Environment="ETCD_PEER_CLIENT_CERT_AUTH=true"
-
+        ExecStartPre=/usr/bin/wait-for-certificate.sh /etc/kubernetes/pki/etcd/etcd-${ip}.pem
         ExecStart=/opt/bin/etcd \
           --name=etcd-${ip} \
           --data-dir=/var/lib/etcd \
@@ -455,15 +440,14 @@ systemd:
           --peer-key-file=/etc/kubernetes/pki/etcd/etcd-${ip}-key.pem \
           --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem \
           --peer-client-cert-auth=true
-
         Restart=always
         RestartSec=10s
         LimitNOFILE=40000
 
         [Install]
         WantedBy=multi-user.target
-
-
+            
+        
     - name: apply-network-routes.service
       enabled: true
       contents: |
