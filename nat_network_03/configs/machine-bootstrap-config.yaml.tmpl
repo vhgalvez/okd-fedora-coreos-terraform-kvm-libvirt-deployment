@@ -372,6 +372,9 @@ storage:
           sudo curl -o /etc/kubernetes/pki/sa.pub http://10.17.3.14/certificates/sa/sa.pem
           sudo curl -o /etc/kubernetes/pki/etcd/etcd-${ip}.pem http://10.17.3.14/certificates/etcd/etcd-${ip}.pem
           sudo curl -o /etc/kubernetes/pki/etcd/etcd-${ip}-key.pem http://10.17.3.14/certificates/etcd/etcd-${ip}-key.pem
+          sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.pem http://10.17.3.14/certificates/apiserver/apiserver-kubelet-client.pem
+          sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client-key.pem http://10.17.3.14/certificates/apiserver/apiserver-kubelet-client-key.pem
+
           
           sudo chown root:root /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
           sudo chmod 600 /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
@@ -558,7 +561,6 @@ systemd:
         [Install]
         WantedBy=multi-user.target
         
-
     - name: kube-controller-manager.service
       enabled: true
       contents: |
