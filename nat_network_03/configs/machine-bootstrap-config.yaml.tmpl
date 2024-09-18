@@ -624,3 +624,21 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
+
+    - name: bootkube.service
+          enabled: true
+          contents: |
+            [Unit]
+            Description=Bootstrap a Kubernetes control plane
+            Documentation=https://github.com/kubernetes-incubator/bootkube
+            Wants=network-online.target
+            After=network-online.target
+
+            [Service]
+            ExecStart=/usr/local/bin/bootkube start --asset-dir=/var/lib/bootkube
+            Restart=on-failure
+            RestartSec=5s
+            LimitNOFILE=65536
+
+            [Install]
+            WantedBy=multi-user.target
