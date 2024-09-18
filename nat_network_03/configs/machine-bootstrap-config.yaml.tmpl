@@ -332,6 +332,13 @@ storage:
           sudo curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.31.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
 
+          # Instalar bootkube (v0.14.0)
+          curl -L https://github.com/kubernetes-incubator/bootkube/releases/download/v0.14.0/bootkube-v0.14.0-linux-amd64.tar.gz -o /tmp/bootkube.tar.gz
+          tar -xzf /tmp/bootkube.tar.gz -C /tmp
+          mv /tmp/bootkube /opt/bin/bootkube
+          chmod +x /opt/bin/bootkube
+          rm -rf /tmp/bootkube.tar.gz
+
           # Descargar e instalar OpenShift Installer (OKD v4.14.0)
           sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
           sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
@@ -380,8 +387,8 @@ storage:
 
 
           sudo systemctl daemon-reload
-          sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
-          sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
+          sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler bootkube
+          sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler bootkube
 
 systemd:
   units:
