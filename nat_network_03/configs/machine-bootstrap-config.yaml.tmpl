@@ -377,8 +377,6 @@ storage:
           sudo chmod 600 /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
           sudo chown root:root /etc/kubernetes/pki/etcd/*.pem
           sudo chmod 600 /etc/kubernetes/pki/etcd/*.pem
-          sudo chmod 600 /etc/kubernetes/pki/*.pem
-          sudo chown root:root /etc/kubernetes/pki/*.pem
 
           sudo systemctl daemon-reload
           sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
@@ -549,7 +547,7 @@ systemd:
           --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client-key.pem \
           --runtime-config=api/all=true \
           --service-account-key-file=/etc/kubernetes/pki/sa.pub \
-          --service-account-signing-key-file=/etc/kubernetes/pki/sa.key \
+          --service-account-signing-key-file=/etc/kubernetes/pki/sa.key.pem \
           --service-account-issuer=https://kubernetes.default.svc.cluster.local \
           --service-cluster-ip-range=10.96.0.0/12 \
           --tls-cert-file=/etc/kubernetes/pki/apiserver.pem \
