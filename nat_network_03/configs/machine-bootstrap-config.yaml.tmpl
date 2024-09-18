@@ -292,8 +292,8 @@ storage:
           exec > /var/log/install-components.log 2>&1
           
           # Crear directorios necesarios
-          sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin /etc/kubernetes/pki/etcd
-          
+          sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin /etc/kubernetes/pki/etcd /etc/kubernetes/manifests/
+
           # Instalar kube-proxy (v1.31.0)
           sudo curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kube-proxy
           sudo mv /tmp/kube-proxy /opt/bin/kube-proxy
@@ -355,7 +355,7 @@ storage:
           sudo /home/core/install >> /home/core/install.log 2>&1
 
           # Descargar certificados necesarios
-          sudo curl -o /etc/kubernetes/pki/ca.pem http://10.17.3.14/certificates/shared/ca.pem
+          sudo curl -o /etc/kubernetes/pki/etcd/ca.pem http://10.17.3.14/certificates/shared/ca.pem
           sudo curl -o /etc/kubernetes/pki/apiserver.pem http://10.17.3.14/certificates/apiserver/apiserver.pem
           sudo curl -o /etc/kubernetes/pki/apiserver-key.pem http://10.17.3.14/certificates/apiserver/apiserver-key.pem
           sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client.pem http://10.17.3.14/certificates/apiserver-etcd-client/apiserver-etcd-client.pem
@@ -375,6 +375,9 @@ storage:
           
           sudo chown root:root /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
           sudo chmod 600 /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
+          sudo chown root:root /etc/kubernetes/pki/etcd/*.pem
+          sudo chmod 600 /etc/kubernetes/pki/etcd/*.pem
+
 
           sudo systemctl daemon-reload
           sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
