@@ -379,8 +379,8 @@ storage:
           sudo chmod 600 /etc/kubernetes/pki/etcd/*.pem
 
           sudo systemctl daemon-reload
-          sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler bootkube
-          sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler bootkube
+          sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
+          sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
 
 systemd:
   units:
