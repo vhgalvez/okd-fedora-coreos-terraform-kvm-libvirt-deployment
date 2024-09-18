@@ -356,6 +356,7 @@ storage:
 
           # Descargar certificados necesarios
           sudo curl -o /etc/kubernetes/pki/etcd/ca.pem http://10.17.3.14/certificates/shared/ca.pem
+          sudo curl -o /etc/kubernetes/pki/ca.pem http://10.17.3.14/certificates/shared/ca.pem
           sudo curl -o /etc/kubernetes/pki/apiserver.pem http://10.17.3.14/certificates/apiserver/apiserver.pem
           sudo curl -o /etc/kubernetes/pki/apiserver-key.pem http://10.17.3.14/certificates/apiserver/apiserver-key.pem
           sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client.pem http://10.17.3.14/certificates/apiserver-etcd-client/apiserver-etcd-client.pem
