@@ -333,12 +333,9 @@ storage:
           sudo chmod +x /opt/bin/kubelet
 
           # Instalar bootkube (v0.14.0)
-          curl -L https://github.com/kubernetes-incubator/bootkube/releases/download/v0.14.0/bootkube-v0.14.0-linux-amd64.tar.gz -o /tmp/bootkube.tar.gz
-          tar -xzf /tmp/bootkube.tar.gz -C /tmp
-          mv /tmp/bootkube /opt/bin/bootkube
-          chmod +x /opt/bin/bootkube
-          rm -rf /tmp/bootkube.tar.gz
-
+          sudo curl -L https://github.com/kinvolk/bootkube/releases/download/v0.14.0/bootkube-linux-amd64 -o /opt/bin/bootkube
+          sudo chmod +x /opt/bin/bootkube
+      
           # Descargar e instalar OpenShift Installer (OKD v4.14.0)
           sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
           sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
@@ -418,10 +415,12 @@ systemd:
         Description=etcd - Distributed Key-Value Store
         Documentation=https://github.com/etcd-io/etcd
         After=network.target
+        Wants=network-online.target
 
         [Service]
         User=etcd
         Type=notify
+        WorkingDirectory=/var/lib/etcd
         Environment="ETCD_DATA_DIR=/var/lib/etcd"
         Environment="ETCD_NAME=etcd-${ip}"
         Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=https://${ip}:2380"
@@ -439,13 +438,33 @@ systemd:
         Environment="ETCD_PEER_KEY_FILE=/etc/kubernetes/pki/etcd/etcd-${ip}-key.pem"
         Environment="ETCD_PEER_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.pem"
         Environment="ETCD_PEER_CLIENT_CERT_AUTH=true"
-        ExecStart=/opt/bin/etcd
+
+        ExecStart=/opt/bin/etcd \
+          --name=etcd-${ip} \
+          --data-dir=/var/lib/etcd \
+          --initial-advertise-peer-urls=https://${ip}:2380 \
+          --listen-peer-urls=https://${ip}:2380 \
+          --listen-client-urls=https://${ip}:2379,https://127.0.0.1:2379 \
+          --advertise-client-urls=https://${ip}:2379 \
+          --initial-cluster=etcd-${ip}=https://${ip}:2380 \
+          --initial-cluster-state=new \
+          --initial-cluster-token=etcd-cluster-token \
+          --cert-file=/etc/kubernetes/pki/etcd/etcd-${ip}.pem \
+          --key-file=/etc/kubernetes/pki/etcd/etcd-${ip}-key.pem \
+          --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem \
+          --client-cert-auth=true \
+          --peer-cert-file=/etc/kubernetes/pki/etcd/etcd-${ip}.pem \
+          --peer-key-file=/etc/kubernetes/pki/etcd/etcd-${ip}-key.pem \
+          --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem \
+          --peer-client-cert-auth=true
+
         Restart=always
         RestartSec=10s
         LimitNOFILE=40000
 
         [Install]
         WantedBy=multi-user.target
+
 
     - name: apply-network-routes.service
       enabled: true
@@ -626,19 +645,19 @@ systemd:
         WantedBy=multi-user.target
 
     - name: bootkube.service
-          enabled: true
-          contents: |
-            [Unit]
-            Description=Bootstrap a Kubernetes control plane
-            Documentation=https://github.com/kubernetes-incubator/bootkube
-            Wants=network-online.target
-            After=network-online.target
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Bootstrap a Kubernetes control plane
+        Documentation=https://github.com/kubernetes-incubator/bootkube
+        Wants=network-online.target
+        After=network-online.target
 
-            [Service]
-            ExecStart=/usr/local/bin/bootkube start --asset-dir=/var/lib/bootkube
-            Restart=on-failure
-            RestartSec=5s
-            LimitNOFILE=65536
+        [Service]
+        ExecStart=/opt/bin/bootkube start --asset-dir=/var/lib/bootkube
+        Restart=on-failure
+        RestartSec=5s
+        LimitNOFILE=65536
 
-            [Install]
-            WantedBy=multi-user.target
+        [Install]
+        WantedBy=multi-user.target
