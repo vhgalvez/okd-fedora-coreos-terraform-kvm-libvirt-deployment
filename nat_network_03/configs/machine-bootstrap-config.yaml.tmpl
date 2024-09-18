@@ -331,10 +331,6 @@ storage:
           # Instalar kubelet (v1.31.0)
           sudo curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.31.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
-
-          # Instalar bootkube (v0.14.0)
-          sudo curl -L https://github.com/kinvolk/bootkube/releases/download/v0.14.0/bootkube-linux-amd64 -o /opt/bin/bootkube
-          sudo chmod +x /opt/bin/bootkube
       
           # Descargar e instalar OpenShift Installer (OKD v4.14.0)
           sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
@@ -639,24 +635,6 @@ systemd:
         RestartSec=5
         LimitNOFILE=65536
         LimitNPROC=4096
-
-        [Install]
-        WantedBy=multi-user.target
-
-    - name: bootkube.service
-      enabled: true
-      contents: |
-        [Unit]
-        Description=Bootstrap a Kubernetes control plane
-        Documentation=https://github.com/kubernetes-incubator/bootkube
-        Wants=network-online.target
-        After=network-online.target
-
-        [Service]
-        ExecStart=/opt/bin/bootkube start --asset-dir=/var/lib/bootkube
-        Restart=on-failure
-        RestartSec=5s
-        LimitNOFILE=65536
 
         [Install]
         WantedBy=multi-user.target
