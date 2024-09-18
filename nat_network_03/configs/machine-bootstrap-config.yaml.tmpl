@@ -418,8 +418,6 @@ systemd:
         User=etcd
         Type=notify
         WorkingDirectory=/var/lib/etcd
-        Environment="ETCD_DATA_DIR=/var/lib/etcd"
-        Environment="ETCD_NAME=etcd-${ip}"
         ExecStart=/opt/bin/etcd \
           --name=etcd-${ip} \
           --data-dir=/var/lib/etcd \
@@ -443,9 +441,7 @@ systemd:
         LimitNOFILE=40000
 
         [Install]
-        WantedBy=multi-user.target
-
-        
+        WantedBy=multi-user.target   
 
     - name: apply-network-routes.service
       enabled: true
