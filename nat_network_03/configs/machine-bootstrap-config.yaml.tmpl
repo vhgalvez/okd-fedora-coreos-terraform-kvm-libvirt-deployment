@@ -38,6 +38,43 @@ storage:
       contents:
         inline: ${host_name}
 
+    - path: /home/core/download-certificates.sh
+      filesystem: root
+      mode: 0755
+      contents:
+        inline: |
+          #!/bin/bash
+          # Script para descargar los certificados necesarios
+          sudo curl -o /etc/kubernetes/pki/etcd/ca.pem http://10.17.3.14/certificates/shared/ca.pem
+          sudo curl -o /etc/kubernetes/pki/apiserver.pem http://10.17.3.14/certificates/apiserver/apiserver.pem
+          sudo curl -o /etc/kubernetes/pki/apiserver-key.pem http://10.17.3.14/certificates/apiserver/apiserver-key.pem
+          sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client.pem http://10.17.3.14/certificates/apiserver-etcd-client/apiserver-etcd-client.pem
+          sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client-key.pem http://10.17.3.14/certificates/apiserver-etcd-client/apiserver-etcd-client-key.pem
+          sudo curl -o /etc/kubernetes/pki/kube-scheduler.pem http://10.17.3.14/certificates/kube-scheduler/kube-scheduler.pem
+          sudo curl -o /etc/kubernetes/pki/kube-scheduler-key.pem http://10.17.3.14/certificates/kube-scheduler/kube-scheduler-key.pem
+          sudo curl -o /etc/kubernetes/pki/kube-controller-manager.pem http://10.17.3.14/certificates/kube-controller-manager/kube-controller-manager.pem
+          sudo curl -o /etc/kubernetes/pki/kube-controller-manager-key.pem http://10.17.3.14/certificates/kube-controller-manager/kube-controller-manager-key.pem
+          sudo curl -o /etc/kubernetes/pki/kube-proxy.pem http://10.17.3.14/certificates/kube-proxy/kube-proxy.pem
+          sudo curl -o /etc/kubernetes/pki/kube-proxy-key.pem http://10.17.3.14/certificates/kube-proxy/kube-proxy-key.pem
+          sudo curl -o /etc/kubernetes/pki/kubelet-${node_name}.pem http://10.17.3.14/certificates/kubelet/${node_name}.pem
+          sudo curl -o /etc/kubernetes/pki/kubelet-${node_name}-key.pem http://10.17.3.14/certificates/kubelet/${node_name}-key.pem
+          sudo curl -o /etc/kubernetes/pki/sa.key http://10.17.3.14/certificates/sa/sa-key.pem
+          sudo curl -o /etc/kubernetes/pki/sa.pub http://10.17.3.14/certificates/sa/sa.pem
+          sudo curl -o /etc/kubernetes/pki/etcd/etcd-${ip}.pem http://10.17.3.14/certificates/etcd/etcd-${ip}.pem
+          sudo curl -o /etc/kubernetes/pki/etcd/etcd-${ip}-key.pem http://10.17.3.14/certificates/etcd/etcd-${ip}-key.pem
+          sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.pem http://10.17.3.14/certificates/apiserver/apiserver-kubelet-client.pem
+          sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client-key.pem http://10.17.3.14/certificates/apiserver/apiserver-kubelet-client-key.pem
+
+
+          sudo chown root:root /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
+          sudo chmod 600 /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
+          sudo chown root:root /etc/kubernetes/pki/etcd/*.pem
+          sudo chmod 600 /etc/kubernetes/pki/etcd/*.pem
+
+          sudo systemctl daemon-reload
+          sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
+          sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
+
     - path: /etc/kubernetes/kubelet.conf
       filesystem: root
       mode: 0644
@@ -290,7 +327,7 @@ storage:
         inline: |
           #!/bin/bash
           exec > /var/log/install-components.log 2>&1
-          
+
           # Crear directorios necesarios
           sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin /etc/kubernetes/pki/etcd /etc/kubernetes/manifests/
 
@@ -298,7 +335,7 @@ storage:
           sudo curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kube-proxy
           sudo mv /tmp/kube-proxy /opt/bin/kube-proxy
           sudo chmod +x /opt/bin/kube-proxy
-          
+
           # Instalar etcd (v3.5.9)
           sudo curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/v3.5.9/etcd-v3.5.9-linux-amd64.tar.gz
           sudo tar -xzf /tmp/etcd.tar.gz -C /tmp
@@ -331,7 +368,7 @@ storage:
           # Instalar kubelet (v1.31.0)
           sudo curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.31.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
-      
+
           # Descargar e instalar OpenShift Installer (OKD v4.14.0)
           sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
           sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
@@ -375,7 +412,7 @@ storage:
           sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.pem http://10.17.3.14/certificates/apiserver/apiserver-kubelet-client.pem
           sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client-key.pem http://10.17.3.14/certificates/apiserver/apiserver-kubelet-client-key.pem
 
-          
+
           sudo chown root:root /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
           sudo chmod 600 /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
           sudo chown root:root /etc/kubernetes/pki/etcd/*.pem
@@ -446,8 +483,7 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
-            
-        
+
     - name: apply-network-routes.service
       enabled: true
       contents: |
@@ -544,7 +580,7 @@ systemd:
 
         [Install]
         WantedBy=multi-user.target
-        
+
     - name: kube-controller-manager.service
       enabled: true
       contents: |
