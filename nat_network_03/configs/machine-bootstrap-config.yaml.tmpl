@@ -379,6 +379,8 @@ storage:
           sudo chmod 600 /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
           sudo chown root:root /etc/kubernetes/pki/etcd/*.pem
           sudo chmod 600 /etc/kubernetes/pki/etcd/*.pem
+          sudo chown -R etcd:etcd /var/lib/etcd
+          sudo chmod -R 700 /var/lib/etcd
          
           sudo systemctl daemon-reload
           sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
@@ -441,7 +443,7 @@ systemd:
         LimitNOFILE=40000
 
         [Install]
-        WantedBy=multi-user.target   
+        WantedBy=multi-user.target     
 
     - name: apply-network-routes.service
       enabled: true
