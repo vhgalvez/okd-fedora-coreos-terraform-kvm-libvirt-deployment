@@ -378,7 +378,6 @@ storage:
           sudo curl -o /etc/kubernetes/pki/kubelet-bootstrap.pem http://10.17.3.14/certificates/kubelet/kubelet-bootstrap.pem
           sudo curl -o /etc/kubernetes/pki/kubelet-bootstrap-key.pem http://10.17.3.14/certificates/kubelet/kubelet-bootstrap-key.pem
 
-
           sudo chown root:root /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
           sudo chmod 600 /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
           sudo chown root:root /etc/kubernetes/pki/etcd/*.pem
