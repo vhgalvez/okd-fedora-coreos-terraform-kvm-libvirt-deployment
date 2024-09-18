@@ -73,6 +73,8 @@ storage:
           sudo systemctl daemon-reload
           sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
           sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
+          export PATH=$PATH:/opt/bin/:/opt/bin/cri-o/bin/
+
 
     - path: /etc/kubernetes/kubelet.conf
       filesystem: root
