@@ -392,7 +392,7 @@ storage:
           sudo curl -o /etc/kubernetes/pki/etcd/etcd-${ip}-key.pem http://10.17.3.14/certificates/etcd/etcd-${ip}-key.pem
 
           # Ajustar permisos de archivos y directorios
-          sudo chown root:root /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
+          sudo chown root:root /etc/kubernetes/pki/*.pem
           sudo chmod 644 /etc/kubernetes/pki/*.pem
           sudo chmod 600 /etc/kubernetes/pki/*-key.pem
 
@@ -410,7 +410,6 @@ storage:
           sudo chmod 600 /etc/kubernetes/pki/kubelet-bootstrap*.pem
 
           # Ajustar permisos para las claves del service account
-          sudo chmod 600 /etc/kubernetes/pki/sa-key.pem
           sudo chmod 644 /etc/kubernetes/pki/sa.pem
             
           sudo systemctl daemon-reload

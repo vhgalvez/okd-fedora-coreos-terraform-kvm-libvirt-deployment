@@ -95,6 +95,31 @@ Habilita systemd-timesyncd para que arranque al iniciar el sistema:
 sudo systemctl enable systemd-timesyncd
 ```
 
+```bash
+core@bootstrap ~ $ timedatectl timesync-status
+       Server: 10.17.3.11 (10.17.3.11)
+Poll interval: 4min 16s (min: 32s; max 34min 8s)
+         Leap: normal
+      Version: 4
+      Stratum: 3
+    Reference: 50CB6EA9
+    Precision: 1us (-24)
+Root distance: 28.907ms (max: 5s)
+       Offset: -5.016ms
+        Delay: 599us
+       Jitter: 4.721ms
+ Packet count: 3
+    Frequency: +20.993ppm
+core@bootstrap ~ $
+```
+
+```bash
+timedatectl show-timesync --all
+```
+
+
+
+
 ### Paso 2: Verificar la Sincronización en los Clientes
 Verifica el estado de la sincronización en los nodos clientes:
 
@@ -194,3 +219,45 @@ Los logs deberían proporcionar información adicional sobre cualquier fallo rel
 ---
 
 Con esta guía puedes asegurar que la configuración de NTP y DNS en tu servidor FreeIPA esté correctamente establecida, y que los clientes estén correctamente sincronizados tanto en tiempo como en resolución de nombres.
+
+
+
+roky linux
+
+sudo dnf install chrony -y
+
+sudo chronyc sources -v
+sudo systemctl status chronyd
+
+sudo firewall-cmd --permanent --add-service=ntp
+sudo firewall-cmd --reload
+
+
+ sincronizar específicamente con 10.17.3.11, puedes modificar la configuración de tu archivo chrony.conf (ubicado típicamente en /etc/chrony.conf en Rocky Linux) para priorizar este servidor. Aquí tienes cómo hacerlo:
+Editar el archivo chrony.conf:
+
+bash
+Copiar código
+sudo vi /etc/chrony.conf
+Agregar el servidor NTP prioritario (si no está ya en la lista):
+
+bash
+Copiar código
+server 10.17.3.11 iburst prefer
+Reiniciar el servicio chronyd:
+
+bash
+Copiar código
+sudo systemctl restart chronyd
+Verificar que 10.17.3.11 es el servidor NTP activo:
+
+bash
+Copiar código
+sudo chronyc sources -v
+Con este cambio, el servidor 10.17.3.11 será el preferido para la sincronización de tiempo en tu red.
+
+
+
+
+
+
