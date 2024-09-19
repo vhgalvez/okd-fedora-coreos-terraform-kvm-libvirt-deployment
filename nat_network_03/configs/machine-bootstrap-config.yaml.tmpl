@@ -93,8 +93,8 @@ storage:
               - --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.pem
               - --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client-key.pem
               - --runtime-config=api/all=true
-              - --service-account-key-file=/etc/kubernetes/pki/sa.pub
-              - --service-account-signing-key-file=/etc/kubernetes/pki/sa.key
+              - --service-account-key-file=/etc/kubernetes/pki/sa.pem
+              - --service-account-signing-key-file=/etc/kubernetes/pki/sa-key.pem
               - --service-account-issuer=https://kubernetes.default.svc.cluster.local
               - --service-cluster-ip-range=10.96.0.0/12
               - --tls-cert-file=/etc/kubernetes/pki/apiserver.pem
@@ -369,8 +369,8 @@ storage:
           sudo curl -o /etc/kubernetes/pki/kube-proxy-key.pem http://10.17.3.14/certificates/kube-proxy/kube-proxy-key.pem
           sudo curl -o /etc/kubernetes/pki/kubelet-${node_name}.pem http://10.17.3.14/certificates/kubelet/${node_name}.pem
           sudo curl -o /etc/kubernetes/pki/kubelet-${node_name}-key.pem http://10.17.3.14/certificates/kubelet/${node_name}-key.pem
-          sudo curl -o /etc/kubernetes/pki/sa.key http://10.17.3.14/certificates/sa/sa-key.pem
-          sudo curl -o /etc/kubernetes/pki/sa.pub http://10.17.3.14/certificates/sa/sa.pem
+          sudo curl -o /etc/kubernetes/pki/sa-key.pem http://10.17.3.14/certificates/sa/sa-key.pem
+          sudo curl -o /etc/kubernetes/pki/sa.pem http://10.17.3.14/certificates/sa/sa.pem
           sudo curl -o /etc/kubernetes/pki/etcd/etcd-${ip}.pem http://10.17.3.14/certificates/etcd/etcd-${ip}.pem
           sudo curl -o /etc/kubernetes/pki/etcd/etcd-${ip}-key.pem http://10.17.3.14/certificates/etcd/etcd-${ip}-key.pem
           sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.pem http://10.17.3.14/certificates/apiserver/apiserver-kubelet-client.pem
@@ -399,9 +399,7 @@ storage:
           sudo chown root:root /etc/kubernetes/pki/kubelet-bootstrap*.pem
           sudo chmod 600 /etc/kubernetes/pki/kubelet-bootstrap*.pem
 
-          sudo chmod 600 /etc/kubernetes/pki/sa.key
-          sudo chown root:root /etc/kubernetes/pki/sa.key
-          
+        
           sudo systemctl daemon-reload
           sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
           sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
@@ -550,18 +548,20 @@ systemd:
           --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.pem \
           --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client-key.pem \
           --runtime-config=api/all=true \
-          --service-account-key-file=/etc/kubernetes/pki/sa.pub \
-          --service-account-signing-key-file=/etc/kubernetes/pki/sa.key \
+          --service-account-key-file=/etc/kubernetes/pki/sa.pem \
+          --service-account-signing-key-file=/etc/kubernetes/pki/sa-key.pem \
           --service-account-issuer=https://kubernetes.default.svc.cluster.local \
           --service-cluster-ip-range=10.96.0.0/12 \
           --tls-cert-file=/etc/kubernetes/pki/apiserver.pem \
           --tls-private-key-file=/etc/kubernetes/pki/apiserver-key.pem \
           --v=2
+
         Restart=on-failure
+        RestartSec=5  # Opcional: Añadir tiempo de espera entre reinicios
 
         [Install]
         WantedBy=multi-user.target
-
+      
     - name: kube-controller-manager.service
       enabled: true
       contents: |
