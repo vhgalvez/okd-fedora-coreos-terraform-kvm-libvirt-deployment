@@ -378,35 +378,27 @@ storage:
           sudo curl -o /etc/kubernetes/pki/kubelet-bootstrap.pem http://10.17.3.14/certificates/kubelet/kubelet-bootstrap.pem
           sudo curl -o /etc/kubernetes/pki/kubelet-bootstrap-key.pem http://10.17.3.14/certificates/kubelet/kubelet-bootstrap-key.pem
 
+          # Ajustar permisos de archivos y directorios
           sudo chown root:root /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
-          sudo chmod 600 /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
-          sudo chown root:root /etc/kubernetes/pki/etcd/*.pem
+          sudo chmod 644 /etc/kubernetes/pki/*.pem
+          sudo chmod 600 /etc/kubernetes/pki/*-key.pem
+
+          # Ajustar permisos para la carpeta y los archivos de etcd
+          sudo chown -R etcd:etcd /etc/kubernetes/pki/etcd
           sudo chmod 600 /etc/kubernetes/pki/etcd/*.pem
+          sudo chmod 600 /etc/kubernetes/pki/etcd/*-key.pem
+
+          # Ajustar permisos para la carpeta de datos de etcd
           sudo chown -R etcd:etcd /var/lib/etcd
           sudo chmod -R 700 /var/lib/etcd
 
-          sudo chown -R etcd:etcd /var/lib/etcd
-          sudo chmod -R 700 /var/lib/etcd
-          sudo chown -R etcd:etcd /etc/kubernetes/pki/etcd/
-          sudo chmod 600 /etc/kubernetes/pki/etcd/*.pem
-
-          sudo chown -R etcd:etcd /var/lib/etcd
-          sudo chmod -R 700 /var/lib/etcd
-
-          sudo chown -R etcd:etcd /etc/kubernetes/pki/etcd/
-          sudo chmod 600 /etc/kubernetes/pki/etcd/*.pem
-
+          # Ajustar permisos para el certificado de bootstrap
           sudo chown root:root /etc/kubernetes/pki/kubelet-bootstrap*.pem
           sudo chmod 600 /etc/kubernetes/pki/kubelet-bootstrap*.pem
 
+          # Ajustar permisos para las claves del service account
           sudo chmod 600 /etc/kubernetes/pki/sa-key.pem
           sudo chmod 644 /etc/kubernetes/pki/sa.pem
-          
-          sudo chmod 644 /etc/kubernetes/pki/*.pem
-          sudo chmod 600 /etc/kubernetes/pki/*-key.pem
-          sudo chmod 644 /etc/kubernetes/pki/etcd/*.pem
-          sudo chmod 600 /etc/kubernetes/pki/etcd/*-key.pem
-
 
           sudo systemctl daemon-reload
           sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
