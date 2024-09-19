@@ -61,8 +61,14 @@ sudo virsh start helper
 sudo virsh start master1
 sudo virsh start master2
 
+
+
+
+
 sudo chown root:root /etc/kubernetes/pki/*.crt /etc/kubernetes/pki/*.key
 sudo chown etcd:etcd /etc/kubernetes/pki/etcd/*.crt /etc/kubernetes/pki/etcd/*.key
+
+
 
 
 
