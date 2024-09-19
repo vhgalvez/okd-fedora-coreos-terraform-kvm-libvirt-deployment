@@ -304,3 +304,9 @@ core@bootstrap ~ $ sudo oc get clusterrolebinding kubelet-bootstrap --kubeconfig
 NAME                ROLE                                   AGE
 kubelet-bootstrap   ClusterRole/system:node-bootstrapper   3m15s
 core@bootstrap ~ $
+
+
+sudo chmod 644 /etc/kubernetes/pki/*.pem
+sudo chmod 600 /etc/kubernetes/pki/*-key.pem
+sudo chmod 644 /etc/kubernetes/pki/etcd/*.pem
+sudo chmod 600 /etc/kubernetes/pki/etcd/*-key.pem

@@ -411,7 +411,12 @@ storage:
 
           # Ajustar permisos para las claves del service account
           sudo chmod 644 /etc/kubernetes/pki/sa.pem
-            
+
+          sudo chmod 644 /etc/kubernetes/pki/*.pem
+          sudo chmod 600 /etc/kubernetes/pki/*-key.pem
+          sudo chmod 644 /etc/kubernetes/pki/etcd/*.pem
+          sudo chmod 600 /etc/kubernetes/pki/etcd/*-key.pem
+           
           sudo systemctl daemon-reload
           sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
           sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
