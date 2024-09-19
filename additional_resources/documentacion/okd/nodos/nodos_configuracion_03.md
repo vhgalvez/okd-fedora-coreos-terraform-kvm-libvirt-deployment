@@ -87,3 +87,12 @@ sudo chmod 600 /etc/kubernetes/pki/etcd/*-key.pem
 
 
 sudo journalctl -u kube-apiserver -f
+
+core@bootstrap ~ $ sudo etcdctl --endpoints=https://10.17.4.27:2379 \
+  --cacert=/etc/kubernetes/pki/etcd/ca.pem \
+  --cert=/etc/kubernetes/pki/etcd/etcd-10.17.4.27.pem \
+  --key=/etc/kubernetes/pki/etcd/etcd-10.17.4.27-key.pem \
+  endpoint health
+https://10.17.4.27:2379 is healthy: successfully committed proposal: took = 125.476333ms
+core@bootstrap ~ $
+
