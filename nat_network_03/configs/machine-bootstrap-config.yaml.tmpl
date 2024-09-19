@@ -377,6 +377,10 @@ storage:
           sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client-key.pem http://10.17.3.14/certificates/apiserver/apiserver-kubelet-client-key.pem
           sudo curl -o /etc/kubernetes/pki/kubelet-bootstrap.pem http://10.17.3.14/certificates/kubelet/kubelet-bootstrap.pem
           sudo curl -o /etc/kubernetes/pki/kubelet-bootstrap-key.pem http://10.17.3.14/certificates/kubelet/kubelet-bootstrap-key.pem
+          sudo curl -o /etc/kubernetes/pki/admin.pem http://10.17.3.14/certificates/shared/admin.pem
+          sudo curl -o /etc/kubernetes/pki/admin-key.pem http://10.17.3.14/certificates/shared/admin-key.pem
+
+
 
           # Ajustar permisos de archivos y directorios
           sudo chown root:root /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
