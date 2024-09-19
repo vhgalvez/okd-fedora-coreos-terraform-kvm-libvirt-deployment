@@ -63,3 +63,18 @@ sudo virsh start master2
 
 sudo chown root:root /etc/kubernetes/pki/*.crt /etc/kubernetes/pki/*.key
 sudo chown etcd:etcd /etc/kubernetes/pki/etcd/*.crt /etc/kubernetes/pki/etcd/*.key
+
+
+
+
+core@bootstrap ~ $ sudo etcdctl --cacert=/etc/kubernetes/pki/etcd/ca.pem \
+    --cert=/etc/kubernetes/pki/etcd/etcd-10.17.4.27.pem \
+    --key=/etc/kubernetes/pki/etcd/etcd-10.17.4.27-key.pem \
+    --endpoints=https://10.17.4.27:2379 \
+    endpoint health
+https://10.17.4.27:2379 is healthy: successfully committed proposal: took = 94.170665ms
+
+
+core@bootstrap ~ $ https://10.17.4.27:2379 is healthy: successfully committed proposal: took = 94.170665ms
+-bash: https://10.17.4.27:2379: No such file or directory
+core@bootstrap ~ $
