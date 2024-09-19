@@ -310,3 +310,8 @@ sudo chmod 644 /etc/kubernetes/pki/*.pem
 sudo chmod 600 /etc/kubernetes/pki/*-key.pem
 sudo chmod 644 /etc/kubernetes/pki/etcd/*.pem
 sudo chmod 600 /etc/kubernetes/pki/etcd/*-key.pem
+
+
+/opt/bin/openshift-install version
+
+openshift-install version
