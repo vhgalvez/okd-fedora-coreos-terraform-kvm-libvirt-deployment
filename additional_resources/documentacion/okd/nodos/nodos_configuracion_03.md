@@ -78,3 +78,9 @@ https://10.17.4.27:2379 is healthy: successfully committed proposal: took = 94.1
 core@bootstrap ~ $ https://10.17.4.27:2379 is healthy: successfully committed proposal: took = 94.170665ms
 -bash: https://10.17.4.27:2379: No such file or directory
 core@bootstrap ~ $
+
+
+sudo chmod 644 /etc/kubernetes/pki/*.pem
+sudo chmod 600 /etc/kubernetes/pki/*-key.pem
+sudo chmod 644 /etc/kubernetes/pki/etcd/*.pem
+sudo chmod 600 /etc/kubernetes/pki/etcd/*-key.pem
