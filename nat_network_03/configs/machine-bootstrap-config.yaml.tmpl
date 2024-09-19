@@ -354,31 +354,42 @@ storage:
           sudo chmod +x /home/core/install
           sudo /home/core/install >> /home/core/install.log 2>&1
 
-          # Descargar certificados necesarios
-          sudo curl -o /etc/kubernetes/pki/etcd/ca.pem http://10.17.3.14/certificates/shared/ca.pem
+          # Descargar los certificados del servidor web
           sudo curl -o /etc/kubernetes/pki/ca.pem http://10.17.3.14/certificates/shared/ca.pem
+          sudo curl -o /etc/kubernetes/pki/admin.pem http://10.17.3.14/certificates/shared/admin.pem
+          sudo curl -o /etc/kubernetes/pki/admin-key.pem http://10.17.3.14/certificates/shared/admin-key.pem
+
+          # Descargar certificados de Kubelet y API Server
           sudo curl -o /etc/kubernetes/pki/apiserver.pem http://10.17.3.14/certificates/apiserver/apiserver.pem
           sudo curl -o /etc/kubernetes/pki/apiserver-key.pem http://10.17.3.14/certificates/apiserver/apiserver-key.pem
+          sudo curl -o /etc/kubernetes/pki/kubelet-bootstrap.pem http://10.17.3.14/certificates/kubelet/kubelet-bootstrap.pem
+          sudo curl -o /etc/kubernetes/pki/kubelet-bootstrap-key.pem http://10.17.3.14/certificates/kubelet/kubelet-bootstrap-key.pem
+
+          # Descargar certificados adicionales
           sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client.pem http://10.17.3.14/certificates/apiserver-etcd-client/apiserver-etcd-client.pem
           sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client-key.pem http://10.17.3.14/certificates/apiserver-etcd-client/apiserver-etcd-client-key.pem
+          sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.pem http://10.17.3.14/certificates/apiserver/apiserver-kubelet-client.pem
+          sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client-key.pem http://10.17.3.14/certificates/apiserver/apiserver-kubelet-client-key.pem
+
+          # Descargar certificados de Kube Scheduler, Controller Manager y Proxy
           sudo curl -o /etc/kubernetes/pki/kube-scheduler.pem http://10.17.3.14/certificates/kube-scheduler/kube-scheduler.pem
           sudo curl -o /etc/kubernetes/pki/kube-scheduler-key.pem http://10.17.3.14/certificates/kube-scheduler/kube-scheduler-key.pem
           sudo curl -o /etc/kubernetes/pki/kube-controller-manager.pem http://10.17.3.14/certificates/kube-controller-manager/kube-controller-manager.pem
           sudo curl -o /etc/kubernetes/pki/kube-controller-manager-key.pem http://10.17.3.14/certificates/kube-controller-manager/kube-controller-manager-key.pem
           sudo curl -o /etc/kubernetes/pki/kube-proxy.pem http://10.17.3.14/certificates/kube-proxy/kube-proxy.pem
           sudo curl -o /etc/kubernetes/pki/kube-proxy-key.pem http://10.17.3.14/certificates/kube-proxy/kube-proxy-key.pem
+
+          # Descargar certificados específicos de Kubelet para cada nodo (reemplazar ${node_name} con el nombre del nodo)
           sudo curl -o /etc/kubernetes/pki/kubelet-${node_name}.pem http://10.17.3.14/certificates/kubelet/${node_name}.pem
           sudo curl -o /etc/kubernetes/pki/kubelet-${node_name}-key.pem http://10.17.3.14/certificates/kubelet/${node_name}-key.pem
+
+          # Descargar certificados del Service Account
           sudo curl -o /etc/kubernetes/pki/sa-key.pem http://10.17.3.14/certificates/sa/sa-key.pem
           sudo curl -o /etc/kubernetes/pki/sa.pem http://10.17.3.14/certificates/sa/sa.pem
+
+          # Descargar certificados de ETCD (reemplazar ${ip} con la IP del nodo ETCD correspondiente)
           sudo curl -o /etc/kubernetes/pki/etcd/etcd-${ip}.pem http://10.17.3.14/certificates/etcd/etcd-${ip}.pem
           sudo curl -o /etc/kubernetes/pki/etcd/etcd-${ip}-key.pem http://10.17.3.14/certificates/etcd/etcd-${ip}-key.pem
-          sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.pem http://10.17.3.14/certificates/apiserver/apiserver-kubelet-client.pem
-          sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client-key.pem http://10.17.3.14/certificates/apiserver/apiserver-kubelet-client-key.pem
-          sudo curl -o /etc/kubernetes/pki/kubelet-bootstrap.pem http://10.17.3.14/certificates/kubelet/kubelet-bootstrap.pem
-          sudo curl -o /etc/kubernetes/pki/kubelet-bootstrap-key.pem http://10.17.3.14/certificates/kubelet/kubelet-bootstrap-key.pem
-          sudo curl -o /etc/kubernetes/pki/admin.pem http://10.17.3.14/certificates/shared/admin.pem
-          sudo curl -o /etc/kubernetes/pki/admin-key.pem http://10.17.3.14/certificates/shared/admin-key.pem
 
           # Ajustar permisos de archivos y directorios
           sudo chown root:root /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
@@ -401,7 +412,7 @@ storage:
           # Ajustar permisos para las claves del service account
           sudo chmod 600 /etc/kubernetes/pki/sa-key.pem
           sudo chmod 644 /etc/kubernetes/pki/sa.pem
-
+            
           sudo systemctl daemon-reload
           sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
           sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
