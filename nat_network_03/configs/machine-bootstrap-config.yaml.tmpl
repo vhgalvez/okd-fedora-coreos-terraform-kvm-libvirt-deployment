@@ -399,7 +399,9 @@ storage:
           sudo chown root:root /etc/kubernetes/pki/kubelet-bootstrap*.pem
           sudo chmod 600 /etc/kubernetes/pki/kubelet-bootstrap*.pem
 
-        
+          sudo chmod 600 /etc/kubernetes/pki/sa-key.pem
+          sudo chmod 644 /etc/kubernetes/pki/sa.pem
+
           sudo systemctl daemon-reload
           sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
           sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler

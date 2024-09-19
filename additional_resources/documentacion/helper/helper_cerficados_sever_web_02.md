@@ -46,7 +46,10 @@ Añade la siguiente configuración básica para servir contenido estático y man
 
 nginx
 Copiar código
-events {}
+
+events {
+    worker_connections 1024;
+}
 
 http {
     server {
@@ -60,11 +63,22 @@ http {
             try_files $uri $uri/ =404;
         }
 
-        # Exponer el directorio de certificados para su descarga
+        # Exponer el directorio de certificados para su descarga, solo accesible desde las redes internas
         location /certificates/ {
             alias /etc/nginx/certificates-exposed/;
             autoindex on;  # Habilita el listado de archivos en el directorio
-            allow all;
+            allow 10.17.3.0/24;
+            allow 10.17.4.0/24;
+            deny all;
+        }
+
+        # Exponer el directorio de instalación de CRI-O, solo accesible desde las redes internas
+        location /install-cri-o/ {
+            alias /home/core/nginx-docker/install-cri-o/;
+            autoindex on;  # Habilita el listado de archivos en el directorio
+            allow 10.17.3.0/24;
+            allow 10.17.4.0/24;
+            deny all;
         }
 
         listen 443 ssl;
@@ -72,6 +86,9 @@ http {
         ssl_certificate_key /etc/nginx/certificates/server.key;
     }
 }
+
+
+
 Paso 4: Crear el Directorio de Contenido HTML
 Crea un directorio html para almacenar el archivo index.html que se servirá por Nginx.
 
