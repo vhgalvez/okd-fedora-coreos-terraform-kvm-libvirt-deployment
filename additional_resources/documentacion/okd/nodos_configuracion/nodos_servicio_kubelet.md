@@ -262,6 +262,11 @@ sudo chown etcd:etcd /etc/kubernetes/pki/etcd/*.crt /etc/kubernetes/pki/etcd/*.k
 _____________________________________
 
 
+
+```bash
+oc get nodes --kubeconfig /etc/kubernetes/admin.conf
+```
+
 core@bootstrap ~ $ sudo etcdctl --cacert=/etc/kubernetes/pki/etcd/ca.pem \
     --cert=/etc/kubernetes/pki/etcd/etcd-10.17.4.27.pem \
     --key=/etc/kubernetes/pki/etcd/etcd-10.17.4.27-key.pem \
@@ -341,6 +346,10 @@ sudo chown etcd:etcd /etc/kubernetes/pki/etcd/*
 
 sudo chmod 600 /etc/kubernetes/pki/etcd/*.pem
 sudo chown -R etcd:etcd /etc/kubernetes/pki/etcd
+
+sudo chmod 600 /etc/kubernetes/pki/*-key.pem
+sudo chmod 644 /etc/kubernetes/pki/*.pem
+
 
 sudo chmod 600 /etc/kubernetes/pki/*-key.pem
 sudo chmod 644 /etc/kubernetes/pki/*.pem
