@@ -315,3 +315,31 @@ sudo chmod 600 /etc/kubernetes/pki/etcd/*-key.pem
 /opt/bin/openshift-install version
 
 openshift-install version
+
+
+sudo chmod 600 /etc/kubernetes/pki/kubelet-bootstrap-key.pem
+sudo chown root:root /etc/kubernetes/pki/kubelet-bootstrap-key.pem
+
+
+sudo chmod 600 /etc/kubernetes/pki/*-key.pem
+sudo chmod 644 /etc/kubernetes/pki/*.pem
+
+chmod 600 /etc/kubernetes/pki/*-key.pem
+
+
+sudo chown -R etcd:etcd /var/lib/etcd
+sudo chmod -R 700 /var/lib/etcd
+
+sudo ls -l /var/lib/etcd
+sudo chown -R etcd:etcd /var/lib/etcd
+sudo chmod -R 700 /var/lib/etcd
+
+sudo chmod 600 /etc/kubernetes/pki/etcd/*-key.pem
+sudo chmod 644 /etc/kubernetes/pki/etcd/*.pem
+sudo chown etcd:etcd /etc/kubernetes/pki/etcd/*
+
+sudo chmod 600 /etc/kubernetes/pki/etcd/*.pem
+sudo chown -R etcd:etcd /etc/kubernetes/pki/etcd
+
+sudo chmod 600 /etc/kubernetes/pki/*-key.pem
+sudo chmod 644 /etc/kubernetes/pki/*.pem
