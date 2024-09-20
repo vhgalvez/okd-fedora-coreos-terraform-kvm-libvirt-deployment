@@ -356,6 +356,7 @@ storage:
 
           # Descargar los certificados del servidor web
           sudo curl -o /etc/kubernetes/pki/ca.pem http://10.17.3.14/certificates/shared/ca.pem
+          sudo curl -o /etc/kubernetes/pki/etcd/ca.pem http://10.17.3.14/certificates/shared/ca.pem
           sudo curl -o /etc/kubernetes/pki/admin.pem http://10.17.3.14/certificates/shared/admin.pem
           sudo curl -o /etc/kubernetes/pki/admin-key.pem http://10.17.3.14/certificates/shared/admin-key.pem
 
@@ -422,7 +423,6 @@ storage:
 
 
           sudo chmod 600 /etc/kubernetes/pki/kubelet.pem /etc/kubernetes/pki/kubelet-key.pem
-
            
           sudo systemctl daemon-reload
           sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
