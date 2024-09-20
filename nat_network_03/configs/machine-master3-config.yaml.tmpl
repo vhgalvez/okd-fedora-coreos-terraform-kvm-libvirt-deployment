@@ -93,8 +93,8 @@ storage:
               - --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.pem
               - --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client-key.pem
               - --runtime-config=api/all=true
-              - --service-account-key-file=/etc/kubernetes/pki/sa.pub
-              - --service-account-signing-key-file=/etc/kubernetes/pki/sa.key
+              - --service-account-key-file=/etc/kubernetes/pki/sa.pem
+              - --service-account-signing-key-file=/etc/kubernetes/pki/sa-key.pem
               - --service-account-issuer=https://kubernetes.default.svc.cluster.local
               - --service-cluster-ip-range=10.96.0.0/12
               - --tls-cert-file=/etc/kubernetes/pki/apiserver.pem
@@ -290,7 +290,7 @@ storage:
         inline: |
           #!/bin/bash
           exec > /var/log/install-components.log 2>&1
-          
+
           # Crear directorios necesarios
           sudo mkdir -p /opt/bin /etc/kubernetes/pki /opt/cni/bin /etc/kubernetes/pki/etcd /etc/kubernetes/manifests/
 
@@ -298,7 +298,7 @@ storage:
           sudo curl -L -o /tmp/kube-proxy https://dl.k8s.io/release/v1.31.0/bin/linux/amd64/kube-proxy
           sudo mv /tmp/kube-proxy /opt/bin/kube-proxy
           sudo chmod +x /opt/bin/kube-proxy
-          
+
           # Instalar etcd (v3.5.9)
           sudo curl -L -o /tmp/etcd.tar.gz https://github.com/etcd-io/etcd/releases/download/v3.5.9/etcd-v3.5.9-linux-amd64.tar.gz
           sudo tar -xzf /tmp/etcd.tar.gz -C /tmp
@@ -331,14 +331,7 @@ storage:
           # Instalar kubelet (v1.31.0)
           sudo curl -L -o /opt/bin/kubelet https://storage.googleapis.com/kubernetes-release/release/v1.31.0/bin/linux/amd64/kubelet
           sudo chmod +x /opt/bin/kubelet
-
-          # Descargar e instalar OpenShift Installer (OKD v4.14.0)
-          sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
-          sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
-          sudo mv /tmp/openshift-install /opt/bin/
-          sudo chmod +x /opt/bin/openshift-install /opt/bin/oc         
-          sudo rm -rf /tmp/openshift-install.tar.gz
-
+    
           # Descargar e instalar CRI-O (v1.30.5)
           sudo curl -L -o /tmp/crio.tar.gz "https://storage.googleapis.com/cri-o/artifacts/cri-o.amd64.v1.30.5.tar.gz"
           sudo tar -xzf /tmp/crio.tar.gz -C /opt/bin/
@@ -354,31 +347,76 @@ storage:
           sudo chmod +x /home/core/install
           sudo /home/core/install >> /home/core/install.log 2>&1
 
-          # Descargar certificados necesarios
-          sudo curl -o /etc/kubernetes/pki/etcd/ca.pem http://10.17.3.14/certificates/shared/ca.pem
+          # Descargar los certificados del servidor web
+          sudo curl -o /etc/kubernetes/pki/ca.pem http://10.17.3.14/certificates/shared/ca.pem
+          sudo curl -o /etc/kubernetes/pki/admin.pem http://10.17.3.14/certificates/shared/admin.pem
+          sudo curl -o /etc/kubernetes/pki/admin-key.pem http://10.17.3.14/certificates/shared/admin-key.pem
+
+          # Descargar certificados de Kubelet y API Server
           sudo curl -o /etc/kubernetes/pki/apiserver.pem http://10.17.3.14/certificates/apiserver/apiserver.pem
           sudo curl -o /etc/kubernetes/pki/apiserver-key.pem http://10.17.3.14/certificates/apiserver/apiserver-key.pem
+          sudo curl -o /etc/kubernetes/pki/kubelet-bootstrap.pem http://10.17.3.14/certificates/kubelet/kubelet-bootstrap.pem
+          sudo curl -o /etc/kubernetes/pki/kubelet-bootstrap-key.pem http://10.17.3.14/certificates/kubelet/kubelet-bootstrap-key.pem
+
+          # Descargar certificados adicionales
           sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client.pem http://10.17.3.14/certificates/apiserver-etcd-client/apiserver-etcd-client.pem
           sudo curl -o /etc/kubernetes/pki/apiserver-etcd-client-key.pem http://10.17.3.14/certificates/apiserver-etcd-client/apiserver-etcd-client-key.pem
+          sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client.pem http://10.17.3.14/certificates/apiserver/apiserver-kubelet-client.pem
+          sudo curl -o /etc/kubernetes/pki/apiserver-kubelet-client-key.pem http://10.17.3.14/certificates/apiserver/apiserver-kubelet-client-key.pem
+
+          # Descargar certificados de Kube Scheduler, Controller Manager y Proxy
           sudo curl -o /etc/kubernetes/pki/kube-scheduler.pem http://10.17.3.14/certificates/kube-scheduler/kube-scheduler.pem
           sudo curl -o /etc/kubernetes/pki/kube-scheduler-key.pem http://10.17.3.14/certificates/kube-scheduler/kube-scheduler-key.pem
           sudo curl -o /etc/kubernetes/pki/kube-controller-manager.pem http://10.17.3.14/certificates/kube-controller-manager/kube-controller-manager.pem
           sudo curl -o /etc/kubernetes/pki/kube-controller-manager-key.pem http://10.17.3.14/certificates/kube-controller-manager/kube-controller-manager-key.pem
           sudo curl -o /etc/kubernetes/pki/kube-proxy.pem http://10.17.3.14/certificates/kube-proxy/kube-proxy.pem
           sudo curl -o /etc/kubernetes/pki/kube-proxy-key.pem http://10.17.3.14/certificates/kube-proxy/kube-proxy-key.pem
+
+          # Descargar certificados específicos de Kubelet para cada nodo (reemplazar ${node_name} con el nombre del nodo)
           sudo curl -o /etc/kubernetes/pki/kubelet-${node_name}.pem http://10.17.3.14/certificates/kubelet/${node_name}.pem
           sudo curl -o /etc/kubernetes/pki/kubelet-${node_name}-key.pem http://10.17.3.14/certificates/kubelet/${node_name}-key.pem
-          sudo curl -o /etc/kubernetes/pki/sa.key http://10.17.3.14/certificates/sa/sa-key.pem
-          sudo curl -o /etc/kubernetes/pki/sa.pub http://10.17.3.14/certificates/sa/sa.pem
+
+          # Descargar certificados del Service Account
+          sudo curl -o /etc/kubernetes/pki/sa-key.pem http://10.17.3.14/certificates/sa/sa-key.pem
+          sudo curl -o /etc/kubernetes/pki/sa.pem http://10.17.3.14/certificates/sa/sa.pem
+
+          # Descargar certificados de ETCD (reemplazar ${ip} con la IP del nodo ETCD correspondiente)
           sudo curl -o /etc/kubernetes/pki/etcd/etcd-${ip}.pem http://10.17.3.14/certificates/etcd/etcd-${ip}.pem
           sudo curl -o /etc/kubernetes/pki/etcd/etcd-${ip}-key.pem http://10.17.3.14/certificates/etcd/etcd-${ip}-key.pem
-          
-          sudo chown root:root /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
-          sudo chmod 600 /etc/kubernetes/pki/*.pem /etc/kubernetes/pki/*.key
-          sudo chown root:root /etc/kubernetes/pki/etcd/*.pem
+
+          # Ajustar permisos de archivos y directorios
+          sudo chown root:root /etc/kubernetes/pki/*.pem
+          sudo chmod 644 /etc/kubernetes/pki/*.pem
+          sudo chmod 600 /etc/kubernetes/pki/*-key.pem
+
+          # Ajustar permisos para la carpeta y los archivos de etcd
+          sudo chown -R etcd:etcd /etc/kubernetes/pki/etcd
           sudo chmod 600 /etc/kubernetes/pki/etcd/*.pem
+          sudo chmod 600 /etc/kubernetes/pki/etcd/*-key.pem
+
+          # Ajustar permisos para la carpeta de datos de etcd
+          sudo chown -R etcd:etcd /var/lib/etcd
+          sudo chmod -R 700 /var/lib/etcd
+
+          # Ajustar permisos para el certificado de bootstrap
+          sudo chown root:root /etc/kubernetes/pki/kubelet-bootstrap*.pem
+          sudo chmod 600 /etc/kubernetes/pki/kubelet-bootstrap*.pem
+
+          # Ajustar permisos para las claves del service account
+          sudo chmod 644 /etc/kubernetes/pki/sa.pem
+
+          sudo chmod 644 /etc/kubernetes/pki/*.pem
+          sudo chmod 600 /etc/kubernetes/pki/*-key.pem
+          sudo chmod 644 /etc/kubernetes/pki/etcd/*.pem
+          sudo chmod 600 /etc/kubernetes/pki/etcd/*-key.pem
+
+          sudo chmod 644 /etc/kubernetes/pki/*.pem
+          sudo chmod 600 /etc/kubernetes/pki/*-key.pem
 
 
+          sudo chmod 600 /etc/kubernetes/pki/kubelet.pem /etc/kubernetes/pki/kubelet-key.pem
+
+           
           sudo systemctl daemon-reload
           sudo systemctl enable --now crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
           sudo systemctl start crio kubelet kube-proxy etcd kube-controller-manager kube-apiserver kube-scheduler
@@ -410,35 +448,37 @@ systemd:
         [Unit]
         Description=etcd - Distributed Key-Value Store
         Documentation=https://github.com/etcd-io/etcd
-        After=network.target
+        After=network.target download-certificates.service
+        Wants=network-online.target
 
         [Service]
         User=etcd
         Type=notify
-        Environment="ETCD_DATA_DIR=/var/lib/etcd"
-        Environment="ETCD_NAME=etcd-${ip}"
-        Environment="ETCD_INITIAL_ADVERTISE_PEER_URLS=https://${ip}:2380"
-        Environment="ETCD_LISTEN_PEER_URLS=https://${ip}:2380"
-        Environment="ETCD_LISTEN_CLIENT_URLS=https://${ip}:2379,https://127.0.0.1:2379"
-        Environment="ETCD_ADVERTISE_CLIENT_URLS=https://${ip}:2379"
-        Environment="ETCD_INITIAL_CLUSTER=etcd-${ip}=https://${ip}:2380"
-        Environment="ETCD_INITIAL_CLUSTER_STATE=new"
-        Environment="ETCD_INITIAL_CLUSTER_TOKEN=etcd-cluster-token"
-        Environment="ETCD_CERT_FILE=/etc/kubernetes/pki/etcd/etcd-${ip}.pem"
-        Environment="ETCD_KEY_FILE=/etc/kubernetes/pki/etcd/etcd-${ip}-key.pem"
-        Environment="ETCD_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.pem"
-        Environment="ETCD_CLIENT_CERT_AUTH=true"
-        Environment="ETCD_PEER_CERT_FILE=/etc/kubernetes/pki/etcd/etcd-${ip}.pem"
-        Environment="ETCD_PEER_KEY_FILE=/etc/kubernetes/pki/etcd/etcd-${ip}-key.pem"
-        Environment="ETCD_PEER_TRUSTED_CA_FILE=/etc/kubernetes/pki/etcd/ca.pem"
-        Environment="ETCD_PEER_CLIENT_CERT_AUTH=true"
-        ExecStart=/opt/bin/etcd
+        WorkingDirectory=/var/lib/etcd
+        ExecStart=/opt/bin/etcd \
+          --name=etcd-${ip} \
+          --data-dir=/var/lib/etcd \
+          --initial-advertise-peer-urls=https://${ip}:2380 \
+          --listen-peer-urls=https://${ip}:2380 \
+          --listen-client-urls=https://${ip}:2379,https://127.0.0.1:2379 \
+          --advertise-client-urls=https://${ip}:2379 \
+          --initial-cluster=etcd-${ip}=https://${ip}:2380 \
+          --initial-cluster-state=new \
+          --initial-cluster-token=etcd-cluster-token \
+          --cert-file=/etc/kubernetes/pki/etcd/etcd-${ip}.pem \
+          --key-file=/etc/kubernetes/pki/etcd/etcd-${ip}-key.pem \
+          --trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem \
+          --client-cert-auth=true \
+          --peer-cert-file=/etc/kubernetes/pki/etcd/etcd-${ip}.pem \
+          --peer-key-file=/etc/kubernetes/pki/etcd/etcd-${ip}-key.pem \
+          --peer-trusted-ca-file=/etc/kubernetes/pki/etcd/ca.pem \
+          --peer-client-cert-auth=true
         Restart=always
         RestartSec=10s
         LimitNOFILE=40000
 
         [Install]
-        WantedBy=multi-user.target
+        WantedBy=multi-user.target     
 
     - name: apply-network-routes.service
       enabled: true
@@ -525,18 +565,20 @@ systemd:
           --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.pem \
           --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client-key.pem \
           --runtime-config=api/all=true \
-          --service-account-key-file=/etc/kubernetes/pki/sa.pub \
-          --service-account-signing-key-file=/etc/kubernetes/pki/sa.key \
+          --service-account-key-file=/etc/kubernetes/pki/sa.pem \
+          --service-account-signing-key-file=/etc/kubernetes/pki/sa-key.pem \
           --service-account-issuer=https://kubernetes.default.svc.cluster.local \
           --service-cluster-ip-range=10.96.0.0/12 \
           --tls-cert-file=/etc/kubernetes/pki/apiserver.pem \
           --tls-private-key-file=/etc/kubernetes/pki/apiserver-key.pem \
           --v=2
+
         Restart=on-failure
+        RestartSec=5
 
         [Install]
         WantedBy=multi-user.target
-
+      
     - name: kube-controller-manager.service
       enabled: true
       contents: |
