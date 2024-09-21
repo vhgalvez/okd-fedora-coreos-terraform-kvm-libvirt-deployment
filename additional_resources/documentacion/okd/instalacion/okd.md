@@ -56,3 +56,56 @@ openshift-install create ignition-configs --dir=./ignition
 
 
 
+
+
+  # Descargar e instalar OpenShift Installer (OKD v4.14.0)
+          sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
+          sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
+          sudo mv /tmp/openshift-install /opt/bin/
+          sudo chmod +x /opt/bin/openshift-install /opt/bin/oc         
+          sudo rm -rf /tmp/openshift-install.tar.gz
+
+
+          Instalación en Rocky Linux:
+Crea el directorio para binarios:
+
+bash
+Copiar código
+sudo mkdir -p /usr/local/bin
+Descargar el instalador de OpenShift (OKD):
+
+bash
+Copiar código
+sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
+Extraer el archivo:
+
+bash
+Copiar código
+sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
+Mover el binario a /usr/local/bin/:
+
+bash
+Copiar código
+sudo mv /tmp/openshift-install /usr/local/bin/
+sudo chmod +x /usr/local/bin/openshift-install
+Verificar que esté en el PATH: Ejecuta:
+
+bash
+Copiar código
+echo $PATH
+Si /usr/local/bin no está en el PATH, añade la siguiente línea a tu archivo ~/.bashrc:
+
+bash
+Copiar código
+export PATH=$PATH:/usr/local/bin
+Luego, recarga el archivo:
+
+bash
+Copiar código
+source ~/.bashrc
+Ejecutar el comando:
+
+bash
+Copiar código
+openshift-install create ignition-configs --dir=./ignition
+Estos pasos deberían funcionar correctamente para instalar openshift-install en Rocky Linux y generar los archivos de configuración Ignition.
