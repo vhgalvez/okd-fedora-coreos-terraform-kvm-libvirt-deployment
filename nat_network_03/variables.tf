@@ -1,3 +1,4 @@
+# variable.tf 
 variable "base_image" {
   description = "Path to the Fedora CoreOS base image"
   type        = string
