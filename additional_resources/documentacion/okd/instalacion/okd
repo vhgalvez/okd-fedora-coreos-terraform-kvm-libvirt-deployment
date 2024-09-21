@@ -52,6 +52,7 @@ Con estos pasos, estarás implementando correctamente la imagen de Fedora CoreOS
 
 
 
+openshift-install create ignition-configs --dir=./ignition
 
 
 
