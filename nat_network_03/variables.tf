@@ -1,28 +1,27 @@
-# variable.tf
 variable "base_image" {
-  description = "Path to the base VM image"
+  description = "Path to the Fedora CoreOS base image"
   type        = string
 }
 
 variable "vm_definitions" {
-  description = "Definitions of virtual machines including CPU, memory, IP, domain name, and disk size"
+  description = "Virtual machine definitions including CPU, memory, IP, and disk size"
   type = map(object({
     cpus         = number
     memory       = number
     ip           = string
     name_dominio = string
-    disk_size    = number # in MB
-    node_name    = string # node name
+    disk_size    = number
+    node_name    = string
   }))
 }
 
 variable "ssh_keys" {
-  description = "List of SSH keys to inject into VMs"
+  description = "SSH keys for VM access"
   type        = list(string)
 }
 
 variable "gateway" {
-  description = "Gateway IP address"
+  description = "Gateway for the network"
   type        = string
 }
 
@@ -35,13 +34,8 @@ variable "dns2" {
   description = "Secondary DNS server"
   type        = string
 }
-variable "initial_cluster" {
-  description = "The initial cluster configuration"
-  type        = string
 
-}
-variable "node_name" {
-  description = "Nombre del nodo"
+variable "initial_cluster" {
+  description = "Initial cluster configuration for etcd"
   type        = string
-  default     = null
 }
