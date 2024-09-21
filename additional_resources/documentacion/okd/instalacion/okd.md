@@ -58,12 +58,32 @@ openshift-install create ignition-configs --dir=./ignition
 
 
 
-  # Descargar e instalar OpenShift Installer (OKD v4.14.0)
-          sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
-          sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
-          sudo mv /tmp/openshift-install /opt/bin/
-          sudo chmod +x /opt/bin/openshift-install /opt/bin/oc         
-          sudo rm -rf /tmp/openshift-install.tar.gz
+
+# Descargar e instalar OpenShift Installer (OKD v4.14.0)
+
+
+sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
+
+sudo mkdir -p /opt/bin
+sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
+sudo mv /tmp/openshift-install /opt/bin/
+sudo chmod +x /opt/bin/openshift-install
+sudo rm -rf /tmp/openshift-install.tar.gz
+openshift-install version
+
+
+
+[core@helper ~]$ echo $PATH
+/home/core/.local/bin:/home/core/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/usr/local/bin
+[core@helper ~]$ export PATH=$PATH:/opt/bin
+[core@helper ~]$ ls -l /opt/bin/openshift-install
+-rwxr-xr-x 1 root root 654617464 Nov 22  2023 /opt/bin/openshift-install
+[core@helper ~]$ openshift-install version
+openshift-install 4.14.0-0.okd-2023-12-01-225814
+built from commit 82051a1c3d42e394be353bbe2eacf348ccb75970
+release image quay.io/openshift/okd@sha256:4510c50834c07e71521a68c021320b5e44978245c8031a858f74328e54e89e1c
+release architecture amd64
+
 
 
           Instalación en Rocky Linux:
@@ -109,3 +129,23 @@ bash
 Copiar código
 openshift-install create ignition-configs --dir=./ignition
 Estos pasos deberían funcionar correctamente para instalar openshift-install en Rocky Linux y generar los archivos de configuración Ignition.
+
+
+
+o install yamllint on Rocky Linux, follow these steps:
+
+Ensure EPEL Repository is enabled (if it's not already):
+
+bash
+Copiar código
+sudo dnf install epel-release
+Install yamllint:
+
+bash
+Copiar código
+sudo dnf install yamllint
+Once installed, you can verify the installation by running:
+
+bash
+Copiar código
+yamllint --version
