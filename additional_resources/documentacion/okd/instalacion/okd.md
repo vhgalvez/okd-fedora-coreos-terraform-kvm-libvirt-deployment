@@ -73,6 +73,20 @@ openshift-install version
 
 
 
+sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
+
+sudo mkdir -p /usr/local/bin/
+sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
+sudo mv /tmp/openshift-install /usr/local/bin/
+sudo chmod +x /usr/local/bin/openshift-install
+sudo rm -rf /tmp/openshift-install.tar.gz
+openshift-install version
+
+
+sudo OPENSHIFT_INSTALL_PLATFORM=none /usr/local/bin/openshift-install create ignition-configs --dir=./ignition --log-level=debug
+
+
+
 [core@helper ~]$ echo $PATH
 /home/core/.local/bin:/home/core/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/usr/local/bin
 [core@helper ~]$ export PATH=$PATH:/opt/bin
@@ -149,3 +163,55 @@ Once installed, you can verify the installation by running:
 bash
 Copiar código
 yamllint --version
+
+
+
+
+openshift-install create ignition-configs --dir=/home/core/okd-install/ignition
+
+
+
+
+openshift-install create manifests --dir=/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install --log-level=debug
+
+
+
+openshift-install create ignition-configs --dir=/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install --log-level=debug
+
+sudo chown -R core:core /home/core/okd-install
+
+sudo chmod -R 755 /home/core/okd-install
+
+sudo chown -R victory:victory /home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install
+sudo chmod -R 755 /home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install
+
+
+
+Intenta lo siguiente:
+
+bash
+Copiar código
+echo $OPENSHIFT_INSTALL_PLATFORM
+Este comando mostrará el valor de la variable de entorno OPENSHIFT_INSTALL_PLATFORM. Si no tiene valor asignado, no mostrará nada.
+
+Si necesitas exportar o asignar un valor a esta variable, puedes hacerlo de esta manera:
+
+bash
+Copiar código
+export OPENSHIFT_INSTALL_PLATFORM=baremetal
+Luego, puedes verificar el valor:
+
+bash
+Copiar código
+echo $OPENSHIFT_INSTALL_PLATFORM
+
+
+
+
+ # Instalar oc (OpenShift Client)
+sudo mkdir -p /usr/local/bin/
+sudo curl -L -o /tmp/oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz
+sudo tar -xzf /tmp/oc.tar.gz -C /tmp
+sudo mv /tmp/oc /usr/local/bin/
+sudo chmod +x /usr/local/bin/
+sudo rm -rf /tmp/oc.tar.gz
