@@ -26,8 +26,8 @@ def format_install_config(pull_secret_path, install_config_template, output_path
         print(f"An error occurred: {e}")
 
 # Usage:
-pull_secret_path = 'path_to_pull_secret.txt'
-install_config_template = 'path_to_install_config_template.yaml'
-output_path = 'path_to_output_install_config.yaml'
+pull_secret_path = '/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/install-config/pull-secret.txt'
+install_config_template = '/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/install-config/install-config.yaml'
+output_path = '/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/install-config/formatted-install-config.yaml'
 
 format_install_config(pull_secret_path, install_config_template, output_path)
