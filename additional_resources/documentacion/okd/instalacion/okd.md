@@ -217,3 +217,14 @@ sudo tar -xzf /tmp/oc.tar.gz -C /tmp
 sudo mv /tmp/oc /usr/local/bin/
 sudo chmod +x /usr/local/bin/
 sudo rm -rf /tmp/oc.tar.gz
+
+
+
+
+Fromato JSON
+
+RFC 8259 
+
+https://jsonformatter.curiousconcept.com/
+
+https://www.base64decode.org/
