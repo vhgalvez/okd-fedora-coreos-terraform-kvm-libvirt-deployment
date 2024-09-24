@@ -258,3 +258,12 @@ cat >> pull_secret.json <<EOF
     }
 }
 EOF
+
+
+
+
+
+sudo chown -R victory:victory /home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install
+sudo chmod -R 755 /home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install
+
+
