@@ -171,7 +171,6 @@ openshift-install create manifests --dir=/home/victory/terraform-openshift-kvm-d
 openshift-install create ignition-configs --dir=/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install --log-level=debug
 
 sudo chown -R core:core /home/core/okd-install
-
 sudo chmod -R 755 /home/core/okd-install
 
 sudo chown -R victory:victory /home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install
