@@ -68,12 +68,19 @@ sudo mkdir -p /usr/local/bin/
 sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/openshift/okd/releases/download/4.15.0-0.okd-2024-03-10-010116/openshift-install-linux-4.15.0-0.okd-2024-03-10-010116.tar.gz"
 
 
-sudo mkdir -p /opt/bin
 sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
-sudo mv /tmp/openshift-install /opt/bin/
-sudo chmod +x /opt/bin/openshift-install
+sudo mv /tmp/openshift-install /usr/local/bin/openshift-install
+sudo chmod +x /usr/local/bin/openshift-install
 sudo rm -rf /tmp/openshift-install.tar.gz
 openshift-install version
+
+
+/usr/local/bin/openshift-install
+
+
+
+sudo mkdir -p /opt/bin
+
 
 
 sudo OPENSHIFT_INSTALL_PLATFORM=none /usr/local/bin/openshift-install create ignition-configs --dir=./ignition --log-level=debug
@@ -210,54 +217,6 @@ https://www.base64decode.org/
 
 
 
-cat >> pull_secret.json <<EOF
-{
-    "auths":{
-        "cloud.openshift.com":{
-            "auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfZTk5M2RiN2MwMDNkNDFlNDhmZGU4ZGE0OWIxZmZkYTI6WkhMMk5HUVFTS01aS1JJSTBPME5aUzFaSVgwQU9GTTNDQjdQUkxMMjc5UzRZN1BKSTBURVdSQUhLSFFZVVJOUw==",
-            "email":"vhgalvez@gmail.com"
-        },
-        "quay.io":{
-            "auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfZTk5M2RiN2MwMDNkNDFlNDhmZGU4ZGE0OWIxZmZkYTI6WkhMMk5HUVFTS01aS1JJSTBPME5aUzFaSVgwQU9GTTNDQjdQUkxMMjc5UzRZN1BKSTBURVdSQUhLSFFZVVJOUw==",
-            "email":"vhgalvez@gmail.com"
-        },
-        "registry.connect.redhat.com":{
-            "auth":"fHVoYy1wb29sLWM1NzlhOGQ5LTA3YmItNDBmNy05OTgxLWNlODRlZmZhZDI2YTpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSTBPRGMxWVRVd01qSmlObU0wWW1KallqRXdNV0V3T1RjM01UQXhNR0k1WWlKOS5ZY0NRSl9XeldjLUFxNVc0UzlGNHE3ajNzbk9DelRmb3V0THRLS05EXzRWMGc2UWdGejZwdWh6N1pVcmEzUzFsUkptUXRWWUJETzFSRWtpT2tCYkR6UEVqVC1PSG1mSDhHcDRnTlN3TG5JZTRzeWdWMUMxWXBIU1NnUldncWlaaFBzMVlQTGJXazh6M0tfOEpNZlhtbUsyVS14dHVYeFVpbnMtLVo3NHd4MDdVWExtd2UwVk9DN0ROWDAwM0FGLUxhbFY5bnY4eVVMWnYzSlJnR0VjOFhuRkZxOWNrNWpCV2ZkVHhJd1VOdFBHYXpBcGhRZ0t1clloLWRmYVpLZkowaVRJVkV5RjBjR09DWWtPRlE0U2pJRE85b2xtZmhjektEblIyOEJSd2QtUE5JcEFzSk9teWRZRjVHdGdTNWtjZE9mV2dldUxxYjluUW1yMFExbXpzdmhhbnNsandxNFdtRUhaWFJ1dVo0NkU5cWVWMXgzZU51QzQyclF5d3dBUnRsdVJwNXpPam9SN3ViZHFHTldqLTIyWTZybi16aVZfbXRBV1R0eENsZjNPVTlqNWJDLU0yNTdIdWg3WGt1cFJ4bWZYcHVsSmpnZGlmQlIyaGNHMVNQVjBxT2pBZjA3NVRGZU5Yc2pOTlZnQWhFb2VmLTEtMHc4WGhISVdaZVBXT1lyRG9mR3dfcE1kclZqWWVUd19xSGpfQzAwa2lISmhOMkFQXzJRQnQzMHNhdVFuYk01c3g2WGpZUjBqNENDRTJaSDNJdkNOYWFNUHdreGJ4a0FaN3ZvbjhyWTNrZjAwa3RacFhmTjJPWDR4bHNFWmljZ0x6NFJjV2RHNFlVNG42cDJleVRPMWJCOEpYRmRpTjNZQmNhYkI3OFpnU1Y5bHlZWW52dTRacmtZRQ==",
-            "email":"vhgalvez@gmail.com"
-        },
-        "registry.redhat.io":{
-            "auth":"fHVoYy1wb29sLWM1NzlhOGQ5LTA3YmItNDBmNy05OTgxLWNlODRlZmZhZDI2YTpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSTBPRGMxWVRVd01qSmlObU0wWW1KallqRXdNV0V3T1RjM01UQXhNR0k1WWlKOS5ZY0NRSl9XeldjLUFxNVc0UzlGNHE3ajNzbk9DelRmb3V0THRLS05EXzRWMGc2UWdGejZwdWh6N1pVcmEzUzFsUkptUXRWWUJETzFSRWtpT2tCYkR6UEVqVC1PSG1mSDhHcDRnTlN3TG5JZTRzeWdWMUMxWXBIU1NnUldncWlaaFBzMVlQTGJXazh6M0tfOEpNZlhtbUsyVS14dHVYeFVpbnMtLVo3NHd4MDdVWExtd2UwVk9DN0ROWDAwM0FGLUxhbFY5bnY4eVVMWnYzSlJnR0VjOFhuRkZxOWNrNWpCV2ZkVHhJd1VOdFBHYXpBcGhRZ0t1clloLWRmYVpLZkowaVRJVkV5RjBjR09DWWtPRlE0U2pJRE85b2xtZmhjektEblIyOEJSd2QtUE5JcEFzSk9teWRZRjVHdGdTNWtjZE9mV2dldUxxYjluUW1yMFExbXpzdmhhbnNsandxNFdtRUhaWFJ1dVo0NkU5cWVWMXgzZU51QzQyclF5d3dBUnRsdVJwNXpPam9SN3ViZHFHTldqLTIyWTZybi16aVZfbXRBV1R0eENsZjNPVTlqNWJDLU0yNTdIdWg3WGt1cFJ4bWZYcHVsSmpnZGlmQlIyaGNHMVNQVjBxT2pBZjA3NVRGZU5Yc2pOTlZnQWhFb2VmLTEtMHc4WGhISVdaZVBXT1lyRG9mR3dfcE1kclZqWWVUd19xSGpfQzAwa2lISmhOMkFQXzJRQnQzMHNhdVFuYk01c3g2WGpZUjBqNENDRTJaSDNJdkNOYWFNUHdreGJ4a0FaN3ZvbjhyWTNrZjAwa3RacFhmTjJPWDR4bHNFWmljZ0x6NFJjV2RHNFlVNG42cDJleVRPMWJCOEpYRmRpTjNZQmNhYkI3OFpnU1Y5bHlZWW52dTRacmtZRQ==",
-            "email":"vhgalvez@gmail.com"
-        }
-    }
-}
-
-EOF
-
-
-
-cat >> pull_secret.json <<EOF
-{
-    "auths":{
-        "cloud.openshift.com":{
-            "auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfZTk5M2RiN2MwMDNkNDFlNDhmZGU4ZGE0OWIxZmZkYTI6WkhMMk5HUVFTS01aS1JJSTBPME5aUzFaSVgwQU9GTTNDQjdQUkxMMjc5UzRZN1BKSTBURVdSQUhLSFFZVVJOUw==",
-            "email":"vhgalvez@gmail.com"
-        },
-        "quay.io":{
-            "auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfZTk5M2RiN2MwMDNkNDFlNDhmZGU4ZGE0OWIxZmZkYTI6WkhMMk5HUVFTS01aS1JJSTBPME5aUzFaSVgwQU9GTTNDQjdQUkxMMjc5UzRZN1BKSTBURVdSQUhLSFFZVVJOUw==",
-            "email":"vhgalvez@gmail.com"
-        },
-        "registry.connect.redhat.com":{
-            "auth":"fHVoYy1wb29sLWM1NzlhOGQ5LTA3YmItNDBmNy05OTgxLWNlODRlZmZhZDI2YTpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSTBPRGMxWVRVd01qSmlObU0wWW1KallqRXdNV0V3T1RjM01UQXhNR0k1WWlKOS5ZY0NRSl9XeldjLUFxNVc0UzlGNHE3ajNzbk9DelRmb3V0THRLS05EXzRWMGc2UWdGejZwdWh6N1pVcmEzUzFsUkptUXRWWUJETzFSRWtpT2tCYkR6UEVqVC1PSG1mSDhHcDRnTlN3TG5JZTRzeWdWMUMxWXBIU1NnUldncWlaaFBzMVlQTGJXazh6M0tfOEpNZlhtbUsyVS14dHVYeFVpbnMtLVo3NHd4MDdVWExtd2UwVk9DN0ROWDAwM0FGLUxhbFY5bnY4eVVMWnYzSlJnR0VjOFhuRkZxOWNrNWpCV2ZkVHhJd1VOdFBHYXpBcGhRZ0t1clloLWRmYVpLZkowaVRJVkV5RjBjR09DWWtPRlE0U2pJRE85b2xtZmhjektEblIyOEJSd2QtUE5JcEFzSk9teWRZRjVHdGdTNWtjZE9mV2dldUxxYjluUW1yMFExbXpzdmhhbnNsandxNFdtRUhaWFJ1dVo0NkU5cWVWMXgzZU51QzQyclF5d3dBUnRsdVJwNXpPam9SN3ViZHFHTldqLTIyWTZybi16aVZfbXRBV1R0eENsZjNPVTlqNWJDLU0yNTdIdWg3WGt1cFJ4bWZYcHVsSmpnZGlmQlIyaGNHMVNQVjBxT2pBZjA3NVRGZU5Yc2pOTlZnQWhFb2VmLTEtMHc4WGhISVdaZVBXT1lyRG9mR3dfcE1kclZqWWVUd19xSGpfQzAwa2lISmhOMkFQXzJRQnQzMHNhdVFuYk01c3g2WGpZUjBqNENDRTJaSDNJdkNOYWFNUHdreGJ4a0FaN3ZvbjhyWTNrZjAwa3RacFhmTjJPWDR4bHNFWmljZ0x6NFJjV2RHNFlVNG42cDJleVRPMWJCOEpYRmRpTjNZQmNhYkI3OFpnU1Y5bHlZWW52dTRacmtZRQ==",
-            "email":"vhgalvez@gmail.com"
-        },
-        "registry.redhat.io":{
-            "auth":"fHVoYy1wb29sLWM1NzlhOGQ5LTA3YmItNDBmNy05OTgxLWNlODRlZmZhZDI2YTpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSTBPRGMxWVRVd01qSmlObU0wWW1KallqRXdNV0V3T1RjM01UQXhNR0k1WWlKOS5ZY0NRSl9XeldjLUFxNVc0UzlGNHE3ajNzbk9DelRmb3V0THRLS05EXzRWMGc2UWdGejZwdWh6N1pVcmEzUzFsUkptUXRWWUJETzFSRWtpT2tCYkR6UEVqVC1PSG1mSDhHcDRnTlN3TG5JZTRzeWdWMUMxWXBIU1NnUldncWlaaFBzMVlQTGJXazh6M0tfOEpNZlhtbUsyVS14dHVYeFVpbnMtLVo3NHd4MDdVWExtd2UwVk9DN0ROWDAwM0FGLUxhbFY5bnY4eVVMWnYzSlJnR0VjOFhuRkZxOWNrNWpCV2ZkVHhJd1VOdFBHYXpBcGhRZ0t1clloLWRmYVpLZkowaVRJVkV5RjBjR09DWWtPRlE0U2pJRE85b2xtZmhjektEblIyOEJSd2QtUE5JcEFzSk9teWRZRjVHdGdTNWtjZE9mV2dldUxxYjluUW1yMFExbXpzdmhhbnNsandxNFdtRUhaWFJ1dVo0NkU5cWVWMXgzZU51QzQyclF5d3dBUnRsdVJwNXpPam9SN3ViZHFHTldqLTIyWTZybi16aVZfbXRBV1R0eENsZjNPVTlqNWJDLU0yNTdIdWg3WGt1cFJ4bWZYcHVsSmpnZGlmQlIyaGNHMVNQVjBxT2pBZjA3NVRGZU5Yc2pOTlZnQWhFb2VmLTEtMHc4WGhISVdaZVBXT1lyRG9mR3dfcE1kclZqWWVUd19xSGpfQzAwa2lISmhOMkFQXzJRQnQzMHNhdVFuYk01c3g2WGpZUjBqNENDRTJaSDNJdkNOYWFNUHdreGJ4a0FaN3ZvbjhyWTNrZjAwa3RacFhmTjJPWDR4bHNFWmljZ0x6NFJjV2RHNFlVNG42cDJleVRPMWJCOEpYRmRpTjNZQmNhYkI3OFpnU1Y5bHlZWW52dTRacmtZRQ==",
-            "email":"vhgalvez@gmail.com"
-        }
-    }
-}
-EOF
 
 
 
@@ -267,3 +226,84 @@ sudo chown -R victory:victory /home/victory/terraform-openshift-kvm-deployment_l
 sudo chmod -R 755 /home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install
 
 
+
+sudo chmod -R 755 
+sudo chown -R core:core
+
+
+
+sudo mkdir -p /usr/local/bin/
+
+sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/openshift/okd/releases/download/4.15.0-0.okd-2024-03-10-010116/openshift-install-linux-4.15.0-0.okd-2024-03-10-010116.tar.gz"
+
+
+sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
+sudo mv /tmp/openshift-install /usr/local/bin/
+sudo chmod +x /usr/local/bin/openshift-install
+sudo rm -rf /tmp/openshift-install.tar.gz
+openshift-install version
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+cat >> pull_secret.json <<EOF
+{
+    "auths":{
+        "cloud.openshift.com":{
+            "auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfZTk5M2RiN2MwMDNkNDFlNDhmZGU4ZGE0OWIxZmZkYTI6WkhMMk5HUVFTS01aS1JJSTBPME5aUzFaSVgwQU9GTTNDQjdQUkxMMjc5UzRZN1BKSTBURVdSQUhLSFFZVVJOUw==",
+            "email":"vhgalvez@gmail.com"
+        },
+        "quay.io":{
+            "auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfZTk5M2RiN2MwMDNkNDFlNDhmZGU4ZGE0OWIxZmZkYTI6WkhMMk5HUVFTS01aS1JJSTBPME5aUzFaSVgwQU9GTTNDQjdQUkxMMjc5UzRZN1BKSTBURVdSQUhLSFFZVVJOUw==",
+            "email":"vhgalvez@gmail.com"
+        },
+        "registry.connect.redhat.com":{
+            "auth":"fHVoYy1wb29sLWM1NzlhOGQ5LTA3YmItNDBmNy05OTgxLWNlODRlZmZhZDI2YTpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSTBPRGMxWVRVd01qSmlObU0wWW1KallqRXdNV0V3T1RjM01UQXhNR0k1WWlKOS5ZY0NRSl9XeldjLUFxNVc0UzlGNHE3ajNzbk9DelRmb3V0THRLS05EXzRWMGc2UWdGejZwdWh6N1pVcmEzUzFsUkptUXRWWUJETzFSRWtpT2tCYkR6UEVqVC1PSG1mSDhHcDRnTlN3TG5JZTRzeWdWMUMxWXBIU1NnUldncWlaaFBzMVlQTGJXazh6M0tfOEpNZlhtbUsyVS14dHVYeFVpbnMtLVo3NHd4MDdVWExtd2UwVk9DN0ROWDAwM0FGLUxhbFY5bnY4eVVMWnYzSlJnR0VjOFhuRkZxOWNrNWpCV2ZkVHhJd1VOdFBHYXpBcGhRZ0t1clloLWRmYVpLZkowaVRJVkV5RjBjR09DWWtPRlE0U2pJRE85b2xtZmhjektEblIyOEJSd2QtUE5JcEFzSk9teWRZRjVHdGdTNWtjZE9mV2dldUxxYjluUW1yMFExbXpzdmhhbnNsandxNFdtRUhaWFJ1dVo0NkU5cWVWMXgzZU51QzQyclF5d3dBUnRsdVJwNXpPam9SN3ViZHFHTldqLTIyWTZybi16aVZfbXRBV1R0eENsZjNPVTlqNWJDLU0yNTdIdWg3WGt1cFJ4bWZYcHVsSmpnZGlmQlIyaGNHMVNQVjBxT2pBZjA3NVRGZU5Yc2pOTlZnQWhFb2VmLTEtMHc4WGhISVdaZVBXT1lyRG9mR3dfcE1kclZqWWVUd19xSGpfQzAwa2lISmhOMkFQXzJRQnQzMHNhdVFuYk01c3g2WGpZUjBqNENDRTJaSDNJdkNOYWFNUHdreGJ4a0FaN3ZvbjhyWTNrZjAwa3RacFhmTjJPWDR4bHNFWmljZ0x6NFJjV2RHNFlVNG42cDJleVRPMWJCOEpYRmRpTjNZQmNhYkI3OFpnU1Y5bHlZWW52dTRacmtZRQ==",
+            "email":"vhgalvez@gmail.com"
+        },
+        "registry.redhat.io":{
+            "auth":"fHVoYy1wb29sLWM1NzlhOGQ5LTA3YmItNDBmNy05OTgxLWNlODRlZmZhZDI2YTpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSTBPRGMxWVRVd01qSmlObU0wWW1KallqRXdNV0V3T1RjM01UQXhNR0k1WWlKOS5ZY0NRSl9XeldjLUFxNVc0UzlGNHE3ajNzbk9DelRmb3V0THRLS05EXzRWMGc2UWdGejZwdWh6N1pVcmEzUzFsUkptUXRWWUJETzFSRWtpT2tCYkR6UEVqVC1PSG1mSDhHcDRnTlN3TG5JZTRzeWdWMUMxWXBIU1NnUldncWlaaFBzMVlQTGJXazh6M0tfOEpNZlhtbUsyVS14dHVYeFVpbnMtLVo3NHd4MDdVWExtd2UwVk9DN0ROWDAwM0FGLUxhbFY5bnY4eVVMWnYzSlJnR0VjOFhuRkZxOWNrNWpCV2ZkVHhJd1VOdFBHYXpBcGhRZ0t1clloLWRmYVpLZkowaVRJVkV5RjBjR09DWWtPRlE0U2pJRE85b2xtZmhjektEblIyOEJSd2QtUE5JcEFzSk9teWRZRjVHdGdTNWtjZE9mV2dldUxxYjluUW1yMFExbXpzdmhhbnNsandxNFdtRUhaWFJ1dVo0NkU5cWVWMXgzZU51QzQyclF5d3dBUnRsdVJwNXpPam9SN3ViZHFHTldqLTIyWTZybi16aVZfbXRBV1R0eENsZjNPVTlqNWJDLU0yNTdIdWg3WGt1cFJ4bWZYcHVsSmpnZGlmQlIyaGNHMVNQVjBxT2pBZjA3NVRGZU5Yc2pOTlZnQWhFb2VmLTEtMHc4WGhISVdaZVBXT1lyRG9mR3dfcE1kclZqWWVUd19xSGpfQzAwa2lISmhOMkFQXzJRQnQzMHNhdVFuYk01c3g2WGpZUjBqNENDRTJaSDNJdkNOYWFNUHdreGJ4a0FaN3ZvbjhyWTNrZjAwa3RacFhmTjJPWDR4bHNFWmljZ0x6NFJjV2RHNFlVNG42cDJleVRPMWJCOEpYRmRpTjNZQmNhYkI3OFpnU1Y5bHlZWW52dTRacmtZRQ==",
+            "email":"vhgalvez@gmail.com"
+        }
+    }
+}
+
+EOF
+
+
+
+cat >> pull_secret.json <<EOF
+{
+    "auths":{
+        "cloud.openshift.com":{
+            "auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfZTk5M2RiN2MwMDNkNDFlNDhmZGU4ZGE0OWIxZmZkYTI6WkhMMk5HUVFTS01aS1JJSTBPME5aUzFaSVgwQU9GTTNDQjdQUkxMMjc5UzRZN1BKSTBURVdSQUhLSFFZVVJOUw==",
+            "email":"vhgalvez@gmail.com"
+        },
+        "quay.io":{
+            "auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfZTk5M2RiN2MwMDNkNDFlNDhmZGU4ZGE0OWIxZmZkYTI6WkhMMk5HUVFTS01aS1JJSTBPME5aUzFaSVgwQU9GTTNDQjdQUkxMMjc5UzRZN1BKSTBURVdSQUhLSFFZVVJOUw==",
+            "email":"vhgalvez@gmail.com"
+        },
+        "registry.connect.redhat.com":{
+            "auth":"fHVoYy1wb29sLWM1NzlhOGQ5LTA3YmItNDBmNy05OTgxLWNlODRlZmZhZDI2YTpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSTBPRGMxWVRVd01qSmlObU0wWW1KallqRXdNV0V3T1RjM01UQXhNR0k1WWlKOS5ZY0NRSl9XeldjLUFxNVc0UzlGNHE3ajNzbk9DelRmb3V0THRLS05EXzRWMGc2UWdGejZwdWh6N1pVcmEzUzFsUkptUXRWWUJETzFSRWtpT2tCYkR6UEVqVC1PSG1mSDhHcDRnTlN3TG5JZTRzeWdWMUMxWXBIU1NnUldncWlaaFBzMVlQTGJXazh6M0tfOEpNZlhtbUsyVS14dHVYeFVpbnMtLVo3NHd4MDdVWExtd2UwVk9DN0ROWDAwM0FGLUxhbFY5bnY4eVVMWnYzSlJnR0VjOFhuRkZxOWNrNWpCV2ZkVHhJd1VOdFBHYXpBcGhRZ0t1clloLWRmYVpLZkowaVRJVkV5RjBjR09DWWtPRlE0U2pJRE85b2xtZmhjektEblIyOEJSd2QtUE5JcEFzSk9teWRZRjVHdGdTNWtjZE9mV2dldUxxYjluUW1yMFExbXpzdmhhbnNsandxNFdtRUhaWFJ1dVo0NkU5cWVWMXgzZU51QzQyclF5d3dBUnRsdVJwNXpPam9SN3ViZHFHTldqLTIyWTZybi16aVZfbXRBV1R0eENsZjNPVTlqNWJDLU0yNTdIdWg3WGt1cFJ4bWZYcHVsSmpnZGlmQlIyaGNHMVNQVjBxT2pBZjA3NVRGZU5Yc2pOTlZnQWhFb2VmLTEtMHc4WGhISVdaZVBXT1lyRG9mR3dfcE1kclZqWWVUd19xSGpfQzAwa2lISmhOMkFQXzJRQnQzMHNhdVFuYk01c3g2WGpZUjBqNENDRTJaSDNJdkNOYWFNUHdreGJ4a0FaN3ZvbjhyWTNrZjAwa3RacFhmTjJPWDR4bHNFWmljZ0x6NFJjV2RHNFlVNG42cDJleVRPMWJCOEpYRmRpTjNZQmNhYkI3OFpnU1Y5bHlZWW52dTRacmtZRQ==",
+            "email":"vhgalvez@gmail.com"
+        },
+        "registry.redhat.io":{
+            "auth":"fHVoYy1wb29sLWM1NzlhOGQ5LTA3YmItNDBmNy05OTgxLWNlODRlZmZhZDI2YTpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSTBPRGMxWVRVd01qSmlObU0wWW1KallqRXdNV0V3T1RjM01UQXhNR0k1WWlKOS5ZY0NRSl9XeldjLUFxNVc0UzlGNHE3ajNzbk9DelRmb3V0THRLS05EXzRWMGc2UWdGejZwdWh6N1pVcmEzUzFsUkptUXRWWUJETzFSRWtpT2tCYkR6UEVqVC1PSG1mSDhHcDRnTlN3TG5JZTRzeWdWMUMxWXBIU1NnUldncWlaaFBzMVlQTGJXazh6M0tfOEpNZlhtbUsyVS14dHVYeFVpbnMtLVo3NHd4MDdVWExtd2UwVk9DN0ROWDAwM0FGLUxhbFY5bnY4eVVMWnYzSlJnR0VjOFhuRkZxOWNrNWpCV2ZkVHhJd1VOdFBHYXpBcGhRZ0t1clloLWRmYVpLZkowaVRJVkV5RjBjR09DWWtPRlE0U2pJRE85b2xtZmhjektEblIyOEJSd2QtUE5JcEFzSk9teWRZRjVHdGdTNWtjZE9mV2dldUxxYjluUW1yMFExbXpzdmhhbnNsandxNFdtRUhaWFJ1dVo0NkU5cWVWMXgzZU51QzQyclF5d3dBUnRsdVJwNXpPam9SN3ViZHFHTldqLTIyWTZybi16aVZfbXRBV1R0eENsZjNPVTlqNWJDLU0yNTdIdWg3WGt1cFJ4bWZYcHVsSmpnZGlmQlIyaGNHMVNQVjBxT2pBZjA3NVRGZU5Yc2pOTlZnQWhFb2VmLTEtMHc4WGhISVdaZVBXT1lyRG9mR3dfcE1kclZqWWVUd19xSGpfQzAwa2lISmhOMkFQXzJRQnQzMHNhdVFuYk01c3g2WGpZUjBqNENDRTJaSDNJdkNOYWFNUHdreGJ4a0FaN3ZvbjhyWTNrZjAwa3RacFhmTjJPWDR4bHNFWmljZ0x6NFJjV2RHNFlVNG42cDJleVRPMWJCOEpYRmRpTjNZQmNhYkI3OFpnU1Y5bHlZWW52dTRacmtZRQ==",
+            "email":"vhgalvez@gmail.com"
+        }
+    }
+}
+EOF
