@@ -82,6 +82,10 @@ openshift-install version
 sudo mkdir -p /opt/bin
 
 
+openshift-install create ignition-configs --dir=
+
+openshift-install create ignition-configs --dir=/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install --log-level=debug
+
 
 sudo OPENSHIFT_INSTALL_PLATFORM=none /usr/local/bin/openshift-install create ignition-configs --dir=./ignition --log-level=debug
 
