@@ -11,6 +11,7 @@ networking:
     - cidr: 172.30.0.0/16
 platform:
   none: {}
+  flip: false
 pullSecret: |
   {
       "auths":{
