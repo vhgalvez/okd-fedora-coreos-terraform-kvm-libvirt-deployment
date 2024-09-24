@@ -62,7 +62,11 @@ openshift-install create ignition-configs --dir=./ignition
 # Descargar e instalar OpenShift Installer (OKD v4.14.0)
 
 
-sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
+
+sudo mkdir -p /usr/local/bin/
+
+sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/openshift/okd/releases/download/4.15.0-0.okd-2024-03-10-010116/openshift-install-linux-4.15.0-0.okd-2024-03-10-010116.tar.gz"
+
 
 sudo mkdir -p /opt/bin
 sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
@@ -72,39 +76,10 @@ sudo rm -rf /tmp/openshift-install.tar.gz
 openshift-install version
 
 
-sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/openshift/okd/releases/download/4.15.0-0.okd-2024-03-10-010116/openshift-install-linux-4.15.0-0.okd-2024-03-10-010116.tar.gz"
-
-
-
-
-sudo curl --retry 5 --retry-delay 10 -L -o /tmp/openshift-install.tar.gz "https://github.com/okd-project/okd/releases/download/4.14.0-0.okd-2023-12-01-225814/openshift-install-linux-4.14.0-0.okd-2023-12-01-225814.tar.gz"
-
-sudo mkdir -p /usr/local/bin/
-sudo tar -xzf /tmp/openshift-install.tar.gz -C /tmp
-sudo mv /tmp/openshift-install /usr/local/bin/
-sudo chmod +x /usr/local/bin/openshift-install
-sudo rm -rf /tmp/openshift-install.tar.gz
-openshift-install version
-
-
 sudo OPENSHIFT_INSTALL_PLATFORM=none /usr/local/bin/openshift-install create ignition-configs --dir=./ignition --log-level=debug
 
 
-
-[core@helper ~]$ echo $PATH
-/home/core/.local/bin:/home/core/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/usr/local/bin
-[core@helper ~]$ export PATH=$PATH:/opt/bin
-[core@helper ~]$ ls -l /opt/bin/openshift-install
--rwxr-xr-x 1 root root 654617464 Nov 22  2023 /opt/bin/openshift-install
-[core@helper ~]$ openshift-install version
-openshift-install 4.14.0-0.okd-2023-12-01-225814
-built from commit 82051a1c3d42e394be353bbe2eacf348ccb75970
-release image quay.io/openshift/okd@sha256:4510c50834c07e71521a68c021320b5e44978245c8031a858f74328e54e89e1c
-release architecture amd64
-
-
-
-          Instalación en Rocky Linux:
+Instalación en Rocky Linux:
 Crea el directorio para binarios:
 
 bash
