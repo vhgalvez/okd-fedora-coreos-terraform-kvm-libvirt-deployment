@@ -36,6 +36,17 @@ resource "libvirt_volume" "base" {
   format = "qcow2"
 }
 
+# VM Disk for each node
+resource "libvirt_volume" "vm_disk" {
+  for_each = var.vm_definitions
+
+  name           = "${each.key}-disk"
+  base_volume_id = libvirt_volume.base.id
+  pool           = libvirt_pool.okd_storage_pool.name
+  format         = "qcow2"
+  size           = each.value.disk_size * 1024 * 1024
+}
+
 # Generate Ignition with OpenShift Installer
 resource "null_resource" "generate_ignition" {
   provisioner "local-exec" {
@@ -68,7 +79,7 @@ resource "libvirt_ignition" "worker_ignition" {
   content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign")
 }
 
-# VM Disk for each node
+# Define virtual machines
 resource "libvirt_domain" "okd_vm" {
   for_each = var.vm_definitions
 
@@ -113,8 +124,6 @@ resource "libvirt_domain" "okd_vm" {
 
   qemu_agent = true
 }
-
-
 
 # Output IP addresses
 output "okd_vm_ips" {
