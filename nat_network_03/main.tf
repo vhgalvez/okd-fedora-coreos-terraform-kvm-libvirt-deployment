@@ -69,17 +69,6 @@ resource "libvirt_ignition" "worker_ignition" {
 }
 
 # VM Disk for each node
-resource "libvirt_volume" "vm_disk" {
-  for_each = var.vm_definitions
-
-  name           = "${each.key}-disk"
-  base_volume_id = libvirt_volume.base.id
-  pool           = libvirt_pool.okd_storage_pool.name
-  format         = "qcow2"
-  size           = each.value.disk_size * 1024 * 1024
-}
-
-# Define virtual machines
 resource "libvirt_domain" "okd_vm" {
   for_each = var.vm_definitions
 
@@ -98,8 +87,8 @@ resource "libvirt_domain" "okd_vm" {
   }
 
   # Use the correct ignition file based on the node type
-  coreos_ignition = each.key == "bootstrap" ? libvirt_ignition.bootstrap_ignition.id :
-                    startswith(each.key, "master") ? libvirt_ignition.master_ignition.id :
+  coreos_ignition = contains(["bootstrap"], each.key) ? libvirt_ignition.bootstrap_ignition.id :
+                    contains(["master1", "master2", "master3"], each.key) ? libvirt_ignition.master_ignition.id :
                     libvirt_ignition.worker_ignition.id
 
   graphics {
@@ -113,6 +102,7 @@ resource "libvirt_domain" "okd_vm" {
 
   qemu_agent = true
 }
+
 
 # Output IP addresses
 output "okd_vm_ips" {
