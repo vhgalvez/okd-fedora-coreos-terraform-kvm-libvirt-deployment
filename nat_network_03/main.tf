@@ -69,17 +69,6 @@ resource "libvirt_ignition" "worker_ignition" {
 }
 
 # VM Disk for each node
-resource "libvirt_volume" "vm_disk" {
-  for_each = var.vm_definitions
-
-  name           = "${each.key}-disk"
-  base_volume_id = libvirt_volume.base.id
-  pool           = libvirt_pool.okd_storage_pool.name
-  format         = "qcow2"
-  size           = each.value.disk_size * 1024 * 1024
-}
-
-# Define virtual machines
 resource "libvirt_domain" "okd_vm" {
   for_each = var.vm_definitions
 
@@ -119,10 +108,12 @@ resource "libvirt_domain" "okd_vm" {
   console {
     type        = "pty"
     target_type = "serial"
+    target_port = "0" # Adding the required target_port argument
   }
 
   qemu_agent = true
 }
+
 
 
 # Output IP addresses
