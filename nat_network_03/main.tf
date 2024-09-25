@@ -87,9 +87,19 @@ resource "libvirt_domain" "okd_vm" {
   }
 
   # Use the correct ignition file based on the node type
-  coreos_ignition = contains(["bootstrap"], each.key) ? libvirt_ignition.bootstrap_ignition.id :
-                    contains(["master1", "master2", "master3"], each.key) ? libvirt_ignition.master_ignition.id :
-                    libvirt_ignition.worker_ignition.id
+  coreos_ignition = lookup(
+    {
+      "bootstrap" = libvirt_ignition.bootstrap_ignition.id,
+      "master1"   = libvirt_ignition.master_ignition.id,
+      "master2"   = libvirt_ignition.master_ignition.id,
+      "master3"   = libvirt_ignition.master_ignition.id,
+      "worker1"   = libvirt_ignition.worker_ignition.id,
+      "worker2"   = libvirt_ignition.worker_ignition.id,
+      "worker3"   = libvirt_ignition.worker_ignition.id
+    },
+    each.key,
+    libvirt_ignition.worker_ignition.id
+  )
 
   graphics {
     type = "vnc"
