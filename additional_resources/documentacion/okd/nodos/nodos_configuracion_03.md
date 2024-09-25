@@ -58,8 +58,15 @@ sudo virsh shutdown  worker3
 sudo virsh start freeipa1
 sudo virsh start load_balancer1
 sudo virsh start helper
+sudo virsh start bootstrap
 sudo virsh start master1
 sudo virsh start master2
+sudo virsh start master3
+sudo virsh start worker1
+sudo virsh start worker2
+sudo virsh start worker3
+
+
 
 
 
