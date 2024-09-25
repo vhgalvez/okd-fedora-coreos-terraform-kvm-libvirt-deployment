@@ -250,70 +250,39 @@ openshift-install version
 
 
 
+1. Download the Fedora CoreOS Image and Verification Files
+bash
+Copiar código
+# Download the Fedora CoreOS image
+curl -O https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/40.20240906.3.0/x86_64/fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2.xz
 
+# Download the checksum file and the signature file
+curl -O https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/40.20240906.3.0/x86_64/fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2.xz-CHECKSUM
+curl -O https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/40.20240906.3.0/x86_64/fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2.xz.sig
+2. Download the Fedora GPG Key
+bash
+Copiar código
+# Download the Fedora GPG key for verification
+curl -O https://fedoraproject.org/fedora.gpg
+3. Verify the Signature of the Downloaded Image
+Use gpgv to verify the image file with the GPG key.
 
+bash
+Copiar código
+# Verify the signature against the downloaded GPG key
+gpgv --keyring ./fedora.gpg fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2.xz.sig fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2.xz
+If the output indicates that the signature is valid, the file integrity is confirmed.
 
+4. Verify the SHA256 Checksum
+Finally, use sha256sum to ensure the file's integrity by comparing it against the checksum.
 
+bash
+Copiar código
+# Verify the checksum matches
+sha256sum -c fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2.xz-CHECKSUM
+If the checksum matches, you will see output like:
 
-
-
-
-
-
-
-
-cat >> pull_secret.json <<EOF
-{
-    "auths":{
-        "cloud.openshift.com":{
-            "auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfZTk5M2RiN2MwMDNkNDFlNDhmZGU4ZGE0OWIxZmZkYTI6WkhMMk5HUVFTS01aS1JJSTBPME5aUzFaSVgwQU9GTTNDQjdQUkxMMjc5UzRZN1BKSTBURVdSQUhLSFFZVVJOUw==",
-            "email":"vhgalvez@gmail.com"
-        },
-        "quay.io":{
-            "auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfZTk5M2RiN2MwMDNkNDFlNDhmZGU4ZGE0OWIxZmZkYTI6WkhMMk5HUVFTS01aS1JJSTBPME5aUzFaSVgwQU9GTTNDQjdQUkxMMjc5UzRZN1BKSTBURVdSQUhLSFFZVVJOUw==",
-            "email":"vhgalvez@gmail.com"
-        },
-        "registry.connect.redhat.com":{
-            "auth":"fHVoYy1wb29sLWM1NzlhOGQ5LTA3YmItNDBmNy05OTgxLWNlODRlZmZhZDI2YTpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSTBPRGMxWVRVd01qSmlObU0wWW1KallqRXdNV0V3T1RjM01UQXhNR0k1WWlKOS5ZY0NRSl9XeldjLUFxNVc0UzlGNHE3ajNzbk9DelRmb3V0THRLS05EXzRWMGc2UWdGejZwdWh6N1pVcmEzUzFsUkptUXRWWUJETzFSRWtpT2tCYkR6UEVqVC1PSG1mSDhHcDRnTlN3TG5JZTRzeWdWMUMxWXBIU1NnUldncWlaaFBzMVlQTGJXazh6M0tfOEpNZlhtbUsyVS14dHVYeFVpbnMtLVo3NHd4MDdVWExtd2UwVk9DN0ROWDAwM0FGLUxhbFY5bnY4eVVMWnYzSlJnR0VjOFhuRkZxOWNrNWpCV2ZkVHhJd1VOdFBHYXpBcGhRZ0t1clloLWRmYVpLZkowaVRJVkV5RjBjR09DWWtPRlE0U2pJRE85b2xtZmhjektEblIyOEJSd2QtUE5JcEFzSk9teWRZRjVHdGdTNWtjZE9mV2dldUxxYjluUW1yMFExbXpzdmhhbnNsandxNFdtRUhaWFJ1dVo0NkU5cWVWMXgzZU51QzQyclF5d3dBUnRsdVJwNXpPam9SN3ViZHFHTldqLTIyWTZybi16aVZfbXRBV1R0eENsZjNPVTlqNWJDLU0yNTdIdWg3WGt1cFJ4bWZYcHVsSmpnZGlmQlIyaGNHMVNQVjBxT2pBZjA3NVRGZU5Yc2pOTlZnQWhFb2VmLTEtMHc4WGhISVdaZVBXT1lyRG9mR3dfcE1kclZqWWVUd19xSGpfQzAwa2lISmhOMkFQXzJRQnQzMHNhdVFuYk01c3g2WGpZUjBqNENDRTJaSDNJdkNOYWFNUHdreGJ4a0FaN3ZvbjhyWTNrZjAwa3RacFhmTjJPWDR4bHNFWmljZ0x6NFJjV2RHNFlVNG42cDJleVRPMWJCOEpYRmRpTjNZQmNhYkI3OFpnU1Y5bHlZWW52dTRacmtZRQ==",
-            "email":"vhgalvez@gmail.com"
-        },
-        "registry.redhat.io":{
-            "auth":"fHVoYy1wb29sLWM1NzlhOGQ5LTA3YmItNDBmNy05OTgxLWNlODRlZmZhZDI2YTpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSTBPRGMxWVRVd01qSmlObU0wWW1KallqRXdNV0V3T1RjM01UQXhNR0k1WWlKOS5ZY0NRSl9XeldjLUFxNVc0UzlGNHE3ajNzbk9DelRmb3V0THRLS05EXzRWMGc2UWdGejZwdWh6N1pVcmEzUzFsUkptUXRWWUJETzFSRWtpT2tCYkR6UEVqVC1PSG1mSDhHcDRnTlN3TG5JZTRzeWdWMUMxWXBIU1NnUldncWlaaFBzMVlQTGJXazh6M0tfOEpNZlhtbUsyVS14dHVYeFVpbnMtLVo3NHd4MDdVWExtd2UwVk9DN0ROWDAwM0FGLUxhbFY5bnY4eVVMWnYzSlJnR0VjOFhuRkZxOWNrNWpCV2ZkVHhJd1VOdFBHYXpBcGhRZ0t1clloLWRmYVpLZkowaVRJVkV5RjBjR09DWWtPRlE0U2pJRE85b2xtZmhjektEblIyOEJSd2QtUE5JcEFzSk9teWRZRjVHdGdTNWtjZE9mV2dldUxxYjluUW1yMFExbXpzdmhhbnNsandxNFdtRUhaWFJ1dVo0NkU5cWVWMXgzZU51QzQyclF5d3dBUnRsdVJwNXpPam9SN3ViZHFHTldqLTIyWTZybi16aVZfbXRBV1R0eENsZjNPVTlqNWJDLU0yNTdIdWg3WGt1cFJ4bWZYcHVsSmpnZGlmQlIyaGNHMVNQVjBxT2pBZjA3NVRGZU5Yc2pOTlZnQWhFb2VmLTEtMHc4WGhISVdaZVBXT1lyRG9mR3dfcE1kclZqWWVUd19xSGpfQzAwa2lISmhOMkFQXzJRQnQzMHNhdVFuYk01c3g2WGpZUjBqNENDRTJaSDNJdkNOYWFNUHdreGJ4a0FaN3ZvbjhyWTNrZjAwa3RacFhmTjJPWDR4bHNFWmljZ0x6NFJjV2RHNFlVNG42cDJleVRPMWJCOEpYRmRpTjNZQmNhYkI3OFpnU1Y5bHlZWW52dTRacmtZRQ==",
-            "email":"vhgalvez@gmail.com"
-        }
-    }
-}
-
-EOF
-
-
-
-cat >> pull_secret.json <<EOF
-{
-    "auths":{
-        "cloud.openshift.com":{
-            "auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfZTk5M2RiN2MwMDNkNDFlNDhmZGU4ZGE0OWIxZmZkYTI6WkhMMk5HUVFTS01aS1JJSTBPME5aUzFaSVgwQU9GTTNDQjdQUkxMMjc5UzRZN1BKSTBURVdSQUhLSFFZVVJOUw==",
-            "email":"vhgalvez@gmail.com"
-        },
-        "quay.io":{
-            "auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfZTk5M2RiN2MwMDNkNDFlNDhmZGU4ZGE0OWIxZmZkYTI6WkhMMk5HUVFTS01aS1JJSTBPME5aUzFaSVgwQU9GTTNDQjdQUkxMMjc5UzRZN1BKSTBURVdSQUhLSFFZVVJOUw==",
-            "email":"vhgalvez@gmail.com"
-        },
-        "registry.connect.redhat.com":{
-            "auth":"fHVoYy1wb29sLWM1NzlhOGQ5LTA3YmItNDBmNy05OTgxLWNlODRlZmZhZDI2YTpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSTBPRGMxWVRVd01qSmlObU0wWW1KallqRXdNV0V3T1RjM01UQXhNR0k1WWlKOS5ZY0NRSl9XeldjLUFxNVc0UzlGNHE3ajNzbk9DelRmb3V0THRLS05EXzRWMGc2UWdGejZwdWh6N1pVcmEzUzFsUkptUXRWWUJETzFSRWtpT2tCYkR6UEVqVC1PSG1mSDhHcDRnTlN3TG5JZTRzeWdWMUMxWXBIU1NnUldncWlaaFBzMVlQTGJXazh6M0tfOEpNZlhtbUsyVS14dHVYeFVpbnMtLVo3NHd4MDdVWExtd2UwVk9DN0ROWDAwM0FGLUxhbFY5bnY4eVVMWnYzSlJnR0VjOFhuRkZxOWNrNWpCV2ZkVHhJd1VOdFBHYXpBcGhRZ0t1clloLWRmYVpLZkowaVRJVkV5RjBjR09DWWtPRlE0U2pJRE85b2xtZmhjektEblIyOEJSd2QtUE5JcEFzSk9teWRZRjVHdGdTNWtjZE9mV2dldUxxYjluUW1yMFExbXpzdmhhbnNsandxNFdtRUhaWFJ1dVo0NkU5cWVWMXgzZU51QzQyclF5d3dBUnRsdVJwNXpPam9SN3ViZHFHTldqLTIyWTZybi16aVZfbXRBV1R0eENsZjNPVTlqNWJDLU0yNTdIdWg3WGt1cFJ4bWZYcHVsSmpnZGlmQlIyaGNHMVNQVjBxT2pBZjA3NVRGZU5Yc2pOTlZnQWhFb2VmLTEtMHc4WGhISVdaZVBXT1lyRG9mR3dfcE1kclZqWWVUd19xSGpfQzAwa2lISmhOMkFQXzJRQnQzMHNhdVFuYk01c3g2WGpZUjBqNENDRTJaSDNJdkNOYWFNUHdreGJ4a0FaN3ZvbjhyWTNrZjAwa3RacFhmTjJPWDR4bHNFWmljZ0x6NFJjV2RHNFlVNG42cDJleVRPMWJCOEpYRmRpTjNZQmNhYkI3OFpnU1Y5bHlZWW52dTRacmtZRQ==",
-            "email":"vhgalvez@gmail.com"
-        },
-        "registry.redhat.io":{
-            "auth":"fHVoYy1wb29sLWM1NzlhOGQ5LTA3YmItNDBmNy05OTgxLWNlODRlZmZhZDI2YTpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSTBPRGMxWVRVd01qSmlObU0wWW1KallqRXdNV0V3T1RjM01UQXhNR0k1WWlKOS5ZY0NRSl9XeldjLUFxNVc0UzlGNHE3ajNzbk9DelRmb3V0THRLS05EXzRWMGc2UWdGejZwdWh6N1pVcmEzUzFsUkptUXRWWUJETzFSRWtpT2tCYkR6UEVqVC1PSG1mSDhHcDRnTlN3TG5JZTRzeWdWMUMxWXBIU1NnUldncWlaaFBzMVlQTGJXazh6M0tfOEpNZlhtbUsyVS14dHVYeFVpbnMtLVo3NHd4MDdVWExtd2UwVk9DN0ROWDAwM0FGLUxhbFY5bnY4eVVMWnYzSlJnR0VjOFhuRkZxOWNrNWpCV2ZkVHhJd1VOdFBHYXpBcGhRZ0t1clloLWRmYVpLZkowaVRJVkV5RjBjR09DWWtPRlE0U2pJRE85b2xtZmhjektEblIyOEJSd2QtUE5JcEFzSk9teWRZRjVHdGdTNWtjZE9mV2dldUxxYjluUW1yMFExbXpzdmhhbnNsandxNFdtRUhaWFJ1dVo0NkU5cWVWMXgzZU51QzQyclF5d3dBUnRsdVJwNXpPam9SN3ViZHFHTldqLTIyWTZybi16aVZfbXRBV1R0eENsZjNPVTlqNWJDLU0yNTdIdWg3WGt1cFJ4bWZYcHVsSmpnZGlmQlIyaGNHMVNQVjBxT2pBZjA3NVRGZU5Yc2pOTlZnQWhFb2VmLTEtMHc4WGhISVdaZVBXT1lyRG9mR3dfcE1kclZqWWVUd19xSGpfQzAwa2lISmhOMkFQXzJRQnQzMHNhdVFuYk01c3g2WGpZUjBqNENDRTJaSDNJdkNOYWFNUHdreGJ4a0FaN3ZvbjhyWTNrZjAwa3RacFhmTjJPWDR4bHNFWmljZ0x6NFJjV2RHNFlVNG42cDJleVRPMWJCOEpYRmRpTjNZQmNhYkI3OFpnU1Y5bHlZWW52dTRacmtZRQ==",
-            "email":"vhgalvez@gmail.com"
-        }
-    }
-}
-EOF
-
-
-
-
-echo '{"auths":{"cloud.openshift.com":{"auth":"b3Blbn...etc"}}}' | jq .
-
- echo '{"auths":{"cloud.openshift.com":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfZTk5M2RiN2MwMDNkNDFlNDhmZGU4ZGE0OWIxZmZkYTI6WkhMMk5HUVFTS01aS1JJSTBPME5aUzFaSVgwQU9GTTNDQjdQUkxMMjc5UzRZN1BKSTBURVdSQUhLSFFZVVJOUw==","email":"vhgalvez@gmail.com"},"quay.io":{"auth":"b3BlbnNoaWZ0LXJlbGVhc2UtZGV2K29jbV9hY2Nlc3NfZTk5M2RiN2MwMDNkNDFlNDhmZGU4ZGE0OWIxZmZkYTI6WkhMMk5HUVFTS01aS1JJSTBPME5aUzFaSVgwQU9GTTNDQjdQUkxMMjc5UzRZN1BKSTBURVdSQUhLSFFZVVJOUw==","email":"vhgalvez@gmail.com"},"registry.connect.redhat.com":{"auth":"fHVoYy1wb29sLWM1NzlhOGQ5LTA3YmItNDBmNy05OTgxLWNlODRlZmZhZDI2YTpleUpoYkdjaU9pSlNVelV4TWlKOS5leUp6ZFdJaU9pSTBPRGMxWVRVd01qSmlObU0wWW1KallqRXdNV0V3T1RjM01UQXhNR0k1WWlKOS5ZY0NRSl9XeldjLUFxNVc0UzlGNHE3ajNzbk9DelRmb3V0THRLS05EXzRWMGc2UWdGejZwdWh6N1pVcmEzUzFsUkptUXRWWUJETzFSRWtpT2tCYkR6UEVqVC1PSG1mSDhHcDRnTlN3TG5JZTRzeWdWMUMxWXBIU1NnUldncWlaaFBzMVlQTGJXazh6M0tfOEpNZlhtbUsyVS14dHVYeFVpbnMtLVo3NHd4MDdVWExtd2UwVk9DN0ROWDAwM0FGLUxhbFY5bnY4eVVMWnYzSlJnR0VjOFhuRkZxOWNrNWpCV2ZkVHhJd1VOdFBHYXpBcGhRZ0t1clloLWRmYVpLZkowaVRJVkV5RjBjR09DWWtPRlE0U2pJRE85b2xtZmhjektEblIyOEJSd2QtUE5JcEFzSk9teWRZRjVHdGdTNWtjZE9mV2dldUxxYjluUW1yMFExbXpzdmhhbnNsandxNFdtRUhaWFJ1dVo0NkU5cWVWMXgzZU51QzQyclF5d3dBUnRsdVJwNXpPam9SN3ViZHFHTldqLTIyWTZybi16aVZfbXRBV1R0eENsZjNPVTlqNWJDLU0yNTdIdWg3WGt1cFJ4bWZYcHVsSmpnZGlmQlIyaGNHMVNQVjBxT2pBZjA3NVRGZU5Yc2pOTlZnQWhFb2VmLTEtMHc4WGhISVdaZVBXT1lyRG9mR3dfcE1kclZqWWVUd19xSGpfQzAwa2lISmhOMkFQXzJRQnQzMHNhdVFuYk01c3g2WGpZUjBqNENDRTJaSDNJdkNOYWFNUHdreGJ4a0FaN3ZvbjhyWTNrZjAwa3RacFhmTjJPWDR4bHNFWmljZ0x6NFJjV2RHNFlVNG42cDJleVRPMWJCOEpYRmRpTjNZQmNhYkI3OFpnU1Y5bHlZWW52dTRacmtZRQ==","email":"vhgalvez@gmail.com"}}}' | jq .
+makefile
+Copiar código
+fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2.xz: OK
+This confirms that your downloaded image is valid and ready to use.

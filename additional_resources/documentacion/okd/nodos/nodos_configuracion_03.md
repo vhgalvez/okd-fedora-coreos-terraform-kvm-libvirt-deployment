@@ -32,12 +32,17 @@ sudo systemctl restart crio etcd kube-apiserver kube-controller-manager kube-sch
 sudo systemctl status crio etcd kube-apiserver kube-controller-manager kube-scheduler kubelet kube-proxy
 
 
+
+
+
+sudo virsh start postgresql1
 sudo virsh start freeipa1
 sudo virsh start load_balancer1
-sudo virsh start bootstrap
 sudo virsh start helper
+
 sudo virsh start master1
 sudo virsh start master2
+sudo virsh start bastion1.cefaslocalserver.com 
 
 sudo virsh list --all
 
