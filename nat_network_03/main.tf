@@ -43,7 +43,7 @@ resource "null_resource" "generate_ignition" {
   }
 
   triggers = {
-    always_run = "${timestamp()}"
+    always_run = timestamp()
   }
 }
 
@@ -99,7 +99,7 @@ resource "libvirt_domain" "okd_vm" {
 
   # Use the correct ignition file based on the node type
   coreos_ignition = each.key == "bootstrap" ? libvirt_ignition.bootstrap_ignition.id :
-                    contains(keys(var.vm_definitions), each.key) && startswith(each.key, "master") ? libvirt_ignition.master_ignition.id :
+                    startswith(each.key, "master") ? libvirt_ignition.master_ignition.id :
                     libvirt_ignition.worker_ignition.id
 
   graphics {
