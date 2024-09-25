@@ -39,7 +39,7 @@ resource "libvirt_volume" "base" {
 # Generate Ignition with OpenShift Installer
 resource "null_resource" "generate_ignition" {
   provisioner "local-exec" {
-    command = "openshift-install create ignition-configs --dir=${path.module}/ignition"
+    command = "openshift-install create ignition-configs --dir=/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install"
   }
 
   triggers = {
@@ -51,21 +51,21 @@ resource "null_resource" "generate_ignition" {
 resource "libvirt_ignition" "bootstrap_ignition" {
   name    = "bootstrap.ign"
   pool    = libvirt_pool.okd_storage_pool.name
-  content = file("${path.module}/ignition/bootstrap.ign")
+  content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/bootstrap.ign")
 }
 
 # Ignition for Master Nodes
 resource "libvirt_ignition" "master_ignition" {
   name    = "master.ign"
   pool    = libvirt_pool.okd_storage_pool.name
-  content = file("${path.module}/ignition/master.ign")
+  content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign")
 }
 
 # Ignition for Worker Nodes
 resource "libvirt_ignition" "worker_ignition" {
   name    = "worker.ign"
   pool    = libvirt_pool.okd_storage_pool.name
-  content = file("${path.module}/ignition/worker.ign")
+  content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign")
 }
 
 # VM Disk for each node
@@ -97,7 +97,10 @@ resource "libvirt_domain" "okd_vm" {
     volume_id = libvirt_volume.vm_disk[each.key].id
   }
 
-  coreos_ignition = libvirt_ignition.bootstrap_ignition.id
+  # Use the correct ignition file based on the node type
+  coreos_ignition = each.key == "bootstrap" ? libvirt_ignition.bootstrap_ignition.id :
+                    contains(keys(var.vm_definitions), each.key) && startswith(each.key, "master") ? libvirt_ignition.master_ignition.id :
+                    libvirt_ignition.worker_ignition.id
 
   graphics {
     type = "vnc"
