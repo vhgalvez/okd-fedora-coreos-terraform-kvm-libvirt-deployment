@@ -25,16 +25,17 @@ resource "null_resource" "create_pool_directory" {
   }
 }
 
-# Improved storage pool creation
+# Improved storage pool creation and start
 resource "libvirt_pool" "okd_storage_pool" {
-  name = "volumetmp_03"
-  type = "dir"
-  path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
+  name      = "volumetmp_03"
+  type      = "dir"
+  path      = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
+  autostart = true
 
   depends_on = [null_resource.create_pool_directory]
 }
 
-# Ensure pool is started
+# Start and autostart the pool
 resource "null_resource" "start_pool" {
   provisioner "local-exec" {
     command = "sudo virsh pool-start volumetmp_03 && sudo virsh pool-autostart volumetmp_03"
@@ -50,44 +51,27 @@ resource "libvirt_network" "okd_network" {
   addresses = ["10.17.4.0/24"]
 }
 
-resource "libvirt_pool" "okd_storage_pool" {
-  name = "volumetmp_03"
-  type = "dir"
-  path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
-  autostart = true
-  depends_on = [null_resource.create_pool_directory]
-}
-
-
-resource "null_resource" "start_pool" {
-  provisioner "local-exec" {
-    command = "sudo virsh pool-start volumetmp_03 && sudo virsh pool-autostart volumetmp_03"
-  }
-  depends_on = [libvirt_pool.okd_storage_pool]
-}
-
-
 # Define Fedora CoreOS base image
 resource "libvirt_volume" "fcos_base" {
   name   = "fcos_base"
   pool   = libvirt_pool.okd_storage_pool.name
   source = "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/34.20210626.3.0/x86_64/fedora-coreos-34.20210626.3.0-qemu.x86_64.qcow2.xz"
   format = "qcow2"
+
+  depends_on = [null_resource.start_pool]
 }
 
-# Define the Ignition config for the bootstrap node
+# Define the Ignition configs
 resource "libvirt_ignition" "bootstrap_ignition" {
   name    = "bootstrap.ign"
   content = file("${path.module}/okd-install/bootstrap.ign")
 }
 
-# Define the Ignition config for the master nodes
 resource "libvirt_ignition" "master_ignition" {
   name    = "master.ign"
   content = file("${path.module}/okd-install/master.ign")
 }
 
-# Define the Ignition config for the worker nodes
 resource "libvirt_ignition" "worker_ignition" {
   name    = "worker.ign"
   content = file("${path.module}/okd-install/worker.ign")
