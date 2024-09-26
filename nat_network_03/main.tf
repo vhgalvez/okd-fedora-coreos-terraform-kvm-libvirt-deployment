@@ -66,6 +66,19 @@ resource "libvirt_volume" "fcos_base" {
   depends_on = [libvirt_pool.volume_pool]
 }
 
+# Define node configurations
+locals {
+  nodes = [
+    { name = "bootstrap", size = var.bootstrap_volume_size, ignition = "bootstrap", ignition_file = local_file.bootstrap_ignition_file.filename },
+    { name = "master1", size = var.master_volume_size, ignition = "master", ignition_file = local_file.master_ignition_file.filename },
+    { name = "master2", size = var.master_volume_size, ignition = "master", ignition_file = local_file.master_ignition_file.filename },
+    { name = "master3", size = var.master_volume_size, ignition = "master", ignition_file = local_file.master_ignition_file.filename },
+    { name = "worker1", size = var.worker_volume_size, ignition = "worker", ignition_file = local_file.worker_ignition_file.filename },
+    { name = "worker2", size = var.worker_volume_size, ignition = "worker", ignition_file = local_file.worker_ignition_file.filename },
+    { name = "worker3", size = var.worker_volume_size, ignition = "worker", ignition_file = local_file.worker_ignition_file.filename },
+  ]
+}
+
 # Create node volumes
 resource "libvirt_volume" "okd_volumes" {
   for_each       = { for node in local.nodes : node.name => node }
