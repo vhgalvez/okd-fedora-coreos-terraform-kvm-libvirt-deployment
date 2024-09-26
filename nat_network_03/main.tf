@@ -32,6 +32,22 @@ data "http" "worker_ignition" {
   url = "http://10.17.3.14/okd/worker.ign"
 }
 
+
+resource "local_file" "bootstrap_ignition_file" {
+  content  = data.http.bootstrap_ignition.response_body
+  filename = "/tmp/bootstrap.ign"
+}
+
+resource "local_file" "master_ignition_file" {
+  content  = data.http.master_ignition.response_body
+  filename = "/tmp/master.ign"
+}
+
+resource "local_file" "worker_ignition_file" {
+  content  = data.http.worker_ignition.response_body
+  filename = "/tmp/worker.ign"
+}
+
 # Define storage pool for volumes
 resource "libvirt_pool" "volume_pool" {
   name = "volumetmp_03"
@@ -63,10 +79,10 @@ locals {
 
 # Create node volumes
 resource "libvirt_volume" "okd_volumes" {
-  for_each = toset(local.nodes[*].name)
-  name     = "${each.key}.qcow2"
-  pool     = libvirt_pool.volume_pool.name
-  size     = local.nodes[each.key].size * 1073741824
+  for_each       = toset(local.nodes[*].name)
+  name           = "${each.key}.qcow2"
+  pool           = libvirt_pool.volume_pool.name
+  size           = local.nodes[each.key].size * 1073741824
   base_volume_id = libvirt_volume.fcos_base.id
 }
 
