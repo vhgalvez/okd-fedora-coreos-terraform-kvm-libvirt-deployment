@@ -20,28 +20,34 @@ resource "libvirt_network" "okd_network" {
   addresses = ["10.17.4.0/24"]
 }
 
-# Storage Pool for volumetmp_03
-resource "libvirt_pool" "okd_storage_pool_tmp" {
+# Create Storage Pool for Terraform managed volumes
+resource "libvirt_pool" "okd_storage_pool" {
   name = "volumetmp_03"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
+  autostart = true
+
+  # Ensure that the pool exists before creating volumes
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
-# Define Fedora CoreOS base image in volumetmp_03
+# Define Fedora CoreOS base image
 resource "libvirt_volume" "base" {
   name   = "fedora-coreos-base"
   source = var.base_image
-  pool   = libvirt_pool.okd_storage_pool_tmp.name
+  pool   = libvirt_pool.okd_storage_pool.name
   format = "qcow2"
 }
 
-# VM Disk for each node in volumetmp_03
+# VM Disk for each node
 resource "libvirt_volume" "vm_disk" {
   for_each = var.vm_definitions
 
   name           = "${each.key}-disk"
   base_volume_id = libvirt_volume.base.id
-  pool           = libvirt_pool.okd_storage_pool_tmp.name
+  pool           = libvirt_pool.okd_storage_pool.name
   format         = "qcow2"
   size           = each.value.disk_size * 1024 * 1024
 }
@@ -60,21 +66,21 @@ resource "null_resource" "generate_ignition" {
 # Ignition for Bootstrap
 resource "libvirt_ignition" "bootstrap_ignition" {
   name    = "bootstrap.ign"
-  pool    = libvirt_pool.okd_storage_pool_tmp.name
+  pool    = libvirt_pool.okd_storage_pool.name
   content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/bootstrap.ign")
 }
 
 # Ignition for Master Nodes
 resource "libvirt_ignition" "master_ignition" {
   name    = "master.ign"
-  pool    = libvirt_pool.okd_storage_pool_tmp.name
+  pool    = libvirt_pool.okd_storage_pool.name
   content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign")
 }
 
 # Ignition for Worker Nodes
 resource "libvirt_ignition" "worker_ignition" {
   name    = "worker.ign"
-  pool    = libvirt_pool.okd_storage_pool_tmp.name
+  pool    = libvirt_pool.okd_storage_pool.name
   content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign")
 }
 
