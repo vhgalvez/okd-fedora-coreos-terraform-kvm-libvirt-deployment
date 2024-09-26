@@ -179,8 +179,3 @@ output "ip_addresses" {
     worker3   = libvirt_domain.worker[2].network_interface.0.addresses[0]
   }
 }
-
-# Output log of pool creation
-output "pool_creation_log" {
-  value = file("/tmp/terraform_pool_creation.log")
-}
