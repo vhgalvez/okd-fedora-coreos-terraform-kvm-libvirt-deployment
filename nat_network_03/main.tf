@@ -19,7 +19,7 @@ provider "libvirt" {
 provider "local" {}
 
 # Referenciar la red NAT existente
-data "libvirt_network" "nat_network_02" {
+resource "libvirt_network" "nat_network_02" {
   name = "nat_network_02"
 }
 
@@ -62,39 +62,43 @@ resource "libvirt_volume" "fcos_base" {
   depends_on = [libvirt_pool.volume_pool]
 }
 
-# Descargar archivos Ignition desde el Helper Node
-data "http" "bootstrap_ignition" {
-  url = "http://10.17.3.14/okd/bootstrap.ign"
+# Descargar archivos Ignition
+resource "null_resource" "download_ignition_files" {
+  provisioner "local-exec" {
+    command = <<-EOT
+      curl -o /tmp/bootstrap.ign http://10.17.3.14/okd/bootstrap.ign
+      curl -o /tmp/master.ign http://10.17.3.14/okd/master.ign
+      curl -o /tmp/worker.ign http://10.17.3.14/okd/worker.ign
+    EOT
+  }
 }
 
-data "http" "master_ignition" {
-  url = "http://10.17.3.14/okd/master.ign"
-}
-
-data "http" "worker_ignition" {
-  url = "http://10.17.3.14/okd/worker.ign"
-}
-
-# Crear volúmenes Ignition a partir de los datos descargados
+# Crear volúmenes Ignition
 resource "libvirt_volume" "bootstrap_ign" {
-  name    = "bootstrap-ignition"
-  pool    = libvirt_pool.volume_pool.name
-  content = data.http.bootstrap_ignition.response_body
-  format  = "raw"
+  name   = "bootstrap-ignition"
+  pool   = libvirt_pool.volume_pool.name
+  source = "/tmp/bootstrap.ign"
+  format = "raw"
+
+  depends_on = [null_resource.download_ignition_files]
 }
 
 resource "libvirt_volume" "master_ign" {
-  name    = "master-ignition"
-  pool    = libvirt_pool.volume_pool.name
-  content = data.http.master_ignition.response_body
-  format  = "raw"
+  name   = "master-ignition"
+  pool   = libvirt_pool.volume_pool.name
+  source = "/tmp/master.ign"
+  format = "raw"
+
+  depends_on = [null_resource.download_ignition_files]
 }
 
 resource "libvirt_volume" "worker_ign" {
-  name    = "worker-ignition"
-  pool    = libvirt_pool.volume_pool.name
-  content = data.http.worker_ignition.response_body
-  format  = "raw"
+  name   = "worker-ignition"
+  pool   = libvirt_pool.volume_pool.name
+  source = "/tmp/worker.ign"
+  format = "raw"
+
+  depends_on = [null_resource.download_ignition_files]
 }
 
 # Definir el nodo bootstrap
@@ -106,7 +110,7 @@ resource "libvirt_domain" "bootstrap" {
   cloudinit = libvirt_volume.bootstrap_ign.id
 
   network_interface {
-    network_name = data.libvirt_network.nat_network_02.name
+    network_name = libvirt_network.nat_network_02.name
   }
 
   disk {
@@ -126,7 +130,7 @@ resource "libvirt_domain" "master" {
   cloudinit = libvirt_volume.master_ign.id
 
   network_interface {
-    network_name = data.libvirt_network.nat_network_02.name
+    network_name = libvirt_network.nat_network_02.name
   }
 
   disk {
@@ -146,7 +150,7 @@ resource "libvirt_domain" "worker" {
   cloudinit = libvirt_volume.worker_ign.id
 
   network_interface {
-    network_name = data.libvirt_network.nat_network_02.name
+    network_name = libvirt_network.nat_network_02.name
   }
 
   disk {
@@ -155,7 +159,6 @@ resource "libvirt_domain" "worker" {
 
   depends_on = [libvirt_volume.fcos_base, libvirt_volume.worker_ign]
 }
-
 # Output de las direcciones IP de los nodos
 output "ip_addresses" {
   value = {

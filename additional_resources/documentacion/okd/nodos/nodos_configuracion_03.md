@@ -35,10 +35,11 @@ sudo systemctl status crio etcd kube-apiserver kube-controller-manager kube-sche
 
 
 
-sudo virsh start postgresql1
 sudo virsh start freeipa1
 sudo virsh start load_balancer1
 sudo virsh start helper
+sudo virsh start postgresql1
+
 
 sudo virsh start master1
 sudo virsh start master2

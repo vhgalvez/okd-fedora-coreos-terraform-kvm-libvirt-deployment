@@ -192,3 +192,7 @@ sudo chown -R core:core
 
 
 
+
+sudo scp -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift \
+/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/*.ign \
+core@10.17.3.14:/home/core/nginx-docker/okd/
