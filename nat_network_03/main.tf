@@ -25,16 +25,20 @@ resource "null_resource" "create_pool_directory" {
   }
 }
 
-# Define and create the pool using virsh commands
-resource "null_resource" "create_and_start_pool" {
+# Define the pool using virsh commands
+resource "null_resource" "define_pool" {
   provisioner "local-exec" {
-    command = <<EOT
-      sudo virsh pool-define-as volumetmp_03 dir --target /mnt/lv_data/organized_storage/volumes/volumetmp_03 && \
-      sudo virsh pool-start volumetmp_03 && \
-      sudo virsh pool-autostart volumetmp_03
-    EOT
+    command = "sudo virsh pool-define-as volumetmp_03 dir --target /mnt/lv_data/organized_storage/volumes/volumetmp_03"
   }
   depends_on = [null_resource.create_pool_directory]
+}
+
+# Start the pool
+resource "null_resource" "start_pool" {
+  provisioner "local-exec" {
+    command = "sudo virsh pool-start volumetmp_03 && sudo virsh pool-autostart volumetmp_03"
+  }
+  depends_on = [null_resource.define_pool]
 }
 
 # Network Configuration for VMs
@@ -52,7 +56,7 @@ resource "libvirt_volume" "fcos_base" {
   source = "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/34.20210626.3.0/x86_64/fedora-coreos-34.20210626.3.0-qemu.x86_64.qcow2.xz"
   format = "qcow2"
 
-  depends_on = [null_resource.create_and_start_pool]
+  depends_on = [null_resource.start_pool]
 }
 
 # Define Ignition configs for bootstrap, master, and worker nodes
