@@ -97,6 +97,7 @@ resource "libvirt_volume" "bootstrap_ign" {
   pool   = libvirt_pool.volume_pool.name
   source = local_file.bootstrap_ign.filename
   format = "raw"
+  depends_on = [local_file.bootstrap_ign]
 }
 
 resource "libvirt_volume" "master_ign" {
@@ -105,6 +106,7 @@ resource "libvirt_volume" "master_ign" {
   pool   = libvirt_pool.volume_pool.name
   source = local_file.master_ign.filename
   format = "raw"
+  depends_on = [local_file.master_ign]
 }
 
 resource "libvirt_volume" "worker_ign" {
@@ -113,6 +115,7 @@ resource "libvirt_volume" "worker_ign" {
   pool   = libvirt_pool.volume_pool.name
   source = local_file.worker_ign.filename
   format = "raw"
+  depends_on = [local_file.worker_ign]
 }
 
 # Define the bootstrap node
