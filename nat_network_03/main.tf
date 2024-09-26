@@ -18,7 +18,6 @@ provider "libvirt" {
 
 provider "local" {}
 
-
 # Create the directory for the pool with correct permissions
 resource "null_resource" "create_pool_directory" {
   provisioner "local-exec" {
@@ -26,23 +25,15 @@ resource "null_resource" "create_pool_directory" {
   }
 }
 
-# Use libvirt_pool to define and start the storage pool
+# Define and start the storage pool using the native libvirt_pool resource
 resource "libvirt_pool" "volume_pool" {
   name = "volumetmp_03"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
 
+  # Ensure pool directory is created before the pool is defined
   depends_on = [null_resource.create_pool_directory]
 }
-
-# Add a delay and verification to ensure pool initialization
-resource "null_resource" "verify_pool_initialization" {
-  provisioner "local-exec" {
-    command = "sleep 10 && sudo virsh pool-list --all | grep volumetmp_03 || (echo 'Pool not initialized properly' && exit 1)"
-  }
-  depends_on = [libvirt_pool.volume_pool]
-}
-
 
 # Network Configuration for VMs
 resource "libvirt_network" "okd_network" {
@@ -52,7 +43,7 @@ resource "libvirt_network" "okd_network" {
   addresses = ["10.17.4.0/24"]
 }
 
-# Define Fedora CoreOS base image
+# Define Fedora CoreOS base image volume
 resource "libvirt_volume" "fcos_base" {
   name   = "fcos_base"
   pool   = libvirt_pool.volume_pool.name
@@ -94,7 +85,7 @@ resource "libvirt_domain" "bootstrap" {
     volume_id = libvirt_volume.fcos_base.id
   }
 
-  depends_on = [libvirt_volume.fcos_base]
+  depends_on = [libvirt_volume.fcos_base, libvirt_ignition.bootstrap_ignition]
 }
 
 # Define the master nodes
@@ -114,7 +105,7 @@ resource "libvirt_domain" "master" {
     volume_id = libvirt_volume.fcos_base.id
   }
 
-  depends_on = [libvirt_volume.fcos_base]
+  depends_on = [libvirt_volume.fcos_base, libvirt_ignition.master_ignition]
 }
 
 # Define the worker nodes
@@ -134,7 +125,7 @@ resource "libvirt_domain" "worker" {
     volume_id = libvirt_volume.fcos_base.id
   }
 
-  depends_on = [libvirt_volume.fcos_base]
+  depends_on = [libvirt_volume.fcos_base, libvirt_ignition.worker_ignition]
 }
 
 # Output the IP addresses of the nodes
