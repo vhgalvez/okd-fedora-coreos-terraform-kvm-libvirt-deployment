@@ -34,7 +34,7 @@ resource "null_resource" "create_pool_directory" {
 # Wait for the directory to be recognized before proceeding
 resource "null_resource" "wait_for_directory" {
   provisioner "local-exec" {
-    command = "sleep 10 && ls -ld /mnt/lv_data/organized_storage/volumes/volumetmp_03 >> /tmp/terraform_pool_creation.log"
+    command = "sleep 20 && ls -ld /mnt/lv_data/organized_storage/volumes/volumetmp_03 >> /tmp/terraform_pool_creation.log"
   }
   depends_on = [null_resource.create_pool_directory]
 }
@@ -66,22 +66,25 @@ resource "libvirt_volume" "fcos_base" {
 }
 
 # Define Ignition configs for bootstrap, master, and worker nodes
-resource "libvirt_ignition" "bootstrap_ignition" {
-  name    = "bootstrap.ign"
-  content = file("${path.module}/okd-install/bootstrap.ign")
-  depends_on = [libvirt_pool.volume_pool]
+resource "libvirt_volume" "bootstrap_ign" {
+  name = "bootstrap-ignition"
+  pool = libvirt_pool.volume_pool.name
+  source = "${path.module}/okd-install/bootstrap.ign"
+  format = "raw"
 }
 
-resource "libvirt_ignition" "master_ignition" {
-  name    = "master.ign"
-  content = file("${path.module}/okd-install/master.ign")
-  depends_on = [libvirt_pool.volume_pool]
+resource "libvirt_volume" "master_ign" {
+  name = "master-ignition"
+  pool = libvirt_pool.volume_pool.name
+  source = "${path.module}/okd-install/master.ign"
+  format = "raw"
 }
 
-resource "libvirt_ignition" "worker_ignition" {
-  name    = "worker.ign"
-  content = file("${path.module}/okd-install/worker.ign")
-  depends_on = [libvirt_pool.volume_pool]
+resource "libvirt_volume" "worker_ign" {
+  name = "worker-ignition"
+  pool = libvirt_pool.volume_pool.name
+  source = "${path.module}/okd-install/worker.ign"
+  format = "raw"
 }
 
 # Define the bootstrap node
@@ -90,7 +93,7 @@ resource "libvirt_domain" "bootstrap" {
   memory = "8192"
   vcpu   = 4
 
-  cloudinit = libvirt_ignition.bootstrap_ignition.id
+  cloudinit = libvirt_volume.bootstrap_ign.id
 
   network_interface {
     network_name = libvirt_network.okd_network.name
@@ -100,7 +103,7 @@ resource "libvirt_domain" "bootstrap" {
     volume_id = libvirt_volume.fcos_base.id
   }
 
-  depends_on = [libvirt_volume.fcos_base, libvirt_ignition.bootstrap_ignition]
+  depends_on = [libvirt_volume.fcos_base, libvirt_volume.bootstrap_ign]
 }
 
 # Define the master nodes
@@ -110,7 +113,7 @@ resource "libvirt_domain" "master" {
   memory = "16384"
   vcpu   = 4
 
-  cloudinit = libvirt_ignition.master_ignition.id
+  cloudinit = libvirt_volume.master_ign.id
 
   network_interface {
     network_name = libvirt_network.okd_network.name
@@ -120,7 +123,7 @@ resource "libvirt_domain" "master" {
     volume_id = libvirt_volume.fcos_base.id
   }
 
-  depends_on = [libvirt_volume.fcos_base, libvirt_ignition.master_ignition]
+  depends_on = [libvirt_volume.fcos_base, libvirt_volume.master_ign]
 }
 
 # Define the worker nodes
@@ -130,7 +133,7 @@ resource "libvirt_domain" "worker" {
   memory = "8192"
   vcpu   = 4
 
-  cloudinit = libvirt_ignition.worker_ignition.id
+  cloudinit = libvirt_volume.worker_ign.id
 
   network_interface {
     network_name = libvirt_network.okd_network.name
@@ -140,7 +143,7 @@ resource "libvirt_domain" "worker" {
     volume_id = libvirt_volume.fcos_base.id
   }
 
-  depends_on = [libvirt_volume.fcos_base, libvirt_ignition.worker_ignition]
+  depends_on = [libvirt_volume.fcos_base, libvirt_volume.worker_ign]
 }
 
 # Output the IP addresses of the nodes
