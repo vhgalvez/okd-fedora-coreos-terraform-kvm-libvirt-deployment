@@ -16,26 +16,23 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-provider "local" {}
-
-# Step to create the directory for the pool with correct permissions
+# Create the directory for the pool with correct permissions
 resource "null_resource" "create_pool_directory" {
   provisioner "local-exec" {
     command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 && sudo chown -R libvirt-qemu:kvm /mnt/lv_data/organized_storage/volumes/volumetmp_03"
   }
 }
 
-# Improved storage pool creation and start
+# Storage pool creation
 resource "libvirt_pool" "okd_storage_pool" {
-  name      = "volumetmp_03"
-  type      = "dir"
-  path      = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
-  autostart = true
-
+  name = "volumetmp_03"
+  type = "dir"
+  path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
+  
   depends_on = [null_resource.create_pool_directory]
 }
 
-# Start and autostart the pool
+# Start the pool
 resource "null_resource" "start_pool" {
   provisioner "local-exec" {
     command = "sudo virsh pool-start volumetmp_03 && sudo virsh pool-autostart volumetmp_03"
