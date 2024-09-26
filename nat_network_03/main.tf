@@ -75,26 +75,42 @@ data "http" "worker_ignition" {
   url = "http://10.17.3.14/okd/worker.ign"
 }
 
-# Crear volúmenes Ignition a partir de los datos descargados
+# Descargar archivos de Ignition y almacenarlos temporalmente
+resource "local_file" "bootstrap_ign" {
+  content  = base64decode(data.http.bootstrap_ignition.body)
+  filename = "/tmp/bootstrap.ign"
+}
+
+resource "local_file" "master_ign" {
+  content  = base64decode(data.http.master_ignition.body)
+  filename = "/tmp/master.ign"
+}
+
+resource "local_file" "worker_ign" {
+  content  = base64decode(data.http.worker_ignition.body)
+  filename = "/tmp/worker.ign"
+}
+
+# Crear volúmenes Ignition a partir de los archivos descargados
 resource "libvirt_volume" "bootstrap_ign" {
-  name    = "bootstrap-ignition"
-  pool    = libvirt_pool.volume_pool.name
-  content = base64decode(data.http.bootstrap_ignition.body)
-  format  = "raw"
+  name   = "bootstrap-ignition"
+  pool   = libvirt_pool.volume_pool.name
+  source = local_file.bootstrap_ign.filename
+  format = "raw"
 }
 
 resource "libvirt_volume" "master_ign" {
-  name    = "master-ignition"
-  pool    = libvirt_pool.volume_pool.name
-  content = base64decode(data.http.master_ignition.body)
-  format  = "raw"
+  name   = "master-ignition"
+  pool   = libvirt_pool.volume_pool.name
+  source = local_file.master_ign.filename
+  format = "raw"
 }
 
 resource "libvirt_volume" "worker_ign" {
-  name    = "worker-ignition"
-  pool    = libvirt_pool.volume_pool.name
-  content = base64decode(data.http.worker_ignition.body)
-  format  = "raw"
+  name   = "worker-ignition"
+  pool   = libvirt_pool.volume_pool.name
+  source = local_file.worker_ign.filename
+  format = "raw"
 }
 
 # Definir el nodo bootstrap
