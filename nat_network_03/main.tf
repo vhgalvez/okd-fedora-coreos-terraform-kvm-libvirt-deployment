@@ -19,12 +19,17 @@ provider "libvirt" {
 provider "local" {}
 
 # Define Ignition files for nodes
-data "http" "ignitions" {
-  urls = {
-    bootstrap = "http://10.17.3.14/okd/bootstrap.ign"
-    master    = "http://10.17.3.14/okd/master.ign"
-    worker    = "http://10.17.3.14/okd/worker.ign"
-  }
+
+data "http" "bootstrap_ignition" {
+  url = "http://10.17.3.14/okd/bootstrap.ign"
+}
+
+data "http" "master_ignition" {
+  url = "http://10.17.3.14/okd/master.ign"
+}
+
+data "http" "worker_ignition" {
+  url = "http://10.17.3.14/okd/worker.ign"
 }
 
 # Define storage pool for volumes
