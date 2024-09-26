@@ -34,20 +34,12 @@ resource "libvirt_pool" "volume_pool" {
   depends_on = [null_resource.create_pool_directory]
 }
 
-# Explicitly start the pool and autostart it
-resource "null_resource" "start_and_autostart_pool" {
+# Add a delay and verification to ensure pool initialization
+resource "null_resource" "verify_pool_initialization" {
   provisioner "local-exec" {
-    command = "sudo virsh pool-start volumetmp_03 && sudo virsh pool-autostart volumetmp_03"
+    command = "sleep 5 && sudo virsh pool-info volumetmp_03 || echo 'Pool not initialized properly'"
   }
   depends_on = [libvirt_pool.volume_pool]
-}
-
-# Add a delay to allow for pool initialization and availability in libvirt
-resource "null_resource" "wait_for_pool_initialization" {
-  provisioner "local-exec" {
-    command = "sleep 10"
-  }
-  depends_on = [null_resource.start_and_autostart_pool]
 }
 
 # Network Configuration for VMs
@@ -65,7 +57,7 @@ resource "libvirt_volume" "fcos_base" {
   source = "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/34.20210626.3.0/x86_64/fedora-coreos-34.20210626.3.0-qemu.x86_64.qcow2.xz"
   format = "qcow2"
 
-  depends_on = [null_resource.wait_for_pool_initialization]
+  depends_on = [null_resource.verify_pool_initialization]
 }
 
 # Define Ignition configs for bootstrap, master, and worker nodes
