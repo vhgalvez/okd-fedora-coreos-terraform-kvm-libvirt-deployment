@@ -25,13 +25,22 @@ resource "null_resource" "create_pool_directory" {
   }
 }
 
-# Use libvirt_pool to define the storage pool
+# Use libvirt_pool to define and start the storage pool
 resource "libvirt_pool" "volume_pool" {
   name   = "volumetmp_03"
   type   = "dir"
   path   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
 
   depends_on = [null_resource.create_pool_directory]
+}
+
+# Add a delay to allow for pool initialization
+resource "null_resource" "wait_for_pool" {
+  provisioner "local-exec" {
+    command = "sleep 5"
+  }
+
+  depends_on = [libvirt_pool.volume_pool]
 }
 
 # Network Configuration for VMs
@@ -49,7 +58,7 @@ resource "libvirt_volume" "fcos_base" {
   source = "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/34.20210626.3.0/x86_64/fedora-coreos-34.20210626.3.0-qemu.x86_64.qcow2.xz"
   format = "qcow2"
 
-  depends_on = [libvirt_pool.volume_pool]
+  depends_on = [null_resource.wait_for_pool]
 }
 
 # Define Ignition configs for bootstrap, master, and worker nodes
