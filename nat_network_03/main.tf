@@ -19,7 +19,6 @@ provider "libvirt" {
 provider "local" {}
 
 # Define Ignition files for nodes
-
 data "http" "bootstrap_ignition" {
   url = "http://10.17.3.14/okd/bootstrap.ign"
 }
@@ -31,7 +30,6 @@ data "http" "master_ignition" {
 data "http" "worker_ignition" {
   url = "http://10.17.3.14/okd/worker.ign"
 }
-
 
 resource "local_file" "bootstrap_ignition_file" {
   content  = data.http.bootstrap_ignition.response_body
@@ -82,22 +80,23 @@ resource "libvirt_volume" "okd_volumes" {
   for_each       = toset(local.nodes[*].name)
   name           = "${each.key}.qcow2"
   pool           = libvirt_pool.volume_pool.name
-  size           = local.nodes[each.key].size * 1073741824
+  size           = lookup(local.nodes, each.key).size * 1073741824
   base_volume_id = libvirt_volume.fcos_base.id
 }
 
-# Create Ignition volumes
-resource "local_file" "ignition_files" {
-  for_each = toset(local.nodes[*].ignition)
-  content  = data.http.ignitions.response_bodies[each.key]
-  filename = "/tmp/${each.key}.ign"
-}
-
+# Create Ignition volumes from downloaded files
 resource "libvirt_volume" "ignition_volumes" {
   for_each = toset(local.nodes[*].ignition)
   name     = "${each.key}-ignition"
   pool     = libvirt_pool.volume_pool.name
-  source   = local_file.ignition_files[each.key].filename
+  source   = lookup(
+    {
+      "bootstrap" = local_file.bootstrap_ignition_file.filename,
+      "master"    = local_file.master_ignition_file.filename,
+      "worker"    = local_file.worker_ignition_file.filename
+    },
+    each.key
+  )
   format   = "raw"
 }
 
@@ -108,7 +107,7 @@ resource "libvirt_domain" "nodes" {
   memory   = lookup(var.vm_definitions[each.key], "memory")
   vcpu     = lookup(var.vm_definitions[each.key], "cpus")
 
-  cloudinit = libvirt_volume.ignition_volumes[local.nodes[each.key].ignition].id
+  cloudinit = libvirt_volume.ignition_volumes[lookup(local.nodes, each.key).ignition].id
 
   network_interface {
     network_name = "nat_network_02"
