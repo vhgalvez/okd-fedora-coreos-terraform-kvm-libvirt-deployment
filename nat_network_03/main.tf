@@ -5,10 +5,6 @@ terraform {
       source  = "dmacvicar/libvirt"
       version = "~> 0.7.0"
     }
-    local = {
-      source  = "hashicorp/local"
-      version = "~> 2.1.0"
-    }
   }
 }
 
@@ -16,19 +12,28 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Create directory for the storage pool with correct permissions
+# Step to create the directory for the pool with correct permissions
 resource "null_resource" "create_pool_directory" {
   provisioner "local-exec" {
     command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 && sudo chown -R libvirt-qemu:kvm /mnt/lv_data/organized_storage/volumes/volumetmp_03"
   }
 }
 
-# Define and create the storage pool
+# Improved storage pool creation
 resource "libvirt_pool" "okd_storage_pool" {
   name = "volumetmp_03"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
+
   depends_on = [null_resource.create_pool_directory]
+}
+
+# Ensure pool is started
+resource "null_resource" "start_pool" {
+  provisioner "local-exec" {
+    command = "sudo virsh pool-start volumetmp_03 && sudo virsh pool-autostart volumetmp_03"
+  }
+  depends_on = [libvirt_pool.okd_storage_pool]
 }
 
 # Network Configuration for VMs
@@ -45,7 +50,7 @@ resource "libvirt_volume" "base" {
   source = var.base_image
   pool   = libvirt_pool.okd_storage_pool.name
   format = "qcow2"
-  depends_on = [libvirt_pool.okd_storage_pool]
+  depends_on = [null_resource.start_pool]
 }
 
 # VM Disk for each node
@@ -76,7 +81,7 @@ resource "libvirt_ignition" "master_ignition" {
   name    = "master.ign"
   pool    = libvirt_pool.okd_storage_pool.name
   content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign")
-  depends_on = [null_resource.generate_ignition]
+  depends_on = [null_resource.generate_ignition, null_resource.start_pool]
 }
 
 # Ignition for Worker Nodes
@@ -84,7 +89,7 @@ resource "libvirt_ignition" "worker_ignition" {
   name    = "worker.ign"
   pool    = libvirt_pool.okd_storage_pool.name
   content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign")
-  depends_on = [null_resource.generate_ignition]
+  depends_on = [null_resource.generate_ignition, null_resource.start_pool]
 }
 
 # Ignition for Bootstrap Node
@@ -92,7 +97,7 @@ resource "libvirt_ignition" "bootstrap_ignition" {
   name    = "bootstrap.ign"
   pool    = libvirt_pool.okd_storage_pool.name
   content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/bootstrap.ign")
-  depends_on = [null_resource.generate_ignition]
+  depends_on = [null_resource.generate_ignition, null_resource.start_pool]
 }
 
 # Define virtual machines
