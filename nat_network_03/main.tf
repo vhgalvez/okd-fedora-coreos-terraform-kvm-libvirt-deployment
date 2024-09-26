@@ -61,19 +61,19 @@ resource "libvirt_volume" "fcos_base" {
 # Define the Ignition config for the bootstrap node
 resource "libvirt_ignition" "bootstrap_ignition" {
   name    = "bootstrap.ign"
-  content = file("${path.module}/bootstrap.ign")
+  content = file("${path.module}/okd-install/bootstrap.ign")
 }
 
 # Define the Ignition config for the master nodes
 resource "libvirt_ignition" "master_ignition" {
   name    = "master.ign"
-  content = file("${path.module}/master.ign")
+  content = file("${path.module}/okd-install/master.ign")
 }
 
 # Define the Ignition config for the worker nodes
 resource "libvirt_ignition" "worker_ignition" {
   name    = "worker.ign"
-  content = file("${path.module}/worker.ign")
+  content = file("${path.module}/okd-install/worker.ign")
 }
 
 # Define the bootstrap node
