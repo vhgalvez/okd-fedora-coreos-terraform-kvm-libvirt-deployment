@@ -25,7 +25,6 @@ resource "libvirt_pool" "okd_storage_pool" {
   name = "volumetmp_03"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
-  autostart = true
 
   # Ensure that the pool exists before creating volumes
   lifecycle {
