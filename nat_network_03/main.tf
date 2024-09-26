@@ -5,6 +5,10 @@ terraform {
       source  = "dmacvicar/libvirt"
       version = "~> 0.7.0"
     }
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.1.0"
+    }
   }
 }
 
@@ -12,19 +16,18 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Step to create the directory for the pool with correct permissions
+# Create directory for the storage pool with correct permissions
 resource "null_resource" "create_pool_directory" {
   provisioner "local-exec" {
     command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 && sudo chown -R libvirt-qemu:kvm /mnt/lv_data/organized_storage/volumes/volumetmp_03"
   }
 }
 
-# Improved storage pool creation
+# Define and create the storage pool
 resource "libvirt_pool" "okd_storage_pool" {
   name = "volumetmp_03"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
-
   depends_on = [null_resource.create_pool_directory]
 }
 
