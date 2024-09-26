@@ -42,13 +42,22 @@ resource "libvirt_pool" "okd_storage_pool" {
   depends_on = [null_resource.prepare_storage_directory]
 }
 
+# Define a delay to ensure pool initialization
+resource "null_resource" "delay_pool_creation" {
+  depends_on = [libvirt_pool.okd_storage_pool]
+
+  provisioner "local-exec" {
+    command = "sleep 10"
+  }
+}
+
 # Define Fedora CoreOS base image
 resource "libvirt_volume" "base" {
-  name     = "fedora-coreos-base"
-  source   = var.base_image
-  pool     = libvirt_pool.okd_storage_pool.name
-  format   = "qcow2"
-  depends_on = [libvirt_pool.okd_storage_pool]
+  name   = "fedora-coreos-base"
+  source = var.base_image
+  pool   = libvirt_pool.okd_storage_pool.name
+  format = "qcow2"
+  depends_on = [libvirt_pool.okd_storage_pool, null_resource.delay_pool_creation]
 }
 
 # VM Disk for each node
@@ -60,7 +69,7 @@ resource "libvirt_volume" "vm_disk" {
   pool           = libvirt_pool.okd_storage_pool.name
   format         = "qcow2"
   size           = each.value.disk_size * 1024 * 1024
-  depends_on     = [libvirt_pool.okd_storage_pool]
+  depends_on     = [libvirt_pool.okd_storage_pool, libvirt_volume.base]
 }
 
 # Generate Ignition with OpenShift Installer
