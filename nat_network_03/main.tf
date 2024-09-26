@@ -18,7 +18,12 @@ provider "libvirt" {
 
 provider "local" {}
 
-# Create the directory for the pool with correct permissions
+# Referenciar la red NAT existente
+data "libvirt_network" "nat_network_02" {
+  name = "nat_network_02"
+}
+
+# Crear el directorio para el almacenamiento con los permisos correctos
 resource "null_resource" "create_pool_directory" {
   provisioner "local-exec" {
     command = <<-EOT
@@ -31,7 +36,7 @@ resource "null_resource" "create_pool_directory" {
   }
 }
 
-# Wait for the directory to be recognized before proceeding
+# Esperar a que el directorio sea reconocido antes de continuar
 resource "null_resource" "wait_for_directory" {
   provisioner "local-exec" {
     command = "sleep 20 && ls -ld /mnt/lv_data/organized_storage/volumes/volumetmp_03 >> /tmp/terraform_pool_creation.log"
@@ -39,7 +44,7 @@ resource "null_resource" "wait_for_directory" {
   depends_on = [null_resource.create_pool_directory]
 }
 
-# Define and start the storage pool
+# Definir y arrancar el almacenamiento
 resource "libvirt_pool" "volume_pool" {
   name = "volumetmp_03"
   type = "dir"
@@ -47,15 +52,7 @@ resource "libvirt_pool" "volume_pool" {
   depends_on = [null_resource.create_pool_directory, null_resource.wait_for_directory]
 }
 
-# Network Configuration for VMs
-resource "libvirt_network" "okd_network" {
-  name      = "okd_network"
-  mode      = "nat"
-  autostart = true
-  addresses = ["10.17.4.0/24"]
-}
-
-# Define Fedora CoreOS base image volume
+# Definir volumen base para Fedora CoreOS
 resource "libvirt_volume" "fcos_base" {
   name   = "fcos_base"
   pool   = libvirt_pool.volume_pool.name
@@ -65,29 +62,42 @@ resource "libvirt_volume" "fcos_base" {
   depends_on = [libvirt_pool.volume_pool]
 }
 
-# Define Ignition configs for bootstrap, master, and worker nodes
+# Descargar archivos Ignition desde el Helper Node
+data "http" "bootstrap_ignition" {
+  url = "http://10.17.3.14/okd/bootstrap.ign"
+}
+
+data "http" "master_ignition" {
+  url = "http://10.17.3.14/okd/master.ign"
+}
+
+data "http" "worker_ignition" {
+  url = "http://10.17.3.14/okd/worker.ign"
+}
+
+# Crear volúmenes Ignition a partir de los datos descargados
 resource "libvirt_volume" "bootstrap_ign" {
-  name = "bootstrap-ignition"
-  pool = libvirt_pool.volume_pool.name
-  source = "${path.module}/okd-install/bootstrap.ign"
+  name   = "bootstrap-ignition"
+  pool   = libvirt_pool.volume_pool.name
+  content = data.http.bootstrap_ignition.response_body
   format = "raw"
 }
 
 resource "libvirt_volume" "master_ign" {
-  name = "master-ignition"
-  pool = libvirt_pool.volume_pool.name
-  source = "${path.module}/okd-install/master.ign"
+  name   = "master-ignition"
+  pool   = libvirt_pool.volume_pool.name
+  content = data.http.master_ignition.response_body
   format = "raw"
 }
 
 resource "libvirt_volume" "worker_ign" {
-  name = "worker-ignition"
-  pool = libvirt_pool.volume_pool.name
-  source = "${path.module}/okd-install/worker.ign"
+  name   = "worker-ignition"
+  pool   = libvirt_pool.volume_pool.name
+  content = data.http.worker_ignition.response_body
   format = "raw"
 }
 
-# Define the bootstrap node
+# Definir el nodo bootstrap
 resource "libvirt_domain" "bootstrap" {
   name   = "bootstrap"
   memory = "8192"
@@ -96,7 +106,7 @@ resource "libvirt_domain" "bootstrap" {
   cloudinit = libvirt_volume.bootstrap_ign.id
 
   network_interface {
-    network_name = libvirt_network.okd_network.name
+    network_name = data.libvirt_network.nat_network_02.name
   }
 
   disk {
@@ -106,7 +116,7 @@ resource "libvirt_domain" "bootstrap" {
   depends_on = [libvirt_volume.fcos_base, libvirt_volume.bootstrap_ign]
 }
 
-# Define the master nodes
+# Definir los nodos master
 resource "libvirt_domain" "master" {
   count  = 3
   name   = "master-${count.index + 1}"
@@ -116,7 +126,7 @@ resource "libvirt_domain" "master" {
   cloudinit = libvirt_volume.master_ign.id
 
   network_interface {
-    network_name = libvirt_network.okd_network.name
+    network_name = data.libvirt_network.nat_network_02.name
   }
 
   disk {
@@ -126,7 +136,7 @@ resource "libvirt_domain" "master" {
   depends_on = [libvirt_volume.fcos_base, libvirt_volume.master_ign]
 }
 
-# Define the worker nodes
+# Definir los nodos worker
 resource "libvirt_domain" "worker" {
   count  = 3
   name   = "worker-${count.index + 1}"
@@ -136,7 +146,7 @@ resource "libvirt_domain" "worker" {
   cloudinit = libvirt_volume.worker_ign.id
 
   network_interface {
-    network_name = libvirt_network.okd_network.name
+    network_name = data.libvirt_network.nat_network_02.name
   }
 
   disk {
@@ -146,7 +156,7 @@ resource "libvirt_domain" "worker" {
   depends_on = [libvirt_volume.fcos_base, libvirt_volume.worker_ign]
 }
 
-# Output the IP addresses of the nodes
+# Output de las direcciones IP de los nodos
 output "ip_addresses" {
   value = {
     bootstrap = libvirt_domain.bootstrap.network_interface.0.addresses[0]
