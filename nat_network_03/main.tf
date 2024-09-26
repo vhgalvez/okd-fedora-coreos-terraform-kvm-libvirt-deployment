@@ -1,4 +1,3 @@
-# main.tf
 terraform {
   required_version = ">= 1.9.5"
   required_providers {
@@ -13,33 +12,33 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
+# Step to create the directory for the pool
+resource "null_resource" "create_pool_directory" {
+  provisioner "local-exec" {
+    command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03"
+  }
+}
+
+# Define and create the pool
+resource "libvirt_pool" "okd_storage_pool" {
+  name = "volumetmp_03"
+  type = "dir"
+  path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
+
+  depends_on = [null_resource.create_pool_directory]
+
+  # Add a provisioner to start and autostart the pool
+  provisioner "local-exec" {
+    command = "sudo virsh pool-start volumetmp_03 && sudo virsh pool-autostart volumetmp_03"
+  }
+}
+
 # Define network for the cluster
 resource "libvirt_network" "okd_network" {
   name      = "okd_network"
   mode      = "nat"
   autostart = true
   addresses = ["10.17.4.0/24"]
-}
-
-# Create Storage Pool for Terraform managed volumes
-resource "libvirt_pool" "okd_storage_pool" {
-  name = "volumetmp_03"
-  type = "dir"
-  path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
-
-  # Ensure that the pool exists before creating volumes
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  depends_on = [null_resource.create_pool_directory]
-}
-
-# Dependencia para asegurar la creación del pool antes de cualquier uso
-resource "null_resource" "create_pool_directory" {
-  provisioner "local-exec" {
-    command = "mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03"
-  }
 }
 
 # Define Fedora CoreOS base image
@@ -116,7 +115,6 @@ resource "libvirt_domain" "okd_vm" {
     volume_id = libvirt_volume.vm_disk[each.key].id
   }
 
-  # Use the correct ignition file based on the node type
   coreos_ignition = lookup(
     {
       "bootstrap" = libvirt_ignition.bootstrap_ignition.id,
