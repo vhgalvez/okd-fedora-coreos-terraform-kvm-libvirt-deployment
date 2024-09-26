@@ -18,7 +18,7 @@ provider "libvirt" {
 
 provider "local" {}
 
-
+# Download Ignition files for bootstrap, master, and worker nodes
 data "http" "bootstrap_ignition" {
   url = "http://10.17.3.14/okd/bootstrap.ign"
 }
@@ -31,8 +31,7 @@ data "http" "worker_ignition" {
   url = "http://10.17.3.14/okd/worker.ign"
 }
 
-
-# Define storage pool
+# Define storage pool for the volumes
 resource "libvirt_pool" "volume_pool" {
   name = "volumetmp_03"
   type = "dir"
@@ -77,47 +76,61 @@ resource "libvirt_volume" "okd_controlplane_3" {
   base_volume_id = libvirt_volume.fcos_base.id
 }
 
-# Download Ignition files directly from the web server
-data "http" "ignitions" {
-  urls = [
-    "http://10.17.3.14/okd/bootstrap.ign",
-    "http://10.17.3.14/okd/master.ign",
-    "http://10.17.3.14/okd/worker.ign"
-  ]
+# Create local Ignition files from the HTTP data sources
+resource "local_file" "bootstrap_ignition_file" {
+  content  = data.http.bootstrap_ignition.response_body
+  filename = "/tmp/bootstrap.ign"
 }
 
-resource "local_file" "ignition_files" {
-  for_each = toset(["bootstrap", "master", "worker"])
-  content  = data.http.ignitions.response_bodies[each.key]
-  filename = "/tmp/${each.key}.ign"
+resource "local_file" "master_ignition_file" {
+  content  = data.http.master_ignition.response_body
+  filename = "/tmp/master.ign"
 }
 
-# Create Ignition volumes from downloaded files
-resource "libvirt_volume" "ignition_volumes" {
-  for_each = toset(["bootstrap", "master", "worker"])
-  name     = "${each.key}-ignition"
-  pool     = libvirt_pool.volume_pool.name
-  source   = local_file.ignition_files[each.key].filename
-  format   = "raw"
+resource "local_file" "worker_ignition_file" {
+  content  = data.http.worker_ignition.response_body
+  filename = "/tmp/worker.ign"
 }
 
-# Define node domains
+# Create Ignition volumes from downloaded Ignition files
+resource "libvirt_volume" "bootstrap_ignition_volume" {
+  name   = "bootstrap-ignition"
+  pool   = libvirt_pool.volume_pool.name
+  source = local_file.bootstrap_ignition_file.filename
+  format = "raw"
+}
+
+resource "libvirt_volume" "master_ignition_volume" {
+  name   = "master-ignition"
+  pool   = libvirt_pool.volume_pool.name
+  source = local_file.master_ignition_file.filename
+  format = "raw"
+}
+
+resource "libvirt_volume" "worker_ignition_volume" {
+  name   = "worker-ignition"
+  pool   = libvirt_pool.volume_pool.name
+  source = local_file.worker_ignition_file.filename
+  format = "raw"
+}
+
+# Define the nodes (bootstrap, masters, workers) with their respective Ignition volumes
 resource "libvirt_domain" "nodes" {
   for_each = {
-    bootstrap = { memory = 8192, vcpu = 4, volume_id = libvirt_volume.okd_bootstrap.id }
-    master1   = { memory = 16384, vcpu = 4, volume_id = libvirt_volume.okd_controlplane_1.id }
-    master2   = { memory = 16384, vcpu = 4, volume_id = libvirt_volume.okd_controlplane_2.id }
-    master3   = { memory = 16384, vcpu = 4, volume_id = libvirt_volume.okd_controlplane_3.id }
-    worker1   = { memory = 8192, vcpu = 4, volume_id = libvirt_volume.okd_controlplane_1.id }
-    worker2   = { memory = 8192, vcpu = 4, volume_id = libvirt_volume.okd_controlplane_2.id }
-    worker3   = { memory = 8192, vcpu = 4, volume_id = libvirt_volume.okd_controlplane_3.id }
+    bootstrap = { memory = 8192, vcpu = 4, volume_id = libvirt_volume.okd_bootstrap.id, ignition_volume = libvirt_volume.bootstrap_ignition_volume.id }
+    master1   = { memory = 16384, vcpu = 4, volume_id = libvirt_volume.okd_controlplane_1.id, ignition_volume = libvirt_volume.master_ignition_volume.id }
+    master2   = { memory = 16384, vcpu = 4, volume_id = libvirt_volume.okd_controlplane_2.id, ignition_volume = libvirt_volume.master_ignition_volume.id }
+    master3   = { memory = 16384, vcpu = 4, volume_id = libvirt_volume.okd_controlplane_3.id, ignition_volume = libvirt_volume.master_ignition_volume.id }
+    worker1   = { memory = 8192, vcpu = 4, volume_id = libvirt_volume.okd_controlplane_1.id, ignition_volume = libvirt_volume.worker_ignition_volume.id }
+    worker2   = { memory = 8192, vcpu = 4, volume_id = libvirt_volume.okd_controlplane_2.id, ignition_volume = libvirt_volume.worker_ignition_volume.id }
+    worker3   = { memory = 8192, vcpu = 4, volume_id = libvirt_volume.okd_controlplane_3.id, ignition_volume = libvirt_volume.worker_ignition_volume.id }
   }
 
   name   = each.key
   memory = each.value.memory
   vcpu   = each.value.vcpu
 
-  cloudinit = libvirt_volume.ignition_volumes["${each.key == "bootstrap" ? "bootstrap" : "master"}"].id
+  cloudinit = each.value.ignition_volume
 
   network_interface {
     network_name = "nat_network_02"
