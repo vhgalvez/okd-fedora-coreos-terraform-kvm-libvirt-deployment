@@ -50,6 +50,23 @@ resource "libvirt_network" "okd_network" {
   addresses = ["10.17.4.0/24"]
 }
 
+resource "libvirt_pool" "okd_storage_pool" {
+  name = "volumetmp_03"
+  type = "dir"
+  path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
+  autostart = true
+  depends_on = [null_resource.create_pool_directory]
+}
+
+
+resource "null_resource" "start_pool" {
+  provisioner "local-exec" {
+    command = "sudo virsh pool-start volumetmp_03 && sudo virsh pool-autostart volumetmp_03"
+  }
+  depends_on = [libvirt_pool.okd_storage_pool]
+}
+
+
 # Define Fedora CoreOS base image
 resource "libvirt_volume" "fcos_base" {
   name   = "fcos_base"
