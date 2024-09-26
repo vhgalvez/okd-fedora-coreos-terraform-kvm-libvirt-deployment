@@ -29,7 +29,7 @@ resource "null_resource" "create_pool_directory" {
   }
 }
 
-# Delay to allow the directory creation to be completed properly
+# Wait for the directory to be recognized before proceeding
 resource "null_resource" "wait_for_directory" {
   provisioner "local-exec" {
     command = "sleep 10 && ls -ld /mnt/lv_data/organized_storage/volumes/volumetmp_03"
@@ -37,7 +37,7 @@ resource "null_resource" "wait_for_directory" {
   depends_on = [null_resource.create_pool_directory]
 }
 
-# Define and start the storage pool using the native libvirt_pool resource
+# Define and start the storage pool
 resource "libvirt_pool" "volume_pool" {
   name = "volumetmp_03"
   type = "dir"
@@ -69,16 +69,19 @@ resource "libvirt_volume" "fcos_base" {
 resource "libvirt_ignition" "bootstrap_ignition" {
   name    = "bootstrap.ign"
   content = file("${path.module}/okd-install/bootstrap.ign")
+  depends_on = [libvirt_pool.volume_pool]
 }
 
 resource "libvirt_ignition" "master_ignition" {
   name    = "master.ign"
   content = file("${path.module}/okd-install/master.ign")
+  depends_on = [libvirt_pool.volume_pool]
 }
 
 resource "libvirt_ignition" "worker_ignition" {
   name    = "worker.ign"
   content = file("${path.module}/okd-install/worker.ign")
+  depends_on = [libvirt_pool.volume_pool]
 }
 
 # Define the bootstrap node
