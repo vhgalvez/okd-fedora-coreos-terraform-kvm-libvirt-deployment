@@ -12,37 +12,23 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Create the directory for the pool with correct permissions
+# Step to create the directory for the pool with correct permissions
 resource "null_resource" "create_pool_directory" {
   provisioner "local-exec" {
     command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 && sudo chown -R libvirt-qemu:kvm /mnt/lv_data/organized_storage/volumes/volumetmp_03"
   }
 }
 
-# Define and create the pool
+# Improved storage pool creation
 resource "libvirt_pool" "okd_storage_pool" {
   name = "volumetmp_03"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
+
   depends_on = [null_resource.create_pool_directory]
 }
 
-# Start and set autostart for the pool
-resource "null_resource" "start_pool" {
-  provisioner "local-exec" {
-    command = "sudo virsh pool-start volumetmp_03"
-  }
-  depends_on = [libvirt_pool.okd_storage_pool]
-}
-
-resource "null_resource" "autostart_pool" {
-  provisioner "local-exec" {
-    command = "sudo virsh pool-autostart volumetmp_03"
-  }
-  depends_on = [null_resource.start_pool]
-}
-
-# Define network for the cluster
+# Network Configuration for VMs
 resource "libvirt_network" "okd_network" {
   name      = "okd_network"
   mode      = "nat"
@@ -56,7 +42,7 @@ resource "libvirt_volume" "base" {
   source = var.base_image
   pool   = libvirt_pool.okd_storage_pool.name
   format = "qcow2"
-  depends_on = [null_resource.autostart_pool]
+  depends_on = [libvirt_pool.okd_storage_pool]
 }
 
 # VM Disk for each node
@@ -68,7 +54,7 @@ resource "libvirt_volume" "vm_disk" {
   pool           = libvirt_pool.okd_storage_pool.name
   format         = "qcow2"
   size           = each.value.disk_size * 1024 * 1024
-  depends_on = [libvirt_volume.base]
+  depends_on     = [libvirt_volume.base]
 }
 
 # Generate Ignition with OpenShift Installer
@@ -76,6 +62,7 @@ resource "null_resource" "generate_ignition" {
   provisioner "local-exec" {
     command = "openshift-install create ignition-configs --dir=/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install"
   }
+
   triggers = {
     always_run = timestamp()
   }
