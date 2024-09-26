@@ -58,7 +58,6 @@ resource "libvirt_volume" "fcos_base" {
   pool   = libvirt_pool.volume_pool.name
   source = "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/34.20210626.3.0/x86_64/fedora-coreos-34.20210626.3.0-qemu.x86_64.qcow2.xz"
   format = "qcow2"
-
   depends_on = [libvirt_pool.volume_pool]
 }
 
