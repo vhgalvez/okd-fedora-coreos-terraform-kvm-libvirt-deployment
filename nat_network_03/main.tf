@@ -5,18 +5,12 @@ terraform {
       source  = "dmacvicar/libvirt"
       version = "~> 0.7.0"
     }
-    local = {
-      source  = "hashicorp/local"
-      version = "~> 2.1.0"
-    }
   }
 }
 
 provider "libvirt" {
   uri = "qemu:///system"
 }
-
-provider "local" {}
 
 # Reference the existing NAT network
 resource "libvirt_network" "nat_network_02" {
@@ -62,57 +56,31 @@ resource "libvirt_volume" "fcos_base" {
   depends_on = [libvirt_pool.volume_pool]
 }
 
-# Download Ignition files directly from the web server
-data "http" "bootstrap_ignition" {
-  url = "http://10.17.3.14/okd/bootstrap.ign"
-}
-
-data "http" "master_ignition" {
-  url = "http://10.17.3.14/okd/master.ign"
-}
-
-data "http" "worker_ignition" {
-  url = "http://10.17.3.14/okd/worker.ign"
-}
-
-# Store Ignition files temporarily
-resource "local_file" "bootstrap_ign" {
-  content  = data.http.bootstrap_ignition.response_body
-  filename = "/tmp/bootstrap.ign"
-}
-
-resource "local_file" "master_ign" {
-  content  = data.http.master_ignition.response_body
-  filename = "/tmp/master.ign"
-}
-
-resource "local_file" "worker_ign" {
-  content  = data.http.worker_ignition.response_body
-  filename = "/tmp/worker.ign"
-}
-
-# Create Ignition volumes from downloaded files
+# Define volumes directly from the URLs for ignition
 resource "libvirt_volume" "bootstrap_ign" {
-  name   = "bootstrap-ignition"
-  pool   = libvirt_pool.volume_pool.name
-  source = local_file.bootstrap_ign.filename
-  format = "raw"
+  name       = "bootstrap-ignition"
+  pool       = libvirt_pool.volume_pool.name
+  source     = "http://10.17.3.14/okd/bootstrap.ign"
+  format     = "raw"
+  depends_on = [libvirt_pool.volume_pool]
 }
 
 resource "libvirt_volume" "master_ign" {
-  count  = 3
-  name   = "master-${count.index + 1}-ignition"
-  pool   = libvirt_pool.volume_pool.name
-  source = local_file.master_ign.filename
-  format = "raw"
+  count      = 3
+  name       = "master-${count.index + 1}-ignition"
+  pool       = libvirt_pool.volume_pool.name
+  source     = "http://10.17.3.14/okd/master.ign"
+  format     = "raw"
+  depends_on = [libvirt_pool.volume_pool]
 }
 
 resource "libvirt_volume" "worker_ign" {
-  count  = 3
-  name   = "worker-${count.index + 1}-ignition"
-  pool   = libvirt_pool.volume_pool.name
-  source = local_file.worker_ign.filename
-  format = "raw"
+  count      = 3
+  name       = "worker-${count.index + 1}-ignition"
+  pool       = libvirt_pool.volume_pool.name
+  source     = "http://10.17.3.14/okd/worker.ign"
+  format     = "raw"
+  depends_on = [libvirt_pool.volume_pool]
 }
 
 # Define the bootstrap node
