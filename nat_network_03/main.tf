@@ -18,12 +18,12 @@ provider "libvirt" {
 
 provider "local" {}
 
-# Referenciar la red NAT existente
+# Reference the existing NAT network
 resource "libvirt_network" "nat_network_02" {
   name = "nat_network_02"
 }
 
-# Crear el directorio para el almacenamiento con los permisos correctos
+# Create the storage directory with correct permissions
 resource "null_resource" "create_pool_directory" {
   provisioner "local-exec" {
     command = <<-EOT
@@ -36,7 +36,7 @@ resource "null_resource" "create_pool_directory" {
   }
 }
 
-# Esperar a que el directorio sea reconocido antes de continuar
+# Wait for the directory to be recognized
 resource "null_resource" "wait_for_directory" {
   provisioner "local-exec" {
     command = "sleep 20 && ls -ld /mnt/lv_data/organized_storage/volumes/volumetmp_03 >> /tmp/terraform_pool_creation.log"
@@ -44,7 +44,7 @@ resource "null_resource" "wait_for_directory" {
   depends_on = [null_resource.create_pool_directory]
 }
 
-# Definir y arrancar el almacenamiento
+# Define and start the storage pool
 resource "libvirt_pool" "volume_pool" {
   name       = "volumetmp_03"
   type       = "dir"
@@ -52,7 +52,7 @@ resource "libvirt_pool" "volume_pool" {
   depends_on = [null_resource.create_pool_directory, null_resource.wait_for_directory]
 }
 
-# Definir volumen base para Fedora CoreOS
+# Define base volume for Fedora CoreOS
 resource "libvirt_volume" "fcos_base" {
   name   = "fcos_base"
   pool   = libvirt_pool.volume_pool.name
@@ -62,7 +62,7 @@ resource "libvirt_volume" "fcos_base" {
   depends_on = [libvirt_pool.volume_pool]
 }
 
-# Descargar archivos Ignition directamente desde el servidor web
+# Download Ignition files directly from the web server
 data "http" "bootstrap_ignition" {
   url = "http://10.17.3.14/okd/bootstrap.ign"
 }
@@ -75,23 +75,23 @@ data "http" "worker_ignition" {
   url = "http://10.17.3.14/okd/worker.ign"
 }
 
-# Descargar archivos de Ignition y almacenarlos temporalmente
+# Store Ignition files temporarily
 resource "local_file" "bootstrap_ign" {
-  content  = base64decode(data.http.bootstrap_ignition.body)
+  content  = data.http.bootstrap_ignition.response_body
   filename = "/tmp/bootstrap.ign"
 }
 
 resource "local_file" "master_ign" {
-  content  = base64decode(data.http.master_ignition.body)
+  content  = data.http.master_ignition.response_body
   filename = "/tmp/master.ign"
 }
 
 resource "local_file" "worker_ign" {
-  content  = base64decode(data.http.worker_ignition.body)
+  content  = data.http.worker_ignition.response_body
   filename = "/tmp/worker.ign"
 }
 
-# Crear volúmenes Ignition a partir de los archivos descargados
+# Create Ignition volumes from downloaded files
 resource "libvirt_volume" "bootstrap_ign" {
   name   = "bootstrap-ignition"
   pool   = libvirt_pool.volume_pool.name
@@ -100,20 +100,22 @@ resource "libvirt_volume" "bootstrap_ign" {
 }
 
 resource "libvirt_volume" "master_ign" {
-  name   = "master-ignition"
+  count  = 3
+  name   = "master-${count.index + 1}-ignition"
   pool   = libvirt_pool.volume_pool.name
   source = local_file.master_ign.filename
   format = "raw"
 }
 
 resource "libvirt_volume" "worker_ign" {
-  name   = "worker-ignition"
+  count  = 3
+  name   = "worker-${count.index + 1}-ignition"
   pool   = libvirt_pool.volume_pool.name
   source = local_file.worker_ign.filename
   format = "raw"
 }
 
-# Definir el nodo bootstrap
+# Define the bootstrap node
 resource "libvirt_domain" "bootstrap" {
   name   = "bootstrap"
   memory = "8192"
@@ -132,14 +134,14 @@ resource "libvirt_domain" "bootstrap" {
   depends_on = [libvirt_volume.fcos_base, libvirt_volume.bootstrap_ign]
 }
 
-# Definir los nodos master
+# Define master nodes
 resource "libvirt_domain" "master" {
   count  = 3
   name   = "master-${count.index + 1}"
   memory = "16384"
   vcpu   = 4
 
-  cloudinit = libvirt_volume.master_ign.id
+  cloudinit = libvirt_volume.master_ign[count.index].id
 
   network_interface {
     network_name = libvirt_network.nat_network_02.name
@@ -152,14 +154,14 @@ resource "libvirt_domain" "master" {
   depends_on = [libvirt_volume.fcos_base, libvirt_volume.master_ign]
 }
 
-# Definir los nodos worker
+# Define worker nodes
 resource "libvirt_domain" "worker" {
   count  = 3
   name   = "worker-${count.index + 1}"
   memory = "8192"
   vcpu   = 4
 
-  cloudinit = libvirt_volume.worker_ign.id
+  cloudinit = libvirt_volume.worker_ign[count.index].id
 
   network_interface {
     network_name = libvirt_network.nat_network_02.name
@@ -172,15 +174,11 @@ resource "libvirt_domain" "worker" {
   depends_on = [libvirt_volume.fcos_base, libvirt_volume.worker_ign]
 }
 
-# Output de las direcciones IP de los nodos
+# Output node IP addresses
 output "ip_addresses" {
   value = {
-    bootstrap = libvirt_domain.bootstrap.network_interface.0.addresses[0]
-    master1   = libvirt_domain.master[0].network_interface.0.addresses[0]
-    master2   = libvirt_domain.master[1].network_interface.0.addresses[0]
-    master3   = libvirt_domain.master[2].network_interface.0.addresses[0]
-    worker1   = libvirt_domain.worker[0].network_interface.0.addresses[0]
-    worker2   = libvirt_domain.worker[1].network_interface.0.addresses[0]
-    worker3   = libvirt_domain.worker[2].network_interface.0.addresses[0]
+    bootstrap = libvirt_domain.bootstrap.network_interface[0].addresses[0]
+    master    = libvirt_domain.master[*].network_interface[0].addresses[0]
+    worker    = libvirt_domain.worker[*].network_interface[0].addresses[0]
   }
 }
