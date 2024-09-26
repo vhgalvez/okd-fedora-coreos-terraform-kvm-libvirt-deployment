@@ -77,16 +77,16 @@ locals {
 
 # Create node volumes
 resource "libvirt_volume" "okd_volumes" {
-  for_each       = toset(local.nodes[*].name)
+  for_each = { for node in local.nodes : node.name => node }
   name           = "${each.key}.qcow2"
   pool           = libvirt_pool.volume_pool.name
-  size           = lookup(local.nodes, each.key).size * 1073741824
+  size           = each.value.size * 1073741824
   base_volume_id = libvirt_volume.fcos_base.id
 }
 
 # Create Ignition volumes from downloaded files
 resource "libvirt_volume" "ignition_volumes" {
-  for_each = toset(local.nodes[*].ignition)
+  for_each = { for node in local.nodes : node.ignition => node }
   name     = "${each.key}-ignition"
   pool     = libvirt_pool.volume_pool.name
   source   = lookup(
@@ -102,12 +102,12 @@ resource "libvirt_volume" "ignition_volumes" {
 
 # Define nodes
 resource "libvirt_domain" "nodes" {
-  for_each = toset(local.nodes[*].name)
+  for_each = { for node in local.nodes : node.name => node }
   name     = each.key
   memory   = lookup(var.vm_definitions[each.key], "memory")
   vcpu     = lookup(var.vm_definitions[each.key], "cpus")
 
-  cloudinit = libvirt_volume.ignition_volumes[lookup(local.nodes, each.key).ignition].id
+  cloudinit = libvirt_volume.ignition_volumes[each.value.ignition].id
 
   network_interface {
     network_name = "nat_network_02"
