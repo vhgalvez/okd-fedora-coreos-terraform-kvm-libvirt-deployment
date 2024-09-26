@@ -56,8 +56,6 @@ resource "libvirt_ignition" "bootstrap_ignition" {
   content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/bootstrap.ign")
   depends_on = [libvirt_pool.okd_storage_pool]
 }
-# Repetir `depends_on` para los demás recursos de igniciones (master y worker).
-
 # Define virtual machines
 resource "libvirt_domain" "okd_vm" {
   for_each = var.vm_definitions
