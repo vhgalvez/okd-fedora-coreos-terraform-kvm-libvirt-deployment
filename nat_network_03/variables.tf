@@ -40,9 +40,32 @@ variable "initial_cluster" {
   description = "Initial cluster configuration for etcd"
   type        = string
 }
-
 variable "coreos_image" {
   description = "URL of the Fedora CoreOS image"
   type        = string
   default     = "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/34.20210626.3.0/x86_64/fedora-coreos-34.20210626.3.0-qemu.x86_64.qcow2.xz"
+}
+
+variable "bootstrap_volume_size" {
+  description = "Volume size for the bootstrap node in GiB"
+  type        = number
+  default     = 20  # Modify as required
+}
+
+variable "controlplane_1_volume_size" {
+  description = "Volume size for the first control plane node in GiB"
+  type        = number
+  default     = 30  # Modify as required
+}
+
+variable "controlplane_2_volume_size" {
+  description = "Volume size for the second control plane node in GiB"
+  type        = number
+  default     = 30  # Modify as required
+}
+
+variable "controlplane_3_volume_size" {
+  description = "Volume size for the third control plane node in GiB"
+  type        = number
+  default     = 30  # Modify as required
 }

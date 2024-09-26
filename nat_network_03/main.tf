@@ -18,6 +18,19 @@ provider "libvirt" {
 
 provider "local" {}
 
+
+data "http" "bootstrap_ignition" {
+  url = "http://10.17.3.14/okd/bootstrap.ign"
+}
+
+data "http" "master_ignition" {
+  url = "http://10.17.3.14/okd/master.ign"
+}
+
+data "http" "worker_ignition" {
+  url = "http://10.17.3.14/okd/worker.ign"
+}
+
 # Define storage pool
 resource "libvirt_pool" "volume_pool" {
   name = "volumetmp_03"
