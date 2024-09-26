@@ -40,3 +40,9 @@ variable "initial_cluster" {
   description = "Initial cluster configuration for etcd"
   type        = string
 }
+
+variable "coreos_image" {
+  description = "URL of the Fedora CoreOS image"
+  type        = string
+  default     = "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/34.20210626.3.0/x86_64/fedora-coreos-34.20210626.3.0-qemu.x86_64.qcow2.xz"
+}
