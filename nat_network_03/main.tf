@@ -9,6 +9,9 @@ terraform {
       source  = "hashicorp/local"
       version = "~> 2.1.0"
     }
+    http = {
+      source = "hashicorp/http"
+    }
   }
 }
 
@@ -18,7 +21,7 @@ provider "libvirt" {
 
 provider "local" {}
 
-# Define Ignition files for nodes
+# Define Ignition data
 data "http" "bootstrap_ignition" {
   url = "http://10.17.3.14/okd/bootstrap.ign"
 }
@@ -31,6 +34,7 @@ data "http" "worker_ignition" {
   url = "http://10.17.3.14/okd/worker.ign"
 }
 
+# Create local Ignition files
 resource "local_file" "bootstrap_ignition_file" {
   content  = data.http.bootstrap_ignition.response_body
   filename = "/tmp/bootstrap.ign"
@@ -55,50 +59,42 @@ resource "libvirt_pool" "volume_pool" {
 
 # Base volume for Fedora CoreOS
 resource "libvirt_volume" "fcos_base" {
-  name       = "fcos_base.qcow2"
-  pool       = libvirt_pool.volume_pool.name
-  source     = var.coreos_image
-  format     = "qcow2"
+  name   = "fcos_base.qcow2"
+  pool   = libvirt_pool.volume_pool.name
+  source = var.coreos_image
+  format = "qcow2"
   depends_on = [libvirt_pool.volume_pool]
 }
 
-# Define VM volumes
+# Define node configurations
 locals {
   nodes = [
-    { name = "bootstrap", size = var.bootstrap_volume_size, ignition = "bootstrap" },
-    { name = "master1", size = var.master_volume_size, ignition = "master1" },
-    { name = "master2", size = var.master_volume_size, ignition = "master2" },
-    { name = "master3", size = var.master_volume_size, ignition = "master3" },
-    { name = "worker1", size = var.worker_volume_size, ignition = "worker1" },
-    { name = "worker2", size = var.worker_volume_size, ignition = "worker2" },
-    { name = "worker3", size = var.worker_volume_size, ignition = "worker3" },
+    { name = "bootstrap", size = var.bootstrap_volume_size, ignition = "bootstrap", ignition_file = local_file.bootstrap_ignition_file.filename },
+    { name = "master1", size = var.master_volume_size, ignition = "master", ignition_file = local_file.master_ignition_file.filename },
+    { name = "master2", size = var.master_volume_size, ignition = "master", ignition_file = local_file.master_ignition_file.filename },
+    { name = "master3", size = var.master_volume_size, ignition = "master", ignition_file = local_file.master_ignition_file.filename },
+    { name = "worker1", size = var.worker_volume_size, ignition = "worker", ignition_file = local_file.worker_ignition_file.filename },
+    { name = "worker2", size = var.worker_volume_size, ignition = "worker", ignition_file = local_file.worker_ignition_file.filename },
+    { name = "worker3", size = var.worker_volume_size, ignition = "worker", ignition_file = local_file.worker_ignition_file.filename },
   ]
 }
 
 # Create node volumes
 resource "libvirt_volume" "okd_volumes" {
-  for_each = { for node in local.nodes : node.name => node }
+  for_each       = { for node in local.nodes : node.name => node }
   name           = "${each.key}.qcow2"
   pool           = libvirt_pool.volume_pool.name
   size           = each.value.size * 1073741824
   base_volume_id = libvirt_volume.fcos_base.id
 }
 
-# Create Ignition volumes without duplicates
+# Create Ignition volumes
 resource "libvirt_volume" "ignition_volumes" {
-  name = "${each.key}-ignition"
-  pool = libvirt_pool.volume_pool.name
-  format = "raw"
-  for_each = {
-    bootstrap = local_file.bootstrap_ignition_file.filename,
-    master1   = local_file.master_ignition_file.filename,
-    master2   = local_file.master_ignition_file.filename,
-    master3   = local_file.master_ignition_file.filename,
-    worker1   = local_file.worker_ignition_file.filename,
-    worker2   = local_file.worker_ignition_file.filename,
-    worker3   = local_file.worker_ignition_file.filename
-  }
-  source = each.value
+  for_each = { for node in local.nodes : "${node.name}-ignition" => node }
+  name     = each.key
+  pool     = libvirt_pool.volume_pool.name
+  source   = each.value.ignition_file
+  format   = "raw"
 }
 
 # Define nodes
@@ -108,7 +104,7 @@ resource "libvirt_domain" "nodes" {
   memory   = lookup(var.vm_definitions[each.key], "memory")
   vcpu     = lookup(var.vm_definitions[each.key], "cpus")
 
-  cloudinit = libvirt_volume.ignition_volumes[each.key].id
+  cloudinit = libvirt_volume.ignition_volumes["${each.key}-ignition"].id
 
   network_interface {
     network_name = "nat_network_02"
@@ -119,6 +115,7 @@ resource "libvirt_domain" "nodes" {
   }
 }
 
+# Output node IP addresses
 output "node_ips" {
   value = {
     for node in libvirt_domain.nodes : node.name => node.network_interface[0].addresses[0]
