@@ -46,9 +46,9 @@ resource "null_resource" "wait_for_directory" {
 
 # Definir y arrancar el almacenamiento
 resource "libvirt_pool" "volume_pool" {
-  name = "volumetmp_03"
-  type = "dir"
-  path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
+  name       = "volumetmp_03"
+  type       = "dir"
+  path       = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
   depends_on = [null_resource.create_pool_directory, null_resource.wait_for_directory]
 }
 
@@ -77,24 +77,24 @@ data "http" "worker_ignition" {
 
 # Crear volúmenes Ignition a partir de los datos descargados
 resource "libvirt_volume" "bootstrap_ign" {
-  name   = "bootstrap-ignition"
-  pool   = libvirt_pool.volume_pool.name
+  name    = "bootstrap-ignition"
+  pool    = libvirt_pool.volume_pool.name
   content = data.http.bootstrap_ignition.response_body
-  format = "raw"
+  format  = "raw"
 }
 
 resource "libvirt_volume" "master_ign" {
-  name   = "master-ignition"
-  pool   = libvirt_pool.volume_pool.name
+  name    = "master-ignition"
+  pool    = libvirt_pool.volume_pool.name
   content = data.http.master_ignition.response_body
-  format = "raw"
+  format  = "raw"
 }
 
 resource "libvirt_volume" "worker_ign" {
-  name   = "worker-ignition"
-  pool   = libvirt_pool.volume_pool.name
+  name    = "worker-ignition"
+  pool    = libvirt_pool.volume_pool.name
   content = data.http.worker_ignition.response_body
-  format = "raw"
+  format  = "raw"
 }
 
 # Definir el nodo bootstrap
