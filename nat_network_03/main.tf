@@ -1,3 +1,4 @@
+# main.tf
 terraform {
   required_version = ">= 1.9.5"
   required_providers {
@@ -25,19 +26,26 @@ resource "libvirt_pool" "okd_storage_pool" {
   name = "volumetmp_03"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
+}
 
-  # Ensure that the pool exists before creating volumes
-  lifecycle {
-    create_before_destroy = true
+# Ensure the storage pool exists before creating any volumes
+resource "null_resource" "create_storage_pool" {
+  provisioner "local-exec" {
+    command = "mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 && sudo chown -R qemu:qemu /mnt/lv_data/organized_storage/volumes/volumetmp_03"
+  }
+
+  triggers = {
+    always_run = timestamp()
   }
 }
 
 # Define Fedora CoreOS base image
 resource "libvirt_volume" "base" {
-  name   = "fedora-coreos-base"
-  source = var.base_image
-  pool   = libvirt_pool.okd_storage_pool.name
-  format = "qcow2"
+  name       = "fedora-coreos-base"
+  source     = var.base_image
+  pool       = libvirt_pool.okd_storage_pool.name
+  format     = "qcow2"
+  depends_on = [null_resource.create_storage_pool]
 }
 
 # VM Disk for each node
@@ -49,6 +57,7 @@ resource "libvirt_volume" "vm_disk" {
   pool           = libvirt_pool.okd_storage_pool.name
   format         = "qcow2"
   size           = each.value.disk_size * 1024 * 1024
+  depends_on     = [libvirt_pool.okd_storage_pool]
 }
 
 # Generate Ignition with OpenShift Installer
@@ -64,23 +73,26 @@ resource "null_resource" "generate_ignition" {
 
 # Ignition for Bootstrap
 resource "libvirt_ignition" "bootstrap_ignition" {
-  name    = "bootstrap.ign"
-  pool    = libvirt_pool.okd_storage_pool.name
-  content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/bootstrap.ign")
+  name       = "bootstrap.ign"
+  pool       = libvirt_pool.okd_storage_pool.name
+  content    = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/bootstrap.ign")
+  depends_on = [null_resource.generate_ignition]
 }
 
 # Ignition for Master Nodes
 resource "libvirt_ignition" "master_ignition" {
-  name    = "master.ign"
-  pool    = libvirt_pool.okd_storage_pool.name
-  content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign")
+  name       = "master.ign"
+  pool       = libvirt_pool.okd_storage_pool.name
+  content    = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign")
+  depends_on = [null_resource.generate_ignition]
 }
 
 # Ignition for Worker Nodes
 resource "libvirt_ignition" "worker_ignition" {
-  name    = "worker.ign"
-  pool    = libvirt_pool.okd_storage_pool.name
-  content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign")
+  name       = "worker.ign"
+  pool       = libvirt_pool.okd_storage_pool.name
+  content    = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign")
+  depends_on = [null_resource.generate_ignition]
 }
 
 # Define virtual machines
@@ -123,7 +135,7 @@ resource "libvirt_domain" "okd_vm" {
   console {
     type        = "pty"
     target_type = "serial"
-    target_port = "0" # Adding the required target_port argument
+    target_port = "0"
   }
 
   qemu_agent = true
