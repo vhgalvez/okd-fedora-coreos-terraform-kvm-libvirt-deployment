@@ -20,28 +20,28 @@ resource "libvirt_network" "okd_network" {
   addresses = ["10.17.4.0/24"]
 }
 
-# Storage Pool
-resource "libvirt_pool" "okd_storage_pool" {
-  name = "okd_pool"
+# Storage Pool for volumetmp_03
+resource "libvirt_pool" "okd_storage_pool_tmp" {
+  name = "volumetmp_03"
   type = "dir"
-  path = "/mnt/okd_pool"
+  path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
 }
 
-# Define Fedora CoreOS base image
+# Define Fedora CoreOS base image in volumetmp_03
 resource "libvirt_volume" "base" {
   name   = "fedora-coreos-base"
   source = var.base_image
-  pool   = libvirt_pool.okd_storage_pool.name
+  pool   = libvirt_pool.okd_storage_pool_tmp.name
   format = "qcow2"
 }
 
-# VM Disk for each node
+# VM Disk for each node in volumetmp_03
 resource "libvirt_volume" "vm_disk" {
   for_each = var.vm_definitions
 
   name           = "${each.key}-disk"
   base_volume_id = libvirt_volume.base.id
-  pool           = libvirt_pool.okd_storage_pool.name
+  pool           = libvirt_pool.okd_storage_pool_tmp.name
   format         = "qcow2"
   size           = each.value.disk_size * 1024 * 1024
 }
@@ -60,21 +60,21 @@ resource "null_resource" "generate_ignition" {
 # Ignition for Bootstrap
 resource "libvirt_ignition" "bootstrap_ignition" {
   name    = "bootstrap.ign"
-  pool    = libvirt_pool.okd_storage_pool.name
+  pool    = libvirt_pool.okd_storage_pool_tmp.name
   content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/bootstrap.ign")
 }
 
 # Ignition for Master Nodes
 resource "libvirt_ignition" "master_ignition" {
   name    = "master.ign"
-  pool    = libvirt_pool.okd_storage_pool.name
+  pool    = libvirt_pool.okd_storage_pool_tmp.name
   content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign")
 }
 
 # Ignition for Worker Nodes
 resource "libvirt_ignition" "worker_ignition" {
   name    = "worker.ign"
-  pool    = libvirt_pool.okd_storage_pool.name
+  pool    = libvirt_pool.okd_storage_pool_tmp.name
   content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign")
 }
 
