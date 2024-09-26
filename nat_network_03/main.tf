@@ -11,30 +11,23 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Create the directory for the storage pool
+# Step to create the directory for the pool
 resource "null_resource" "create_pool_directory" {
   provisioner "local-exec" {
     command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03"
   }
 }
 
-# Define and create the storage pool
+# Ensure pool is correctly defined
 resource "libvirt_pool" "okd_storage_pool" {
   name = "volumetmp_03"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
 
   depends_on = [null_resource.create_pool_directory]
-
-  # Ensure the pool is handled correctly
-  lifecycle {
-    ignore_changes = [
-      path,
-    ]
-  }
 }
 
-# Define the network for VMs
+# Define network for the cluster
 resource "libvirt_network" "okd_network" {
   name      = "okd_network"
   mode      = "nat"
@@ -42,7 +35,7 @@ resource "libvirt_network" "okd_network" {
   addresses = ["10.17.4.0/24"]
 }
 
-# Define the base image volume
+# Define Fedora CoreOS base image
 resource "libvirt_volume" "base" {
   name   = "fedora-coreos-base"
   source = var.base_image
@@ -51,7 +44,7 @@ resource "libvirt_volume" "base" {
   depends_on = [libvirt_pool.okd_storage_pool]
 }
 
-# Define disks for each VM
+# VM Disk for each node
 resource "libvirt_volume" "vm_disk" {
   for_each = var.vm_definitions
 
@@ -74,7 +67,7 @@ resource "null_resource" "generate_ignition" {
   }
 }
 
-# Define Ignition configs for Masters, Workers, and Bootstrap
+# Ignition for Master Nodes
 resource "libvirt_ignition" "ignition_configs" {
   for_each = {
     "bootstrap" = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/bootstrap.ign"
