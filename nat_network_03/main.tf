@@ -21,8 +21,20 @@ provider "local" {}
 # Create the directory for the pool with correct permissions
 resource "null_resource" "create_pool_directory" {
   provisioner "local-exec" {
-    command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 && sudo chown -R qemu:kvm /mnt/lv_data/organized_storage/volumes/volumetmp_03 && sudo chmod 755 /mnt/lv_data/organized_storage/volumes/volumetmp_03"
+    command = <<EOT
+      sudo mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 &&
+      sudo chown -R qemu:kvm /mnt/lv_data/organized_storage/volumes/volumetmp_03 &&
+      sudo chmod 755 /mnt/lv_data/organized_storage/volumes/volumetmp_03
+    EOT
   }
+}
+
+# Delay to allow the directory creation to be completed properly
+resource "null_resource" "wait_for_directory" {
+  provisioner "local-exec" {
+    command = "sleep 10 && ls -ld /mnt/lv_data/organized_storage/volumes/volumetmp_03"
+  }
+  depends_on = [null_resource.create_pool_directory]
 }
 
 # Define and start the storage pool using the native libvirt_pool resource
@@ -32,7 +44,7 @@ resource "libvirt_pool" "volume_pool" {
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
 
   # Ensure pool directory is created before the pool is defined
-  depends_on = [null_resource.create_pool_directory]
+  depends_on = [null_resource.create_pool_directory, null_resource.wait_for_directory]
 }
 
 # Network Configuration for VMs
