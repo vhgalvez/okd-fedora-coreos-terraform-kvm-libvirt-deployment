@@ -21,6 +21,13 @@ provider "libvirt" {
 
 provider "local" {}
 
+# Define storage pool for volumes
+resource "libvirt_pool" "volume_pool" {
+  name = "volumetmp_03"
+  type = "dir"
+  path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
+}
+
 # Define Ignition data
 data "http" "bootstrap_ignition" {
   url = "http://10.17.3.14/okd/bootstrap.ign"
