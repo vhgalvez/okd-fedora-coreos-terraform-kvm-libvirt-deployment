@@ -30,8 +30,18 @@ resource "null_resource" "create_pool_directory" {
       sudo mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 &&
       sudo chown -R qemu:kvm /mnt/lv_data/organized_storage/volumes/volumetmp_03 &&
       sudo chmod 755 /mnt/lv_data/organized_storage/volumes/volumetmp_03
+      echo "Directory created and permissions set" > /tmp/terraform_pool_creation.log
+      ls -ld /mnt/lv_data/organized_storage/volumes/volumetmp_03 >> /tmp/terraform_pool_creation.log
     EOT
   }
+}
+
+# Esperar a que el directorio sea reconocido antes de continuar
+resource "null_resource" "wait_for_directory" {
+  provisioner "local-exec" {
+    command = "sleep 20 && ls -ld /mnt/lv_data/organized_storage/volumes/volumetmp_03 >> /tmp/terraform_pool_creation.log"
+  }
+  depends_on = [null_resource.create_pool_directory]
 }
 
 # Definir y arrancar el almacenamiento
@@ -39,7 +49,7 @@ resource "libvirt_pool" "volume_pool" {
   name       = "volumetmp_03"
   type       = "dir"
   path       = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
-  depends_on = [null_resource.create_pool_directory]
+  depends_on = [null_resource.create_pool_directory, null_resource.wait_for_directory]
 }
 
 # Definir volumen base para Fedora CoreOS
@@ -48,43 +58,43 @@ resource "libvirt_volume" "fcos_base" {
   pool   = libvirt_pool.volume_pool.name
   source = "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/34.20210626.3.0/x86_64/fedora-coreos-34.20210626.3.0-qemu.x86_64.qcow2.xz"
   format = "qcow2"
+
   depends_on = [libvirt_pool.volume_pool]
 }
 
-# Descargar archivos Ignition
-resource "null_resource" "download_ignition_files" {
-  provisioner "local-exec" {
-    command = <<-EOT
-      curl -o /tmp/bootstrap.ign http://10.17.3.14/okd/bootstrap.ign &&
-      curl -o /tmp/master.ign http://10.17.3.14/okd/master.ign &&
-      curl -o /tmp/worker.ign http://10.17.3.14/okd/worker.ign
-    EOT
-  }
+# Descargar archivos Ignition directamente desde el servidor web
+data "http" "bootstrap_ignition" {
+  url = "http://10.17.3.14/okd/bootstrap.ign"
 }
 
-# Crear volúmenes Ignition
+data "http" "master_ignition" {
+  url = "http://10.17.3.14/okd/master.ign"
+}
+
+data "http" "worker_ignition" {
+  url = "http://10.17.3.14/okd/worker.ign"
+}
+
+# Crear volúmenes Ignition a partir de los datos descargados
 resource "libvirt_volume" "bootstrap_ign" {
-  name   = "bootstrap-ignition"
-  pool   = libvirt_pool.volume_pool.name
-  source = "/tmp/bootstrap.ign"
-  format = "raw"
-  depends_on = [null_resource.download_ignition_files, libvirt_pool.volume_pool]
+  name    = "bootstrap-ignition"
+  pool    = libvirt_pool.volume_pool.name
+  content = base64decode(data.http.bootstrap_ignition.body)
+  format  = "raw"
 }
 
 resource "libvirt_volume" "master_ign" {
-  name   = "master-ignition"
-  pool   = libvirt_pool.volume_pool.name
-  source = "/tmp/master.ign"
-  format = "raw"
-  depends_on = [null_resource.download_ignition_files, libvirt_pool.volume_pool]
+  name    = "master-ignition"
+  pool    = libvirt_pool.volume_pool.name
+  content = base64decode(data.http.master_ignition.body)
+  format  = "raw"
 }
 
 resource "libvirt_volume" "worker_ign" {
-  name   = "worker-ignition"
-  pool   = libvirt_pool.volume_pool.name
-  source = "/tmp/worker.ign"
-  format = "raw"
-  depends_on = [null_resource.download_ignition_files, libvirt_pool.volume_pool]
+  name    = "worker-ignition"
+  pool    = libvirt_pool.volume_pool.name
+  content = base64decode(data.http.worker_ignition.body)
+  format  = "raw"
 }
 
 # Definir el nodo bootstrap
@@ -103,7 +113,7 @@ resource "libvirt_domain" "bootstrap" {
     volume_id = libvirt_volume.fcos_base.id
   }
 
-  depends_on = [libvirt_volume.bootstrap_ign]
+  depends_on = [libvirt_volume.fcos_base, libvirt_volume.bootstrap_ign]
 }
 
 # Definir los nodos master
@@ -123,7 +133,7 @@ resource "libvirt_domain" "master" {
     volume_id = libvirt_volume.fcos_base.id
   }
 
-  depends_on = [libvirt_volume.master_ign]
+  depends_on = [libvirt_volume.fcos_base, libvirt_volume.master_ign]
 }
 
 # Definir los nodos worker
@@ -143,7 +153,7 @@ resource "libvirt_domain" "worker" {
     volume_id = libvirt_volume.fcos_base.id
   }
 
-  depends_on = [libvirt_volume.worker_ign]
+  depends_on = [libvirt_volume.fcos_base, libvirt_volume.worker_ign]
 }
 
 # Output de las direcciones IP de los nodos
