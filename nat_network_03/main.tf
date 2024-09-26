@@ -58,6 +58,7 @@ resource "libvirt_volume" "fcos_base" {
   pool   = libvirt_pool.volume_pool.name
   source = "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/34.20210626.3.0/x86_64/fedora-coreos-34.20210626.3.0-qemu.x86_64.qcow2.xz"
   format = "qcow2"
+
   depends_on = [libvirt_pool.volume_pool]
 }
 
@@ -78,16 +79,19 @@ data "http" "worker_ignition" {
 resource "local_file" "bootstrap_ign" {
   content  = data.http.bootstrap_ignition.response_body
   filename = "/tmp/bootstrap.ign"
+  depends_on = [libvirt_pool.volume_pool]
 }
 
 resource "local_file" "master_ign" {
   content  = data.http.master_ignition.response_body
   filename = "/tmp/master.ign"
+  depends_on = [libvirt_pool.volume_pool]
 }
 
 resource "local_file" "worker_ign" {
   content  = data.http.worker_ignition.response_body
   filename = "/tmp/worker.ign"
+  depends_on = [libvirt_pool.volume_pool]
 }
 
 # Create Ignition volumes from downloaded files
