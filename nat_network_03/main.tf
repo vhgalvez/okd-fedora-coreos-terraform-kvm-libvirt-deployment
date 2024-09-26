@@ -5,12 +5,18 @@ terraform {
       source  = "dmacvicar/libvirt"
       version = "~> 0.7.0"
     }
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.1.0"
+    }
   }
 }
 
 provider "libvirt" {
   uri = "qemu:///system"
 }
+
+provider "local" {}
 
 # Step to create the directory for the pool with correct permissions
 resource "null_resource" "create_pool_directory" {
@@ -45,113 +51,93 @@ resource "libvirt_network" "okd_network" {
 }
 
 # Define Fedora CoreOS base image
-resource "libvirt_volume" "base" {
-  name   = "fedora-coreos-base"
-  source = var.base_image
+resource "libvirt_volume" "fcos_base" {
+  name   = "fcos_base"
   pool   = libvirt_pool.okd_storage_pool.name
+  source = "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/34.20210626.3.0/x86_64/fedora-coreos-34.20210626.3.0-qemu.x86_64.qcow2.xz"
   format = "qcow2"
-  depends_on = [null_resource.start_pool]
 }
 
-# VM Disk for each node
-resource "libvirt_volume" "vm_disk" {
-  for_each = var.vm_definitions
-
-  name           = "${each.key}-disk"
-  base_volume_id = libvirt_volume.base.id
-  pool           = libvirt_pool.okd_storage_pool.name
-  format         = "qcow2"
-  size           = each.value.disk_size * 1024 * 1024
-  depends_on     = [libvirt_volume.base]
-}
-
-# Generate Ignition with OpenShift Installer
-resource "null_resource" "generate_ignition" {
-  provisioner "local-exec" {
-    command = "openshift-install create ignition-configs --dir=/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install"
-  }
-
-  triggers = {
-    always_run = timestamp()
-  }
-}
-
-# Ignition for Master Nodes
-resource "libvirt_ignition" "master_ignition" {
-  name    = "master.ign"
-  pool    = libvirt_pool.okd_storage_pool.name
-  content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign")
-  depends_on = [null_resource.generate_ignition, null_resource.start_pool]
-}
-
-# Ignition for Worker Nodes
-resource "libvirt_ignition" "worker_ignition" {
-  name    = "worker.ign"
-  pool    = libvirt_pool.okd_storage_pool.name
-  content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign")
-  depends_on = [null_resource.generate_ignition, null_resource.start_pool]
-}
-
-# Ignition for Bootstrap Node
+# Define the Ignition config for the bootstrap node
 resource "libvirt_ignition" "bootstrap_ignition" {
   name    = "bootstrap.ign"
-  pool    = libvirt_pool.okd_storage_pool.name
-  content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/bootstrap.ign")
-  depends_on = [null_resource.generate_ignition, null_resource.start_pool]
+  content = file("${path.module}/bootstrap.ign")
 }
 
-# Define virtual machines
-resource "libvirt_domain" "okd_vm" {
-  for_each = var.vm_definitions
+# Define the Ignition config for the master nodes
+resource "libvirt_ignition" "master_ignition" {
+  name    = "master.ign"
+  content = file("${path.module}/master.ign")
+}
 
-  name   = each.key
-  vcpu   = each.value.cpus
-  memory = each.value.memory
+# Define the Ignition config for the worker nodes
+resource "libvirt_ignition" "worker_ignition" {
+  name    = "worker.ign"
+  content = file("${path.module}/worker.ign")
+}
+
+# Define the bootstrap node
+resource "libvirt_domain" "bootstrap" {
+  name   = "bootstrap"
+  memory = "8192"
+  vcpu   = 4
+
+  cloudinit = libvirt_ignition.bootstrap_ignition.id
 
   network_interface {
-    network_id     = libvirt_network.okd_network.id
-    wait_for_lease = true
-    addresses      = [each.value.ip]
+    network_name = libvirt_network.okd_network.name
   }
 
   disk {
-    volume_id = libvirt_volume.vm_disk[each.key].id
+    volume_id = libvirt_volume.fcos_base.id
   }
-
-  coreos_ignition = lookup(
-    {
-      "bootstrap" = libvirt_ignition.bootstrap_ignition.id,
-      "master1"   = libvirt_ignition.master_ignition.id,
-      "master2"   = libvirt_ignition.master_ignition.id,
-      "master3"   = libvirt_ignition.master_ignition.id,
-      "worker1"   = libvirt_ignition.worker_ignition.id,
-      "worker2"   = libvirt_ignition.worker_ignition.id,
-      "worker3"   = libvirt_ignition.worker_ignition.id
-    },
-    each.key,
-    libvirt_ignition.worker_ignition.id
-  )
-
-  graphics {
-    type = "vnc"
-  }
-
-  console {
-    type        = "pty"
-    target_type = "serial"
-    target_port = "0"
-  }
-
-  qemu_agent = true
-
-  depends_on = [
-    libvirt_ignition.master_ignition, 
-    libvirt_ignition.worker_ignition, 
-    libvirt_ignition.bootstrap_ignition
-  ]
 }
 
-# Output IP addresses
-output "okd_vm_ips" {
-  value = { for key, vm in libvirt_domain.okd_vm : key => vm.network_interface[0].addresses[0] }
+# Define the master nodes
+resource "libvirt_domain" "master" {
+  count  = 3
+  name   = "master-${count.index + 1}"
+  memory = "16384"
+  vcpu   = 4
+
+  cloudinit = libvirt_ignition.master_ignition.id
+
+  network_interface {
+    network_name = libvirt_network.okd_network.name
+  }
+
+  disk {
+    volume_id = libvirt_volume.fcos_base.id
+  }
+}
+
+# Define the worker nodes
+resource "libvirt_domain" "worker" {
+  count  = 3
+  name   = "worker-${count.index + 1}"
+  memory = "8192"
+  vcpu   = 4
+
+  cloudinit = libvirt_ignition.worker_ignition.id
+
+  network_interface {
+    network_name = libvirt_network.okd_network.name
+  }
+
+  disk {
+    volume_id = libvirt_volume.fcos_base.id
+  }
+}
+
+# Output the IP addresses of the nodes
+output "ip_addresses" {
+  value = {
+    bootstrap = libvirt_domain.bootstrap.network_interface.0.addresses[0]
+    master1   = libvirt_domain.master[0].network_interface.0.addresses[0]
+    master2   = libvirt_domain.master[1].network_interface.0.addresses[0]
+    master3   = libvirt_domain.master[2].network_interface.0.addresses[0]
+    worker1   = libvirt_domain.worker[0].network_interface.0.addresses[0]
+    worker2   = libvirt_domain.worker[1].network_interface.0.addresses[0]
+    worker3   = libvirt_domain.worker[2].network_interface.0.addresses[0]
+  }
 }
