@@ -18,18 +18,19 @@ provider "libvirt" {
 
 provider "local" {}
 
+
 # Create the directory for the pool with correct permissions
 resource "null_resource" "create_pool_directory" {
   provisioner "local-exec" {
-    command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 && sudo chown -R libvirt-qemu:kvm /mnt/lv_data/organized_storage/volumes/volumetmp_03"
+    command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 && sudo chown -R qemu:kvm /mnt/lv_data/organized_storage/volumes/volumetmp_03 && sudo chmod 755 /mnt/lv_data/organized_storage/volumes/volumetmp_03"
   }
 }
 
 # Use libvirt_pool to define and start the storage pool
 resource "libvirt_pool" "volume_pool" {
-  name   = "volumetmp_03"
-  type   = "dir"
-  path   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
+  name = "volumetmp_03"
+  type = "dir"
+  path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
 
   depends_on = [null_resource.create_pool_directory]
 }
@@ -37,10 +38,12 @@ resource "libvirt_pool" "volume_pool" {
 # Add a delay and verification to ensure pool initialization
 resource "null_resource" "verify_pool_initialization" {
   provisioner "local-exec" {
-    command = "sleep 5 && sudo virsh pool-info volumetmp_03 || echo 'Pool not initialized properly'"
+    command = "sleep 10 && sudo virsh pool-list --all | grep volumetmp_03 || (echo 'Pool not initialized properly' && exit 1)"
   }
   depends_on = [libvirt_pool.volume_pool]
 }
+
+
 # Network Configuration for VMs
 resource "libvirt_network" "okd_network" {
   name      = "okd_network"
