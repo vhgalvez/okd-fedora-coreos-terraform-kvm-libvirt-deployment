@@ -22,8 +22,8 @@ provider "local" {}
 resource "null_resource" "create_pool_directory" {
   provisioner "local-exec" {
     command = <<-EOT
-      sudo mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03
-      sudo chown -R qemu:kvm /mnt/lv_data/organized_storage/volumes/volumetmp_03
+      sudo mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 &&
+      sudo chown -R qemu:kvm /mnt/lv_data/organized_storage/volumes/volumetmp_03 &&
       sudo chmod 755 /mnt/lv_data/organized_storage/volumes/volumetmp_03
       echo "Directory created and permissions set" > /tmp/terraform_pool_creation.log
       ls -ld /mnt/lv_data/organized_storage/volumes/volumetmp_03 >> /tmp/terraform_pool_creation.log
@@ -39,36 +39,12 @@ resource "null_resource" "wait_for_directory" {
   depends_on = [null_resource.create_pool_directory]
 }
 
-# Define and start the storage pool manually
+# Define and start the storage pool
 resource "libvirt_pool" "volume_pool" {
   name = "volumetmp_03"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
-
-  # Use a manual approach to define, build, start, and autostart the pool
-  provisioner "local-exec" {
-    command = <<-EOT
-      echo "Attempting to create libvirt pool" >> /tmp/terraform_pool_creation.log
-      sudo virsh pool-define-as volumetmp_03 dir --target /mnt/lv_data/organized_storage/volumes/volumetmp_03
-      sudo virsh pool-build volumetmp_03
-      sudo virsh pool-start volumetmp_03
-      sudo virsh pool-autostart volumetmp_03
-      sudo virsh pool-list --all >> /tmp/terraform_pool_creation.log
-    EOT
-  }
   depends_on = [null_resource.create_pool_directory, null_resource.wait_for_directory]
-}
-
-# Verify the storage pool is properly initialized
-resource "null_resource" "verify_pool_initialization" {
-  provisioner "local-exec" {
-    command = <<-EOT
-      sleep 15
-      sudo virsh pool-list --all | grep volumetmp_03 && echo "Pool found in virsh pool-list" >> /tmp/terraform_pool_creation.log || (echo "Pool not initialized properly" >> /tmp/terraform_pool_creation.log && exit 1)
-      sudo virsh pool-info volumetmp_03 && echo "Successfully retrieved pool info" >> /tmp/terraform_pool_creation.log || (echo "Failed to retrieve pool info" >> /tmp/terraform_pool_creation.log && exit 1)
-    EOT
-  }
-  depends_on = [libvirt_pool.volume_pool]
 }
 
 # Network Configuration for VMs
@@ -86,7 +62,7 @@ resource "libvirt_volume" "fcos_base" {
   source = "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/34.20210626.3.0/x86_64/fedora-coreos-34.20210626.3.0-qemu.x86_64.qcow2.xz"
   format = "qcow2"
 
-  depends_on = [libvirt_pool.volume_pool, null_resource.verify_pool_initialization]
+  depends_on = [libvirt_pool.volume_pool]
 }
 
 # Define Ignition configs for bootstrap, master, and worker nodes
