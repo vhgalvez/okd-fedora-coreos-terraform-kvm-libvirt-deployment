@@ -21,7 +21,7 @@ resource "libvirt_network" "okd_network" {
   addresses = ["10.17.4.0/24"]
 }
 
-# Ensure the directory for storage pool exists and is owned by 'qemu'
+# Prepare the storage directory for the pool
 resource "null_resource" "prepare_storage_directory" {
   provisioner "local-exec" {
     command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 && sudo chown -R qemu:qemu /mnt/lv_data/organized_storage/volumes/volumetmp_03"
@@ -34,15 +34,15 @@ resource "null_resource" "prepare_storage_directory" {
 
 # Create Storage Pool for Terraform managed volumes
 resource "libvirt_pool" "okd_storage_pool" {
-  name   = "volumetmp_03"
-  type   = "dir"
-  path   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
-  
-  # Ensure that the storage directory exists
+  name = "volumetmp_03"
+  type = "dir"
+  path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
+
+  # Ensure that the pool exists before creating volumes
   depends_on = [null_resource.prepare_storage_directory]
 }
 
-# Ensure the storage pool is active before creating volumes
+# Ensure the pool is active before creating volumes
 resource "null_resource" "check_pool_active" {
   provisioner "local-exec" {
     command = "sudo virsh pool-refresh volumetmp_03"
@@ -147,7 +147,7 @@ resource "libvirt_domain" "okd_vm" {
   console {
     type        = "pty"
     target_type = "serial"
-    target_port = "0"
+    target_port = "0" # Adding the required target_port argument
   }
 
   qemu_agent = true
