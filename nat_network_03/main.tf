@@ -33,12 +33,20 @@ resource "libvirt_pool" "okd_storage_pool" {
   }
 }
 
+# Dependencia para asegurar la creación del pool antes de cualquier uso
+resource "null_resource" "create_pool_directory" {
+  provisioner "local-exec" {
+    command = "mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03"
+  }
+}
+
 # Define Fedora CoreOS base image
 resource "libvirt_volume" "base" {
   name   = "fedora-coreos-base"
   source = var.base_image
   pool   = libvirt_pool.okd_storage_pool.name
   format = "qcow2"
+  depends_on = [libvirt_pool.okd_storage_pool, null_resource.create_pool_directory]
 }
 
 # VM Disk for each node
@@ -50,6 +58,7 @@ resource "libvirt_volume" "vm_disk" {
   pool           = libvirt_pool.okd_storage_pool.name
   format         = "qcow2"
   size           = each.value.disk_size * 1024 * 1024
+  depends_on = [libvirt_pool.okd_storage_pool, libvirt_volume.base]
 }
 
 # Generate Ignition with OpenShift Installer
@@ -68,7 +77,7 @@ resource "libvirt_ignition" "master_ignition" {
   name    = "master.ign"
   pool    = libvirt_pool.okd_storage_pool.name
   content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign")
-  depends_on = [libvirt_pool.okd_storage_pool]
+  depends_on = [libvirt_pool.okd_storage_pool, null_resource.generate_ignition]
 }
 
 # Ignition for Worker Nodes
@@ -76,7 +85,7 @@ resource "libvirt_ignition" "worker_ignition" {
   name    = "worker.ign"
   pool    = libvirt_pool.okd_storage_pool.name
   content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign")
-  depends_on = [libvirt_pool.okd_storage_pool]
+  depends_on = [libvirt_pool.okd_storage_pool, null_resource.generate_ignition]
 }
 
 # Ignition for Bootstrap Node
@@ -84,7 +93,7 @@ resource "libvirt_ignition" "bootstrap_ignition" {
   name    = "bootstrap.ign"
   pool    = libvirt_pool.okd_storage_pool.name
   content = file("/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/bootstrap.ign")
-  depends_on = [libvirt_pool.okd_storage_pool]
+  depends_on = [libvirt_pool.okd_storage_pool, null_resource.generate_ignition]
 }
 
 # Define virtual machines
@@ -131,6 +140,8 @@ resource "libvirt_domain" "okd_vm" {
   }
 
   qemu_agent = true
+
+  depends_on = [libvirt_ignition.master_ignition, libvirt_ignition.worker_ignition, libvirt_ignition.bootstrap_ignition]
 }
 
 # Output IP addresses
