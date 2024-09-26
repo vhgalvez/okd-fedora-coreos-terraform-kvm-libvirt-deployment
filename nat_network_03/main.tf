@@ -25,20 +25,13 @@ resource "null_resource" "create_pool_directory" {
   }
 }
 
-# Define the pool using virsh commands
-resource "null_resource" "define_pool" {
-  provisioner "local-exec" {
-    command = "sudo virsh pool-define-as volumetmp_03 dir --target /mnt/lv_data/organized_storage/volumes/volumetmp_03"
-  }
-  depends_on = [null_resource.create_pool_directory]
-}
+# Use libvirt_pool to define the storage pool
+resource "libvirt_pool" "volume_pool" {
+  name   = "volumetmp_03"
+  type   = "dir"
+  path   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
 
-# Start the pool
-resource "null_resource" "start_pool" {
-  provisioner "local-exec" {
-    command = "sudo virsh pool-start volumetmp_03 && sudo virsh pool-autostart volumetmp_03"
-  }
-  depends_on = [null_resource.define_pool]
+  depends_on = [null_resource.create_pool_directory]
 }
 
 # Network Configuration for VMs
@@ -52,11 +45,11 @@ resource "libvirt_network" "okd_network" {
 # Define Fedora CoreOS base image
 resource "libvirt_volume" "fcos_base" {
   name   = "fcos_base"
-  pool   = "volumetmp_03"
+  pool   = libvirt_pool.volume_pool.name
   source = "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/34.20210626.3.0/x86_64/fedora-coreos-34.20210626.3.0-qemu.x86_64.qcow2.xz"
   format = "qcow2"
 
-  depends_on = [null_resource.start_pool]
+  depends_on = [libvirt_pool.volume_pool]
 }
 
 # Define Ignition configs for bootstrap, master, and worker nodes
@@ -90,6 +83,8 @@ resource "libvirt_domain" "bootstrap" {
   disk {
     volume_id = libvirt_volume.fcos_base.id
   }
+
+  depends_on = [libvirt_volume.fcos_base]
 }
 
 # Define the master nodes
@@ -108,6 +103,8 @@ resource "libvirt_domain" "master" {
   disk {
     volume_id = libvirt_volume.fcos_base.id
   }
+
+  depends_on = [libvirt_volume.fcos_base]
 }
 
 # Define the worker nodes
@@ -126,6 +123,8 @@ resource "libvirt_domain" "worker" {
   disk {
     volume_id = libvirt_volume.fcos_base.id
   }
+
+  depends_on = [libvirt_volume.fcos_base]
 }
 
 # Output the IP addresses of the nodes
