@@ -79,15 +79,6 @@ locals {
   ]
 }
 
-# Create node volumes
-resource "libvirt_volume" "okd_volumes" {
-  for_each       = { for node in local.nodes : node.name => node }
-  name           = "${each.key}.qcow2"
-  pool           = libvirt_pool.volume_pool.name
-  size           = each.value.size * 1073741824
-  base_volume_id = libvirt_volume.fcos_base.id
-}
-
 # Create Ignition volumes
 resource "libvirt_volume" "ignition_volumes" {
   for_each = { for node in local.nodes : "${node.name}-ignition" => node }
@@ -97,12 +88,12 @@ resource "libvirt_volume" "ignition_volumes" {
   format   = "raw"
 }
 
-# Define nodes
+# Create node domains
 resource "libvirt_domain" "nodes" {
   for_each = { for node in local.nodes : node.name => node }
   name     = each.key
-  memory   = lookup(var.vm_definitions[each.key], "memory")
-  vcpu     = lookup(var.vm_definitions[each.key], "cpus")
+  memory   = each.value.size
+  vcpu     = 4  # Assuming 4 vCPUs for all nodes
 
   cloudinit = libvirt_volume.ignition_volumes["${each.key}-ignition"].id
 
@@ -113,6 +104,11 @@ resource "libvirt_domain" "nodes" {
   disk {
     volume_id = libvirt_volume.okd_volumes[each.key].id
   }
+
+  depends_on = [
+    libvirt_volume.ignition_volumes,
+    libvirt_volume.okd_volumes
+  ]
 }
 
 # Output node IP addresses
