@@ -21,12 +21,6 @@ provider "libvirt" {
 
 provider "local" {}
 
-resource "libvirt_pool" "volume_pool" {
-  name = "volumes"
-  type = "dir"
-  path = "/var/lib/libvirt/images"
-}
-
 # Define Ignition data
 data "http" "bootstrap_ignition" {
   url = "http://10.17.3.14/okd/bootstrap.ign"
@@ -54,6 +48,13 @@ resource "local_file" "master_ignition_file" {
 resource "local_file" "worker_ignition_file" {
   content  = data.http.worker_ignition.response_body
   filename = "/tmp/worker.ign"
+}
+
+# Create storage pool for volumes
+resource "libvirt_pool" "volume_pool" {
+  name = "volumes"
+  type = "dir"
+  path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
 }
 
 # Base volume for Fedora CoreOS
