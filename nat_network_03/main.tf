@@ -21,7 +21,6 @@ provider "libvirt" {
 
 provider "local" {}
 
-
 # Define storage pool
 resource "libvirt_pool" "volume_pool" {
   name = "volumes"
