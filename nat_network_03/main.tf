@@ -27,16 +27,16 @@ resource "libvirt_pool" "volumetmp_03" {
   }
 }
 
-# Define node configurations with direct URLs for Ignition files
+# Define node configurations with local file URLs for Ignition files
 locals {
   nodes = {
-    bootstrap = { size = var.bootstrap_volume_size, url = "http://10.17.3.14/okd/bootstrap.ign" },
-    master1   = { size = var.master_volume_size, url = "http://10.17.3.14/okd/master.ign" },
-    master2   = { size = var.master_volume_size, url = "http://10.17.3.14/okd/master.ign" },
-    master3   = { size = var.master_volume_size, url = "http://10.17.3.14/okd/master.ign" },
-    worker1   = { size = var.worker_volume_size, url = "http://10.17.3.14/okd/worker.ign" },
-    worker2   = { size = var.worker_volume_size, url = "http://10.17.3.14/okd/worker.ign" },
-    worker3   = { size = var.worker_volume_size, url = "http://10.17.3.14/okd/worker.ign" }
+    bootstrap = { size = var.bootstrap_volume_size, url = "file:///home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/bootstrap.ign" },
+    master1   = { size = var.master_volume_size, url = "file:///home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign" },
+    master2   = { size = var.master_volume_size, url = "file:///home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign" },
+    master3   = { size = var.master_volume_size, url = "file:///home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign" },
+    worker1   = { size = var.worker_volume_size, url = "file:///home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign" },
+    worker2   = { size = var.worker_volume_size, url = "file:///home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign" },
+    worker3   = { size = var.worker_volume_size, url = "file:///home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign" }
   }
 }
 
