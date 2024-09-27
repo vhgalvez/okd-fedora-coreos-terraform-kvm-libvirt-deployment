@@ -1,12 +1,10 @@
 terraform {
   required_version = ">= 1.9.5"
-
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
       version = "~> 0.8.0"
     }
-
     local = {
       source  = "hashicorp/local"
       version = "~> 2.5.2"
@@ -24,7 +22,6 @@ resource "libvirt_pool" "volumetmp_03" {
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
 
-  # Make sure the pool is created before being used
   lifecycle {
     create_before_destroy = true
   }
@@ -64,7 +61,7 @@ resource "libvirt_volume" "ignition_volumes" {
   format   = "raw"
 }
 
-# Define base volume for Fedora CoreOS
+# Base volume definition for Fedora CoreOS
 resource "libvirt_volume" "fcos_base" {
   name   = "fcos_base.qcow2"
   pool   = libvirt_pool.volumetmp_03.name
@@ -90,11 +87,6 @@ resource "libvirt_domain" "nodes" {
 
   # Use Ignition volume for cloud-init
   cloudinit = libvirt_volume.ignition_volumes[each.key].id
-
-  # Ensure the Ignition volume is created before the domain
-  depends_on = [
-    libvirt_volume.ignition_volumes[each.key]
-  ]
 
   network_interface {
     network_name = "nat_network_02"
