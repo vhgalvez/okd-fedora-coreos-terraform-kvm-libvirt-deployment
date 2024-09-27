@@ -26,6 +26,18 @@ provider "libvirt" {
 
 provider "local" {}
 
+resource "libvirt_volume" "ignition_volumes" {
+  for_each = local.nodes
+  name     = "${each.key}-ignition"
+  pool     = libvirt_pool.volumetmp_03.name
+  format   = "raw"
+
+  # Ensure this refers to the correct local Ignition file
+  source = each.value.ignition_file
+}
+
+
+
 # Define storage pool for volumes
 resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
