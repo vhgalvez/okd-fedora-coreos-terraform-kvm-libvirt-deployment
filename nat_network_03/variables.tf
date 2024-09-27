@@ -1,7 +1,11 @@
 variable "coreos_image" {
   description = "URL for Fedora CoreOS image"
   type        = string
-  default     = "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/34.20210626.3.0/x86_64/fedora-coreos-34.20210626.3.0-qemu.x86_64.qcow2.xz"
+}
+
+variable "base_image" {
+  description = "Path to the base image for the VM"
+  type        = string
 }
 
 variable "bootstrap_volume_size" {
@@ -44,7 +48,8 @@ variable "dns2" {
   description = "Secondary DNS server"
   type        = string
 }
-variable "base_image" {
-  description = "Path to the base image for the VM"
-  type        = string
+
+variable "ssh_keys" {
+  description = "List of SSH public keys"
+  type        = list(string)
 }

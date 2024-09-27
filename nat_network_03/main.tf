@@ -109,8 +109,8 @@ resource "libvirt_volume" "okd_volumes" {
 resource "libvirt_domain" "nodes" {
   for_each = { for node in local.nodes : node.name => node }
   name     = each.key
-  memory   = each.value.size
-  vcpu     = 4 # Assuming 4 vCPUs for all nodes
+  memory   = var.vm_definitions[each.key].memory
+  vcpu     = var.vm_definitions[each.key].cpus
 
   cloudinit = libvirt_volume.ignition_volumes["${each.key}-ignition"].id
 
