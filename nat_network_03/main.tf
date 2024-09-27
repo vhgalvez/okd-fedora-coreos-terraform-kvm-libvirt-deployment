@@ -69,13 +69,13 @@ resource "null_resource" "create_ignition_files" {
 # Define node configurations
 locals {
   nodes = {
-    bootstrap = { size = var.bootstrap_volume_size, ignition_file = local_file.bootstrap_ignition_file.content },
-    master1   = { size = var.master_volume_size, ignition_file = local_file.master_ignition_file.content },
-    master2   = { size = var.master_volume_size, ignition_file = local_file.master_ignition_file.content },
-    master3   = { size = var.master_volume_size, ignition_file = local_file.master_ignition_file.content },
-    worker1   = { size = var.worker_volume_size, ignition_file = local_file.worker_ignition_file.content },
-    worker2   = { size = var.worker_volume_size, ignition_file = local_file.worker_ignition_file.content },
-    worker3   = { size = var.worker_volume_size, ignition_file = local_file.worker_ignition_file.content }
+    bootstrap = { size = var.bootstrap_volume_size, ignition_file = local_file.bootstrap_ignition_file.filename },
+    master1   = { size = var.master_volume_size, ignition_file = local_file.master_ignition_file.filename },
+    master2   = { size = var.master_volume_size, ignition_file = local_file.master_ignition_file.filename },
+    master3   = { size = var.master_volume_size, ignition_file = local_file.master_ignition_file.filename },
+    worker1   = { size = var.worker_volume_size, ignition_file = local_file.worker_ignition_file.filename },
+    worker2   = { size = var.worker_volume_size, ignition_file = local_file.worker_ignition_file.filename },
+    worker3   = { size = var.worker_volume_size, ignition_file = local_file.worker_ignition_file.filename }
   }
 }
 
@@ -84,25 +84,26 @@ resource "libvirt_volume" "ignition_volumes" {
   for_each = local.nodes
   name     = "${each.key}-ignition"
   pool     = libvirt_pool.volumetmp_03.name
-  source   = each.value.ignition_file
-  format   = "raw"
+  # Reading content directly instead of using file()
+  content    = file(each.value.ignition_file)
+  format     = "raw"
   depends_on = [null_resource.create_ignition_files]
 }
 
 # Base volume definition for Fedora CoreOS
 resource "libvirt_volume" "fcos_base" {
-  name       = "fcos_base.qcow2"
-  pool       = libvirt_pool.volumetmp_03.name
-  source     = var.coreos_image
-  format     = "qcow2"
+  name   = "fcos_base.qcow2"
+  pool   = libvirt_pool.volumetmp_03.name
+  source = var.coreos_image
+  format = "qcow2"
 }
 
 # Create node volumes
 resource "libvirt_volume" "okd_volumes" {
-  for_each = local.nodes
-  name     = "${each.key}.qcow2"
-  pool     = libvirt_pool.volumetmp_03.name
-  size     = each.value.size * 1073741824
+  for_each       = local.nodes
+  name           = "${each.key}.qcow2"
+  pool           = libvirt_pool.volumetmp_03.name
+  size           = each.value.size * 1073741824
   base_volume_id = libvirt_volume.fcos_base.id
 }
 
