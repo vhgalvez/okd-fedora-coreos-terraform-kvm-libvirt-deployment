@@ -30,11 +30,12 @@ resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
-  
+
   lifecycle {
     create_before_destroy = true
   }
 }
+
 
 # Define node configurations with direct file paths for Ignition files
 locals {
