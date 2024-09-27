@@ -1,4 +1,4 @@
-terraform {
+¡terraform {
   required_version = ">= 1.9.5"
   required_providers {
     libvirt = {
@@ -21,14 +21,22 @@ provider "libvirt" {
 
 provider "local" {}
 
-# Define storage pool for volumes
-resource "libvirt_pool" "volume_pool" {
+# Define the storage pool for volumes
+resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
 }
 
-# Define Ignition data
+# Define base volume
+resource "libvirt_volume" "base" {
+  name   = "base"
+  source = var.base_image
+  pool   = libvirt_pool.volumetmp_03.name
+  format = "qcow2"
+}
+
+# Fetch Ignition configuration files
 data "http" "bootstrap_ignition" {
   url = "http://10.17.3.14/okd/bootstrap.ign"
 }
@@ -60,10 +68,10 @@ resource "local_file" "worker_ignition_file" {
 # Base volume for Fedora CoreOS
 resource "libvirt_volume" "fcos_base" {
   name       = "fcos_base.qcow2"
-  pool       = libvirt_pool.volume_pool.name
+  pool       = libvirt_pool.volumetmp_03.name
   source     = var.coreos_image
   format     = "qcow2"
-  depends_on = [libvirt_pool.volume_pool]
+  depends_on = [libvirt_pool.volumetmp_03]
 }
 
 # Define node configurations
@@ -83,7 +91,7 @@ locals {
 resource "libvirt_volume" "ignition_volumes" {
   for_each = { for node in local.nodes : "${node.name}-ignition" => node }
   name     = each.key
-  pool     = libvirt_pool.volume_pool.name
+  pool     = libvirt_pool.volumetmp_03.name
   source   = each.value.ignition_file
   format   = "raw"
 }
@@ -92,7 +100,7 @@ resource "libvirt_volume" "ignition_volumes" {
 resource "libvirt_volume" "okd_volumes" {
   for_each       = { for node in local.nodes : node.name => node }
   name           = "${each.key}.qcow2"
-  pool           = libvirt_pool.volume_pool.name
+  pool           = libvirt_pool.volumetmp_03.name
   size           = each.value.size * 1073741824
   base_volume_id = libvirt_volume.fcos_base.id
 }
