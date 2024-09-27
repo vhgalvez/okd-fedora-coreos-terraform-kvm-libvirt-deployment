@@ -1,9 +1,18 @@
 terraform {
   required_version = ">= 1.9.5"
+
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
-      version = "~> 0.8.0"
+      version = "0.8.0"
+    }
+    ct = {
+      source  = "poseidon/ct"
+      version = "0.13.0"
+    }
+    template = {
+      source  = "hashicorp/template"
+      version = "~> 2.2.0"
     }
     local = {
       source  = "hashicorp/local"
