@@ -26,18 +26,6 @@ provider "libvirt" {
 
 provider "local" {}
 
-resource "libvirt_volume" "ignition_volumes" {
-  for_each = local.nodes
-  name     = "${each.key}-ignition"
-  pool     = libvirt_pool.volumetmp_03.name
-  format   = "raw"
-
-  # Ensure this refers to the correct local Ignition file
-  source = each.value.ignition_file
-}
-
-
-
 # Define storage pool for volumes
 resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
@@ -53,7 +41,7 @@ resource "libvirt_volume" "fcos_base" {
   format = "qcow2"
 }
 
-# Fetch Ignition configuration files for Bootstrap, Master, and Worker nodes
+# Fetch Ignition configuration files
 data "http" "bootstrap_ignition" {
   url = "http://10.17.3.14/okd/bootstrap.ign"
 }
@@ -95,7 +83,7 @@ locals {
   }
 }
 
-# Create Ignition volumes
+# Create Ignition volumes for nodes
 resource "libvirt_volume" "ignition_volumes" {
   for_each = local.nodes
   name     = "${each.key}-ignition"
