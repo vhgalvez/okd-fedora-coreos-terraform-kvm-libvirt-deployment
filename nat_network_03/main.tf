@@ -59,10 +59,10 @@ resource "local_file" "worker_ignition_file" {
 
 # Base volume for Fedora CoreOS
 resource "libvirt_volume" "fcos_base" {
-  name       = "fcos_base.qcow2"
-  pool       = libvirt_pool.volume_pool.name
-  source     = var.coreos_image
-  format     = "qcow2"
+  name   = "fcos_base.qcow2"
+  pool   = libvirt_pool.volume_pool.name
+  source = var.coreos_image
+  format = "qcow2"
   depends_on = [libvirt_pool.volume_pool]
 }
 
@@ -79,12 +79,21 @@ locals {
   ]
 }
 
+# Create Ignition volumes
+resource "libvirt_volume" "ignition_volumes" {
+  for_each = { for node in local.nodes : "${node.name}-ignition" => node }
+  name     = each.key
+  pool     = libvirt_pool.volume_pool.name
+  source   = each.value.ignition_file
+  format   = "raw"
+}
+
 # Create node volumes
 resource "libvirt_volume" "okd_volumes" {
-  for_each       = { for node in local.nodes : node.name => node }
-  name           = "${each.key}.qcow2"
-  pool           = libvirt_pool.volume_pool.name
-  size           = each.value.size * 1073741824
+  for_each = { for node in local.nodes : node.name => node }
+  name     = "${each.key}.qcow2"
+  pool     = libvirt_pool.volume_pool.name
+  size     = each.value.size * 1073741824
   base_volume_id = libvirt_volume.fcos_base.id
 }
 
@@ -93,7 +102,7 @@ resource "libvirt_domain" "nodes" {
   for_each = { for node in local.nodes : node.name => node }
   name     = each.key
   memory   = each.value.size
-  vcpu     = 4 # Assuming 4 vCPUs for all nodes
+  vcpu     = 4  # Assuming 4 vCPUs for all nodes
 
   cloudinit = libvirt_volume.ignition_volumes["${each.key}-ignition"].id
 
