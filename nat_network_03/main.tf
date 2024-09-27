@@ -1,10 +1,12 @@
 terraform {
   required_version = ">= 1.9.5"
+
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
       version = "~> 0.8.0"
     }
+
     local = {
       source  = "hashicorp/local"
       version = "~> 2.5.2"
@@ -16,20 +18,19 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Definir el pool de almacenamiento para volúmenes
+# Define storage pool for volumes
 resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
 
-  # Añade esta línea para asegurarte de que el pool esté activo antes de usarlo
+  # Make sure the pool is created before being used
   lifecycle {
     create_before_destroy = true
   }
 }
 
-
-# Definir configuraciones de nodos con URLs directas para archivos Ignition
+# Define node configurations with direct URLs for Ignition files
 locals {
   nodes = {
     bootstrap = { size = var.bootstrap_volume_size, url = "http://10.17.3.14/okd/bootstrap.ign" },
@@ -42,7 +43,7 @@ locals {
   }
 }
 
-# Descargar archivos Ignition al disco local antes de crear volúmenes
+# Download Ignition files to local disk before creating volumes
 data "http" "ignition_files" {
   for_each = local.nodes
   url      = each.value.url
@@ -54,7 +55,7 @@ resource "local_file" "ignition_files" {
   filename = "/tmp/${each.key}.ign"
 }
 
-# Crear volúmenes Ignition para los nodos
+# Create Ignition volumes for nodes
 resource "libvirt_volume" "ignition_volumes" {
   for_each = local.nodes
   name     = "${each.key}-ignition"
@@ -63,7 +64,7 @@ resource "libvirt_volume" "ignition_volumes" {
   format   = "raw"
 }
 
-# Definir volumen base para Fedora CoreOS
+# Define base volume for Fedora CoreOS
 resource "libvirt_volume" "fcos_base" {
   name   = "fcos_base.qcow2"
   pool   = libvirt_pool.volumetmp_03.name
@@ -71,7 +72,7 @@ resource "libvirt_volume" "fcos_base" {
   format = "qcow2"
 }
 
-# Crear volúmenes de nodos
+# Create node volumes
 resource "libvirt_volume" "okd_volumes" {
   for_each       = local.nodes
   name           = "${each.key}.qcow2"
@@ -80,14 +81,20 @@ resource "libvirt_volume" "okd_volumes" {
   base_volume_id = libvirt_volume.fcos_base.id
 }
 
-# Definir dominios libvirt para nodos
+# Define libvirt domains for nodes
 resource "libvirt_domain" "nodes" {
   for_each = local.nodes
   name     = each.key
   memory   = var.vm_definitions[each.key].memory
   vcpu     = var.vm_definitions[each.key].cpus
 
+  # Use Ignition volume for cloud-init
   cloudinit = libvirt_volume.ignition_volumes[each.key].id
+
+  # Ensure the Ignition volume is created before the domain
+  depends_on = [
+    libvirt_volume.ignition_volumes[each.key]
+  ]
 
   network_interface {
     network_name = "nat_network_02"
@@ -98,7 +105,7 @@ resource "libvirt_domain" "nodes" {
   }
 }
 
-# Salida de direcciones IP de los nodos
+# Output node IP addresses
 output "node_ips" {
   value = { for node in libvirt_domain.nodes : node.name => node.network_interface[0].addresses[0] }
 }
