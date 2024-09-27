@@ -23,16 +23,45 @@ resource "libvirt_pool" "volumetmp_03" {
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
 }
 
+# Fetch Ignition configuration files
+data "http" "bootstrap_ignition" {
+  url = "http://10.17.3.14/okd/bootstrap.ign"
+}
+
+data "http" "master_ignition" {
+  url = "http://10.17.3.14/okd/master.ign"
+}
+
+data "http" "worker_ignition" {
+  url = "http://10.17.3.14/okd/worker.ign"
+}
+
+# Create local Ignition files
+resource "local_file" "bootstrap_ignition_file" {
+  content  = data.http.bootstrap_ignition.response_body
+  filename = "/tmp/bootstrap.ign"
+}
+
+resource "local_file" "master_ignition_file" {
+  content  = data.http.master_ignition.response_body
+  filename = "/tmp/master.ign"
+}
+
+resource "local_file" "worker_ignition_file" {
+  content  = data.http.worker_ignition.response_body
+  filename = "/tmp/worker.ign"
+}
+
 # Define node configurations
 locals {
   nodes = {
-    bootstrap = { size = var.bootstrap_volume_size, url = "http://10.17.3.14/okd/bootstrap.ign" },
-    master1   = { size = var.master_volume_size, url = "http://10.17.3.14/okd/master.ign" },
-    master2   = { size = var.master_volume_size, url = "http://10.17.3.14/okd/master.ign" },
-    master3   = { size = var.master_volume_size, url = "http://10.17.3.14/okd/master.ign" },
-    worker1   = { size = var.worker_volume_size, url = "http://10.17.3.14/okd/worker.ign" },
-    worker2   = { size = var.worker_volume_size, url = "http://10.17.3.14/okd/worker.ign" },
-    worker3   = { size = var.worker_volume_size, url = "http://10.17.3.14/okd/worker.ign" }
+    bootstrap = { size = var.bootstrap_volume_size, ignition_file = local_file.bootstrap_ignition_file.filename },
+    master1   = { size = var.master_volume_size, ignition_file = local_file.master_ignition_file.filename },
+    master2   = { size = var.master_volume_size, ignition_file = local_file.master_ignition_file.filename },
+    master3   = { size = var.master_volume_size, ignition_file = local_file.master_ignition_file.filename },
+    worker1   = { size = var.worker_volume_size, ignition_file = local_file.worker_ignition_file.filename },
+    worker2   = { size = var.worker_volume_size, ignition_file = local_file.worker_ignition_file.filename },
+    worker3   = { size = var.worker_volume_size, ignition_file = local_file.worker_ignition_file.filename }
   }
 }
 
@@ -41,10 +70,15 @@ resource "libvirt_volume" "ignition_volumes" {
   for_each = local.nodes
   name     = "${each.key}-ignition"
   pool     = libvirt_pool.volumetmp_03.name
-  source   = each.value.url
+  source   = each.value.ignition_file
   format   = "raw"
+  # Ensure volume creation waits for local files
+  depends_on = [
+    local_file.bootstrap_ignition_file,
+    local_file.master_ignition_file,
+    local_file.worker_ignition_file
+  ]
 }
-
 
 # Base volume definition for Fedora CoreOS
 resource "libvirt_volume" "fcos_base" {
