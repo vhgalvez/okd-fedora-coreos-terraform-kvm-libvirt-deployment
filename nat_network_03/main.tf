@@ -50,6 +50,7 @@ locals {
   }
 }
 
+
 # Create Ignition volumes for nodes
 resource "libvirt_volume" "ignition_volumes" {
   for_each = local.nodes
