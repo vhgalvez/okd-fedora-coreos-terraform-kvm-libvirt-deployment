@@ -27,29 +27,24 @@ resource "libvirt_pool" "volumetmp_03" {
   }
 }
 
-# Define node configurations with local file URLs for Ignition files
+# Define node configurations with direct file URLs for Ignition files
 locals {
   nodes = {
-    bootstrap = { size = var.bootstrap_volume_size, url = "file:///home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/bootstrap.ign" },
-    master1   = { size = var.master_volume_size, url = "file:///home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign" },
-    master2   = { size = var.master_volume_size, url = "file:///home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign" },
-    master3   = { size = var.master_volume_size, url = "file:///home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign" },
-    worker1   = { size = var.worker_volume_size, url = "file:///home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign" },
-    worker2   = { size = var.worker_volume_size, url = "file:///home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign" },
-    worker3   = { size = var.worker_volume_size, url = "file:///home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign" }
+    bootstrap = { size = var.bootstrap_volume_size, file = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/bootstrap.ign" },
+    master1   = { size = var.master_volume_size, file = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign" },
+    master2   = { size = var.master_volume_size, file = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign" },
+    master3   = { size = var.master_volume_size, file = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign" },
+    worker1   = { size = var.worker_volume_size, file = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign" },
+    worker2   = { size = var.worker_volume_size, file = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign" },
+    worker3   = { size = var.worker_volume_size, file = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign" }
   }
 }
 
-# Download Ignition files to local disk before creating volumes
+# Directly use local file paths without HTTP data source
 resource "local_file" "ignition_files" {
   for_each = local.nodes
-  content  = data.http.ignition_files[each.key].response_body
+  content  = file(each.value.file)
   filename = "/tmp/${each.key}.ign"
-}
-
-data "http" "ignition_files" {
-  for_each = local.nodes
-  url      = each.value.url
 }
 
 # Create Ignition volumes for nodes
