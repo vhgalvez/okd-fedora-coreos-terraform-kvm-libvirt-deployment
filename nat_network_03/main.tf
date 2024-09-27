@@ -1,4 +1,3 @@
-# main.tf
 terraform {
   required_version = ">= 1.9.5"
   required_providers {
@@ -58,17 +57,36 @@ resource "local_file" "worker_ignition_file" {
   filename = "/tmp/worker.ign"
 }
 
+# Ensure all local Ignition files are created before creating Ignition volumes
+resource "null_resource" "create_ignition_files" {
+  depends_on = [
+    local_file.bootstrap_ignition_file,
+    local_file.master_ignition_file,
+    local_file.worker_ignition_file
+  ]
+}
+
 # Define node configurations
 locals {
   nodes = {
-    bootstrap = { size = var.bootstrap_volume_size, ignition_file = local_file.bootstrap_ignition_file.filename },
-    master1   = { size = var.master_volume_size, ignition_file = local_file.master_ignition_file.filename },
-    master2   = { size = var.master_volume_size, ignition_file = local_file.master_ignition_file.filename },
-    master3   = { size = var.master_volume_size, ignition_file = local_file.master_ignition_file.filename },
-    worker1   = { size = var.worker_volume_size, ignition_file = local_file.worker_ignition_file.filename },
-    worker2   = { size = var.worker_volume_size, ignition_file = local_file.worker_ignition_file.filename },
-    worker3   = { size = var.worker_volume_size, ignition_file = local_file.worker_ignition_file.filename },
+    bootstrap = { size = var.bootstrap_volume_size, ignition_file = local_file.bootstrap_ignition_file.content },
+    master1   = { size = var.master_volume_size, ignition_file = local_file.master_ignition_file.content },
+    master2   = { size = var.master_volume_size, ignition_file = local_file.master_ignition_file.content },
+    master3   = { size = var.master_volume_size, ignition_file = local_file.master_ignition_file.content },
+    worker1   = { size = var.worker_volume_size, ignition_file = local_file.worker_ignition_file.content },
+    worker2   = { size = var.worker_volume_size, ignition_file = local_file.worker_ignition_file.content },
+    worker3   = { size = var.worker_volume_size, ignition_file = local_file.worker_ignition_file.content }
   }
+}
+
+# Create Ignition volumes for nodes
+resource "libvirt_volume" "ignition_volumes" {
+  for_each = local.nodes
+  name     = "${each.key}-ignition"
+  pool     = libvirt_pool.volumetmp_03.name
+  source   = each.value.ignition_file
+  format   = "raw"
+  depends_on = [null_resource.create_ignition_files]
 }
 
 # Base volume definition for Fedora CoreOS
@@ -79,27 +97,12 @@ resource "libvirt_volume" "fcos_base" {
   format     = "qcow2"
 }
 
-# Ensure all local Ignition files are created before creating Ignition volumes
-resource "null_resource" "create_ignition_files" {
-  depends_on = [local_file.bootstrap_ignition_file, local_file.master_ignition_file, local_file.worker_ignition_file]
-}
-
-# Create Ignition volumes for nodes
-resource "libvirt_volume" "ignition_volumes" {
-  for_each = local.nodes
-  name     = "${each.key}-ignition"
-  pool     = libvirt_pool.volumetmp_03.name
-  source   = file(each.value.ignition_file) # Ensure the file content is properly read
-  format   = "raw"
-  depends_on = [null_resource.create_ignition_files]
-}
-
 # Create node volumes
 resource "libvirt_volume" "okd_volumes" {
-  for_each       = local.nodes
-  name           = "${each.key}.qcow2"
-  pool           = libvirt_pool.volumetmp_03.name
-  size           = each.value.size * 1073741824
+  for_each = local.nodes
+  name     = "${each.key}.qcow2"
+  pool     = libvirt_pool.volumetmp_03.name
+  size     = each.value.size * 1073741824
   base_volume_id = libvirt_volume.fcos_base.id
 }
 
