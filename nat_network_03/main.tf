@@ -19,7 +19,7 @@ resource "libvirt_pool" "volumetmp_03" {
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
 }
 
-# Define node configurations with direct URLs
+# Define node configurations with direct URLs for Ignition files
 locals {
   nodes = {
     bootstrap = { size = var.bootstrap_volume_size, url = "http://10.17.3.14/okd/bootstrap.ign" },
@@ -32,12 +32,24 @@ locals {
   }
 }
 
-# Create Ignition volumes for nodes directly from URLs
+# Download Ignition files to local disk before creating volumes
+resource "local_file" "ignition_files" {
+  for_each = local.nodes
+  content  = data.http.ignition_files[each.key].response_body
+  filename = "/tmp/${each.key}.ign"
+}
+
+data "http" "ignition_files" {
+  for_each = local.nodes
+  url      = each.value.url
+}
+
+# Create Ignition volumes for nodes
 resource "libvirt_volume" "ignition_volumes" {
   for_each = local.nodes
   name     = "${each.key}-ignition"
   pool     = libvirt_pool.volumetmp_03.name
-  source   = each.value.url  # Directly using the URL as source
+  source   = local_file.ignition_files[each.key].filename
   format   = "raw"
 }
 
