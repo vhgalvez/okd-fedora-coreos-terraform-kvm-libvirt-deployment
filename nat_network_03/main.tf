@@ -22,7 +22,8 @@ provider "libvirt" {
 provider "local" {}
 
 
-volume_pool {
+# Define storage pool
+resource "libvirt_pool" "volume_pool" {
   name = "volumes"
   type = "dir"
   path = "/var/lib/libvirt/images"
