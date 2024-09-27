@@ -1,4 +1,3 @@
-# main.tf
 terraform {
   required_version = ">= 1.9.5"
   required_providers {
@@ -90,6 +89,7 @@ resource "libvirt_volume" "ignition_volumes" {
   pool     = libvirt_pool.volumetmp_03.name
   source   = each.value.ignition_file
   format   = "raw"
+  depends_on = [local_file.bootstrap_ignition_file, local_file.master_ignition_file, local_file.worker_ignition_file]
 }
 
 # Create node volumes
