@@ -21,14 +21,14 @@ provider "libvirt" {
 
 provider "local" {}
 
-# Define the storage pool for volumes
+# Storage pool for volumes
 resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
 }
 
-# Define base volume
+# Base volume definition
 resource "libvirt_volume" "base" {
   name   = "base"
   source = var.base_image
@@ -98,14 +98,14 @@ resource "libvirt_volume" "ignition_volumes" {
 
 # Create node volumes
 resource "libvirt_volume" "okd_volumes" {
-  for_each       = { for node in local.nodes : node.name => node }
-  name           = "${each.key}.qcow2"
-  pool           = libvirt_pool.volumetmp_03.name
-  size           = each.value.size * 1073741824
+  for_each = { for node in local.nodes : node.name => node }
+  name     = "${each.key}.qcow2"
+  pool     = libvirt_pool.volumetmp_03.name
+  size     = each.value.size * 1073741824
   base_volume_id = libvirt_volume.fcos_base.id
 }
 
-# Define nodes
+# Define libvirt domains for nodes
 resource "libvirt_domain" "nodes" {
   for_each = { for node in local.nodes : node.name => node }
   name     = each.key
@@ -121,11 +121,6 @@ resource "libvirt_domain" "nodes" {
   disk {
     volume_id = libvirt_volume.okd_volumes[each.key].id
   }
-
-  depends_on = [
-    libvirt_volume.ignition_volumes,
-    libvirt_volume.okd_volumes
-  ]
 }
 
 # Output node IP addresses
