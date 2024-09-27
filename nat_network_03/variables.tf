@@ -44,3 +44,7 @@ variable "dns2" {
   description = "Secondary DNS server"
   type        = string
 }
+variable "base_image" {
+  description = "Path to the base image for the VM"
+  type        = string
+}
