@@ -3,11 +3,11 @@ terraform {
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
-      version = "~> 0.7.0"
+      version = "~> 0.8.0"
     }
     local = {
       source  = "hashicorp/local"
-      version = "~> 2.1.0"
+      version = "~> 2.5.2"
     }
     http = {
       source = "hashicorp/http"
