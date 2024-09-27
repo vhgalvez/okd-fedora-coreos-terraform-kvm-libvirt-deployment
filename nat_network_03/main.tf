@@ -5,6 +5,10 @@ terraform {
       source  = "dmacvicar/libvirt"
       version = "~> 0.8.0"
     }
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.2.0"
+    }
   }
 }
 
@@ -40,6 +44,7 @@ resource "libvirt_volume" "ignition_volumes" {
   source   = each.value.url
   format   = "raw"
 }
+
 
 # Base volume definition for Fedora CoreOS
 resource "libvirt_volume" "fcos_base" {
