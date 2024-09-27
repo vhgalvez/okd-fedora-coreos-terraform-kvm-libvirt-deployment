@@ -1,30 +1,23 @@
-variable "coreos_image" {
-  description = "URL for Fedora CoreOS image"
+variable "dns1" {
+  description = "Primary DNS server"
   type        = string
 }
 
-variable "bootstrap_volume_size" {
-  description = "Volume size for bootstrap node (in GiB)"
-  type        = number
-  default     = 20
+variable "dns2" {
+  description = "Secondary DNS server"
+  type        = string
 }
 
-variable "master_volume_size" {
-  description = "Volume size for master nodes (in GiB)"
-  type        = number
-  default     = 30
+variable "gateway" {
+  description = "Network gateway"
+  type        = string
 }
 
-variable "worker_volume_size" {
-  description = "Volume size for worker nodes (in GiB)"
-  type        = number
-  default     = 30
+variable "ssh_keys" {
+  description = "List of SSH public keys"
+  type        = list(string)
 }
-
-variable "vm_definitions" {
-  description = "VM configurations"
-  type = map(object({
-    cpus   = number
-    memory = number
-  }))
+variable "coreos_image" {
+  description = "URL or path to the Fedora CoreOS image"
+  type        = string
 }
