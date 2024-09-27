@@ -1,13 +1,10 @@
+# main.tf
 terraform {
   required_version = ">= 1.9.5"
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
       version = "~> 0.7.0"
-    }
-    ct = {
-      source  = "poseidon/ct"
-      version = "0.13.0"
     }
     local = {
       source  = "hashicorp/local"
@@ -30,14 +27,6 @@ resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
-}
-
-# Base volume definition for Fedora CoreOS
-resource "libvirt_volume" "fcos_base" {
-  name   = "fcos_base.qcow2"
-  source = var.base_image
-  pool   = libvirt_pool.volumetmp_03.name
-  format = "qcow2"
 }
 
 # Fetch Ignition configuration files
@@ -82,6 +71,11 @@ locals {
   }
 }
 
+# Ensure all local Ignition files are created before creating Ignition volumes
+resource "null_resource" "create_ignition_files" {
+  depends_on = [local_file.bootstrap_ignition_file, local_file.master_ignition_file, local_file.worker_ignition_file]
+}
+
 # Create Ignition volumes for nodes
 resource "libvirt_volume" "ignition_volumes" {
   for_each = local.nodes
@@ -89,15 +83,23 @@ resource "libvirt_volume" "ignition_volumes" {
   pool     = libvirt_pool.volumetmp_03.name
   source   = each.value.ignition_file
   format   = "raw"
-  depends_on = [local_file.bootstrap_ignition_file, local_file.master_ignition_file, local_file.worker_ignition_file]
+  depends_on = [null_resource.create_ignition_files]
+}
+
+# Base volume definition for Fedora CoreOS
+resource "libvirt_volume" "fcos_base" {
+  name       = "fcos_base.qcow2"
+  pool       = libvirt_pool.volumetmp_03.name
+  source     = var.coreos_image
+  format     = "qcow2"
 }
 
 # Create node volumes
 resource "libvirt_volume" "okd_volumes" {
-  for_each       = local.nodes
-  name           = "${each.key}.qcow2"
-  pool           = libvirt_pool.volumetmp_03.name
-  size           = each.value.size * 1073741824
+  for_each = local.nodes
+  name     = "${each.key}.qcow2"
+  pool     = libvirt_pool.volumetmp_03.name
+  size     = each.value.size * 1073741824
   base_volume_id = libvirt_volume.fcos_base.id
 }
 
