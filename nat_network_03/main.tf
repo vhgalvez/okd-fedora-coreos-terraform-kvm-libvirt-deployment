@@ -40,19 +40,12 @@ locals {
   }
 }
 
-# Directly use local file paths without HTTP data source
-resource "local_file" "ignition_files" {
-  for_each = local.nodes
-  content  = file(each.value.file)
-  filename = "/tmp/${each.key}.ign"
-}
-
 # Create Ignition volumes for nodes
 resource "libvirt_volume" "ignition_volumes" {
   for_each = local.nodes
   name     = "${each.key}-ignition"
   pool     = libvirt_pool.volumetmp_03.name
-  source   = local_file.ignition_files[each.key].filename
+  source   = each.value.file
   format   = "raw"
 }
 

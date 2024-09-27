@@ -3,11 +3,6 @@ variable "coreos_image" {
   type        = string
 }
 
-variable "base_image" {
-  description = "Path to the base image for the VM"
-  type        = string
-}
-
 variable "bootstrap_volume_size" {
   description = "Volume size for bootstrap node (in GiB)"
   type        = number
@@ -32,24 +27,4 @@ variable "vm_definitions" {
     cpus   = number
     memory = number
   }))
-}
-
-variable "gateway" {
-  description = "Network gateway"
-  type        = string
-}
-
-variable "dns1" {
-  description = "Primary DNS server"
-  type        = string
-}
-
-variable "dns2" {
-  description = "Secondary DNS server"
-  type        = string
-}
-
-variable "ssh_keys" {
-  description = "List of SSH public keys"
-  type        = list(string)
 }
