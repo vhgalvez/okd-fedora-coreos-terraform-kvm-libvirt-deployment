@@ -84,9 +84,8 @@ resource "libvirt_volume" "ignition_volumes" {
   for_each = local.nodes
   name     = "${each.key}-ignition"
   pool     = libvirt_pool.volumetmp_03.name
-  # Reading content directly instead of using file()
-  content    = file(each.value.ignition_file)
-  format     = "raw"
+  source   = each.value.ignition_file
+  format   = "raw"
   depends_on = [null_resource.create_ignition_files]
 }
 
