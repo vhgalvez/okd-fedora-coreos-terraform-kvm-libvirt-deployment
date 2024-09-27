@@ -25,8 +25,6 @@ resource "libvirt_pool" "volumetmp_03" {
   lifecycle {
     create_before_destroy = true
   }
-  # Hacer que el pool se inicie automáticamente
-  autostart = true
 }
 
 # Definir configuraciones de nodos con URLs directas para archivos Ignition
@@ -87,7 +85,6 @@ resource "libvirt_domain" "nodes" {
   memory   = var.vm_definitions[each.key].memory
   vcpu     = var.vm_definitions[each.key].cpus
 
-  # Usar cloud-init si es necesario, para Fedora CoreOS usa Ignition
   cloudinit = libvirt_volume.ignition_volumes[each.key].id
 
   network_interface {
