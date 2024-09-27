@@ -21,13 +21,13 @@ resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
-  # Ensure pool is created before using it
+  
   lifecycle {
     create_before_destroy = true
   }
 }
 
-# Define node configurations with direct file URLs for Ignition files
+# Define node configurations with direct file paths for Ignition files
 locals {
   nodes = {
     bootstrap = { size = var.bootstrap_volume_size, file = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/bootstrap.ign" },
