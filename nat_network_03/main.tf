@@ -21,11 +21,13 @@ resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
-  # Crear el directorio si no existe
+
+  # Añade esta línea para asegurarte de que el pool esté activo antes de usarlo
   lifecycle {
     create_before_destroy = true
   }
 }
+
 
 # Definir configuraciones de nodos con URLs directas para archivos Ignition
 locals {
