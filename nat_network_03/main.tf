@@ -21,7 +21,7 @@ resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
-
+  # Ensure pool is created before using it
   lifecycle {
     create_before_destroy = true
   }
@@ -41,15 +41,15 @@ locals {
 }
 
 # Download Ignition files to local disk before creating volumes
-data "http" "ignition_files" {
-  for_each = local.nodes
-  url      = each.value.url
-}
-
 resource "local_file" "ignition_files" {
   for_each = local.nodes
   content  = data.http.ignition_files[each.key].response_body
   filename = "/tmp/${each.key}.ign"
+}
+
+data "http" "ignition_files" {
+  for_each = local.nodes
+  url      = each.value.url
 }
 
 # Create Ignition volumes for nodes
