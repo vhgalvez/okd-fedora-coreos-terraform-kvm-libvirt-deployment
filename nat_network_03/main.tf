@@ -6,10 +6,6 @@ terraform {
       source  = "dmacvicar/libvirt"
       version = "0.8.0"
     }
-    local = {
-      source  = "hashicorp/local"
-      version = "~> 2.5.2"
-    }
   }
 }
 
@@ -28,7 +24,7 @@ resource "libvirt_pool" "volumetmp_03" {
   }
 }
 
-# Corrected: Only one resource to create volumes based on the existing .ign files
+# Resource to create volumes based on the existing .ign files
 resource "libvirt_volume" "ignition_volumes" {
   for_each = {
     "bootstrap" = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/bootstrap.ign"
@@ -39,29 +35,10 @@ resource "libvirt_volume" "ignition_volumes" {
     "worker2"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker2.ign"
     "worker3"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker3.ign"
   }
-
   name     = "${each.key}-ignition"
   pool     = libvirt_pool.volumetmp_03.name
   source   = each.value
   format   = "raw"
-}
-
-
-# Save Ignition files locally before creating volumes
-resource "local_file" "ignition_files" {
-  for_each = data.http.ignition_files
-  content  = each.value.body
-  filename = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/${each.key}.ign"
-}
-
-# Create Ignition volumes only after files are downloaded
-resource "libvirt_volume" "ignition_volumes" {
-  for_each = local_file.ignition_files
-  name     = "${each.key}-ignition"
-  pool     = libvirt_pool.volumetmp_03.name
-  source   = each.value.filename
-  format   = "raw"
-  depends_on = [local_file.ignition_files]  # Ensure volumes are created after files are saved
 }
 
 # Create a base volume for Fedora CoreOS
