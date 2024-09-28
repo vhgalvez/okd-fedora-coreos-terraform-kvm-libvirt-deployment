@@ -97,21 +97,6 @@ resource "libvirt_domain" "nodes" {
 
 
 
-
-  graphics {
-    type        = "vnc"
-    listen_type = "address"
-  }
-
-  console {
-    type        = "pty"
-    target_type = "serial"
-    target_port = "0"
-  }
-
-  qemu_agent = true
-}
-
 # Output node IP addresses
 output "node_ips" {
   value = { for node in libvirt_domain.nodes : node.name => node.network_interface[0].addresses[0] }
