@@ -34,7 +34,7 @@ resource "null_resource" "create_volumetmp_directory" {
 resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
   type = "dir"
-  path = "/mnt/lv_data/organized_storage/volumetmp_03"
+  path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
 
   lifecycle {
     create_before_destroy = true
@@ -80,9 +80,9 @@ resource "libvirt_volume" "okd_volumes" {
   name           = "${each.key}.qcow2"
   pool           = libvirt_pool.volumetmp_03.name
   size           = each.value.disk_size * 1048576 # Convert MB to bytes
-  base_volume_id = libvirt_volume.fcos_base.id
+  base_volume_id = libvirt_volume.coreos_image.id # Corrected reference
 
-  depends_on = [libvirt_volume.fcos_base]
+  depends_on = [libvirt_volume.coreos_image] # Corrected reference
 }
 
 # Define VMs with network and disk attachments
