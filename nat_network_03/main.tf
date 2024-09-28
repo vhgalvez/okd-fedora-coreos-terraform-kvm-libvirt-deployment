@@ -25,7 +25,7 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Definir el pool de almacenamiento para los volúmenes
+# Define storage pool
 resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
   type = "dir"
@@ -36,7 +36,7 @@ resource "libvirt_pool" "volumetmp_03" {
   }
 }
 
-# Definir configuraciones de nodos y rutas a los archivos Ignition (vía servidor web)
+# Define node configurations with the correct Ignition URLs
 locals {
   nodes = {
     bootstrap = { size = var.bootstrap_volume_size, file = "http://10.17.3.14/okd/bootstrap.ign" },
@@ -49,17 +49,17 @@ locals {
   }
 }
 
-# Crear volúmenes de Ignition para los nodos
+# Create Ignition volumes for nodes
 resource "libvirt_volume" "ignition_volumes" {
   for_each = local.nodes
   name     = "${each.key}-ignition"
   pool     = libvirt_pool.volumetmp_03.name
-  # Se refiere al archivo Ignition servido vía HTTP
+  # Refers to the Ignition file served via HTTP
   source   = each.value.file
   format   = "raw"
 }
 
-# Crear el volumen base de Fedora CoreOS
+# Create base volume for Fedora CoreOS
 resource "libvirt_volume" "fcos_base" {
   name   = "fcos_base.qcow2"
   pool   = libvirt_pool.volumetmp_03.name
@@ -67,7 +67,7 @@ resource "libvirt_volume" "fcos_base" {
   format = "qcow2"
 }
 
-# Crear volúmenes individuales de nodos basados en la imagen base
+# Create node volumes based on the base image
 resource "libvirt_volume" "okd_volumes" {
   for_each       = local.nodes
   name           = "${each.key}.qcow2"
@@ -76,7 +76,7 @@ resource "libvirt_volume" "okd_volumes" {
   base_volume_id = libvirt_volume.fcos_base.id
 }
 
-# Definir dominios VM y conectar los volúmenes Ignition y la red
+# Define VMs with network and disk attachments
 resource "libvirt_domain" "nodes" {
   for_each = local.nodes
   name     = each.key
@@ -86,7 +86,7 @@ resource "libvirt_domain" "nodes" {
   cloudinit = libvirt_volume.ignition_volumes[each.key].id
 
   network_interface {
-    network_name = "kube_network_02" # Asegúrate de que esta red esté correctamente configurada en libvirt
+    network_name = "kube_network_02"
   }
 
   disk {
@@ -94,7 +94,7 @@ resource "libvirt_domain" "nodes" {
   }
 }
 
-# Salida de las IPs de los nodos
+# Output node IP addresses
 output "node_ips" {
   value = { for node in libvirt_domain.nodes : node.name => node.network_interface[0].addresses[0] }
 }
