@@ -64,3 +64,11 @@ Una vez que el pool volumetmp_03 esté creado y activo, Terraform puede gestiona
 Si prefieres automatizar la configuración del pool de almacenamiento completamente con Terraform, asegúrate de que el archivo main.tf maneje todas las condiciones de creación, permisos y contexto SELinux para evitar errores. Sin embargo, la creación manual sigue siendo la mejor práctica para asegurar una infraestructura base sólida antes del despliegue automatizado.
 
 Este procedimiento asegura que el pool esté disponible y correctamente configurado, permitiendo a Terraform trabajar sin problemas durante la provisión de recursos para el clúster de OKD.
+
+
+
+
+
+
+
+
