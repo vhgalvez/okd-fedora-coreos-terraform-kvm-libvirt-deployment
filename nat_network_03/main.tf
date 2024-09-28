@@ -92,8 +92,11 @@ resource "libvirt_domain" "nodes" {
     volume_id = libvirt_volume.okd_volumes[each.key].id
   }
 
-  # Do not use any graphical interface (VNC/Spice)
-  # No `graphics` block is required.
+  # No graphical interface required
+  graphics {
+    type        = "vnc"
+    listen_type = "none"
+  }
 
   console {
     type        = "pty"
@@ -101,8 +104,8 @@ resource "libvirt_domain" "nodes" {
     target_port = "0"
   }
 
-  # Enable QEMU agent if you require it
-  qemu_agent = true
+  # Disable waiting for guest agent
+  wait_for_lease = false
 
   depends_on = [libvirt_volume.okd_volumes]
 }
