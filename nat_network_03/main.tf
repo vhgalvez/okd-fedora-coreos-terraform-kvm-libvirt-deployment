@@ -92,6 +92,21 @@ resource "libvirt_domain" "nodes" {
     volume_id = libvirt_volume.okd_volumes[each.key].id
   }
 
+  # Use VNC for the graphics type as Spice is not supported in your QEMU setup
+  graphics {
+    type        = "vnc"
+    listen_type = "none" # You can use `none` if you don't need a VNC server
+  }
+
+  console {
+    type        = "pty"
+    target_type = "serial"
+    target_port = "0"
+  }
+
+  # Enable QEMU agent if you require it
+  qemu_agent = true
+
   depends_on = [libvirt_volume.okd_volumes]
 }
 
