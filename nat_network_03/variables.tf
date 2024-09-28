@@ -25,7 +25,7 @@ variable "dns2" {
 }
 
 # Path to the Fedora CoreOS base image
-variable "base_image" {
+variable "coreos_image" {
   description = "Path to the Fedora CoreOS base image"
   type        = string
 }
