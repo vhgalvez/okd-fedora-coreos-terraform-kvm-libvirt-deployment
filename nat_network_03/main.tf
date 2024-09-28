@@ -41,21 +41,21 @@ data "http" "ignition_files" {
   url = each.value
 }
 
-# Save Ignition files locally
+# Save Ignition files locally before creating volumes
 resource "local_file" "ignition_files" {
   for_each = data.http.ignition_files
   content  = each.value.body
   filename = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/${each.key}.ign"
 }
 
-# Ensure the Ignition files are successfully created before creating the volumes
+# Create Ignition volumes only after files are downloaded
 resource "libvirt_volume" "ignition_volumes" {
   for_each = local_file.ignition_files
   name     = "${each.key}-ignition"
   pool     = libvirt_pool.volumetmp_03.name
   source   = each.value.filename
   format   = "raw"
-  depends_on = [local_file.ignition_files]  # Ensure Ignition files are ready
+  depends_on = [local_file.ignition_files]  # Ensure volumes are created after files are saved
 }
 
 # Create a base volume for Fedora CoreOS
