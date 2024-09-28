@@ -23,7 +23,7 @@ resource "null_resource" "create_volumetmp_directory" {
 resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
   type = "dir"
-  path = "/mnt/lv_data/organized_storage/volumetmp_03"
+  path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
 
   lifecycle {
     create_before_destroy = true
@@ -90,11 +90,6 @@ resource "libvirt_domain" "nodes" {
 
   disk {
     volume_id = libvirt_volume.okd_volumes[each.key].id
-  }
-
-  # Disable graphical interface
-  graphics {
-    type = "none"
   }
 
   depends_on = [libvirt_volume.okd_volumes]
