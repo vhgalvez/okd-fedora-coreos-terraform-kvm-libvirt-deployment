@@ -1,3 +1,4 @@
+# main.tf
 terraform {
   required_version = ">= 1.9.5"
   required_providers {
@@ -90,8 +91,19 @@ resource "libvirt_domain" "nodes" {
   memory   = each.value.memory
   vcpu     = each.value.cpus
 
-  # Asignar cloudinit al recurso de ignition correcto
-  cloudinit = libvirt_ignition[each.key].id
+  # Match each node with its corresponding Ignition file
+  cloudinit = lookup(
+    {
+      "bootstrap" = libvirt_ignition.bootstrap.id,
+      "master1"   = libvirt_ignition.master1.id,
+      "master2"   = libvirt_ignition.master2.id,
+      "master3"   = libvirt_ignition.master3.id,
+      "worker1"   = libvirt_ignition.worker1.id,
+      "worker2"   = libvirt_ignition.worker2.id,
+      "worker3"   = libvirt_ignition.worker3.id
+    },
+    each.key
+  )
 
   network_interface {
     network_name = "kube_network_02"
