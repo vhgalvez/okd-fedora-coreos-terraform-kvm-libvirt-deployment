@@ -85,7 +85,7 @@ resource "libvirt_domain" "nodes" {
   cloudinit = libvirt_volume.ignition_volumes[each.key].id
 
   network_interface {
-    network_name = "kube_network_02"
+    network_name = "kube_network_02" # Asegúrate de que esta red esté correctamente configurada en libvirt
   }
 
   disk {
