@@ -85,21 +85,26 @@ resource "libvirt_domain" "nodes" {
   cloudinit = libvirt_ignition.ignitions[each.key].id
 
   network_interface {
-    network_name  = "kube_network_02"
-    wait_for_lease = true # Ensure the network interface waits for a lease
+    network_name = "kube_network_02"
   }
 
   disk {
     volume_id = libvirt_volume.okd_volumes[each.key].id
   }
 
-  # Disable QEMU agent to prevent issues
-  qemu_agent = false
+  # Define the QEMU guest agent channel for communication
+  channel {
+    type = "unix"
+    target {
+      type = "virtio"
+      name = "org.qemu.guest_agent.0"
+    }
+  }
 
-  # Use VNC for the graphics type if needed
+  # Use VNC for the graphics type as Spice is not supported in your QEMU setup
   graphics {
     type        = "vnc"
-    listen_type = "none" # Set to `none` to avoid starting a VNC server
+    listen_type = "none" # You can use `none` if you don't need a VNC server
   }
 
   console {
@@ -107,6 +112,9 @@ resource "libvirt_domain" "nodes" {
     target_type = "serial"
     target_port = "0"
   }
+
+  # Disable QEMU agent communication to prevent waiting on it
+  qemu_agent = false
 
   depends_on = [libvirt_volume.okd_volumes]
 }
