@@ -15,7 +15,7 @@ provider "libvirt" {
 # Ensure the directory is created before anything else
 resource "null_resource" "create_volumetmp_directory" {
   provisioner "local-exec" {
-    command = "mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 && chmod 755 /mnt/lv_data/organized_storage/volumes/volumetmp_03"
+    command = "mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 && chmod 755 /mnt/lv_data/organized_storage/volumetmp_03"
   }
 }
 
@@ -23,7 +23,7 @@ resource "null_resource" "create_volumetmp_directory" {
 resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
   type = "dir"
-  path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
+  path = "/mnt/lv_data/organized_storage/volumetmp_03"
 
   lifecycle {
     create_before_destroy = true
@@ -92,11 +92,8 @@ resource "libvirt_domain" "nodes" {
     volume_id = libvirt_volume.okd_volumes[each.key].id
   }
 
-  # Use VNC for the graphics type as Spice is not supported in your QEMU setup
-  graphics {
-    type        = "vnc"
-    listen_type = "none" # You can use `none` if you don't need a VNC server
-  }
+  # Do not use any graphical interface (VNC/Spice)
+  # No `graphics` block is required.
 
   console {
     type        = "pty"
