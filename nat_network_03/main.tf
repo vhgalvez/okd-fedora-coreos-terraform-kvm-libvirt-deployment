@@ -25,21 +25,47 @@ resource "libvirt_pool" "volumetmp_03" {
   }
 }
 
-# Generate ignition configurations with libvirt_ignition
-resource "libvirt_ignition" "ignition_configs" {
-  for_each = {
-    "bootstrap" = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/bootstrap.ign"
-    "master1"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/master1.ign"
-    "master2"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/master2.ign"
-    "master3"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/master3.ign"
-    "worker1"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker1.ign"
-    "worker2"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker2.ign"
-    "worker3"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker3.ign"
-  }
-
-  name    = "${each.key}.ign"
+# Define individual Ignition resources
+resource "libvirt_ignition" "bootstrap" {
+  name    = "bootstrap.ign"
   pool    = libvirt_pool.volumetmp_03.name
-  content = file(each.value)
+  content = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/bootstrap.ign")
+}
+
+resource "libvirt_ignition" "master1" {
+  name    = "master1.ign"
+  pool    = libvirt_pool.volumetmp_03.name
+  content = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/master1.ign")
+}
+
+resource "libvirt_ignition" "master2" {
+  name    = "master2.ign"
+  pool    = libvirt_pool.volumetmp_03.name
+  content = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/master2.ign")
+}
+
+resource "libvirt_ignition" "master3" {
+  name    = "master3.ign"
+  pool    = libvirt_pool.volumetmp_03.name
+  content = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/master3.ign")
+}
+
+resource "libvirt_ignition" "worker1" {
+  name    = "worker1.ign"
+  pool    = libvirt_pool.volumetmp_03.name
+  content = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker1.ign")
+}
+
+resource "libvirt_ignition" "worker2" {
+  name    = "worker2.ign"
+  pool    = libvirt_pool.volumetmp_03.name
+  content = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker2.ign")
+}
+
+resource "libvirt_ignition" "worker3" {
+  name    = "worker3.ign"
+  pool    = libvirt_pool.volumetmp_03.name
+  content = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker3.ign")
 }
 
 # Create a base volume for Fedora CoreOS
@@ -67,7 +93,7 @@ resource "libvirt_domain" "nodes" {
   vcpu     = each.value.cpus
 
   # Link the cloudinit to the correct volume
-  cloudinit = libvirt_ignition.ignition_configs[each.key].id
+  cloudinit = libvirt_ignition[each.key].id
 
   network_interface {
     network_name = "kube_network_02"
