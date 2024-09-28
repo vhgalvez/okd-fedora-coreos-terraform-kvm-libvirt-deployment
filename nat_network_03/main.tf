@@ -12,7 +12,7 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Crear la nueva red kube_network_03 con NAT
+# Create the new NAT-based network kube_network_03
 resource "libvirt_network" "kube_network_03" {
   name      = "kube_network_03"
   mode      = "nat"
@@ -61,7 +61,7 @@ resource "libvirt_ignition" "ignitions" {
   for_each = local.ignition_files
 
   name    = "${each.key}-ignition"
-  content = file(each.value) # Wrap `file()` around the Ignition file path
+  content = file(each.value)
 }
 
 # Create a base volume for Fedora CoreOS
@@ -95,19 +95,19 @@ resource "libvirt_domain" "nodes" {
   # Use the correct Ignition volume
   cloudinit = libvirt_ignition.ignitions[each.key].id
 
-  # Conectar las VMs a la nueva red kube_network_03
+  # Connect VMs to the kube_network_03 network
   network_interface {
-    network_id = libvirt_network.kube_network_03.id
+    network_id     = libvirt_network.kube_network_03.id
+    wait_for_lease = true # Enable this to ensure DHCP assigns an IP address
   }
 
   disk {
     volume_id = libvirt_volume.okd_volumes[each.key].id
   }
 
-  # Use VNC for the graphics type as Spice is not supported in your QEMU setup
   graphics {
     type        = "vnc"
-    listen_type = "none" # You can use `none` if you don't need a VNC server
+    listen_type = "none"
   }
 
   console {
@@ -116,7 +116,7 @@ resource "libvirt_domain" "nodes" {
     target_port = "0"
   }
 
-  # Disable QEMU agent communication to prevent waiting on it
+  # Disable QEMU agent communication to prevent retrieval issues
   qemu_agent = false
 
   depends_on = [libvirt_volume.okd_volumes, libvirt_network.kube_network_03]
