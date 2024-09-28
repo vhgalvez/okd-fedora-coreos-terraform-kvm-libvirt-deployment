@@ -12,7 +12,7 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Ensure the directory for the pool is created
+# Ensure the directory is created before anything else
 resource "null_resource" "create_volumetmp_directory" {
   provisioner "local-exec" {
     command = "mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 && chmod 755 /mnt/lv_data/organized_storage/volumes/volumetmp_03"
@@ -24,14 +24,12 @@ resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
-  
-  # Ensure the directory is created before the pool
-  depends_on = [null_resource.create_volumetmp_directory]
 
-  # Proper lifecycle to handle pool creation
   lifecycle {
     create_before_destroy = true
   }
+
+  depends_on = [null_resource.create_volumetmp_directory]
 }
 
 # Define local paths to Ignition files
@@ -47,16 +45,12 @@ locals {
   }
 }
 
-# Create Ignition volumes from the .ign files
-resource "libvirt_volume" "ignition_volumes" {
+# Create Ignition volumes
+resource "libvirt_ignition" "ignitions" {
   for_each = local.ignition_files
 
-  name      = "${each.key}-ignition"
-  pool      = libvirt_pool.volumetmp_03.name
-  source    = each.value
-  format    = "qcow2"
-
-  depends_on = [libvirt_pool.volumetmp_03]
+  name    = "${each.key}-ignition"
+  content = file(each.value) # Wrap `file()` around the Ignition file path
 }
 
 # Create a base volume for Fedora CoreOS
@@ -87,8 +81,8 @@ resource "libvirt_domain" "nodes" {
   memory   = each.value.memory
   vcpu     = each.value.cpus
 
-  # Link the correct Ignition volume to cloudinit based on node type
-  cloudinit = libvirt_volume.ignition_volumes[each.key].id
+  # Use the correct Ignition volume
+  cloudinit = libvirt_ignition.ignitions[each.key].id
 
   network_interface {
     network_name = "kube_network_02"
