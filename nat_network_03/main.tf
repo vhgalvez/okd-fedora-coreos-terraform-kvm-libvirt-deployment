@@ -1,9 +1,18 @@
 terraform {
   required_version = ">= 1.9.5"
+
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
       version = "0.8.0"
+    }
+    ct = {
+      source  = "poseidon/ct"
+      version = "0.13.0"
+    }
+    template = {
+      source  = "hashicorp/template"
+      version = "~> 2.2.0"
     }
   }
 }
@@ -12,102 +21,109 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Create the new NAT-based network kube_network_03
+# Ensure the base directory is created first
+resource "null_resource" "create_directory" {
+  provisioner "local-exec" {
+    command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 && sudo chmod 755 /mnt/lv_data/organized_storage/volumetmp_03"
+  }
+}
+
 resource "libvirt_network" "kube_network_03" {
   name      = "kube_network_03"
   mode      = "nat"
   autostart = true
   addresses = ["10.17.4.0/24"]
+
   dhcp {
     enabled = true
   }
 }
 
-# Ensure the directory is created before anything else
-resource "null_resource" "create_volumetmp_directory" {
-  provisioner "local-exec" {
-    command = "mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 && chmod 755 /mnt/lv_data/organized_storage/volumetmp_03"
-  }
-}
-
-# Define a storage pool
 resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
   type = "dir"
-  path = "/mnt/lv_data/organized_storage/volumetmp_03"
+  path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
 
-  lifecycle {
-    create_before_destroy = true
-  }
-
-  depends_on = [null_resource.create_volumetmp_directory]
+  # Ensure the directory is created before creating the pool
+  depends_on = [null_resource.create_directory]
 }
 
-# Define local paths to Ignition files
-locals {
-  ignition_files = {
-    "bootstrap" = "${path.module}/okd-install/bootstrap.ign"
-    "master1"   = "${path.module}/okd-install/master.ign"
-    "master2"   = "${path.module}/okd-install/master.ign"
-    "master3"   = "${path.module}/okd-install/master.ign"
-    "worker1"   = "${path.module}/okd-install/worker.ign"
-    "worker2"   = "${path.module}/okd-install/worker.ign"
-    "worker3"   = "${path.module}/okd-install/worker.ign"
+resource "libvirt_volume" "base" {
+  name   = "base"
+  source = var.base_image
+  pool   = libvirt_pool.volumetmp_03.name
+  format = "qcow2"
+}
+
+data "template_file" "vm-configs" {
+  for_each = var.vm_definitions
+
+  template = file("${path.module}/configs/machine-${each.key}-config.yaml.tmpl")
+
+  vars = {
+    ssh_keys        = join(",", var.ssh_keys)
+    node_name       = each.value.node_name
+    ip              = each.value.ip
+    host_name       = each.value.name_dominio
+    gateway         = var.gateway
+    dns1            = var.dns1
+    dns2            = var.dns2
+    initial_cluster = var.initial_cluster
   }
 }
 
-# Create Ignition volumes
-resource "libvirt_ignition" "ignitions" {
-  for_each = local.ignition_files
+data "ct_config" "vm-ignitions" {
+  for_each = var.vm_definitions
+  content  = data.template_file.vm-configs[each.key].rendered
+}
+
+resource "local_file" "ignition_configs" {
+  for_each = var.vm_definitions
+
+  content  = data.ct_config.vm-ignitions[each.key].rendered
+  filename = "${path.module}/ignition-configs/${each.key}.ign"
+}
+
+resource "libvirt_ignition" "ignition" {
+  for_each = var.vm_definitions
 
   name    = "${each.key}-ignition"
-  content = file(each.value)
+  pool    = libvirt_pool.volumetmp_03.name
+  content = data.ct_config.vm-ignitions[each.key].rendered
 }
 
-# Create a base volume for Fedora CoreOS
-resource "libvirt_volume" "fcos_base" {
-  name   = "fcos_base.qcow2"
-  pool   = libvirt_pool.volumetmp_03.name
-  source = var.coreos_image
-  format = "qcow2"
-
-  depends_on = [libvirt_pool.volumetmp_03]
-}
-
-# Create individual node volumes based on the base image
-resource "libvirt_volume" "okd_volumes" {
-  for_each       = var.vm_definitions
-  name           = "${each.key}.qcow2"
-  pool           = libvirt_pool.volumetmp_03.name
-  size           = each.value.disk_size * 1048576 # Convert MB to bytes
-  base_volume_id = libvirt_volume.fcos_base.id
-
-  depends_on = [libvirt_volume.fcos_base]
-}
-
-# Define VMs with network and disk attachments
-resource "libvirt_domain" "nodes" {
+resource "libvirt_volume" "vm_disk" {
   for_each = var.vm_definitions
-  name     = "okd-${each.key}"
-  memory   = each.value.memory
-  vcpu     = each.value.cpus
 
-  # Use the correct Ignition volume
-  cloudinit = libvirt_ignition.ignitions[each.key].id
+  name           = "${each.key}-disk"
+  base_volume_id = libvirt_volume.base.id
+  pool           = libvirt_pool.volumetmp_03.name
+  format         = "qcow2"
+  size           = each.value.disk_size * 1024 * 1024 # size in MB converted to bytes
+}
 
-  # Connect VMs to the kube_network_03 network
+resource "libvirt_domain" "machine" {
+  for_each = var.vm_definitions
+
+  name   = each.key
+  vcpu   = each.value.cpus
+  memory = each.value.memory
+
   network_interface {
     network_id     = libvirt_network.kube_network_03.id
-    wait_for_lease = true # Enable this to ensure DHCP assigns an IP address
+    wait_for_lease = true
+    addresses      = [each.value.ip]
   }
 
   disk {
-    volume_id = libvirt_volume.okd_volumes[each.key].id
+    volume_id = libvirt_volume.vm_disk[each.key].id
   }
+
+  coreos_ignition = libvirt_ignition.ignition[each.key].id
 
   graphics {
     type        = "vnc"
-    listen_type = "none"
+    listen_type = "address"
   }
 
   console {
@@ -116,13 +132,9 @@ resource "libvirt_domain" "nodes" {
     target_port = "0"
   }
 
-  # Disable QEMU agent communication to prevent retrieval issues
-  qemu_agent = false
-
-  depends_on = [libvirt_volume.okd_volumes, libvirt_network.kube_network_03]
+  qemu_agent = true
 }
 
-# Output node IP addresses
-output "node_ips" {
-  value = { for node in libvirt_domain.nodes : node.name => node.network_interface[0].addresses[0] }
+output "ip_addresses" {
+  value = { for key, machine in libvirt_domain.machine : key => machine.network_interface[0].addresses[0] if length(machine.network_interface[0].addresses) > 0 }
 }
