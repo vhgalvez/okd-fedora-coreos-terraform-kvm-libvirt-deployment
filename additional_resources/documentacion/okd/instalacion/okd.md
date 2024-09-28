@@ -202,3 +202,9 @@ core@10.17.3.14:/home/core/nginx-docker/okd/
 sudo chcon -t svirt_home_t /home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/*.ign
 
 curl -o /mnt/lv_data/organized_storage/volumes/volumetmp_03/bootstrap.ign http://10.17.3.14/okd/bootstrap.ign
+
+
+
+    curl http://10.17.3.14/okd/bootstrap.ign
+    curl http://10.17.3.14/okd/master.ign
+    curl http://10.17.3.14/okd/worker.ign
