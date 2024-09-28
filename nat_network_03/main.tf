@@ -24,11 +24,10 @@ resource "libvirt_network" "kube_network_03" {
 }
 
 # Ensure the directory is created before anything else
-
 resource "null_resource" "create_volumetmp_directory" {
   provisioner "local-exec" {
     when    = create
-    command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 && sudo chmod 755 /mnt/lv_data/organized_storage/volumetmp_03"
+    command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 && sudo chmod 755 /mnt/lv_data/organized_storage/volumes/volumetmp_03"
   }
 
   provisioner "local-exec" {
