@@ -48,3 +48,7 @@ variable "ssh_keys" {
   description = "List of SSH public keys"
   type        = list(string)
 }
+variable "coreos_image" {
+  description = "Ruta de la imagen Fedora CoreOS"
+  default     = "/mnt/lv_data/organized_storage/images/fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2"
+}
