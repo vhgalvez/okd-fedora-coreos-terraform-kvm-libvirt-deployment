@@ -25,7 +25,7 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Define storage pool for volumes
+# Define the storage pool for volumes
 resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
   type = "dir"
@@ -35,7 +35,6 @@ resource "libvirt_pool" "volumetmp_03" {
     create_before_destroy = true
   }
 }
-
 
 # Define node configurations with direct file paths for Ignition files
 locals {
@@ -49,7 +48,6 @@ locals {
     worker3   = { size = var.worker_volume_size, file = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign" }
   }
 }
-
 
 # Create Ignition volumes for nodes
 resource "libvirt_volume" "ignition_volumes" {
@@ -77,7 +75,7 @@ resource "libvirt_volume" "okd_volumes" {
   base_volume_id = libvirt_volume.fcos_base.id
 }
 
-# Define libvirt domains for nodes
+# Define libvirt domains for nodes, connecting them to the existing network
 resource "libvirt_domain" "nodes" {
   for_each = local.nodes
   name     = each.key
@@ -87,8 +85,9 @@ resource "libvirt_domain" "nodes" {
   # Use Ignition volume for cloud-init
   cloudinit = libvirt_volume.ignition_volumes[each.key].id
 
+  # Connect the nodes to the existing network
   network_interface {
-    network_name = "nat_network_02"
+    network_name = "kube_network_02" # Reference the existing network
   }
 
   disk {
