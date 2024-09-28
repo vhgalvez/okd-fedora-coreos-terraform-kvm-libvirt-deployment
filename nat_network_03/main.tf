@@ -23,25 +23,27 @@ resource "libvirt_pool" "volumetmp_03" {
   }
 }
 
-# Define individual Ignition resources
+# Define local paths to Ignition files
 locals {
   ignition_files = {
-    "bootstrap" = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/bootstrap.ign")
-    "master1"   = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/master1.ign")
-    "master2"   = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/master2.ign")
-    "master3"   = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/master3.ign")
-    "worker1"   = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker1.ign")
-    "worker2"   = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker2.ign")
-    "worker3"   = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker3.ign")
+    "bootstrap" = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/bootstrap.ign"
+    "master1"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/master1.ign"
+    "master2"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/master2.ign"
+    "master3"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/master3.ign"
+    "worker1"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker1.ign"
+    "worker2"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker2.ign"
+    "worker3"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker3.ign"
   }
 }
 
-resource "libvirt_ignition" "ignitions" {
+# Correctly generate volumes from the .ign files
+resource "libvirt_volume" "ignition_volumes" {
   for_each = local.ignition_files
 
-  name    = "${each.key}.ign"
-  pool    = libvirt_pool.volumetmp_03.name
-  content = each.value
+  name   = "${each.key}-ignition"
+  pool   = libvirt_pool.volumetmp_03.name
+  source = each.value
+  format = "raw"
 }
 
 # Create a base volume for Fedora CoreOS
@@ -68,8 +70,8 @@ resource "libvirt_domain" "nodes" {
   memory   = each.value.memory
   vcpu     = each.value.cpus
 
-  # Assign the correct Ignition file to cloudinit based on node type
-  cloudinit = libvirt_ignition.ignitions[each.key].id
+  # Link the correct Ignition volume to cloudinit based on node type
+  cloudinit = libvirt_volume.ignition_volumes[each.key].id
 
   network_interface {
     network_name = "kube_network_02"
