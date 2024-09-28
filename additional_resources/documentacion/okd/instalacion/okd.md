@@ -205,9 +205,9 @@ curl -o /mnt/lv_data/organized_storage/volumes/volumetmp_03/bootstrap.ign http:/
 
 
 
-    curl http://10.17.3.14/okd/bootstrap.ign
-    curl http://10.17.3.14/okd/master.ign
-    curl http://10.17.3.14/okd/worker.ign
+curl http://10.17.3.14/okd/bootstrap.ign
+curl http://10.17.3.14/okd/master.ign
+curl http://10.17.3.14/okd/worker.ign
 
 
 

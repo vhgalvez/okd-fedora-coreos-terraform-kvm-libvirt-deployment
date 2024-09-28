@@ -36,8 +36,6 @@ resource "null_resource" "create_volumetmp_directory" {
   }
 }
 
-
-
 # Define a storage pool
 resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
