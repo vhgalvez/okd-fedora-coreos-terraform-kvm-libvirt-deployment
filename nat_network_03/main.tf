@@ -23,23 +23,24 @@ resource "libvirt_pool" "volumetmp_03" {
   }
 }
 
+
 resource "libvirt_volume" "ignition_volumes" {
   for_each = {
-    "bootstrap" = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/bootstrap.ign"
-    "master1"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/master1.ign"
-    "master2"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/master2.ign"
-    "master3"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/master3.ign"
-    "worker1"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker1.ign"
-    "worker2"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker2.ign"
-    "worker3"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker3.ign"
+    "bootstrap" = "http://10.17.3.14/okd/bootstrap.ign"
+    "master1"   = "http://10.17.3.14/okd/master.ign"
+    "master2"   = "http://10.17.3.14/okd/master.ign"
+    "master3"   = "http://10.17.3.14/okd/master.ign"
+    "worker1"   = "http://10.17.3.14/okd/worker.ign"
+    "worker2"   = "http://10.17.3.14/okd/worker.ign"
+    "worker3"   = "http://10.17.3.14/okd/worker.ign"
+
   }
 
-  name     = "${each.key}-ignition"
-  pool     = libvirt_pool.volumetmp_03.name
-  source   = each.value
-  format   = "qcow2"
+  name   = "${each.key}-ignition"
+  pool   = libvirt_pool.volumetmp_03.name
+  source = each.value
+  format = "qcow2"
 }
-
 
 # Create a base volume for Fedora CoreOS
 resource "libvirt_volume" "fcos_base" {
@@ -51,10 +52,10 @@ resource "libvirt_volume" "fcos_base" {
 
 # Create individual node volumes based on the base image
 resource "libvirt_volume" "okd_volumes" {
-  for_each = var.vm_definitions
-  name     = "${each.key}.qcow2"
-  pool     = libvirt_pool.volumetmp_03.name
-  size     = each.value.disk_size * 1048576  # Convert MB to bytes
+  for_each       = var.vm_definitions
+  name           = "${each.key}.qcow2"
+  pool           = libvirt_pool.volumetmp_03.name
+  size           = each.value.disk_size * 1048576 # Convert MB to bytes
   base_volume_id = libvirt_volume.fcos_base.id
 }
 
