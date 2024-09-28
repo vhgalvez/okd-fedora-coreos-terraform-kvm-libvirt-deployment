@@ -24,47 +24,54 @@ resource "libvirt_pool" "volumetmp_03" {
   }
 }
 
-# Crear recursos de Ignition con libvirt_ignition para bootstrap, master, y worker
-resource "libvirt_ignition" "bootstrap" {
-  name    = "bootstrap.ign"
-  pool    = libvirt_pool.volumetmp_03.name
-  content = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/bootstrap.ign")
+# Create volumes for each Ignition file
+resource "libvirt_volume" "bootstrap_ignition" {
+  name   = "bootstrap-ignition"
+  pool   = libvirt_pool.volumetmp_03.name
+  source = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/bootstrap.ign"
+  format = "raw"
 }
 
-resource "libvirt_ignition" "master1" {
-  name    = "master1.ign"
-  pool    = libvirt_pool.volumetmp_03.name
-  content = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/master1.ign")
+resource "libvirt_volume" "master1_ignition" {
+  name   = "master1-ignition"
+  pool   = libvirt_pool.volumetmp_03.name
+  source = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/master1.ign"
+  format = "raw"
 }
 
-resource "libvirt_ignition" "master2" {
-  name    = "master2.ign"
-  pool    = libvirt_pool.volumetmp_03.name
-  content = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/master2.ign")
+resource "libvirt_volume" "master2_ignition" {
+  name   = "master2-ignition"
+  pool   = libvirt_pool.volumetmp_03.name
+  source = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/master2.ign"
+  format = "raw"
 }
 
-resource "libvirt_ignition" "master3" {
-  name    = "master3.ign"
-  pool    = libvirt_pool.volumetmp_03.name
-  content = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/master3.ign")
+resource "libvirt_volume" "master3_ignition" {
+  name   = "master3-ignition"
+  pool   = libvirt_pool.volumetmp_03.name
+  source = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/master3.ign"
+  format = "raw"
 }
 
-resource "libvirt_ignition" "worker1" {
-  name    = "worker1.ign"
-  pool    = libvirt_pool.volumetmp_03.name
-  content = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker1.ign")
+resource "libvirt_volume" "worker1_ignition" {
+  name   = "worker1-ignition"
+  pool   = libvirt_pool.volumetmp_03.name
+  source = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker1.ign"
+  format = "raw"
 }
 
-resource "libvirt_ignition" "worker2" {
-  name    = "worker2.ign"
-  pool    = libvirt_pool.volumetmp_03.name
-  content = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker2.ign")
+resource "libvirt_volume" "worker2_ignition" {
+  name   = "worker2-ignition"
+  pool   = libvirt_pool.volumetmp_03.name
+  source = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker2.ign"
+  format = "raw"
 }
 
-resource "libvirt_ignition" "worker3" {
-  name    = "worker3.ign"
-  pool    = libvirt_pool.volumetmp_03.name
-  content = file("/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker3.ign")
+resource "libvirt_volume" "worker3_ignition" {
+  name   = "worker3-ignition"
+  pool   = libvirt_pool.volumetmp_03.name
+  source = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker3.ign"
+  format = "raw"
 }
 
 # Create a base volume for Fedora CoreOS
@@ -91,16 +98,16 @@ resource "libvirt_domain" "nodes" {
   memory   = each.value.memory
   vcpu     = each.value.cpus
 
-  # Match each node with its corresponding Ignition file
+  # Link the cloudinit to the correct volume
   cloudinit = lookup(
     {
-      "bootstrap" = libvirt_ignition.bootstrap.id,
-      "master1"   = libvirt_ignition.master1.id,
-      "master2"   = libvirt_ignition.master2.id,
-      "master3"   = libvirt_ignition.master3.id,
-      "worker1"   = libvirt_ignition.worker1.id,
-      "worker2"   = libvirt_ignition.worker2.id,
-      "worker3"   = libvirt_ignition.worker3.id
+      "bootstrap" = libvirt_volume.bootstrap_ignition.id,
+      "master1"   = libvirt_volume.master1_ignition.id,
+      "master2"   = libvirt_volume.master2_ignition.id,
+      "master3"   = libvirt_volume.master3_ignition.id,
+      "worker1"   = libvirt_volume.worker1_ignition.id,
+      "worker2"   = libvirt_volume.worker2_ignition.id,
+      "worker3"   = libvirt_volume.worker3_ignition.id
     },
     each.key
   )
