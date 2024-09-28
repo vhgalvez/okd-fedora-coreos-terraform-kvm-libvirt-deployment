@@ -36,6 +36,23 @@ resource "libvirt_pool" "volumetmp_03" {
   }
 }
 
+# Crear directorio para el pool de almacenamiento si no existe
+resource "null_resource" "create_pool_directory" {
+  provisioner "local-exec" {
+    command = "mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03"
+  }
+
+  provisioner "local-exec" {
+    command = "chown -R libvirt-qemu:kvm /mnt/lv_data/organized_storage/volumes/volumetmp_03"
+  }
+
+  provisioner "local-exec" {
+    command = "chcon -t svirt_home_t /mnt/lv_data/organized_storage/volumes/volumetmp_03 || true"
+  }
+
+  depends_on = [libvirt_pool.volumetmp_03]
+}
+
 # Definir configuraciones de nodos y rutas a los archivos Ignition
 locals {
   nodes = {
@@ -56,6 +73,11 @@ resource "libvirt_volume" "ignition_volumes" {
   pool     = libvirt_pool.volumetmp_03.name
   source   = each.value.file
   format   = "raw"
+
+  # Verificar existencia del archivo
+  provisioner "local-exec" {
+    command = "test -f ${each.value.file} || echo 'Archivo Ignition no encontrado: ${each.value.file}'"
+  }
 }
 
 # Crear el volumen base de Fedora CoreOS
@@ -85,7 +107,7 @@ resource "libvirt_domain" "nodes" {
   cloudinit = libvirt_volume.ignition_volumes[each.key].id
 
   network_interface {
-    network_name = "kube_network_02" # Asegúrate de que esta red esté correctamente configurada en libvirt
+    network_name = "kube_network_02"
   }
 
   disk {
