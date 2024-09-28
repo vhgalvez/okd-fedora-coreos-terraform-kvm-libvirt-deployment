@@ -208,3 +208,22 @@ curl -o /mnt/lv_data/organized_storage/volumes/volumetmp_03/bootstrap.ign http:/
     curl http://10.17.3.14/okd/bootstrap.ign
     curl http://10.17.3.14/okd/master.ign
     curl http://10.17.3.14/okd/worker.ign
+
+
+
+resource "libvirt_volume" "ignition_volumes" {
+  for_each = {
+    "bootstrap" = "http://10.17.3.14/okd/bootstrap.ign"
+    "master1"   = "http://10.17.3.14/okd/master.ign"
+    "master2"   = "http://10.17.3.14/okd/master.ign"
+    "master3"   = "http://10.17.3.14/okd/master.ign"
+    "worker1"   = "http://10.17.3.14/okd/worker.ign"
+    "worker2"   = "http://10.17.3.14/okd/worker.ign"
+    "worker3"   = "http://10.17.3.14/okd/worker.ign"
+  }
+
+  name     = "${each.key}-ignition"
+  pool     = libvirt_pool.volumetmp_03.name
+  source   = each.value
+  format   = "qcow2"
+}
