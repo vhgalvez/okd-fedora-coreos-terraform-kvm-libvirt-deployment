@@ -1,4 +1,18 @@
+
+# Variables for the NAT network module
+variable "initial_cluster" {
+  description = "Initial cluster configuration for VM nodes"
+  type        = string
+}
+
+# Variables for the NAT network module
+variable "gateway" {
+  description = "Gateway IP address for network routing"
+  type        = string
+}
+
 # Primary DNS server
+
 variable "dns1" {
   description = "Primary DNS server"
   type        = string
@@ -11,7 +25,7 @@ variable "dns2" {
 }
 
 # Path to the Fedora CoreOS base image
-variable "coreos_image" {
+variable "base_image" {
   description = "Path to the Fedora CoreOS base image"
   type        = string
 }
