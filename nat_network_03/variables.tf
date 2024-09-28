@@ -1,37 +1,31 @@
 variable "dns1" {
   description = "Primary DNS server"
   type        = string
-  default     = "10.17.3.11"  # Set your DNS server IP here
 }
 
 variable "dns2" {
   description = "Secondary DNS server"
   type        = string
-  default     = "8.8.8.8"  # Set secondary DNS or use a public DNS like Google's
 }
 
 variable "coreos_image" {
   description = "Path to the Fedora CoreOS base image"
   type        = string
-  default     = "/mnt/lv_data/organized_storage/images/fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2"
 }
 
 variable "bootstrap_volume_size" {
   description = "Volume size for bootstrap node (in GiB)"
   type        = number
-  default     = 20
 }
 
 variable "master_volume_size" {
   description = "Volume size for master nodes (in GiB)"
   type        = number
-  default     = 30
 }
 
 variable "worker_volume_size" {
   description = "Volume size for worker nodes (in GiB)"
   type        = number
-  default     = 30
 }
 
 variable "vm_definitions" {
@@ -49,5 +43,3 @@ variable "vm_definitions" {
 variable "ssh_keys" {
   description = "List of SSH public keys"
   type        = list(string)
-  default     = [
-    "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDC9XqGWEd2de3Ud8TgvzFchK2/SYh+WHohA1KEuveXjCbse9aXKmNAZ369vaGFFGrxbSptMeEt41ytEFpU09gAXM6KSsQWGZx
