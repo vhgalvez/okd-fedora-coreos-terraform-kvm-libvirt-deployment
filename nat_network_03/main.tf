@@ -90,8 +90,16 @@ resource "libvirt_domain" "nodes" {
   memory   = each.value.memory
   vcpu     = each.value.cpus
 
-  # Link the correct Ignition volume for cloud-init
-  cloudinit = libvirt_ignition[each.key].id
+  # Assign the correct Ignition file to cloudinit based on node type
+  cloudinit = (
+    each.key == "bootstrap" ? libvirt_ignition.bootstrap.id :
+    each.key == "master1" ? libvirt_ignition.master1.id :
+    each.key == "master2" ? libvirt_ignition.master2.id :
+    each.key == "master3" ? libvirt_ignition.master3.id :
+    each.key == "worker1" ? libvirt_ignition.worker1.id :
+    each.key == "worker2" ? libvirt_ignition.worker2.id :
+    libvirt_ignition.worker3.id
+  )
 
   network_interface {
     network_name = "kube_network_02"
