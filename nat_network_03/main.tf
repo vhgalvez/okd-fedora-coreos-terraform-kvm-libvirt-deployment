@@ -85,17 +85,21 @@ resource "libvirt_domain" "nodes" {
   cloudinit = libvirt_ignition.ignitions[each.key].id
 
   network_interface {
-    network_name = "kube_network_02"
+    network_name  = "kube_network_02"
+    wait_for_lease = true # Ensure the network interface waits for a lease
   }
 
   disk {
     volume_id = libvirt_volume.okd_volumes[each.key].id
   }
 
-  # No graphical interface required
+  # Disable QEMU agent to prevent issues
+  qemu_agent = false
+
+  # Use VNC for the graphics type if needed
   graphics {
     type        = "vnc"
-    listen_type = "none"
+    listen_type = "none" # Set to `none` to avoid starting a VNC server
   }
 
   console {
@@ -103,9 +107,6 @@ resource "libvirt_domain" "nodes" {
     target_type = "serial"
     target_port = "0"
   }
-
-  # Disable waiting for guest agent
-  wait_for_lease = false
 
   depends_on = [libvirt_volume.okd_volumes]
 }
