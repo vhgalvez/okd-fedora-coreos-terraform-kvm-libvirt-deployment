@@ -87,13 +87,14 @@ resource "libvirt_domain" "nodes" {
 
   # Connect the nodes to the existing network
   network_interface {
-    network_name = "kube_network_02" # Reference the existing network
+    network_name = "kube_network_02" # Ensure this network is correctly configured in libvirt
   }
 
   disk {
     volume_id = libvirt_volume.okd_volumes[each.key].id
   }
 }
+
 
 # Output node IP addresses
 output "node_ips" {
