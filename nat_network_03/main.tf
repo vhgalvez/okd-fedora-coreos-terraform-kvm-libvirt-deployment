@@ -26,24 +26,27 @@ resource "libvirt_pool" "volumetmp_03" {
 # Define local paths to Ignition files
 locals {
   ignition_files = {
-    "bootstrap" = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/bootstrap.ign"
-    "master1"   = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign"
-    "master2"   = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign"
-    "master3"   = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign"
-    "worker1"   = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign"
-    "worker2"   = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign"
-    "worker3"   = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign"
+    "bootstrap" = "${path.module}/okd-install/bootstrap.ign"
+    "master1"   = "${path.module}/okd-install/master.ign"
+    "master2"   = "${path.module}/okd-install/master.ign"
+    "master3"   = "${path.module}/okd-install/master.ign"
+    "worker1"   = "${path.module}/okd-install/worker.ign"
+    "worker2"   = "${path.module}/okd-install/worker.ign"
+    "worker3"   = "${path.module}/okd-install/worker.ign"
   }
 }
 
-# Correctly generate volumes from the .ign files
+# Correctly generate Ignition volumes from the .ign files
 resource "libvirt_volume" "ignition_volumes" {
   for_each = local.ignition_files
 
-  name   = "${each.key}-ignition"
-  pool   = libvirt_pool.volumetmp_03.name
-  source = each.value
-  format = "raw"
+  name      = "${each.key}-ignition"
+  pool      = libvirt_pool.volumetmp_03.name
+  source    = each.value
+  format    = "qcow2" # Cambiado a "qcow2"
+
+  # Asegura que el pool se haya creado antes de los volúmenes
+  depends_on = [libvirt_pool.volumetmp_03]
 }
 
 # Create a base volume for Fedora CoreOS
@@ -56,10 +59,10 @@ resource "libvirt_volume" "fcos_base" {
 
 # Create individual node volumes based on the base image
 resource "libvirt_volume" "okd_volumes" {
-  for_each = var.vm_definitions
-  name     = "${each.key}.qcow2"
-  pool     = libvirt_pool.volumetmp_03.name
-  size     = each.value.disk_size * 1048576  # Convert MB to bytes
+  for_each       = var.vm_definitions
+  name           = "${each.key}.qcow2"
+  pool           = libvirt_pool.volumetmp_03.name
+  size           = each.value.disk_size * 1048576 # Convert MB to bytes
   base_volume_id = libvirt_volume.fcos_base.id
 }
 
