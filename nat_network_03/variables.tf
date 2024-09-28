@@ -1,4 +1,3 @@
-# Networking Settings
 variable "dns1" {
   description = "Primary DNS server"
   type        = string
@@ -9,18 +8,12 @@ variable "dns2" {
   type        = string
 }
 
-# Image Configuration
-variable "base_image" {
-  description = "Path to the base image for the VM"
-  type        = string
-}
-
 variable "coreos_image" {
-  description = "URL for Fedora CoreOS image"
+  description = "Path to the Fedora CoreOS base image"
   type        = string
+  default     = "/mnt/lv_data/organized_storage/images/fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2"
 }
 
-# Volume Sizes
 variable "bootstrap_volume_size" {
   description = "Volume size for bootstrap node (in GiB)"
   type        = number
@@ -39,7 +32,6 @@ variable "worker_volume_size" {
   default     = 30
 }
 
-# VM Configuration
 variable "vm_definitions" {
   description = "VM configurations including CPU, memory, disk size, and network info"
   type = map(object({
@@ -52,7 +44,6 @@ variable "vm_definitions" {
   }))
 }
 
-# SSH Configuration
 variable "ssh_keys" {
   description = "List of SSH public keys"
   type        = list(string)
