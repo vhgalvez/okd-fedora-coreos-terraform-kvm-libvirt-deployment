@@ -26,13 +26,13 @@ resource "libvirt_pool" "volumetmp_03" {
 # Define local paths to Ignition files
 locals {
   ignition_files = {
-    "bootstrap" = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/bootstrap.ign"
-    "master1"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/master1.ign"
-    "master2"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/master2.ign"
-    "master3"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/master3.ign"
-    "worker1"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker1.ign"
-    "worker2"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker2.ign"
-    "worker3"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker3.ign"
+    "bootstrap" = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/bootstrap.ign"
+    "master1"   = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign"
+    "master2"   = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign"
+    "master3"   = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign"
+    "worker1"   = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign"
+    "worker2"   = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign"
+    "worker3"   = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign"
   }
 }
 

@@ -227,3 +227,12 @@ resource "libvirt_volume" "ignition_volumes" {
   source   = each.value
   format   = "qcow2"
 }
+
+
+sudo terraform state rm 'local_file.ignition_configs["bootstrap"]'
+sudo terraform state rm 'local_file.ignition_configs["master1"]'
+sudo terraform state rm 'local_file.ignition_configs["master2"]'
+sudo terraform state rm 'local_file.ignition_configs["master3"]'
+sudo terraform state rm 'local_file.ignition_configs["worker1"]'
+sudo terraform state rm 'local_file.ignition_configs["worker2"]'
+sudo terraform state rm 'local_file.ignition_configs["worker3"]'
