@@ -23,7 +23,6 @@ resource "libvirt_pool" "volumetmp_03" {
   }
 }
 
-
 resource "libvirt_volume" "ignition_volumes" {
   for_each = {
     "bootstrap" = "http://10.17.3.14/okd/bootstrap.ign"
