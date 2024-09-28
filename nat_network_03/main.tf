@@ -23,7 +23,7 @@ resource "libvirt_pool" "volumetmp_03" {
   }
 }
 
-# Define individual Ignition resources
+# Define Ignition files for each node
 resource "libvirt_ignition" "bootstrap" {
   name    = "bootstrap.ign"
   pool    = libvirt_pool.volumetmp_03.name
@@ -90,7 +90,7 @@ resource "libvirt_domain" "nodes" {
   memory   = each.value.memory
   vcpu     = each.value.cpus
 
-  # Link the cloudinit to the correct volume
+  # Link the cloudinit to the correct Ignition volume
   cloudinit = libvirt_ignition[each.key].id
 
   network_interface {
