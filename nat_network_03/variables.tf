@@ -43,3 +43,4 @@ variable "vm_definitions" {
 variable "ssh_keys" {
   description = "List of SSH public keys"
   type        = list(string)
+}
