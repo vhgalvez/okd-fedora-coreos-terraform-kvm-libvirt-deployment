@@ -1,11 +1,13 @@
 variable "dns1" {
   description = "Primary DNS server"
   type        = string
+  default     = "10.17.3.11"  # Set your DNS server IP here
 }
 
 variable "dns2" {
   description = "Secondary DNS server"
   type        = string
+  default     = "8.8.8.8"  # Set secondary DNS or use a public DNS like Google's
 }
 
 variable "coreos_image" {
@@ -47,4 +49,5 @@ variable "vm_definitions" {
 variable "ssh_keys" {
   description = "List of SSH public keys"
   type        = list(string)
-}
+  default     = [
+    "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDC9XqGWEd2de3Ud8TgvzFchK2/SYh+WHohA1KEuveXjCbse9aXKmNAZ369vaGFFGrxbSptMeEt41ytEFpU09gAXM6KSsQWGZx
