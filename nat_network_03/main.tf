@@ -1,3 +1,5 @@
+# main.tf
+
 terraform {
   required_version = ">= 1.9.5"
   required_providers {
@@ -23,22 +25,21 @@ resource "libvirt_pool" "volumetmp_03" {
   }
 }
 
-resource "libvirt_volume" "ignition_volumes" {
+# Generate ignition configurations with libvirt_ignition
+resource "libvirt_ignition" "ignition_configs" {
   for_each = {
-    "bootstrap" = "http://10.17.3.14/okd/bootstrap.ign"
-    "master1"   = "http://10.17.3.14/okd/master.ign"
-    "master2"   = "http://10.17.3.14/okd/master.ign"
-    "master3"   = "http://10.17.3.14/okd/master.ign"
-    "worker1"   = "http://10.17.3.14/okd/worker.ign"
-    "worker2"   = "http://10.17.3.14/okd/worker.ign"
-    "worker3"   = "http://10.17.3.14/okd/worker.ign"
-
+    "bootstrap" = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/bootstrap.ign"
+    "master1"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/master1.ign"
+    "master2"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/master2.ign"
+    "master3"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/master3.ign"
+    "worker1"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker1.ign"
+    "worker2"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker2.ign"
+    "worker3"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker3.ign"
   }
 
-  name   = "${each.key}-ignition"
-  pool   = libvirt_pool.volumetmp_03.name
-  source = each.value
-  format = "qcow2"
+  name    = "${each.key}.ign"
+  pool    = libvirt_pool.volumetmp_03.name
+  content = file(each.value)
 }
 
 # Create a base volume for Fedora CoreOS
@@ -51,10 +52,10 @@ resource "libvirt_volume" "fcos_base" {
 
 # Create individual node volumes based on the base image
 resource "libvirt_volume" "okd_volumes" {
-  for_each       = var.vm_definitions
-  name           = "${each.key}.qcow2"
-  pool           = libvirt_pool.volumetmp_03.name
-  size           = each.value.disk_size * 1048576 # Convert MB to bytes
+  for_each = var.vm_definitions
+  name     = "${each.key}.qcow2"
+  pool     = libvirt_pool.volumetmp_03.name
+  size     = each.value.disk_size * 1048576  # Convert MB to bytes
   base_volume_id = libvirt_volume.fcos_base.id
 }
 
@@ -66,7 +67,7 @@ resource "libvirt_domain" "nodes" {
   vcpu     = each.value.cpus
 
   # Link the cloudinit to the correct volume
-  cloudinit = libvirt_volume.ignition_volumes[each.key].id
+  cloudinit = libvirt_ignition.ignition_configs[each.key].id
 
   network_interface {
     network_name = "kube_network_02"
