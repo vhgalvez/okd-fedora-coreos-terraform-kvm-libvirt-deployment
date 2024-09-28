@@ -1,3 +1,4 @@
+# terraform.tfvars
 # VM Definitions: CPU, Memory, Disk Size, and IP configurations for each node
 vm_definitions = {
   bootstrap = {

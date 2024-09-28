@@ -61,25 +61,25 @@ resource "libvirt_volume" "ignition_volumes" {
 resource "libvirt_volume" "fcos_base" {
   name   = "fcos_base.qcow2"
   pool   = libvirt_pool.volumetmp_03.name
-  source = "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/latest.x86_64/fedora-coreos-qemu.x86_64.qcow2.xz"
+  source = var.coreos_image
   format = "qcow2"
 }
 
 # Create individual node volumes based on the base image
 resource "libvirt_volume" "okd_volumes" {
-  for_each = data.http.ignition_files
+  for_each = var.vm_definitions
   name     = "${each.key}.qcow2"
   pool     = libvirt_pool.volumetmp_03.name
-  size     = var.volume_sizes[each.key] * 1073741824
+  size     = each.value.disk_size * 1048576  # Convert MB to bytes
   base_volume_id = libvirt_volume.fcos_base.id
 }
 
 # Define VMs with network and disk attachments
 resource "libvirt_domain" "nodes" {
-  for_each = data.http.ignition_files
+  for_each = var.vm_definitions
   name     = "okd-${each.key}"
-  memory   = var.vm_memory[each.key]
-  vcpu     = var.vm_cpus[each.key]
+  memory   = each.value.memory
+  vcpu     = each.value.cpus
 
   cloudinit = libvirt_volume.ignition_volumes[each.key].id
 
