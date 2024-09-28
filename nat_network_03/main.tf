@@ -92,15 +92,6 @@ resource "libvirt_domain" "nodes" {
     volume_id = libvirt_volume.okd_volumes[each.key].id
   }
 
-  # Define the QEMU guest agent channel for communication
-  channel {
-    type = "unix"
-    target {
-      type = "virtio"
-      name = "org.qemu.guest_agent.0"
-    }
-  }
-
   # Use VNC for the graphics type as Spice is not supported in your QEMU setup
   graphics {
     type        = "vnc"
