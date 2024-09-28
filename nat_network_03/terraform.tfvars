@@ -64,7 +64,7 @@ dns2 = "8.8.8.8"
 
 # Base image and CoreOS image download URL
 base_image   = "/mnt/lv_data/organized_storage/images/flatcar_production_qemu_image.img"
-coreos_image = "https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/34.20210626.3.0/x86_64/fedora-coreos-34.20210626.3.0-qemu.x86_64.qcow2.xz"
+coreos_image = "/mnt/lv_data/organized_storage/images/fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2"
 
 # Volume sizes (in GB)
 bootstrap_volume_size = 20
