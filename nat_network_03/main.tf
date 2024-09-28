@@ -12,6 +12,13 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
+# Ensure the directory is created before anything else
+resource "null_resource" "create_volumetmp_directory" {
+  provisioner "local-exec" {
+    command = "mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 && chmod 755 /mnt/lv_data/organized_storage/volumes/volumetmp_03"
+  }
+}
+
 # Define a storage pool
 resource "libvirt_pool" "volumetmp_03" {
   name = "volumetmp_03"
@@ -21,6 +28,8 @@ resource "libvirt_pool" "volumetmp_03" {
   lifecycle {
     create_before_destroy = true
   }
+
+  depends_on = [null_resource.create_volumetmp_directory]
 }
 
 # Define local paths to Ignition files
@@ -43,9 +52,13 @@ resource "libvirt_volume" "ignition_volumes" {
   name      = "${each.key}-ignition"
   pool      = libvirt_pool.volumetmp_03.name
   source    = each.value
-  format    = "qcow2" # Cambiado a "qcow2"
+  format    = "qcow2" # Changed to "qcow2"
 
-  # Asegura que el pool se haya creado antes de los volúmenes
+  timeouts {
+    create = "30m"
+  }
+
+  # Ensure the pool is created before volumes
   depends_on = [libvirt_pool.volumetmp_03]
 }
 
@@ -55,6 +68,12 @@ resource "libvirt_volume" "fcos_base" {
   pool   = libvirt_pool.volumetmp_03.name
   source = var.coreos_image
   format = "qcow2"
+
+  timeouts {
+    create = "30m"
+  }
+
+  depends_on = [libvirt_pool.volumetmp_03]
 }
 
 # Create individual node volumes based on the base image
@@ -64,6 +83,12 @@ resource "libvirt_volume" "okd_volumes" {
   pool           = libvirt_pool.volumetmp_03.name
   size           = each.value.disk_size * 1048576 # Convert MB to bytes
   base_volume_id = libvirt_volume.fcos_base.id
+
+  timeouts {
+    create = "30m"
+  }
+
+  depends_on = [libvirt_volume.fcos_base]
 }
 
 # Define VMs with network and disk attachments
@@ -83,6 +108,8 @@ resource "libvirt_domain" "nodes" {
   disk {
     volume_id = libvirt_volume.okd_volumes[each.key].id
   }
+
+  depends_on = [libvirt_volume.okd_volumes]
 }
 
 # Output node IP addresses
