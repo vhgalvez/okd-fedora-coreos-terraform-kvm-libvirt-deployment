@@ -96,7 +96,6 @@ resource "libvirt_domain" "nodes" {
 }
 
 
-
 # Output node IP addresses
 output "node_ips" {
   value = { for node in libvirt_domain.nodes : node.name => node.network_interface[0].addresses[0] }
