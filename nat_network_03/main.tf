@@ -36,33 +36,16 @@ resource "libvirt_pool" "volumetmp_03" {
   }
 }
 
-# Crear directorio para el pool de almacenamiento si no existe
-resource "null_resource" "create_pool_directory" {
-  provisioner "local-exec" {
-    command = "mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03"
-  }
-
-  provisioner "local-exec" {
-    command = "chown -R libvirt-qemu:kvm /mnt/lv_data/organized_storage/volumes/volumetmp_03"
-  }
-
-  provisioner "local-exec" {
-    command = "chcon -t svirt_home_t /mnt/lv_data/organized_storage/volumes/volumetmp_03 || true"
-  }
-
-  depends_on = [libvirt_pool.volumetmp_03]
-}
-
-# Definir configuraciones de nodos y rutas a los archivos Ignition
+# Definir configuraciones de nodos y rutas a los archivos Ignition (vía servidor web)
 locals {
   nodes = {
-    bootstrap = { size = var.bootstrap_volume_size, file = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/bootstrap.ign" },
-    master1   = { size = var.master_volume_size, file = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign" },
-    master2   = { size = var.master_volume_size, file = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign" },
-    master3   = { size = var.master_volume_size, file = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/master.ign" },
-    worker1   = { size = var.worker_volume_size, file = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign" },
-    worker2   = { size = var.worker_volume_size, file = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign" },
-    worker3   = { size = var.worker_volume_size, file = "/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install/worker.ign" }
+    bootstrap = { size = var.bootstrap_volume_size, file = "http://10.17.3.14/okd/bootstrap.ign" },
+    master1   = { size = var.master_volume_size, file = "http://10.17.3.14/okd/master.ign" },
+    master2   = { size = var.master_volume_size, file = "http://10.17.3.14/okd/master.ign" },
+    master3   = { size = var.master_volume_size, file = "http://10.17.3.14/okd/master.ign" },
+    worker1   = { size = var.worker_volume_size, file = "http://10.17.3.14/okd/worker.ign" },
+    worker2   = { size = var.worker_volume_size, file = "http://10.17.3.14/okd/worker.ign" },
+    worker3   = { size = var.worker_volume_size, file = "http://10.17.3.14/okd/worker.ign" }
   }
 }
 
@@ -71,13 +54,9 @@ resource "libvirt_volume" "ignition_volumes" {
   for_each = local.nodes
   name     = "${each.key}-ignition"
   pool     = libvirt_pool.volumetmp_03.name
+  # Se refiere al archivo Ignition servido vía HTTP
   source   = each.value.file
   format   = "raw"
-
-  # Verificar existencia del archivo
-  provisioner "local-exec" {
-    command = "test -f ${each.value.file} || echo 'Archivo Ignition no encontrado: ${each.value.file}'"
-  }
 }
 
 # Crear el volumen base de Fedora CoreOS
@@ -107,7 +86,7 @@ resource "libvirt_domain" "nodes" {
   cloudinit = libvirt_volume.ignition_volumes[each.key].id
 
   network_interface {
-    network_name = "kube_network_02"
+    network_name = "kube_network_02" # Asegúrate de que esta red esté correctamente configurada en libvirt
   }
 
   disk {
