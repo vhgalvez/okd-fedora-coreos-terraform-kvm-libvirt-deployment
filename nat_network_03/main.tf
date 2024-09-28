@@ -12,6 +12,17 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
+# Crear la nueva red kube_network_03 con NAT
+resource "libvirt_network" "kube_network_03" {
+  name      = "kube_network_03"
+  mode      = "nat"
+  autostart = true
+  addresses = ["10.17.4.0/24"]
+  dhcp {
+    enabled = true
+  }
+}
+
 # Ensure the directory is created before anything else
 resource "null_resource" "create_volumetmp_directory" {
   provisioner "local-exec" {
@@ -84,8 +95,9 @@ resource "libvirt_domain" "nodes" {
   # Use the correct Ignition volume
   cloudinit = libvirt_ignition.ignitions[each.key].id
 
+  # Conectar las VMs a la nueva red kube_network_03
   network_interface {
-    network_name = "kube_network_02"
+    network_id = libvirt_network.kube_network_03.id
   }
 
   disk {
@@ -107,7 +119,7 @@ resource "libvirt_domain" "nodes" {
   # Disable QEMU agent communication to prevent waiting on it
   qemu_agent = false
 
-  depends_on = [libvirt_volume.okd_volumes]
+  depends_on = [libvirt_volume.okd_volumes, libvirt_network.kube_network_03]
 }
 
 # Output node IP addresses
