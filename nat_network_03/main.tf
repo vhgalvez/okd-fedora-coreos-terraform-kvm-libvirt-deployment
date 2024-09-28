@@ -57,7 +57,7 @@ resource "libvirt_volume" "ignition_volumes" {
   format   = "raw"
 }
 
-# Download Fedora CoreOS base image and create base volume
+# Create a base volume for Fedora CoreOS
 resource "libvirt_volume" "fcos_base" {
   name   = "fcos_base.qcow2"
   pool   = libvirt_pool.volumetmp_03.name

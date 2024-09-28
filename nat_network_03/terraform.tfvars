@@ -1,5 +1,6 @@
 # terraform.tfvars
-# VM Definitions: CPU, Memory, Disk Size, and IP configurations for each node
+# VM Definitions: CPU, Memory, Disk Size, IP, Domain, and Node Name
+
 vm_definitions = {
   bootstrap = {
     cpus         = 4
@@ -59,18 +60,8 @@ vm_definitions = {
   }
 }
 
-# DNS Settings
-dns1 = "10.17.3.11"
-dns2 = "8.8.8.8"
-
-# Base image and CoreOS image download URL
-base_image   = "/mnt/lv_data/organized_storage/images/flatcar_production_qemu_image.img"
+# CoreOS image download URL
 coreos_image = "/mnt/lv_data/organized_storage/images/fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2"
-
-# Volume sizes (in GB)
-bootstrap_volume_size = 20
-master_volume_size    = 30
-worker_volume_size    = 30
 
 # SSH Public Keys for accessing the nodes
 ssh_keys = [
