@@ -1,3 +1,4 @@
+# main.tf
 terraform {
   required_version = ">= 1.9.5"
   required_providers {
@@ -27,6 +28,7 @@ resource "libvirt_pool" "volumetmp_03" {
   }
 }
 
+# Corrected: Only one resource to create volumes based on the existing .ign files
 resource "libvirt_volume" "ignition_volumes" {
   for_each = {
     "bootstrap" = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/bootstrap.ign"
@@ -37,12 +39,13 @@ resource "libvirt_volume" "ignition_volumes" {
     "worker2"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker2.ign"
     "worker3"   = "/mnt/lv_data/organized_storage/volumes/volumetmp_03/worker3.ign"
   }
-  
+
   name     = "${each.key}-ignition"
   pool     = libvirt_pool.volumetmp_03.name
   source   = each.value
   format   = "raw"
 }
+
 
 # Save Ignition files locally before creating volumes
 resource "local_file" "ignition_files" {

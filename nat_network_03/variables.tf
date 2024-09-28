@@ -1,3 +1,4 @@
+# variable.tf
 variable "dns1" {
   description = "Primary DNS server"
   type        = string
