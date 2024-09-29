@@ -1,4 +1,4 @@
-
+# variable.tf
 # Variables for the NAT network module
 variable "initial_cluster" {
   description = "Initial cluster configuration for VM nodes"
