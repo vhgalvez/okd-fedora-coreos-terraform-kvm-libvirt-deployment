@@ -94,7 +94,6 @@ resource "libvirt_domain" "vm" {
 
   cloudinit = libvirt_cloudinit_disk.vm_cloudinit[each.key].id
 
-  
 
   console {
     type        = "pty"
@@ -102,11 +101,11 @@ resource "libvirt_domain" "vm" {
     target_port = "0"
   }
 
-  console {
-    type        = "pty"
-    target_type = "virtio"
-    target_port = "1"
-  }
+  #  console {
+  #   type        = "pty"
+  #   target_type = "virtio"
+  #  target_port = "1"
+  #  }
 
   cpu {
     mode = "host-passthrough"
