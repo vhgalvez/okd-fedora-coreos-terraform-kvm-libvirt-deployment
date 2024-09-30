@@ -62,6 +62,35 @@ write_files:
       echo "${ip}  ${hostname} ${short_hostname}" >> /etc/hosts
     permissions: "0755"
 
+  - path: /etc/systemd/system/docker-images.mount
+    content: |
+      [Unit]
+      Description=Mount /srv/images for QEMU guest agent
+      Before=local-fs.target
+
+      [Mount]
+      What=qemu_docker_images
+      Where=/var/mnt/images
+      Options=ro,trans=virtio,version=9p2000.L
+      Type=9p
+
+      [Install]
+      WantedBy=local-fs.target
+
+  - path: /etc/systemd/system/qemu-agent.service
+    content: |
+      [Unit]
+      Description=QEMU Guest Agent
+      After=docker.service
+
+      [Service]
+      ExecStartPre=-/usr/bin/docker load -i /srv/images/qemu-guest-agent.tar
+      ExecStart=/usr/bin/docker run --rm --name qemu-agent --privileged rancher/os-qemuguestagent:v2.8.1-2
+      Restart=always
+
+      [Install]
+      WantedBy=multi-user.target
+
 runcmd:
   - sudo ip route add 10.17.3.0/24 via 192.168.0.21 dev eth0
   - sudo ip route add 10.17.4.0/24 via 192.168.0.21 dev eth0
@@ -70,5 +99,7 @@ runcmd:
   - ["systemctl", "enable", "--now", "firewalld"]
   - ["systemctl", "restart", "NetworkManager.service"]
   - /usr/local/bin/set-hosts.sh
+  - [ "systemctl", "enable", "--now", "docker-images.mount" ]
+  - [ "systemctl", "enable", "--now", "qemu-agent.service" ]
 
 timezone: ${timezone}
