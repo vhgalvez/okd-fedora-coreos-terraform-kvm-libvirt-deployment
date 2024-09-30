@@ -1,4 +1,3 @@
-# br0_network\main.tf
 terraform {
   required_version = "= 1.9.6"
 
@@ -85,7 +84,7 @@ resource "libvirt_domain" "vm" {
   network_interface {
     network_id = libvirt_network.br0.id
     bridge     = "br0"
-    addresses  = [each.value.ip] # Assign the static IP
+    addresses  = [each.value.ip]
   }
 
   disk {
@@ -94,18 +93,17 @@ resource "libvirt_domain" "vm" {
 
   cloudinit = libvirt_cloudinit_disk.vm_cloudinit[each.key].id
 
-
   console {
     type        = "pty"
     target_type = "serial"
     target_port = "0"
   }
 
-  #  console {
-  #   type        = "pty"
-  #   target_type = "virtio"
-  #  target_port = "1"
-  #  }
+  console {
+    type        = "pty"
+    target_type = "virtio"
+    target_port = "1"
+  }
 
   cpu {
     mode = "host-passthrough"
