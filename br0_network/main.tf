@@ -95,7 +95,7 @@ resource "libvirt_domain" "vm" {
 
 
   graphics {
-    type        = "vnc"
+    type        = "spice"
     listen_type = "address"
   }
 
