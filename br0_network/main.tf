@@ -94,11 +94,12 @@ resource "libvirt_domain" "vm" {
 
   cloudinit = libvirt_cloudinit_disk.vm_cloudinit[each.key].id
 
-  graphics {
-    type        = "spice" # Comentado o eliminado
-    listen_type = "none"  # Comentado o eliminado
-  }
 
+ # Use VNC for graphical interface
+  graphics {
+    type        = "vnc"
+    listen_type = "none"
+  }
 
   console {
     type        = "pty"
@@ -115,6 +116,9 @@ resource "libvirt_domain" "vm" {
   cpu {
     mode = "host-passthrough"
   }
+
+  # Enable QEMU agent for advanced management
+  qemu_agent = true
 }
 
 output "bastion_ip_address" {
