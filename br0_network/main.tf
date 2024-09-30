@@ -96,8 +96,7 @@ resource "libvirt_domain" "vm" {
 
 
   graphics {
-    type        = "vnc"
-    listen_type = "none"
+    type = "none"
   }
 
   console {
