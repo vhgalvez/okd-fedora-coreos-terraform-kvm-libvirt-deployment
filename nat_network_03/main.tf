@@ -123,8 +123,8 @@ resource "libvirt_domain" "nodes" {
     target_port = "0"
   }
 
-  # Disable QEMU agent communication to prevent retrieval issues
-  qemu_agent = false
+  # Enable QEMU agent communication to prevent retrieval issues
+  qemu_agent = enabled
 
   depends_on = [libvirt_volume.okd_volumes, libvirt_network.kube_network_03]
 }
