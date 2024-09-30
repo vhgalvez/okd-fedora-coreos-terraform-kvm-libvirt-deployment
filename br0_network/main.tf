@@ -92,7 +92,12 @@ resource "libvirt_domain" "vm" {
   }
 
   cloudinit = libvirt_cloudinit_disk.vm_cloudinit[each.key].id
- 
+
+  graphics {
+    type = "none"
+  }
+
+
   console {
     type        = "pty"
     target_type = "serial"
