@@ -95,6 +95,13 @@ resource "libvirt_domain" "vm" {
   cloudinit = libvirt_cloudinit_disk.vm_cloudinit[each.key].id
 
 
+graphics {
+    type        = "spice"
+    listen_type = "tcp"
+    listen_address = "0.0.0.0"
+    listen_port = 5922
+  }
+
   console {
     type        = "pty"
     target_type = "serial"
