@@ -238,3 +238,22 @@ sudo terraform state rm 'local_file.ignition_configs["master3"]'
 sudo terraform state rm 'local_file.ignition_configs["worker1"]'
 sudo terraform state rm 'local_file.ignition_configs["worker2"]'
 sudo terraform state rm 'local_file.ignition_configs["worker3"]'
+
+
+
+To download the ignition-validate binary for a Linux x86_64 system, you can use the following command:
+
+bash
+Copiar código
+wget https://github.com/coreos/ignition/releases/download/v2.19.0/ignition-validate-x86_64-linux
+After downloading, make the binary executable and move it to a directory in your PATH:
+
+bash
+Copiar código
+chmod +x ignition-validate-x86_64-linux
+sudo mv ignition-validate-x86_64-linux /usr/local/bin/ignition-validate
+You can then validate your Ignition files using:
+
+bash
+Copiar código
+ignition-validate bootstrap.ign
