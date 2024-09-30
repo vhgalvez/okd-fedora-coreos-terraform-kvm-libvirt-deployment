@@ -111,9 +111,10 @@ resource "libvirt_domain" "nodes" {
   disk {
     volume_id = libvirt_volume.okd_volumes[each.key].id
   }
+
   graphics {
-    type        = "vnc"
-    listen_type = "address"
+    type     = "vnc"
+    autoport = true
   }
 
   console {

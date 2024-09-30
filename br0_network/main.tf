@@ -98,6 +98,7 @@ resource "libvirt_domain" "vm" {
     autoport = true
   }
 
+
   console {
     type        = "pty"
     target_type = "serial"
