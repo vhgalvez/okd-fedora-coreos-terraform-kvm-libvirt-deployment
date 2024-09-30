@@ -94,12 +94,6 @@ resource "libvirt_domain" "vm" {
 
   cloudinit = libvirt_cloudinit_disk.vm_cloudinit[each.key].id
 
- 
-  # Explicitly disable graphics
-  graphics {
-    type        = "none"
-  }
-  
   console {
     type        = "pty"
     target_type = "serial"
