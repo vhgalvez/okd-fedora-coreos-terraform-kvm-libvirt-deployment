@@ -95,8 +95,7 @@ resource "libvirt_domain" "vm" {
 
   graphics {
     type        = "vnc"
-    listen_type = "none"
-    autoport    = true
+    listen_type = "address"
   }
 
   console {
