@@ -111,12 +111,10 @@ resource "libvirt_domain" "nodes" {
   disk {
     volume_id = libvirt_volume.okd_volumes[each.key].id
   }
-
-  graphics {
-    type        = "vnc"
-    listen_type = "none"
-  }
-
+ graphics {
+  type        = "spice"
+  listen_type = "none"
+}
   console {
     type        = "pty"
     target_type = "serial"
