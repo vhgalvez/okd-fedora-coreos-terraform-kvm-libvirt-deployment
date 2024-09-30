@@ -33,6 +33,7 @@ sudo systemctl status crio etcd kube-apiserver kube-controller-manager kube-sche
 
 
 
+sudo virsh list --all
 
 
 sudo virsh start freeipa1
@@ -45,7 +46,6 @@ sudo virsh start master1
 sudo virsh start master2
 sudo virsh start bastion1.cefaslocalserver.com 
 
-sudo virsh list --all
 
 sudo virsh shutdown  freeipa1
 sudo virsh shutdown  load_balancer1
