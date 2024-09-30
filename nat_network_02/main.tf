@@ -88,10 +88,10 @@ resource "libvirt_domain" "vm_nat_02" {
     volume_id = libvirt_volume.vm_disk[each.key].id
   }
 
-  graphics {
-    type        = "vnc"
-    listen_type = "address"
-  }
+ graphics {
+  type        = "spice"
+  listen_type = "none"
+}
 
   cloudinit = libvirt_cloudinit_disk.vm_cloudinit[each.key].id
 
