@@ -36,6 +36,9 @@ resource "libvirt_volume" "rocky9_image" {
   source = var.rocky9_image
   pool   = libvirt_pool.volumetmp_nat_02.name
   format = "qcow2"
+
+  depends_on = [libvirt_pool.volumetmp_nat_02]
+
 }
 
 data "template_file" "vm-configs" {
@@ -43,14 +46,14 @@ data "template_file" "vm-configs" {
 
   template = file("${path.module}/config/${each.key}-user-data.tpl")
   vars = {
-    ssh_keys = jsonencode(var.ssh_keys),
-    hostname = each.value.hostname,
+    ssh_keys       = jsonencode(var.ssh_keys),
+    hostname       = each.value.hostname,
     short_hostname = each.value.short_hostname,
-    timezone = var.timezone,
-    ip       = each.value.ip,
-    gateway  = var.gateway,
-    dns1     = var.dns1,
-    dns2     = var.dns2
+    timezone       = var.timezone,
+    ip             = each.value.ip,
+    gateway        = var.gateway,
+    dns1           = var.dns1,
+    dns2           = var.dns2
   }
 }
 
