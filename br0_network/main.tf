@@ -72,6 +72,10 @@ resource "libvirt_volume" "vm_disk" {
   pool           = each.value.volume_pool
   format         = each.value.volume_format
   size           = each.value.volume_size
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "libvirt_domain" "vm" {
@@ -98,7 +102,6 @@ resource "libvirt_domain" "vm" {
     autoport = true
   }
 
-
   console {
     type        = "pty"
     target_type = "serial"
@@ -114,8 +117,8 @@ resource "libvirt_domain" "vm" {
   cpu {
     mode = "host-passthrough"
   }
+}
 
- }
 output "bastion_ip_address" {
   value = var.vm_rockylinux_definitions["bastion1"].ip
 }
