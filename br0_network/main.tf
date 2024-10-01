@@ -1,5 +1,3 @@
-# br0_network\main.tf
-
 terraform {
   required_version = "= 1.9.6"
 
@@ -15,6 +13,13 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
+# Create directory for the pool before pool creation
+resource "null_resource" "create_directory" {
+  provisioner "local-exec" {
+    command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+  }
+}
+
 resource "libvirt_network" "br0" {
   name      = var.rocky9_network_name
   mode      = "bridge"
@@ -24,9 +29,10 @@ resource "libvirt_network" "br0" {
 }
 
 resource "libvirt_pool" "volumetmp_bastion" {
-  name = "${var.cluster_name}_bastion"
-  type = "dir"
-  path = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+  name       = "${var.cluster_name}_bastion"
+  type       = "dir"
+  path       = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+  depends_on = [null_resource.create_directory]
 }
 
 resource "libvirt_volume" "rocky9_image" {
@@ -34,7 +40,7 @@ resource "libvirt_volume" "rocky9_image" {
   source     = var.rocky9_image
   pool       = libvirt_pool.volumetmp_bastion.name
   format     = "qcow2"
-  depends_on = [libvirt_pool.volumetmp_bastion] # Ensure pool is created before volume
+  depends_on = [libvirt_pool.volumetmp_bastion]
 }
 
 data "template_file" "vm_configs" {
@@ -56,16 +62,16 @@ data "template_file" "vm_configs" {
 resource "libvirt_cloudinit_disk" "vm_cloudinit" {
   for_each = var.vm_rockylinux_definitions
 
-  name      = "${each.key}_cloudinit.iso"
-  pool      = libvirt_pool.volumetmp_bastion.name
-  user_data = data.template_file.vm_configs[each.key].rendered
+  name          = "${each.key}_cloudinit.iso"
+  pool          = libvirt_pool.volumetmp_bastion.name
+  user_data     = data.template_file.vm_configs[each.key].rendered
   network_config = templatefile("${path.module}/config/network-config.tpl", {
     ip      = each.value.ip,
     gateway = each.value.gateway,
     dns1    = each.value.dns1,
     dns2    = each.value.dns2
   })
-  depends_on = [libvirt_pool.volumetmp_bastion] # Ensure pool is created before cloudinit disk
+  depends_on = [libvirt_pool.volumetmp_bastion]
 }
 
 resource "libvirt_volume" "vm_disk" {
@@ -76,7 +82,7 @@ resource "libvirt_volume" "vm_disk" {
   pool           = each.value.volume_pool
   format         = each.value.volume_format
   size           = each.value.volume_size
-  depends_on     = [libvirt_volume.rocky9_image] # Ensure base volume is created before disk
+  depends_on     = [libvirt_volume.rocky9_image]
 }
 
 resource "libvirt_domain" "vm" {
@@ -89,7 +95,7 @@ resource "libvirt_domain" "vm" {
   network_interface {
     network_id = libvirt_network.br0.id
     bridge     = "br0"
-    addresses  = [each.value.ip] # Assign the static IP
+    addresses  = [each.value.ip]
   }
 
   disk {
