@@ -1,3 +1,4 @@
+# br0_network\main.tf
 terraform {
   required_version = "= 1.9.6"
 
@@ -84,7 +85,7 @@ resource "libvirt_domain" "vm" {
   network_interface {
     network_id = libvirt_network.br0.id
     bridge     = "br0"
-    addresses  = [each.value.ip]
+    addresses  = [each.value.ip] # Assign the static IP
   }
 
   disk {
@@ -94,10 +95,9 @@ resource "libvirt_domain" "vm" {
   cloudinit = libvirt_cloudinit_disk.vm_cloudinit[each.key].id
 
   graphics {
-    type     = "vnc"
-    autoport = true
+    type        = "vnc"
+    listen_type = "address"
   }
-
 
   console {
     type        = "pty"
@@ -114,9 +114,7 @@ resource "libvirt_domain" "vm" {
   cpu {
     mode = "host-passthrough"
   }
-
-
-
+}
 
 output "bastion_ip_address" {
   value = var.vm_rockylinux_definitions["bastion1"].ip
