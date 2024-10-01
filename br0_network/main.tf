@@ -125,6 +125,14 @@ resource "libvirt_domain" "vm" {
     mode = "host-passthrough"
   }
 
+ # Provisioner to ensure domain is removed on destroy
+  provisioner "local-exec" {
+    when    = destroy
+    command = "virsh undefine ${self.name} --remove-all-storage || true"
+  }
+}
+
+
   depends_on = [libvirt_volume.vm_disk, libvirt_cloudinit_disk.vm_cloudinit]
 }
 

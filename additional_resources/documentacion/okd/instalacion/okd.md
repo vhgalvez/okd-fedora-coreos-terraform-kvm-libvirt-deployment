@@ -257,3 +257,25 @@ You can then validate your Ignition files using:
 bash
 Copiar código
 ignition-validate bootstrap.ign
+
+
+he error suggests a permissions issue with qemu-system-x86_64. Here’s how to resolve it:
+
+Ensure Correct Permissions: Ensure that qemu-system-x86_64 is executable by the qemu user or group:
+
+bash
+Copiar código
+sudo chmod +x /usr/local/bin/qemu-system-x86_64
+sudo chown root:kvm /usr/local/bin/qemu-system-x86_64
+sudo chmod 755 /usr/local/bin/qemu-system-x86_64
+Check User Group: Ensure your user is part of the kvm and libvirt groups:
+
+bash
+Copiar código
+sudo usermod -aG kvm,libvirt $(whoami)
+Restart Services: Restart the libvirtd service:
+
+bash
+Copiar código
+sudo systemctl restart libvirtd
+After making these changes, try running terraform apply again.
