@@ -73,7 +73,8 @@ resource "libvirt_volume" "vm_disk" {
 resource "libvirt_domain" "vm" {
   for_each = var.vm_rockylinux_definitions
 
-  name   = "${each.value.hostname}.${var.cluster_domain}"
+  # Cambiar esta línea para que solo use el `hostname`
+  name   = each.value.hostname
   memory = each.value.memory
   vcpu   = each.value.cpus
 
@@ -92,7 +93,6 @@ resource "libvirt_domain" "vm" {
   cpu {
     mode = "host-passthrough"
   }
-
 
   graphics {
     type        = "vnc"
@@ -115,6 +115,7 @@ resource "libvirt_domain" "vm" {
     libvirt_cloudinit_disk.vm_cloudinit
   ]
 }
+
 
 output "bastion_ip_address" {
   value = var.vm_rockylinux_definitions["bastion1"].ip
