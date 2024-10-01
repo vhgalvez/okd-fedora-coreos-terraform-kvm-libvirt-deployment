@@ -18,6 +18,18 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
+# Ensure the directory is created before anything else
+resource "null_resource" "create_volumetmp_directory" {
+  provisioner "local-exec" {
+    command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_nat_02"
+  }
+
+  provisioner "local-exec" {
+    when    = "destroy"
+    command = "sudo rm -rf /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_nat_02"
+  }
+}
+
 resource "libvirt_network" "kube_network_02" {
   name      = "kube_network_02"
   mode      = "nat"
@@ -26,19 +38,18 @@ resource "libvirt_network" "kube_network_02" {
 }
 
 resource "libvirt_pool" "volumetmp_nat_02" {
-  name = "${var.cluster_name}_nat_02"
-  type = "dir"
-  path = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_nat_02"
+  name       = "${var.cluster_name}_nat_02"
+  type       = "dir"
+  path       = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_nat_02"
+  depends_on = [null_resource.create_volumetmp_directory]
 }
 
 resource "libvirt_volume" "rocky9_image" {
-  name   = "${var.cluster_name}_rocky9_image"
-  source = var.rocky9_image
-  pool   = libvirt_pool.volumetmp_nat_02.name
-  format = "qcow2"
-
+  name       = "${var.cluster_name}_rocky9_image"
+  source     = var.rocky9_image
+  pool       = libvirt_pool.volumetmp_nat_02.name
+  format     = "qcow2"
   depends_on = [libvirt_pool.volumetmp_nat_02]
-
 }
 
 data "template_file" "vm-configs" {
@@ -109,3 +120,4 @@ resource "libvirt_domain" "vm_nat_02" {
     target_port = "0"
   }
 }
+
