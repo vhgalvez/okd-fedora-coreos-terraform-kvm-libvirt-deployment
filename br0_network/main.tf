@@ -25,10 +25,6 @@ resource "libvirt_pool" "volumetmp_bastion" {
   name = "${var.cluster_name}_bastion"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
-
-  lifecycle {
-    create_before_destroy = false
-  }
 }
 
 resource "libvirt_volume" "rocky9_image" {
@@ -36,10 +32,6 @@ resource "libvirt_volume" "rocky9_image" {
   source = var.rocky9_image
   pool   = libvirt_pool.volumetmp_bastion.name
   format = "qcow2"
-
-  lifecycle {
-    create_before_destroy = false
-  }
 }
 
 data "template_file" "vm_configs" {
@@ -70,10 +62,6 @@ resource "libvirt_cloudinit_disk" "vm_cloudinit" {
     dns1    = each.value.dns1,
     dns2    = each.value.dns2
   })
-
-  lifecycle {
-    create_before_destroy = false
-  }
 }
 
 resource "libvirt_volume" "vm_disk" {
@@ -84,10 +72,6 @@ resource "libvirt_volume" "vm_disk" {
   pool           = each.value.volume_pool
   format         = each.value.volume_format
   size           = each.value.volume_size
-
-  lifecycle {
-    create_before_destroy = false
-  }
 }
 
 resource "libvirt_domain" "vm" {
@@ -114,6 +98,7 @@ resource "libvirt_domain" "vm" {
     autoport = true
   }
 
+
   console {
     type        = "pty"
     target_type = "serial"
@@ -130,10 +115,8 @@ resource "libvirt_domain" "vm" {
     mode = "host-passthrough"
   }
 
-  lifecycle {
-    create_before_destroy = false
-  }
-}
+
+
 
 output "bastion_ip_address" {
   value = var.vm_rockylinux_definitions["bastion1"].ip
