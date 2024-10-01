@@ -13,10 +13,13 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Create directory for the pool before pool creation
+# Ensure that the directory has appropriate permissions before running Terraform.
+# It is recommended to set these permissions manually or through a configuration management tool.
+
+# Create directory for the pool before pool creation (without sudo)
 resource "null_resource" "create_directory" {
   provisioner "local-exec" {
-    command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+    command = "mkdir -p /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
   }
 }
 
@@ -125,15 +128,20 @@ resource "libvirt_domain" "vm" {
     mode = "host-passthrough"
   }
 
- # Provisioner to ensure domain is removed on destroy
+  # Provisioner to ensure domain is removed on destroy
   provisioner "local-exec" {
     when    = destroy
     command = "virsh undefine ${self.name} --remove-all-storage || true"
   }
 }
 
-
-  depends_on = [libvirt_volume.vm_disk, libvirt_cloudinit_disk.vm_cloudinit]
+# Ensure directory is removed after libvirt resources are destroyed (without sudo)
+resource "null_resource" "remove_directory" {
+  provisioner "local-exec" {
+    when    = destroy
+    command = "rm -rf /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+  }
+  depends_on = [libvirt_pool.volumetmp_bastion]
 }
 
 output "bastion_ip_address" {
