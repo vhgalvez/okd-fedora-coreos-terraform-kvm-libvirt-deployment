@@ -134,9 +134,8 @@ resource "libvirt_domain" "vm" {
     create_before_destroy = false
   }
 
-  # Use `null_resource` to handle pre-destroy domain cleanup
+  # Ensure domain is cleaned up before creation
   provisioner "local-exec" {
-    when    = create
     command = "virsh destroy ${self.name} || true; virsh undefine ${self.name} --remove-all-storage || true"
   }
 }
