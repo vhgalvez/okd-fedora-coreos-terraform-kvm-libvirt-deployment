@@ -134,10 +134,10 @@ resource "libvirt_domain" "vm" {
     create_before_destroy = false
   }
 
-  # Provisioner para eliminar el dominio si ya existe antes de aplicar
+  # Provisioner to clean up any existing domain before creation
   provisioner "local-exec" {
-    when    = create
-    command = "virsh undefine ${each.value.hostname} --remove-all-storage || true"
+    when    = "create"
+    command = "virsh destroy ${self.name} || true; virsh undefine ${self.name} --remove-all-storage || true"
   }
 }
 
