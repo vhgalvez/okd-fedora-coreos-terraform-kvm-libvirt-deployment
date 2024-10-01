@@ -63,6 +63,8 @@ write_files:
     permissions: "0755"
 
 runcmd:
+  - sudo dnf install -y qemu-guest-agent
+  - sudo systemctl enable --now qemu-guest-agent
   - chmod +x /usr/local/bin/set-dns.sh
   - chmod +x /usr/local/bin/set-hosts.sh
   - /usr/local/bin/set-dns.sh
