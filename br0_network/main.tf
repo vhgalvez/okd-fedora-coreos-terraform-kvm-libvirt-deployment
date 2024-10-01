@@ -73,7 +73,6 @@ resource "libvirt_volume" "vm_disk" {
 resource "libvirt_domain" "vm" {
   for_each = var.vm_rockylinux_definitions
 
-  # Usa el nombre largo para la VM
   name   = "${each.value.hostname}.${var.cluster_domain}"
   memory = each.value.memory
   vcpu   = each.value.cpus
@@ -100,7 +99,6 @@ resource "libvirt_domain" "vm" {
     target_port = "0"
   }
 
-  # Destroy provisioner para eliminar el dominio correctamente
   provisioner "local-exec" {
     when    = destroy
     command = "virsh undefine ${self.name} --remove-all-storage || true"
