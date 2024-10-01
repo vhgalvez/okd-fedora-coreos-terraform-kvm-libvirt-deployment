@@ -25,10 +25,6 @@ resource "libvirt_pool" "volumetmp_bastion" {
   name = "${var.cluster_name}_bastion"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
-
-  lifecycle {
-    create_before_destroy = false
-  }
 }
 
 resource "libvirt_volume" "rocky9_image" {
@@ -36,10 +32,6 @@ resource "libvirt_volume" "rocky9_image" {
   source = var.rocky9_image
   pool   = libvirt_pool.volumetmp_bastion.name
   format = "qcow2"
-
-  lifecycle {
-    create_before_destroy = false
-  }
 }
 
 data "template_file" "vm_configs" {
@@ -61,19 +53,15 @@ data "template_file" "vm_configs" {
 resource "libvirt_cloudinit_disk" "vm_cloudinit" {
   for_each = var.vm_rockylinux_definitions
 
-  name      = "${each.key}_cloudinit.iso"
-  pool      = libvirt_pool.volumetmp_bastion.name
-  user_data = data.template_file.vm_configs[each.key].rendered
+  name           = "${each.key}_cloudinit.iso"
+  pool           = libvirt_pool.volumetmp_bastion.name
+  user_data      = data.template_file.vm_configs[each.key].rendered
   network_config = templatefile("${path.module}/config/network-config.tpl", {
     ip      = each.value.ip,
     gateway = each.value.gateway,
     dns1    = each.value.dns1,
     dns2    = each.value.dns2
   })
-
-  lifecycle {
-    create_before_destroy = false
-  }
 }
 
 resource "libvirt_volume" "vm_disk" {
@@ -86,7 +74,7 @@ resource "libvirt_volume" "vm_disk" {
   size           = each.value.volume_size
 
   lifecycle {
-    create_before_destroy = false
+    create_before_destroy = true
   }
 }
 
@@ -130,8 +118,10 @@ resource "libvirt_domain" "vm" {
     mode = "host-passthrough"
   }
 
-  lifecycle {
-    create_before_destroy = false
+  # Provisioner para eliminar el dominio si ya existe
+  provisioner "local-exec" {
+    when    = destroy
+    command = "virsh undefine ${each.value.hostname} --remove-all-storage || true"
   }
 }
 
