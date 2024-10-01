@@ -100,6 +100,13 @@ resource "libvirt_domain" "vm" {
     mode = "host-passthrough"
   }
 
+
+  # Graphics support
+  graphics {
+    type        = "vnc"
+    listen_type = "address"
+  }
+
   # Serial console support
   console {
     type        = "pty"
