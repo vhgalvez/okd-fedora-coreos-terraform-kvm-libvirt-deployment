@@ -93,6 +93,12 @@ resource "libvirt_domain" "vm" {
     mode = "host-passthrough"
   }
 
+
+  graphics {
+    type        = "vnc"
+    listen_type = "address"
+  }
+
   console {
     type        = "pty"
     target_type = "serial"
