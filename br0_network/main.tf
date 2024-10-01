@@ -1,4 +1,5 @@
 # br0_network\main.tf
+
 terraform {
   required_version = "= 1.9.6"
 
@@ -29,10 +30,11 @@ resource "libvirt_pool" "volumetmp_bastion" {
 }
 
 resource "libvirt_volume" "rocky9_image" {
-  name   = "${var.cluster_name}-rocky9_image"
-  source = var.rocky9_image
-  pool   = libvirt_pool.volumetmp_bastion.name
-  format = "qcow2"
+  name       = "${var.cluster_name}-rocky9_image"
+  source     = var.rocky9_image
+  pool       = libvirt_pool.volumetmp_bastion.name
+  format     = "qcow2"
+  depends_on = [libvirt_pool.volumetmp_bastion] # Ensure pool is created before volume
 }
 
 data "template_file" "vm_configs" {
@@ -63,6 +65,7 @@ resource "libvirt_cloudinit_disk" "vm_cloudinit" {
     dns1    = each.value.dns1,
     dns2    = each.value.dns2
   })
+  depends_on = [libvirt_pool.volumetmp_bastion] # Ensure pool is created before cloudinit disk
 }
 
 resource "libvirt_volume" "vm_disk" {
@@ -73,6 +76,7 @@ resource "libvirt_volume" "vm_disk" {
   pool           = each.value.volume_pool
   format         = each.value.volume_format
   size           = each.value.volume_size
+  depends_on     = [libvirt_volume.rocky9_image] # Ensure base volume is created before disk
 }
 
 resource "libvirt_domain" "vm" {
@@ -114,6 +118,8 @@ resource "libvirt_domain" "vm" {
   cpu {
     mode = "host-passthrough"
   }
+
+  depends_on = [libvirt_volume.vm_disk, libvirt_cloudinit_disk.vm_cloudinit]
 }
 
 output "bastion_ip_address" {
