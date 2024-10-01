@@ -115,6 +115,7 @@ resource "libvirt_domain" "vm" {
     mode = "host-passthrough"
   }
 
+}
 output "bastion_ip_address" {
   value = var.vm_rockylinux_definitions["bastion1"].ip
 }
