@@ -133,11 +133,6 @@ resource "libvirt_domain" "vm" {
   lifecycle {
     create_before_destroy = false
   }
-
-  # Ensure domain is cleaned up before creation
-  provisioner "local-exec" {
-    command = "virsh destroy ${self.name} || true; virsh undefine ${self.name} --remove-all-storage || true"
-  }
 }
 
 output "bastion_ip_address" {
