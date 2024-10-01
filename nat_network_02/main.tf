@@ -1,5 +1,4 @@
 # nat_network_02\main.tf
-
 terraform {
   required_version = "= 1.9.6"
 
@@ -30,13 +29,22 @@ resource "libvirt_pool" "volumetmp_nat_02" {
   name = "${var.cluster_name}_nat_02"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_nat_02"
+  # Make sure the pool is created before any volume
+  depends_on = [null_resource.create_volumetmp_directory]
+}
+
+resource "null_resource" "create_volumetmp_directory" {
+  provisioner "local-exec" {
+    command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_nat_02"
+  }
 }
 
 resource "libvirt_volume" "rocky9_image" {
-  name   = "${var.cluster_name}_rocky9_image"
-  source = var.rocky9_image
-  pool   = libvirt_pool.volumetmp_nat_02.name
-  format = "qcow2"
+  name       = "${var.cluster_name}_rocky9_image"
+  source     = var.rocky9_image
+  pool       = libvirt_pool.volumetmp_nat_02.name
+  format     = "qcow2"
+  depends_on = [libvirt_pool.volumetmp_nat_02]
 }
 
 data "template_file" "vm-configs" {
@@ -100,7 +108,6 @@ resource "libvirt_domain" "vm_nat_02" {
     mode = "host-passthrough"
   }
 
-  # Add this section for serial console support
   console {
     type        = "pty"
     target_type = "serial"
