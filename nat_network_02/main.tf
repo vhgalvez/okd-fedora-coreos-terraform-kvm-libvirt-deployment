@@ -24,9 +24,8 @@ resource "null_resource" "create_volumetmp_directory" {
     command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_nat_02"
   }
 
-  provisioner "local-exec" {
-    when    = "destroy"
-    command = "sudo rm -rf /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_nat_02"
+  triggers = {
+    cluster_name = var.cluster_name
   }
 }
 
@@ -120,4 +119,3 @@ resource "libvirt_domain" "vm_nat_02" {
     target_port = "0"
   }
 }
-
