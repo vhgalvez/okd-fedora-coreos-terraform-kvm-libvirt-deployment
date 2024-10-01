@@ -280,3 +280,10 @@ bash
 Copiar código
 sudo systemctl restart libvirtd
 After making these changes, try running terraform apply again.
+
+
+
+curl -o /mnt/lv_data/organized_storage/images/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2 https://dl.rockylinux.org/mirror/rockylinux.org/9/images/x86_64/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2
+
+
+sudo curl -o /mnt/lv_data/organized_storage/images/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2 https://dl.rockylinux.org/mirror/rockylinux.org/9/images/x86_64/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2
