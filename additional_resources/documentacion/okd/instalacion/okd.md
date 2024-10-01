@@ -268,6 +268,7 @@ Copiar código
 sudo chmod +x /usr/local/bin/qemu-system-x86_64
 sudo chown root:kvm /usr/local/bin/qemu-system-x86_64
 sudo chmod 755 /usr/local/bin/qemu-system-x86_64
+
 Check User Group: Ensure your user is part of the kvm and libvirt groups:
 
 bash
