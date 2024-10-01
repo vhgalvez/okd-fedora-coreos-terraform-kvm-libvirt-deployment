@@ -115,10 +115,6 @@ resource "libvirt_domain" "vm" {
     mode = "host-passthrough"
   }
 
-  # Enable QEMU agent for advanced management
-  qemu_agent = true
-}
-
 output "bastion_ip_address" {
   value = var.vm_rockylinux_definitions["bastion1"].ip
 }
