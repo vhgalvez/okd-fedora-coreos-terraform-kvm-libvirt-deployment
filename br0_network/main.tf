@@ -5,7 +5,7 @@ terraform {
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
-      version = "8.0.0"
+      version = "0.8.0"
     }
     template = {
       source  = "hashicorp/template"
