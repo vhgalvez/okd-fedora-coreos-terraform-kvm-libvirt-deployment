@@ -29,10 +29,10 @@ resource "libvirt_pool" "volumetmp_bastion" {
 }
 
 resource "libvirt_volume" "rocky9_image" {
-  name   = "${var.cluster_name}-rocky9_image"
-  source = var.rocky9_image
-  pool   = libvirt_pool.volumetmp_bastion.name
-  format = "qcow2"
+  name       = "${var.cluster_name}-rocky9_image"
+  source     = var.rocky9_image
+  pool       = libvirt_pool.volumetmp_bastion.name
+  format     = "qcow2"
   depends_on = [libvirt_pool.volumetmp_bastion]
 }
 
