@@ -1,10 +1,11 @@
+# br0_network\main.tf
 terraform {
-  required_version = ">= 0.13"
+  required_version = "= 1.9.6"
 
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
-      version = "~> 0.8.0"
+      version = "0.8.0"
     }
   }
 }
@@ -15,9 +16,10 @@ provider "libvirt" {
 
 resource "libvirt_network" "br0" {
   name      = var.rocky9_network_name
-  mode      = "nat"
+  mode      = "bridge"
+  bridge    = "br0"
   autostart = true
-  addresses = ["10.17.3.0/24"]
+  addresses = ["192.168.0.0/24"]
 }
 
 resource "libvirt_pool" "volumetmp_bastion" {
@@ -27,7 +29,7 @@ resource "libvirt_pool" "volumetmp_bastion" {
 }
 
 resource "libvirt_volume" "rocky9_image" {
-  name   = "${var.cluster_name}_rocky9_image"
+  name   = "${var.cluster_name}-rocky9_image"
   source = var.rocky9_image
   pool   = libvirt_pool.volumetmp_bastion.name
   format = "qcow2"
@@ -55,15 +57,22 @@ resource "libvirt_cloudinit_disk" "vm_cloudinit" {
   name      = "${each.key}_cloudinit.iso"
   pool      = libvirt_pool.volumetmp_bastion.name
   user_data = data.template_file.vm_configs[each.key].rendered
+  network_config = templatefile("${path.module}/config/network-config.tpl", {
+    ip      = each.value.ip,
+    gateway = each.value.gateway,
+    dns1    = each.value.dns1,
+    dns2    = each.value.dns2
+  })
 }
 
 resource "libvirt_volume" "vm_disk" {
   for_each = var.vm_rockylinux_definitions
 
-  name           = "${each.key}-${var.cluster_name}.qcow2"
+  name           = each.value.volume_name
   base_volume_id = libvirt_volume.rocky9_image.id
-  pool           = libvirt_pool.volumetmp_bastion.name
-  format         = "qcow2"
+  pool           = each.value.volume_pool
+  format         = each.value.volume_format
+  size           = each.value.volume_size
 }
 
 resource "libvirt_domain" "vm" {
@@ -74,9 +83,9 @@ resource "libvirt_domain" "vm" {
   vcpu   = each.value.cpus
 
   network_interface {
-    network_id     = libvirt_network.br0.id
-    wait_for_lease = true
-    addresses      = [each.value.ip]
+    network_id = libvirt_network.br0.id
+    bridge     = "br0"
+    addresses  = [each.value.ip] # Assign the static IP
   }
 
   disk {
@@ -84,10 +93,6 @@ resource "libvirt_domain" "vm" {
   }
 
   cloudinit = libvirt_cloudinit_disk.vm_cloudinit[each.key].id
-
-  cpu {
-    mode = "host-passthrough"
-  }
 
   graphics {
     type        = "vnc"
@@ -100,11 +105,15 @@ resource "libvirt_domain" "vm" {
     target_port = "0"
   }
 
-  depends_on = [
-    libvirt_volume.vm_disk,
-    libvirt_cloudinit_disk.vm_cloudinit,
-    libvirt_network.br0
-  ]
+  console {
+    type        = "pty"
+    target_type = "virtio"
+    target_port = "1"
+  }
+
+  cpu {
+    mode = "host-passthrough"
+  }
 }
 
 output "bastion_ip_address" {
