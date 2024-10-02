@@ -315,3 +315,11 @@ After applying these, restart libvirtd:
 bash
 Copiar código
 sudo systemctl restart libvirtd
+
+
+
+
+
+sudo virsh destroy bastion1.cefaslocalserver.com
+sudo virsh undefine bastion1.cefaslocalserver.com --remove-all-storage
+sudo terraform state rm libvirt_domain.vm["bastion1"]
