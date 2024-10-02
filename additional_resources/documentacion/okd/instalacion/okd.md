@@ -287,3 +287,31 @@ curl -o /mnt/lv_data/organized_storage/images/Rocky-9-GenericCloud-Base.latest.x
 
 
 sudo curl -o /mnt/lv_data/organized_storage/images/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2 https://dl.rockylinux.org/mirror/rockylinux.org/9/images/x86_64/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2
+
+
+
+
+
+If the permission changes on /usr/local/bin/qemu-system-x86_64 keep resetting, it could be due to system policies or another process overriding them. Here are simplified ways to make the changes persistent without repeatedly needing to adjust permissions:
+
+1. Use a Sticky Bit or Immutable Attribute:
+Set a sticky bit to prevent changes:
+bash
+Copiar código
+sudo chmod +t /usr/local/bin/qemu-system-x86_64
+Make the file immutable:
+bash
+Copiar código
+sudo chattr +i /usr/local/bin/qemu-system-x86_64
+2. Ensure Your User is Permanently Added to Groups:
+Check that your user is correctly added to libvirt and kvm groups:
+bash
+Copiar código
+sudo usermod -aG libvirt,kvm $(whoami)
+3. Persistent SELinux Policy:
+If SELinux is enabled, consider creating a policy allowing qemu-system-x86_64 access instead of turning it off permanently.
+After applying these, restart libvirtd:
+
+bash
+Copiar código
+sudo systemctl restart libvirtd

@@ -1,11 +1,11 @@
 # nat_network_02\main.tf
 terraform {
-  required_version = "= 1.9.6"
+  required_version = "= 1.9.5"
 
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
-      version = "0.8.0"
+      version = "0.7.0"
     }
     template = {
       source  = "hashicorp/template"
@@ -29,22 +29,13 @@ resource "libvirt_pool" "volumetmp_nat_02" {
   name = "${var.cluster_name}_nat_02"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_nat_02"
-  # Make sure the pool is created before any volume
-  depends_on = [null_resource.create_volumetmp_directory]
-}
-
-resource "null_resource" "create_volumetmp_directory" {
-  provisioner "local-exec" {
-    command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_nat_02"
-  }
 }
 
 resource "libvirt_volume" "rocky9_image" {
-  name       = "${var.cluster_name}_rocky9_image"
-  source     = var.rocky9_image
-  pool       = libvirt_pool.volumetmp_nat_02.name
-  format     = "qcow2"
-  depends_on = [libvirt_pool.volumetmp_nat_02]
+  name   = "${var.cluster_name}_rocky9_image"
+  source = var.rocky9_image
+  pool   = libvirt_pool.volumetmp_nat_02.name
+  format = "qcow2"
 }
 
 data "template_file" "vm-configs" {
@@ -52,14 +43,14 @@ data "template_file" "vm-configs" {
 
   template = file("${path.module}/config/${each.key}-user-data.tpl")
   vars = {
-    ssh_keys       = jsonencode(var.ssh_keys),
-    hostname       = each.value.hostname,
+    ssh_keys = jsonencode(var.ssh_keys),
+    hostname = each.value.hostname,
     short_hostname = each.value.short_hostname,
-    timezone       = var.timezone,
-    ip             = each.value.ip,
-    gateway        = var.gateway,
-    dns1           = var.dns1,
-    dns2           = var.dns2
+    timezone = var.timezone,
+    ip       = each.value.ip,
+    gateway  = var.gateway,
+    dns1     = var.dns1,
+    dns2     = var.dns2
   }
 }
 
@@ -108,6 +99,7 @@ resource "libvirt_domain" "vm_nat_02" {
     mode = "host-passthrough"
   }
 
+  # Add this section for serial console support
   console {
     type        = "pty"
     target_type = "serial"
