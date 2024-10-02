@@ -321,3 +321,54 @@ sudo systemctl restart libvirtd
 sudo virsh destroy bastion1.cefaslocalserver.com
 sudo virsh undefine bastion1.cefaslocalserver.com --remove-all-storage
 sudo terraform state rm libvirt_domain.vm["bastion1"]
+
+
+
+
+
+Para hacer persistente la solución sin deshabilitar SELinux por completo, sigue estos pasos:
+
+Eliminar cualquier contexto previo incorrecto:
+
+bash
+Copiar código
+sudo semanage fcontext -d '/usr/local/bin/qemu-system-x86_64'
+Asignar el tipo virt_exec_t al binario de QEMU:
+
+bash
+Copiar código
+sudo semanage fcontext -a -t virt_exec_t '/usr/local/bin/qemu-system-x86_64'
+sudo restorecon -v /usr/local/bin/qemu-system-x86_64
+Hacer persistente el modo permisivo de SELinux solo para QEMU: Si deseas mantener SELinux activo, solo ajusta los permisos de QEMU y no toda la configuración de SELinux. Reinicia y asegúrate de que el cambio se mantiene:
+
+bash
+Copiar código
+sudo reboot
+Esto debe resolver los problemas de permisos sin cambiar el estado completo de SELinux a "permissive".
+
+
+Para corregir los permisos y asegurarte de que no sean revertidos:
+
+Eliminar el atributo inmutable (si está aplicado):
+
+bash
+Copiar código
+sudo chattr -i /usr/local/bin/qemu-system-x86_64
+Configurar usuario y grupo en /etc/libvirt/qemu.conf: Edita el archivo /etc/libvirt/qemu.conf y establece:
+
+conf
+Copiar código
+user = "root"
+group = "kvm"
+Reiniciar el servicio de libvirt:
+
+bash
+Copiar código
+sudo systemctl restart libvirtd
+Establecer la propiedad y permisos correctos:
+
+bash
+Copiar código
+sudo chown root:kvm /usr/local/bin/qemu-system-x86_64
+sudo chmod 755 /usr/local/bin/qemu-system-x86_64
+Estos pasos asegurarán que los permisos sean correctos y persistentes para QEMU.
