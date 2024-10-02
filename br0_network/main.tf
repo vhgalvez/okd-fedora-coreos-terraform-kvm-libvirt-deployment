@@ -33,6 +33,7 @@ resource "libvirt_volume" "rocky9_image" {
   source = var.rocky9_image
   pool   = libvirt_pool.volumetmp_bastion.name
   format = "qcow2"
+  depends_on = [libvirt_pool.volumetmp_bastion]
 }
 
 data "template_file" "vm_configs" {

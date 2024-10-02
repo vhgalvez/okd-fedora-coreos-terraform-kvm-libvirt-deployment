@@ -372,3 +372,7 @@ Copiar código
 sudo chown root:kvm /usr/local/bin/qemu-system-x86_64
 sudo chmod 755 /usr/local/bin/qemu-system-x86_64
 Estos pasos asegurarán que los permisos sean correctos y persistentes para QEMU.
+
+
+sudo setenforce 0
+sudo systemctl restart libvirtd
