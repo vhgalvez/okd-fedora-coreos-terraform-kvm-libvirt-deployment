@@ -4,7 +4,7 @@ terraform {
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
-      version = "~> 0.7.1"
+      version = "~> 0.8.0"
     }
   }
 }
@@ -21,9 +21,9 @@ resource "libvirt_network" "br0" {
 }
 
 resource "libvirt_pool" "volumetmp_bastion" {
-  name          = "${var.cluster_name}_bastion"
-  type          = "dir"
-  path          = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+  name = "${var.cluster_name}_bastion"
+  type = "dir"
+  path = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
 }
 
 resource "libvirt_volume" "rocky9_image" {
@@ -98,6 +98,17 @@ resource "libvirt_domain" "vm" {
     type        = "pty"
     target_type = "serial"
     target_port = "0"
+  }
+
+  provisioner "local-exec" {
+    when = destroy
+    command = <<EOT
+      sudo chmod +x /usr/local/bin/qemu-system-x86_64
+      sudo chown root:kvm /usr/local/bin/qemu-system-x86_64
+      sudo chmod 755 /usr/local/bin/qemu-system-x86_64
+      sudo usermod -aG kvm,libvirt $(whoami)
+      sudo systemctl restart libvirtd
+    EOT
   }
 
   depends_on = [
