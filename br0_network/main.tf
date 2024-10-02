@@ -1,14 +1,10 @@
 terraform {
-  required_version = "= 1.9.6"
+  required_version = ">= 0.13"
 
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
-      version = "0.8.0"
-    }
-    template = {
-      source  = "hashicorp/template"
-      version = "~> 2.2.0"
+      version = "~> 0.8.0"
     }
   }
 }
@@ -73,7 +69,6 @@ resource "libvirt_volume" "vm_disk" {
 resource "libvirt_domain" "vm" {
   for_each = var.vm_rockylinux_definitions
 
-  # Cambiar esta línea para que solo use el `hostname`
   name   = each.value.hostname
   memory = each.value.memory
   vcpu   = each.value.cpus
@@ -105,17 +100,12 @@ resource "libvirt_domain" "vm" {
     target_port = "0"
   }
 
-  provisioner "local-exec" {
-    when    = destroy
-    command = "virsh undefine ${self.name} --remove-all-storage || true"
-  }
-
   depends_on = [
     libvirt_volume.vm_disk,
-    libvirt_cloudinit_disk.vm_cloudinit
+    libvirt_cloudinit_disk.vm_cloudinit,
+    libvirt_network.br0
   ]
 }
-
 
 output "bastion_ip_address" {
   value = var.vm_rockylinux_definitions["bastion1"].ip
