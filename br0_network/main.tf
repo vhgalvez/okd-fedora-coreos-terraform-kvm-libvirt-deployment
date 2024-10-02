@@ -21,9 +21,9 @@ resource "libvirt_network" "br0" {
 }
 
 resource "libvirt_pool" "volumetmp_bastion" {
-  name          = "${var.cluster_name}_bastion"
-  type          = "dir"
-  path          = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+  name = "${var.cluster_name}_bastion"
+  type = "dir"
+  path = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
 }
 
 resource "libvirt_volume" "rocky9_image" {
