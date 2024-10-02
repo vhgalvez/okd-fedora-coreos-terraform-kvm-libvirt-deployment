@@ -101,7 +101,7 @@ resource "libvirt_domain" "vm" {
   }
 
   provisioner "local-exec" {
-    when = destroy
+    when    = destroy
     command = <<EOT
       sudo chmod +x /usr/local/bin/qemu-system-x86_64
       sudo chown root:kvm /usr/local/bin/qemu-system-x86_64

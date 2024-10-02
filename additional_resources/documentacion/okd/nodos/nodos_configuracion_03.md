@@ -74,11 +74,6 @@ sudo virsh start worker3
 
 
 
-
-
-
-
-
 sudo virsh start freeipa1
 sudo virsh start load_balancer1
 sudo virsh start helper
