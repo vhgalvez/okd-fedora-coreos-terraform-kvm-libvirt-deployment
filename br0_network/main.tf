@@ -1,3 +1,4 @@
+
 terraform {
   required_version = "= 1.9.6"
 
@@ -25,11 +26,6 @@ resource "libvirt_network" "br0" {
 resource "null_resource" "create_volumetmp_directory" {
   provisioner "local-exec" {
     command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion && sudo chmod 755 /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
-  }
-
-  provisioner "local-exec" {
-    when    = destroy
-    command = "sudo rm -rf /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
   }
 }
 
