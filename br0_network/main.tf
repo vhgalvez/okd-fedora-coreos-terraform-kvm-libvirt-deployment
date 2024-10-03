@@ -1,5 +1,6 @@
 terraform {
   required_version = ">= 1.9.6"
+
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
@@ -12,11 +13,16 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Create the storage directory
+# Ensure the directory is created before anything else
 resource "null_resource" "create_volumetmp_directory" {
   provisioner "local-exec" {
     when    = create
     command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion && sudo chown -R qemu:kvm /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion && sudo chmod 755 /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "sudo rm -rf /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
   }
 
   triggers = {
@@ -37,6 +43,19 @@ resource "libvirt_pool" "volumetmp_bastion" {
   depends_on = [null_resource.create_volumetmp_directory]
 }
 
+# Ensure the pool is started
+resource "null_resource" "start_pool" {
+  depends_on = [libvirt_pool.volumetmp_bastion]
+
+  provisioner "local-exec" {
+    command = "virsh pool-start ${var.cluster_name}_bastion"
+  }
+
+  triggers = {
+    pool = libvirt_pool.volumetmp_bastion.name
+  }
+}
+
 # Create the network configuration
 resource "libvirt_network" "br0" {
   name      = var.rocky9_network_name
@@ -53,7 +72,7 @@ resource "libvirt_volume" "rocky9_image" {
   pool   = libvirt_pool.volumetmp_bastion.name
   format = "qcow2"
 
-  depends_on = [libvirt_pool.volumetmp_bastion]
+  depends_on = [libvirt_pool.volumetmp_bastion, null_resource.start_pool]
 }
 
 # Generate template data for VM configurations
