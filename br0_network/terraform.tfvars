@@ -1,4 +1,5 @@
 # br0_network\terraform.tfvars
+
 rocky9_image = "/mnt/lv_data/organized_storage/images/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2"
 
 vm_rockylinux_definitions = {
@@ -8,7 +9,7 @@ vm_rockylinux_definitions = {
     volume_name    = "bastion1_volume"
     volume_format  = "qcow2"
     volume_pool    = "default"
-    volume_size    = "32212254720" # 30GB
+    volume_size    = "32212254720"                   # 30GB
     hostname       = "bastion1.cefaslocalserver.com" # hostname completo
     ip             = "192.168.0.20"
     gateway        = "192.168.0.1"
