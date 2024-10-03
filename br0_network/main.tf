@@ -38,7 +38,10 @@ resource "libvirt_pool" "volumetmp_bastion" {
   depends_on = [null_resource.create_volumetmp_directory]
 }
 
+
+
 # Make sure the storage pool is started and autostarted in libvirt
+
 resource "null_resource" "start_pool" {
   depends_on = [libvirt_pool.volumetmp_bastion]
 
@@ -50,6 +53,9 @@ resource "null_resource" "start_pool" {
     pool = libvirt_pool.volumetmp_bastion.name
   }
 }
+
+
+
 
 # Create the network configuration
 resource "libvirt_network" "br0" {
