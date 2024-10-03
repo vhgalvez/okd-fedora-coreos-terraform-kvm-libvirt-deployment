@@ -4,7 +4,7 @@ terraform {
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
-      version = "0.7.1"  # Ensure you use the version you have installed
+      version = "0.7.1" # Change to your actual installed version
     }
   }
 }
@@ -13,19 +13,42 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
+# Create the directory for the storage pool
+resource "null_resource" "create_volumetmp_directory" {
+  provisioner "local-exec" {
+    command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion && sudo chown libvirt-qemu:kvm /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion && sudo chmod 755 /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "sudo rm -rf /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+  }
+
+  # Trigger creation if any relevant data changes
+  triggers = {
+    directory_created = timestamp()
+  }
+}
+
+# Define the storage pool
+resource "libvirt_pool" "volumetmp_bastion" {
+  name = "${var.cluster_name}_bastion"
+  type = "dir"
+  path = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  depends_on = [null_resource.create_volumetmp_directory]
+}
+
 resource "libvirt_network" "br0" {
   name      = var.rocky9_network_name
   mode      = "bridge"
   bridge    = "br0"
   autostart = true
   addresses = ["192.168.0.0/24"]
-}
-
-# Correct the storage pool resource definition
-resource "libvirt_pool" "volumetmp_bastion" {
-  name = "${var.cluster_name}_bastion"
-  type = "dir"
-  path = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
 }
 
 resource "libvirt_volume" "rocky9_image" {
@@ -64,7 +87,6 @@ resource "libvirt_cloudinit_disk" "vm_cloudinit" {
     dns1    = each.value.dns1,
     dns2    = each.value.dns2
   })
-  depends_on = [libvirt_pool.volumetmp_bastion]
 }
 
 resource "libvirt_volume" "vm_disk" {
