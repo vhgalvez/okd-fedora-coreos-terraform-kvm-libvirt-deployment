@@ -38,10 +38,7 @@ resource "libvirt_pool" "volumetmp_bastion" {
   depends_on = [null_resource.create_volumetmp_directory]
 }
 
-
-
 # Make sure the storage pool is started and autostarted in libvirt
-
 resource "null_resource" "start_pool" {
   depends_on = [libvirt_pool.volumetmp_bastion]
 
@@ -53,9 +50,6 @@ resource "null_resource" "start_pool" {
     pool = libvirt_pool.volumetmp_bastion.name
   }
 }
-
-
-
 
 # Create the network configuration
 resource "libvirt_network" "br0" {
@@ -106,6 +100,9 @@ resource "libvirt_cloudinit_disk" "vm_cloudinit" {
     dns1    = each.value.dns1,
     dns2    = each.value.dns2
   })
+
+  # Ensure cloud-init disk creation depends on the pool being started
+  depends_on = [libvirt_pool.volumetmp_bastion, null_resource.start_pool]
 }
 
 # Create the VM disk volumes
@@ -117,6 +114,8 @@ resource "libvirt_volume" "vm_disk" {
   pool           = libvirt_pool.volumetmp_bastion.name
   format         = each.value.volume_format
   size           = each.value.volume_size
+
+  depends_on = [libvirt_pool.volumetmp_bastion, null_resource.start_pool]
 }
 
 # Create the VM domain
