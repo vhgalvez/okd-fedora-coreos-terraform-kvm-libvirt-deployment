@@ -13,7 +13,7 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Create the network configuration
+# Create the network
 resource "libvirt_network" "br0" {
   name      = var.rocky9_network_name
   mode      = "bridge"
@@ -22,46 +22,22 @@ resource "libvirt_network" "br0" {
   addresses = ["192.168.0.0/24"]
 }
 
-# Define the storage pool
+# Create the storage pool for VM volumes
 resource "libvirt_pool" "volumetmp_bastion" {
   name = "${var.cluster_name}_bastion"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
-
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
-# Define the base volume using Rocky Linux image
+# Define the base volume with the Rocky Linux image
 resource "libvirt_volume" "rocky9_image" {
   name   = "${var.cluster_name}-rocky9_image"
   source = var.rocky9_image
   pool   = libvirt_pool.volumetmp_bastion.name
   format = "qcow2"
-
-  # Ensure the base volume is created after the pool
-  depends_on = [libvirt_pool.volumetmp_bastion]
 }
 
-# Generate template data for VM configurations
-data "template_file" "vm_configs" {
-  for_each = var.vm_rockylinux_definitions
-
-  template = file("${path.module}/config/${each.key}-user-data.tpl")
-  vars = {
-    ssh_keys       = jsonencode(var.ssh_keys),
-    hostname       = each.value.hostname,
-    short_hostname = each.value.short_hostname,
-    timezone       = var.timezone,
-    ip             = each.value.ip,
-    gateway        = each.value.gateway,
-    dns1           = each.value.dns1,
-    dns2           = each.value.dns2
-  }
-}
-
-# Create the cloud-init disk for each VM
+# Create cloud-init disk for each VM
 resource "libvirt_cloudinit_disk" "vm_cloudinit" {
   for_each = var.vm_rockylinux_definitions
 
@@ -74,12 +50,9 @@ resource "libvirt_cloudinit_disk" "vm_cloudinit" {
     dns1    = each.value.dns1,
     dns2    = each.value.dns2
   })
-
-  # Ensure cloud-init disk creation depends on the pool being started
-  depends_on = [libvirt_pool.volumetmp_bastion]
 }
 
-# Create the VM disk volumes
+# Create the VM disk volumes based on the base image
 resource "libvirt_volume" "vm_disk" {
   for_each = var.vm_rockylinux_definitions
 
@@ -88,11 +61,9 @@ resource "libvirt_volume" "vm_disk" {
   pool           = libvirt_pool.volumetmp_bastion.name
   format         = each.value.volume_format
   size           = each.value.volume_size
-
-  depends_on = [libvirt_volume.rocky9_image]
 }
 
-# Create the VM domain
+# Define VM domains with boot order set correctly
 resource "libvirt_domain" "vm" {
   for_each = var.vm_rockylinux_definitions
 
@@ -103,7 +74,7 @@ resource "libvirt_domain" "vm" {
   network_interface {
     network_id = libvirt_network.br0.id
     bridge     = "br0"
-    addresses  = [each.value.ip]
+    addresses  = [each.value.ip] # Assign the static IP
   }
 
   disk {
@@ -113,7 +84,7 @@ resource "libvirt_domain" "vm" {
   cloudinit = libvirt_cloudinit_disk.vm_cloudinit[each.key].id
 
   graphics {
-    type     = "vnc"
+    type        = "vnc"
     listen_type = "address"
   }
 
@@ -132,12 +103,6 @@ resource "libvirt_domain" "vm" {
   cpu {
     mode = "host-passthrough"
   }
-
-  # Boot order to ensure boot from the correct disk
-  boot_device {
-    dev = ["hd", "cdrom"]
-  }
-}
 
 # Output the bastion's IP address
 output "bastion_ip_address" {
