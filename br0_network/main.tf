@@ -1,6 +1,5 @@
 terraform {
   required_version = ">= 1.9.6"
-
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
@@ -20,16 +19,10 @@ resource "null_resource" "create_volumetmp_directory" {
     command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion && sudo chown -R qemu:kvm /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion && sudo chmod 755 /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
   }
 
-  provisioner "local-exec" {
-    when    = destroy
-    command = "sudo rm -rf /mnt/lv_data/organized_storage/volumes/${self.triggers.cluster_name}_bastion"
-  }
-
   triggers = {
     cluster_name = var.cluster_name
   }
 }
-
 
 # Define the storage pool
 resource "libvirt_pool" "volumetmp_bastion" {
