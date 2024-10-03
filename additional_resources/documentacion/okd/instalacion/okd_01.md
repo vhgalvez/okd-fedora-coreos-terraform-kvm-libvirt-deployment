@@ -8,10 +8,12 @@ Ejecute el siguiente comando curl para descargar la última imagen de Fedora Cor
 bash
 Copiar código
 sudo curl --retry 5 --retry-delay 10 -L -o /tmp/fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2.xz https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/40.20240906.3.0/x86_64/fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2.xz
+
 --retry 5: Reintenta la descarga hasta 5 veces en caso de fallo.
 --retry-delay 10: Espera 10 segundos entre reintentos.
 -L: Sigue redireccionamientos si la URL cambia.
 -o /tmp/fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2.xz: Especifica la ruta de salida del archivo.
+
 2. Descomprimir la Imagen
 El archivo descargado está en formato .xz, por lo que necesita descomprimirlo para obtener la imagen .qcow2:
 

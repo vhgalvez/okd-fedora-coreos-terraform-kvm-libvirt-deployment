@@ -1,4 +1,3 @@
-# br0_network\main.tf
 terraform {
   required_version = "= 1.9.6"
 
@@ -22,10 +21,28 @@ resource "libvirt_network" "br0" {
   addresses = ["192.168.0.0/24"]
 }
 
+# Ensure the directory for the storage pool is created
+resource "null_resource" "create_volumetmp_directory" {
+  provisioner "local-exec" {
+    command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion && sudo chmod 755 /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "sudo rm -rf /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+  }
+}
+
 resource "libvirt_pool" "volumetmp_bastion" {
   name = "${var.cluster_name}_bastion"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  depends_on = [null_resource.create_volumetmp_directory]
 }
 
 resource "libvirt_volume" "rocky9_image" {
