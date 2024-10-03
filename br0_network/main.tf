@@ -1,6 +1,5 @@
-
 terraform {
-  required_version = "= 1.9.6"
+  required_version = ">= 1.9.6"
 
   required_providers {
     libvirt = {
@@ -14,21 +13,20 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-resource "libvirt_network" "br0" {
-  name      = var.rocky9_network_name
-  mode      = "bridge"
-  bridge    = "br0"
-  autostart = true
-  addresses = ["192.168.0.0/24"]
-}
-
-# Ensure the directory for the storage pool is created
+# Ensure the directory is created before anything else
 resource "null_resource" "create_volumetmp_directory" {
   provisioner "local-exec" {
-    command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion && sudo chmod 755 /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+    when    = create
+    command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion && sudo chown -R qemu:kvm /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion && sudo chmod 755 /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+  }
+
+  provisioner "local-exec" {
+    when    = destroy
+    command = "sudo rm -rf /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
   }
 }
 
+# Define the storage pool
 resource "libvirt_pool" "volumetmp_bastion" {
   name = "${var.cluster_name}_bastion"
   type = "dir"
@@ -41,13 +39,26 @@ resource "libvirt_pool" "volumetmp_bastion" {
   depends_on = [null_resource.create_volumetmp_directory]
 }
 
+# Create the network configuration
+resource "libvirt_network" "br0" {
+  name      = var.rocky9_network_name
+  mode      = "bridge"
+  bridge    = "br0"
+  autostart = true
+  addresses = ["192.168.0.0/24"]
+}
+
+# Define the volume based on the Rocky Linux image
 resource "libvirt_volume" "rocky9_image" {
   name   = "${var.cluster_name}-rocky9_image"
   source = var.rocky9_image
   pool   = libvirt_pool.volumetmp_bastion.name
   format = "qcow2"
+
+  depends_on = [libvirt_pool.volumetmp_bastion]
 }
 
+# Generate template data for VM configurations
 data "template_file" "vm_configs" {
   for_each = var.vm_rockylinux_definitions
 
@@ -64,6 +75,7 @@ data "template_file" "vm_configs" {
   }
 }
 
+# Create the cloud-init disk for each VM
 resource "libvirt_cloudinit_disk" "vm_cloudinit" {
   for_each = var.vm_rockylinux_definitions
 
@@ -78,16 +90,18 @@ resource "libvirt_cloudinit_disk" "vm_cloudinit" {
   })
 }
 
+# Create the VM disk volumes
 resource "libvirt_volume" "vm_disk" {
   for_each = var.vm_rockylinux_definitions
 
   name           = each.value.volume_name
   base_volume_id = libvirt_volume.rocky9_image.id
-  pool           = each.value.volume_pool
+  pool           = libvirt_pool.volumetmp_bastion.name
   format         = each.value.volume_format
   size           = each.value.volume_size
 }
 
+# Create the VM domain
 resource "libvirt_domain" "vm" {
   for_each = var.vm_rockylinux_definitions
 
@@ -129,6 +143,7 @@ resource "libvirt_domain" "vm" {
   }
 }
 
+# Output the bastion's IP address
 output "bastion_ip_address" {
   value = var.vm_rockylinux_definitions["bastion1"].ip
 }
