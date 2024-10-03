@@ -14,6 +14,7 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
+# Define the network configuration
 resource "libvirt_network" "br0" {
   name      = var.rocky9_network_name
   mode      = "bridge"
@@ -22,12 +23,18 @@ resource "libvirt_network" "br0" {
   addresses = ["192.168.0.0/24"]
 }
 
+# Define and create the storage pool
 resource "libvirt_pool" "volumetmp_bastion" {
   name = "${var.cluster_name}_bastion"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
+# Define the volume based on the Rocky Linux image
 resource "libvirt_volume" "rocky9_image" {
   name   = "${var.cluster_name}-rocky9_image"
   source = var.rocky9_image
@@ -35,6 +42,7 @@ resource "libvirt_volume" "rocky9_image" {
   format = "qcow2"
 }
 
+# Generate template data for VM configurations
 data "template_file" "vm_configs" {
   for_each = var.vm_rockylinux_definitions
 
@@ -51,6 +59,7 @@ data "template_file" "vm_configs" {
   }
 }
 
+# Create the cloud-init disk for each VM
 resource "libvirt_cloudinit_disk" "vm_cloudinit" {
   for_each = var.vm_rockylinux_definitions
 
@@ -65,16 +74,18 @@ resource "libvirt_cloudinit_disk" "vm_cloudinit" {
   })
 }
 
+# Create the VM disk volumes
 resource "libvirt_volume" "vm_disk" {
   for_each = var.vm_rockylinux_definitions
 
   name           = each.value.volume_name
   base_volume_id = libvirt_volume.rocky9_image.id
-  pool           = each.value.volume_pool
+  pool           = libvirt_pool.volumetmp_bastion.name
   format         = each.value.volume_format
   size           = each.value.volume_size
 }
 
+# Create the VM domain with explicit boot device
 resource "libvirt_domain" "vm" {
   for_each = var.vm_rockylinux_definitions
 
@@ -82,10 +93,14 @@ resource "libvirt_domain" "vm" {
   memory = each.value.memory
   vcpu   = each.value.cpus
 
+  boot_device {
+    dev = "hd"
+  }
+
   network_interface {
     network_id = libvirt_network.br0.id
     bridge     = "br0"
-    addresses  = [each.value.ip] # Assign the static IP
+    addresses  = [each.value.ip]
   }
 
   disk {
@@ -116,6 +131,7 @@ resource "libvirt_domain" "vm" {
   }
 }
 
+# Output the bastion's IP address
 output "bastion_ip_address" {
   value = var.vm_rockylinux_definitions["bastion1"].ip
 }
