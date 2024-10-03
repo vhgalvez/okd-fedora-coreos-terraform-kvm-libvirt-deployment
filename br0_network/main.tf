@@ -4,7 +4,7 @@ terraform {
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
-      version = "0.7.1" # Change to your actual installed version
+      version = "0.8.0"
     }
   }
 }
@@ -109,7 +109,7 @@ resource "libvirt_domain" "vm" {
   network_interface {
     network_id = libvirt_network.br0.id
     bridge     = "br0"
-    addresses  = [each.value.ip] # Assign the static IP
+    addresses  = [each.value.ip] 
   }
 
   disk {
@@ -139,6 +139,7 @@ resource "libvirt_domain" "vm" {
     mode = "host-passthrough"
   }
 }
+
 
 output "bastion_ip_address" {
   value = var.vm_rockylinux_definitions["bastion1"].ip

@@ -1,8 +1,4 @@
-variable "enabled" {
-  description = "Enable or disable QEMU agent"
-  type        = bool
-  default     = true
-}
+
 variable "ssh_keys" {
   description = "SSH keys for the VMs"
   type        = list(string)
