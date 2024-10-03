@@ -22,13 +22,14 @@ resource "null_resource" "create_volumetmp_directory" {
 
   provisioner "local-exec" {
     when    = destroy
-    command = "sudo rm -rf /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+    command = "sudo rm -rf /mnt/lv_data/organized_storage/volumes/${self.triggers.cluster_name}_bastion"
   }
 
   triggers = {
     cluster_name = var.cluster_name
   }
 }
+
 
 # Define the storage pool
 resource "libvirt_pool" "volumetmp_bastion" {
