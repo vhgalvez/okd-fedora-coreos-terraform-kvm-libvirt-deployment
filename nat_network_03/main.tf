@@ -107,7 +107,7 @@ resource "libvirt_domain" "nodes" {
   }
 
   # Enable QEMU agent communication to prevent retrieval issues
-  qemu_agent = true
+  qemu_agent = false
 }
 
 # Output node IP addresses
