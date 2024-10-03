@@ -26,10 +26,10 @@ resource "libvirt_network" "kube_network_03" {
 }
 
 # Define a storage pool
-resource "libvirt_pool" "volumetmp_03" {
-  name = "volumetmp_03"
+resource "libvirt_pool" "volume_03" {
+  name = "volume_03"
   type = "dir"
-  path = "/mnt/lv_data/organized_storage/volumes/volumetmp_03"
+  path = "/mnt/lv_data/organized_storage/volumes/volume_03"
 
   lifecycle {
     create_before_destroy = true
@@ -60,7 +60,7 @@ resource "libvirt_ignition" "ignitions" {
 # Create a base volume for Fedora CoreOS
 resource "libvirt_volume" "coreos_image" {
   name   = "coreos_image.qcow2"
-  pool   = libvirt_pool.volumetmp_03.name
+  pool   = libvirt_pool.volume_03.name
   source = var.coreos_image
   format = "qcow2"
 }
@@ -69,7 +69,7 @@ resource "libvirt_volume" "coreos_image" {
 resource "libvirt_volume" "okd_volumes" {
   for_each       = var.vm_definitions
   name           = "${each.key}.qcow2"
-  pool           = libvirt_pool.volumetmp_03.name
+  pool           = libvirt_pool.volume_03.name
   size           = each.value.disk_size * 1048576 # Convert MB to bytes
   base_volume_id = libvirt_volume.coreos_image.id
 }
