@@ -1,6 +1,6 @@
-# main.tf
 terraform {
   required_version = ">= 1.9.6"
+
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
@@ -13,27 +13,15 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Create the new NAT-based network kube_network_03
+# Create a new NAT-based network kube_network_03
 resource "libvirt_network" "kube_network_03" {
   name      = "kube_network_03"
   mode      = "nat"
   autostart = true
   addresses = ["10.17.4.0/24"]
+
   dhcp {
     enabled = true
-  }
-}
-
-# Ensure the directory is created before anything else
-resource "null_resource" "create_volumetmp_directory" {
-  provisioner "local-exec" {
-    when    = create
-    command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/volumetmp_03 && sudo chmod 755 /mnt/lv_data/organized_storage/volumes/volumetmp_03"
-  }
-
-  provisioner "local-exec" {
-    when    = destroy
-    command = "sudo rm -rf /mnt/lv_data/organized_storage/volumes/volumetmp_03"
   }
 }
 
@@ -46,8 +34,6 @@ resource "libvirt_pool" "volumetmp_03" {
   lifecycle {
     create_before_destroy = true
   }
-
-  depends_on = [null_resource.create_volumetmp_directory]
 }
 
 # Define local paths to Ignition files
@@ -77,8 +63,6 @@ resource "libvirt_volume" "coreos_image" {
   pool   = libvirt_pool.volumetmp_03.name
   source = var.coreos_image
   format = "qcow2"
-
-  depends_on = [libvirt_pool.volumetmp_03]
 }
 
 # Create individual node volumes based on the base image
@@ -87,14 +71,13 @@ resource "libvirt_volume" "okd_volumes" {
   name           = "${each.key}.qcow2"
   pool           = libvirt_pool.volumetmp_03.name
   size           = each.value.disk_size * 1048576 # Convert MB to bytes
-  base_volume_id = libvirt_volume.coreos_image.id # Corrected reference
-
-  depends_on = [libvirt_volume.coreos_image] # Corrected reference
+  base_volume_id = libvirt_volume.coreos_image.id
 }
 
 # Define VMs with network and disk attachments
 resource "libvirt_domain" "nodes" {
   for_each = var.vm_definitions
+
   name     = "okd-${each.key}"
   memory   = each.value.memory
   vcpu     = each.value.cpus
@@ -105,7 +88,7 @@ resource "libvirt_domain" "nodes" {
   # Connect VMs to the kube_network_03 network
   network_interface {
     network_id     = libvirt_network.kube_network_03.id
-    wait_for_lease = true # Enable this to ensure DHCP assigns an IP address
+    wait_for_lease = true
   }
 
   disk {
@@ -125,8 +108,6 @@ resource "libvirt_domain" "nodes" {
 
   # Enable QEMU agent communication to prevent retrieval issues
   qemu_agent = true
-
-  depends_on = [libvirt_volume.okd_volumes, libvirt_network.kube_network_03]
 }
 
 # Output node IP addresses
