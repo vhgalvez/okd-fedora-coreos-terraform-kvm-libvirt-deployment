@@ -13,7 +13,7 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Ensure the directory is created before anything else
+# Ensure the directory for the storage pool is created
 resource "null_resource" "create_volumetmp_directory" {
   provisioner "local-exec" {
     when    = create
@@ -25,7 +25,7 @@ resource "null_resource" "create_volumetmp_directory" {
   }
 }
 
-# Define and start the storage pool in Terraform
+# Define and create the storage pool
 resource "libvirt_pool" "volumetmp_bastion" {
   name = "${var.cluster_name}_bastion"
   type = "dir"
@@ -38,7 +38,7 @@ resource "libvirt_pool" "volumetmp_bastion" {
   depends_on = [null_resource.create_volumetmp_directory]
 }
 
-# Start and enable the storage pool after creation
+# Make sure the storage pool is started and autostarted in libvirt
 resource "null_resource" "start_pool" {
   depends_on = [libvirt_pool.volumetmp_bastion]
 
