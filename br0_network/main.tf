@@ -12,7 +12,7 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Ensure the directory is created before anything else
+# Create the storage directory
 resource "null_resource" "create_volumetmp_directory" {
   provisioner "local-exec" {
     when    = create
@@ -24,7 +24,7 @@ resource "null_resource" "create_volumetmp_directory" {
   }
 }
 
-# Define the storage pool
+# Define the storage pool, with an explicit dependency on the directory creation
 resource "libvirt_pool" "volumetmp_bastion" {
   name = "${var.cluster_name}_bastion"
   type = "dir"
