@@ -64,7 +64,7 @@ data "template_file" "vm_configs" {
 
   template = file("${path.module}/config/${each.key}-user-data.tpl")
   vars = {
-    ssh_keys       = var.ssh_keys
+    ssh_keys       = join("\n", var.ssh_keys)
     hostname       = each.value.hostname
     short_hostname = each.value.short_hostname
     timezone       = var.timezone
