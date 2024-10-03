@@ -19,15 +19,9 @@ resource "null_resource" "create_volumetmp_directory" {
     command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion && sudo chown libvirt-qemu:kvm /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion && sudo chmod 755 /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
   }
 
-  provisioner "local-exec" {
-    when    = destroy
-    command = "sudo rm -rf ${self.triggers.directory_path}"
-  }
-
-  # Trigger creation if any relevant data changes
+  # Ensure the directory is only created once
   triggers = {
-    directory_created = timestamp()
-    directory_path    = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+    always_run = timestamp()
   }
 }
 
@@ -37,11 +31,23 @@ resource "libvirt_pool" "volumetmp_bastion" {
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
 
+  # Create the pool before volumes
   lifecycle {
     create_before_destroy = true
   }
 
   depends_on = [null_resource.create_volumetmp_directory]
+}
+
+# Define the Rocky Linux image volume
+resource "libvirt_volume" "rocky9_image" {
+  name       = "${var.cluster_name}-rocky9_image"
+  source     = var.rocky9_image
+  pool       = libvirt_pool.volumetmp_bastion.name
+  format     = "qcow2"
+  
+  # Explicitly depend on the pool creation
+  depends_on = [libvirt_pool.volumetmp_bastion]
 }
 
 resource "libvirt_network" "br0" {
@@ -52,30 +58,7 @@ resource "libvirt_network" "br0" {
   addresses = ["192.168.0.0/24"]
 }
 
-resource "libvirt_volume" "rocky9_image" {
-  name       = "${var.cluster_name}-rocky9_image"
-  source     = var.rocky9_image
-  pool       = libvirt_pool.volumetmp_bastion.name
-  format     = "qcow2"
-  depends_on = [libvirt_pool.volumetmp_bastion]
-}
-
-data "template_file" "vm_configs" {
-  for_each = var.vm_rockylinux_definitions
-
-  template = file("${path.module}/config/${each.key}-user-data.tpl")
-  vars = {
-    ssh_keys       = jsonencode(var.ssh_keys),
-    hostname       = each.value.hostname,
-    short_hostname = each.value.short_hostname,
-    timezone       = var.timezone,
-    ip             = each.value.ip,
-    gateway        = each.value.gateway,
-    dns1           = each.value.dns1,
-    dns2           = each.value.dns2
-  }
-}
-
+# Cloudinit configuration
 resource "libvirt_cloudinit_disk" "vm_cloudinit" {
   for_each = var.vm_rockylinux_definitions
 
@@ -88,6 +71,8 @@ resource "libvirt_cloudinit_disk" "vm_cloudinit" {
     dns1    = each.value.dns1,
     dns2    = each.value.dns2
   })
+
+  depends_on = [libvirt_pool.volumetmp_bastion]
 }
 
 resource "libvirt_volume" "vm_disk" {
