@@ -16,6 +16,6 @@ sshKey: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDC9XqGWEd2de3Ud8TgvzFchK2/SYh+WHo
 passwd:
   users:
     - name: core
-      passwordHash: '$6$randomsalt$hashedpasswordstring'
+      passwordHash: '1234567'
     - name: root
-      passwordHash: '$6$randomsalt$hashedpasswordstring'
+      passwordHash: '1234567'
