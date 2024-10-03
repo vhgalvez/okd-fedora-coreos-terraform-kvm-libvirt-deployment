@@ -124,7 +124,7 @@ resource "libvirt_domain" "nodes" {
   }
 
   # Enable QEMU agent communication to prevent retrieval issues
-  qemu_agent = enabled
+  qemu_agent = true
 
   depends_on = [libvirt_volume.okd_volumes, libvirt_network.kube_network_03]
 }
