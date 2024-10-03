@@ -39,23 +39,40 @@ resource "libvirt_pool" "volumetmp_bastion" {
   depends_on = [null_resource.create_volumetmp_directory]
 }
 
-# Define the Rocky Linux image volume
-resource "libvirt_volume" "rocky9_image" {
-  name   = "${var.cluster_name}-rocky9_image"
-  source = var.rocky9_image
-  pool   = libvirt_pool.volumetmp_bastion.name
-  format = "qcow2"
-
-  # Explicitly depend on the pool creation
-  depends_on = [libvirt_pool.volumetmp_bastion]
-}
-
 resource "libvirt_network" "br0" {
   name      = var.rocky9_network_name
   mode      = "bridge"
   bridge    = "br0"
   autostart = true
   addresses = ["192.168.0.0/24"]
+}
+
+# Define the Rocky Linux image volume
+resource "libvirt_volume" "rocky9_image" {
+  name       = "${var.cluster_name}-rocky9_image"
+  source     = var.rocky9_image
+  pool       = libvirt_pool.volumetmp_bastion.name
+  format     = "qcow2"
+  
+  # Explicitly depend on the pool creation
+  depends_on = [libvirt_pool.volumetmp_bastion]
+}
+
+# Create a template for cloud-init
+data "template_file" "vm_configs" {
+  for_each = var.vm_rockylinux_definitions
+
+  template = file("${path.module}/config/${each.key}-user-data.tpl")
+  vars = {
+    ssh_keys       = var.ssh_keys
+    hostname       = each.value.hostname
+    short_hostname = each.value.short_hostname
+    timezone       = var.timezone
+    ip             = each.value.ip
+    gateway        = each.value.gateway
+    dns1           = each.value.dns1
+    dns2           = each.value.dns2
+  }
 }
 
 # Cloudinit configuration
@@ -66,9 +83,9 @@ resource "libvirt_cloudinit_disk" "vm_cloudinit" {
   pool      = libvirt_pool.volumetmp_bastion.name
   user_data = data.template_file.vm_configs[each.key].rendered
   network_config = templatefile("${path.module}/config/network-config.tpl", {
-    ip      = each.value.ip,
-    gateway = each.value.gateway,
-    dns1    = each.value.dns1,
+    ip      = each.value.ip
+    gateway = each.value.gateway
+    dns1    = each.value.dns1
     dns2    = each.value.dns2
   })
 
@@ -95,7 +112,7 @@ resource "libvirt_domain" "vm" {
   network_interface {
     network_id = libvirt_network.br0.id
     bridge     = "br0"
-    addresses  = [each.value.ip]
+    addresses  = [each.value.ip] 
   }
 
   disk {
