@@ -20,18 +20,25 @@ resource "null_resource" "create_volumetmp_directory" {
     command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion && sudo chown -R qemu:kvm /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion && sudo chmod 755 /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
   }
 
-  # Corrected to use self triggers for destroy provisioner
-  provisioner "local-exec" {
-    when    = destroy
-    command = "sudo rm -rf /mnt/lv_data/organized_storage/volumes/${self.triggers.cluster_name}_bastion"
-  }
-
   triggers = {
     cluster_name = var.cluster_name
   }
 }
 
-# Define the storage pool, with an explicit dependency on the directory creation
+# Initialize the storage pool using virsh
+resource "null_resource" "initialize_pool" {
+  provisioner "local-exec" {
+    command = "virsh pool-define-as ${var.cluster_name}_bastion dir - - - - /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion && virsh pool-start ${var.cluster_name}_bastion && virsh pool-autostart ${var.cluster_name}_bastion"
+  }
+
+  triggers = {
+    cluster_name = var.cluster_name
+  }
+
+  depends_on = [null_resource.create_volumetmp_directory]
+}
+
+# Define the storage pool in Terraform for use by libvirt
 resource "libvirt_pool" "volumetmp_bastion" {
   name = "${var.cluster_name}_bastion"
   type = "dir"
@@ -41,20 +48,7 @@ resource "libvirt_pool" "volumetmp_bastion" {
     create_before_destroy = true
   }
 
-  depends_on = [null_resource.create_volumetmp_directory]
-}
-
-# Ensure the pool is started
-resource "null_resource" "start_pool" {
-  depends_on = [libvirt_pool.volumetmp_bastion]
-
-  provisioner "local-exec" {
-    command = "virsh pool-start ${var.cluster_name}_bastion"
-  }
-
-  triggers = {
-    pool = libvirt_pool.volumetmp_bastion.name
-  }
+  depends_on = [null_resource.initialize_pool]
 }
 
 # Create the network configuration
@@ -73,7 +67,7 @@ resource "libvirt_volume" "rocky9_image" {
   pool   = libvirt_pool.volumetmp_bastion.name
   format = "qcow2"
 
-  depends_on = [libvirt_pool.volumetmp_bastion, null_resource.start_pool]
+  depends_on = [libvirt_pool.volumetmp_bastion]
 }
 
 # Generate template data for VM configurations
