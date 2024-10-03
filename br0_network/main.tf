@@ -20,9 +20,10 @@ resource "null_resource" "create_volumetmp_directory" {
     command = "sudo mkdir -p /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion && sudo chown -R qemu:kvm /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion && sudo chmod 755 /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
   }
 
+  # Note: The destroy provisioner is restructured to not reference external variables
   provisioner "local-exec" {
     when    = destroy
-    command = "sudo rm -rf /mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+    command = "sudo rm -rf /mnt/lv_data/organized_storage/volumes/${self.triggers.cluster_name}_bastion"
   }
 
   triggers = {
