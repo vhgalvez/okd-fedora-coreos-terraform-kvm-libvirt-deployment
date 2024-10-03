@@ -5,7 +5,7 @@ terraform {
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
-      version = "0.8.0"
+      version = "0.7.6"
     }
   }
 }
@@ -85,7 +85,7 @@ resource "libvirt_domain" "vm" {
   network_interface {
     network_id = libvirt_network.br0.id
     bridge     = "br0"
-    addresses  = [each.value.ip] # Assign the static IP
+    addresses  = [each.value.ip]
   }
 
   disk {
