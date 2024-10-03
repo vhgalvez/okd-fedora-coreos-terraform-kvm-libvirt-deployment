@@ -1,11 +1,10 @@
-# br0_network\main.tf
 terraform {
   required_version = "= 1.9.6"
 
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
-      version = "0.8.0"
+      version = "0.7.1"  # Set this to the installed version
     }
   }
 }
@@ -22,12 +21,17 @@ resource "libvirt_network" "br0" {
   addresses = ["192.168.0.0/24"]
 }
 
+# Define the storage pool for volumes
 resource "libvirt_pool" "volumetmp_bastion" {
   name = "${var.cluster_name}_bastion"
   type = "dir"
   path = "/mnt/lv_data/organized_storage/volumes/${var.cluster_name}_bastion"
+  # Make sure the pool is built and started
+  build = true
+  autostart = true
 }
 
+# Volume from image source
 resource "libvirt_volume" "rocky9_image" {
   name       = "${var.cluster_name}-rocky9_image"
   source     = var.rocky9_image
@@ -52,6 +56,7 @@ data "template_file" "vm_configs" {
   }
 }
 
+# Cloud-init disk for VMs
 resource "libvirt_cloudinit_disk" "vm_cloudinit" {
   for_each = var.vm_rockylinux_definitions
 
@@ -64,18 +69,22 @@ resource "libvirt_cloudinit_disk" "vm_cloudinit" {
     dns1    = each.value.dns1,
     dns2    = each.value.dns2
   })
+  depends_on = [libvirt_pool.volumetmp_bastion]
 }
 
+# Create disks for VMs
 resource "libvirt_volume" "vm_disk" {
   for_each = var.vm_rockylinux_definitions
 
   name           = each.value.volume_name
   base_volume_id = libvirt_volume.rocky9_image.id
-  pool           = each.value.volume_pool
+  pool           = libvirt_pool.volumetmp_bastion.name
   format         = each.value.volume_format
   size           = each.value.volume_size
+  depends_on     = [libvirt_pool.volumetmp_bastion]
 }
 
+# VM domain definitions
 resource "libvirt_domain" "vm" {
   for_each = var.vm_rockylinux_definitions
 
