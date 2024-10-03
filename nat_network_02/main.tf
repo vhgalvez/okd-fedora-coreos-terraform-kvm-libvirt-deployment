@@ -106,3 +106,7 @@ resource "libvirt_domain" "vm_nat_02" {
     target_port = "0"
   }
 }
+
+output "ip_addresses" {
+  value = { for key, machine in libvirt_domain.vm_nat_02 : key => machine.network_interface[0].addresses[0] }
+}
