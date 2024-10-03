@@ -1,6 +1,5 @@
 terraform {
   required_version = ">= 1.9.6"
-
   required_providers {
     libvirt = {
       source  = "dmacvicar/libvirt"
@@ -38,19 +37,6 @@ resource "libvirt_pool" "volumetmp_bastion" {
   depends_on = [null_resource.create_volumetmp_directory]
 }
 
-# Make sure the storage pool is started and autostarted in libvirt
-resource "null_resource" "start_pool" {
-  depends_on = [libvirt_pool.volumetmp_bastion]
-
-  provisioner "local-exec" {
-    command = "virsh pool-start ${var.cluster_name}_bastion && virsh pool-autostart ${var.cluster_name}_bastion"
-  }
-
-  triggers = {
-    pool = libvirt_pool.volumetmp_bastion.name
-  }
-}
-
 # Create the network configuration
 resource "libvirt_network" "br0" {
   name      = var.rocky9_network_name
@@ -67,7 +53,8 @@ resource "libvirt_volume" "rocky9_image" {
   pool   = libvirt_pool.volumetmp_bastion.name
   format = "qcow2"
 
-  depends_on = [libvirt_pool.volumetmp_bastion, null_resource.start_pool]
+  # Ensure this depends on the pool being fully created and ready
+  depends_on = [libvirt_pool.volumetmp_bastion]
 }
 
 # Generate template data for VM configurations
@@ -101,8 +88,7 @@ resource "libvirt_cloudinit_disk" "vm_cloudinit" {
     dns2    = each.value.dns2
   })
 
-  # Ensure cloud-init disk creation depends on the pool being started
-  depends_on = [libvirt_pool.volumetmp_bastion, null_resource.start_pool]
+  depends_on = [libvirt_pool.volumetmp_bastion]
 }
 
 # Create the VM disk volumes
@@ -115,7 +101,7 @@ resource "libvirt_volume" "vm_disk" {
   format         = each.value.volume_format
   size           = each.value.volume_size
 
-  depends_on = [libvirt_pool.volumetmp_bastion, null_resource.start_pool]
+  depends_on = [libvirt_pool.volumetmp_bastion]
 }
 
 # Create the VM domain
