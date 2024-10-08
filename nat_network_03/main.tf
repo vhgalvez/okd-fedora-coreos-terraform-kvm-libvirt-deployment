@@ -101,7 +101,7 @@ resource "libvirt_domain" "nodes" {
   }
 
   # Habilitar la comunicación con el agente QEMU para obtener IPs
-  qemu_agent = true
+  qemu_agent = false
 }
 
 # Mostrar las direcciones IP de los nodos
