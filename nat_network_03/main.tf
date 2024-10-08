@@ -13,11 +13,6 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Define una red existente (kube_network_02 ya creada anteriormente)
-data "libvirt_network" "kube_network_02" {
-  name = "kube_network_02"
-}
-
 # Define una nueva pool de almacenamiento
 resource "libvirt_pool" "volume_03" {
   name = "volume_03"
@@ -67,7 +62,7 @@ resource "libvirt_volume" "okd_volumes" {
   base_volume_id = libvirt_volume.coreos_image.id
 }
 
-# Definir máquinas virtuales con conexión a la red existente kube_network_02
+# Definir máquinas virtuales conectadas a la red existente "kube_network_02"
 resource "libvirt_domain" "nodes" {
   for_each = var.vm_definitions
 
@@ -78,9 +73,9 @@ resource "libvirt_domain" "nodes" {
   # Usar el volumen de Ignition correcto
   cloudinit = libvirt_ignition.ignitions[each.key].id
 
-  # Conectar las VMs a la red existente kube_network_02
+  # Conectar las VMs a la red existente usando el nombre
   network_interface {
-    network_id     = data.libvirt_network.kube_network_02.id
+    network_name  = "kube_network_02"  # Referencia a la red existente
     wait_for_lease = true
   }
 
