@@ -13,19 +13,12 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Create a new NAT-based network kube_network_03
-resource "libvirt_network" "kube_network_03" {
-  name      = "kube_network_03"
-  mode      = "nat"
-  autostart = true
-  addresses = ["10.17.4.0/24"]
-
-  dhcp {
-    enabled = true
-  }
+# Define una red existente (kube_network_02 ya creada anteriormente)
+data "libvirt_network" "kube_network_02" {
+  name = "kube_network_02"
 }
 
-# Define a storage pool
+# Define una nueva pool de almacenamiento
 resource "libvirt_pool" "volume_03" {
   name = "volume_03"
   type = "dir"
@@ -36,7 +29,7 @@ resource "libvirt_pool" "volume_03" {
   }
 }
 
-# Define local paths to Ignition files
+# Define rutas locales a los archivos de Ignition
 locals {
   ignition_files = {
     "bootstrap" = "${path.module}/okd-install/bootstrap.ign"
@@ -49,7 +42,7 @@ locals {
   }
 }
 
-# Create Ignition volumes
+# Crear volúmenes de Ignition
 resource "libvirt_ignition" "ignitions" {
   for_each = local.ignition_files
 
@@ -57,7 +50,7 @@ resource "libvirt_ignition" "ignitions" {
   content = file(each.value)
 }
 
-# Create a base volume for Fedora CoreOS
+# Crea un volumen base para Fedora CoreOS
 resource "libvirt_volume" "coreos_image" {
   name   = "coreos_image.qcow2"
   pool   = libvirt_pool.volume_03.name
@@ -65,16 +58,16 @@ resource "libvirt_volume" "coreos_image" {
   format = "qcow2"
 }
 
-# Create individual node volumes based on the base image
+# Crear volúmenes para cada nodo en base al volumen base
 resource "libvirt_volume" "okd_volumes" {
   for_each       = var.vm_definitions
   name           = "${each.key}.qcow2"
   pool           = libvirt_pool.volume_03.name
-  size           = each.value.disk_size * 1048576 # Convert MB to bytes
+  size           = each.value.disk_size * 1048576 # Convertir MB a bytes
   base_volume_id = libvirt_volume.coreos_image.id
 }
 
-# Define VMs with network and disk attachments
+# Definir máquinas virtuales con conexión a la red existente kube_network_02
 resource "libvirt_domain" "nodes" {
   for_each = var.vm_definitions
 
@@ -82,12 +75,12 @@ resource "libvirt_domain" "nodes" {
   memory   = each.value.memory
   vcpu     = each.value.cpus
 
-  # Use the correct Ignition volume
+  # Usar el volumen de Ignition correcto
   cloudinit = libvirt_ignition.ignitions[each.key].id
 
-  # Connect VMs to the kube_network_03 network
+  # Conectar las VMs a la red existente kube_network_02
   network_interface {
-    network_id     = libvirt_network.kube_network_03.id
+    network_id     = data.libvirt_network.kube_network_02.id
     wait_for_lease = true
   }
 
@@ -106,11 +99,11 @@ resource "libvirt_domain" "nodes" {
     target_port = "0"
   }
 
-  # Enable QEMU agent communication to prevent retrieval issues
+  # Habilitar la comunicación con el agente QEMU
   qemu_agent = false
 }
 
-# Output node IP addresses
+# Mostrar las direcciones IP de los nodos
 output "node_ips" {
   value = { for node in libvirt_domain.nodes : node.name => node.network_interface[0].addresses[0] }
 }
