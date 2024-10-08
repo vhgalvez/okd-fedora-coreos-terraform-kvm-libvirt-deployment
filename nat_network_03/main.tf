@@ -75,8 +75,14 @@ resource "libvirt_domain" "nodes" {
 
   # Conectar las VMs a la red existente usando el nombre
   network_interface {
-    network_name  = "kube_network_02"  # Referencia a la red existente
+    network_name   = "kube_network_02"  # Referencia a la red existente
     wait_for_lease = true
+  }
+
+  # Agregar la IP estática según el archivo tfvars
+  network_interface {
+    network_name = "kube_network_02"
+    addresses    = [each.value.ip]
   }
 
   disk {
@@ -94,11 +100,12 @@ resource "libvirt_domain" "nodes" {
     target_port = "0"
   }
 
-  # Habilitar la comunicación con el agente QEMU
-  qemu_agent = false
+  # Habilitar la comunicación con el agente QEMU para obtener IPs
+  qemu_agent = true
 }
 
 # Mostrar las direcciones IP de los nodos
 output "node_ips" {
   value = { for node in libvirt_domain.nodes : node.name => node.network_interface[0].addresses[0] }
 }
+
