@@ -378,3 +378,8 @@ sudo setenforce 0
 sudo systemctl restart libvirtd
 
 curl -o /mnt/lv_data/organized_storage/images/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2 https://dl.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2
+
+
+
+
+openshift-install create ignition-configs  --dir=/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install --log-level=debug
