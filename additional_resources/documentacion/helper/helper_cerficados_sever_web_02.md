@@ -1,20 +1,91 @@
-Guía para Configurar un Servidor Nginx con Docker Compose
-Este tutorial te guiará a través de los pasos necesarios para instalar y configurar un servidor web Nginx utilizando Docker Compose en un sistema basado en Linux. Incluye la creación de un contenedor Docker para Nginx y su configuración a través de Docker Compose.
+Guía Completa para Configurar el Servidor Help
+Paso 1: Preparar el Entorno
+1.1 Acceder al Servidor
+Conéctese al servidor help utilizando SSH:
 
-Paso 1: Preparar el Entorno de Trabajo
-Primero, crea un directorio de trabajo donde se almacenarán todos los archivos necesarios para la configuración del servidor Nginx.
+bash
+Copiar código
+sudo ssh -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift core@10.17.3.14 -p 22
+1.2 Actualizar el Sistema
+Actualice todos los paquetes del sistema:
+
+bash
+Copiar código
+sudo dnf update -y && sudo dnf upgrade -y
+1.3 Instalar Dependencias
+Instale las dependencias necesarias:
+
+bash
+Copiar código
+sudo dnf install -y epel-release
+sudo dnf install -y wget vim
+Paso 2: Instalar Docker
+2.1 Instalar Docker
+Agregue el repositorio e instale Docker:
+
+bash
+Copiar código
+sudo dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+sudo dnf install -y docker-ce docker-ce-cli containerd.io
+2.2 Iniciar y Habilitar Docker
+Inicie el servicio de Docker:
+
+bash
+Copiar código
+sudo systemctl start docker
+sudo systemctl enable docker
+Paso 3: Instalar Docker Compose
+3.1 Descargar Docker Compose
+Descargue Docker Compose:
+
+bash
+Copiar código
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+3.2 Dar Permisos de Ejecución
+Asigne permisos de ejecución:
+
+bash
+Copiar código
+sudo chmod +x /usr/local/bin/docker-compose
+3.3 Verificar la Instalación
+Verifique que Docker Compose esté instalado:
+
+bash
+Copiar código
+/usr/local/bin/docker-compose --version
+3.4 Añadir Docker Compose al PATH
+Agregue Docker Compose al PATH:
+
+bash
+Copiar código
+echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc
+source ~/.bashrc
+3.5 Modificar el PATH para sudo
+Edite /etc/sudoers para incluir /usr/local/bin:
+
+bash
+Copiar código
+sudo visudo
+Modifique la línea de secure_path:
+
+bash
+Copiar código
+Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
+Paso 4: Configurar Nginx con Docker Compose
+4.1 Crear un Directorio para Nginx
+Cree un directorio de trabajo:
 
 bash
 Copiar código
 mkdir ~/nginx-docker
 cd ~/nginx-docker
-Paso 2: Crear el Archivo docker-compose.yml
-Crea un archivo docker-compose.yml en el directorio de trabajo. Este archivo define los servicios que se ejecutarán en contenedores Docker, en este caso, Nginx.
+4.2 Crear el Archivo docker-compose.yml
+Cree y edite el archivo:
 
 bash
 Copiar código
 nano docker-compose.yml
-Dentro del archivo docker-compose.yml, añade el siguiente contenido:
+Agregue el siguiente contenido:
 
 yaml
 Copiar código
@@ -31,22 +102,16 @@ services:
       - ./certificates:/etc/nginx/certificates-exposed:ro
       - ./nginx-certs:/etc/nginx/certificates:ro
     restart: always
-Explicación de la Configuración:
-nginx.conf: Archivo de configuración principal de Nginx.
-html: Directorio donde se almacenarán los archivos HTML que se servirán.
-certificates: Directorio para los certificados expuestos, montado en /etc/nginx/certificates-exposed.
-nginx-certs: Directorio para los certificados SSL, montado en /etc/nginx/certificates.
-Paso 3: Configurar Nginx
-A continuación, crea un archivo de configuración para Nginx llamado nginx.conf en el mismo directorio.
+4.3 Crear el Archivo de Configuración de Nginx
+Cree el archivo nginx.conf:
 
 bash
 Copiar código
 nano nginx.conf
-Añade la siguiente configuración básica para servir contenido estático y manejar conexiones HTTPS:
+Añada la configuración para servir contenido estático y manejar SSL:
 
 nginx
 Copiar código
-
 events {
     worker_connections 1024;
 }
@@ -63,19 +128,9 @@ http {
             try_files $uri $uri/ =404;
         }
 
-        # Exponer el directorio de certificados para su descarga, solo accesible desde las redes internas
         location /certificates/ {
             alias /etc/nginx/certificates-exposed/;
-            autoindex on;  # Habilita el listado de archivos en el directorio
-            allow 10.17.3.0/24;
-            allow 10.17.4.0/24;
-            deny all;
-        }
-
-        # Exponer el directorio de instalación de CRI-O, solo accesible desde las redes internas
-        location /install-cri-o/ {
-            alias /home/core/nginx-docker/install-cri-o/;
-            autoindex on;  # Habilita el listado de archivos en el directorio
+            autoindex on;
             allow 10.17.3.0/24;
             allow 10.17.4.0/24;
             deny all;
@@ -86,72 +141,55 @@ http {
         ssl_certificate_key /etc/nginx/certificates/server.key;
     }
 }
-
-
-
-Paso 4: Crear el Directorio de Contenido HTML
-Crea un directorio html para almacenar el archivo index.html que se servirá por Nginx.
+4.4 Crear el Directorio de HTML
+Cree el directorio y el archivo index.html:
 
 bash
 Copiar código
 mkdir html
 echo '<h1>Welcome to Nginx!</h1>' > html/index.html
-Paso 5: Iniciar el Servidor Nginx
-Ahora puedes iniciar el servidor Nginx utilizando Docker Compose. Asegúrate de estar en el directorio donde se encuentra el archivo docker-compose.yml.
+4.5 Iniciar el Servidor Nginx
+Ejecute Docker Compose:
 
 bash
 Copiar código
 docker-compose up -d
-El parámetro -d asegura que el contenedor se ejecute en segundo plano.
-
-Paso 6: Verificar los Logs y Detener el Servidor
-Puedes verificar los logs para asegurarte de que todo esté funcionando correctamente:
+4.6 Verificar los Logs y Detener el Servidor
+Verifique los logs de Docker:
 
 bash
 Copiar código
 docker-compose logs -f
-Si deseas detener el servidor en algún momento, utiliza el siguiente comando:
+Para detener el servidor:
 
 bash
 Copiar código
 docker-compose down
-Paso 7: Generar el Certificado SSL para Nginx
-Si aún no tienes un certificado SSL, puedes generar un certificado auto-firmado para Nginx.
+Paso 5: Generar Certificado SSL
+5.1 Crear el Directorio para los Certificados
+Cree un directorio para almacenar los certificados:
 
-Crear un nuevo directorio para los certificados de Nginx:
 bash
 Copiar código
 mkdir /home/core/nginx-docker/nginx-certs
-``
-Generar el certificado SSL para Nginx:
+5.2 Generar el Certificado SSL
+Genere un certificado auto-firmado:
+
 bash
 Copiar código
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /home/core/nginx-docker/nginx-certs/server.key -out /home/core/nginx-docker/nginx-certs/server.crt -subj "/CN=localhost"
-Este comando genera un certificado y una clave que son necesarios para que Nginx pueda manejar conexiones HTTPS.
+Paso 6: Clonar Repositorio de Git
+6.1 Instalar Git
+Instale Git en el servidor:
 
-Resumen y Explicación
-Este tutorial te ha guiado a través de la creación y configuración de un servidor Nginx utilizando Docker Compose. Has aprendido a configurar los archivos necesarios (docker-compose.yml y nginx.conf), a generar un certificado SSL auto-firmado, y a exponer un directorio para permitir la descarga de certificados a través de Nginx.
-
-Posibles Mejoras:
-Seguridad: Considera implementar medidas de seguridad adicionales, como la autenticación básica para proteger el acceso a los certificados expuestos.
-Automatización: Puedes crear scripts adicionales para automatizar la generación y renovación de certificados.
-Nombres Sugeridos para el Documento:
-"Guía para Configurar un Servidor Nginx con Docker Compose"
-"Configuración de Nginx en Docker Compose: Paso a Paso"
-Paso 8: Instalar Git y Clonar un Repositorio
-Si necesitas clonar un repositorio para obtener más recursos o configuraciones, puedes instalar Git y clonar el repositorio requerido.
-
-Instalar Git:
 bash
 Copiar código
 sudo dnf install git
-Clonar el Repositorio:
+6.2 Clonar el Repositorio
+Clone el repositorio necesario:
+
 bash
 Copiar código
 git clone https://github.com/vhgalvez/generate_certificates_cluster.git
-Este paso te permite obtener scripts adicionales, como los necesarios para generar certificados de clúster en Kubernetes, o cualquier otro recurso que puedas necesitar.
-
-Resumen y Explicación
-Este tutorial te guía a través de la creación y configuración de un servidor Nginx utilizando Docker Compose. Los archivos de configuración (docker-compose.yml y nginx.conf) están diseñados para exponer un servidor web en los puertos 80 y 443, con soporte para HTTPS mediante certificados SSL. Además, se muestran comandos útiles para manejar el ciclo de vida del contenedor Docker y la instalación de Git para clonar repositorios adicionales.
-
-Puedes nombrar este documento como "Guía para Configurar un Servidor Nginx con Docker Compose" o "Configuración de Nginx en Docker Compose: Paso a Paso" según prefieras.
+Resumen
+Este tutorial cubre la instalación y configuración de Docker, Docker Compose, y Nginx con soporte para HTTPS mediante certificados SSL. Además, muestra cómo exponer directorios específicos a través de Nginx y utilizar Docker Compose para gestionar contenedores de manera eficiente.
