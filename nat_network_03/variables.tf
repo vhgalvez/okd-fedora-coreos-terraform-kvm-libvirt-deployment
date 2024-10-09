@@ -43,8 +43,3 @@ variable "vm_definitions" {
     disk_size    = number
   }))
 }
-
-variable "ssh_keys" {
-  type        = list(string)
-  description = "List of SSH public keys"
-}
