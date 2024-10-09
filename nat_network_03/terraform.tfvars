@@ -1,4 +1,5 @@
 # terraform.tfvars
+
 dns1    = "10.17.3.11"
 dns2    = "8.8.8.8"
 gateway = "10.17.3.1"
