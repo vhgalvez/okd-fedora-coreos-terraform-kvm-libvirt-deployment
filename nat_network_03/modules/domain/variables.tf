@@ -1,59 +1,60 @@
 # modules/domain/variables.tf
 
-# Declare network_name variable
-variable "network_name" {
-  description = "Name of the network to which the nodes should be attached"
+
+# Declare network_id variable
+variable "network_id" {
+  description = "ID of the network to which the nodes should be attached"
   type        = string
 }
 
-# Declare Ignition config variables
-variable "bootstrap_ignition" {
-  description = "Ignition configuration for the bootstrap node"
+# Declare Ignition config ID variables
+variable "bootstrap_ignition_id" {
+  description = "Ignition configuration ID for the bootstrap node"
   type        = string
 }
 
-variable "master_ignition" { # Corrected from worker_ignition to match the control plane (master) nodes
-  description = "Ignition configuration for control plane nodes"
+variable "master_ignition_id" {
+  description = "Ignition configuration ID for control plane nodes"
   type        = string
 }
 
-variable "worker_ignition" {
-  description = "Ignition configuration for worker nodes"
+variable "worker_ignition_id" {
+  description = "Ignition configuration ID for worker nodes"
   type        = string
 }
 
-# Declare volume variables for each node type
-variable "bootstrap_volume" {
+# Declare volume ID variables for each node type
+variable "bootstrap_volume_id" {
   description = "Volume ID for the bootstrap node"
   type        = string
 }
 
-variable "controlplane_1_volume" {
+variable "controlplane_1_volume_id" {
   description = "Volume ID for control plane node 1"
   type        = string
 }
 
-variable "controlplane_2_volume" {
+variable "controlplane_2_volume_id" {
   description = "Volume ID for control plane node 2"
   type        = string
 }
 
-variable "controlplane_3_volume" {
+variable "controlplane_3_volume_id" {
   description = "Volume ID for control plane node 3"
   type        = string
 }
 
-variable "worker_1_volume" {
+variable "worker_1_volume_id" {
   description = "Volume ID for worker node 1"
   type        = string
 }
 
-variable "worker_2_volume" {
+variable "worker_2_volume_id" {
   description = "Volume ID for worker node 2"
   type        = string
 }
 
-variable "worker_3_volume" {
+variable "worker_3_volume_id" {
   description = "Volume ID for worker node 3"
   type        = string
 }
@@ -61,77 +62,35 @@ variable "worker_3_volume" {
 # Declare node definitions for bootstrap, control planes, and workers
 variable "bootstrap" {
   description = "Configuration for the bootstrap node"
-  type = object({
-    name    = string
-    memory  = number
-    vcpu    = number
-    address = string
-    mac     = string
-  })
+  type        = map(string)
 }
 
 variable "controlplane_1" {
   description = "Configuration for control plane node 1"
-  type = object({
-    name    = string
-    memory  = number
-    vcpu    = number
-    address = string
-    mac     = string
-  })
+  type        = map(string)
 }
 
 variable "controlplane_2" {
   description = "Configuration for control plane node 2"
-  type = object({
-    name    = string
-    memory  = number
-    vcpu    = number
-    address = string
-    mac     = string
-  })
+  type        = map(string)
 }
 
 variable "controlplane_3" {
   description = "Configuration for control plane node 3"
-  type = object({
-    name    = string
-    memory  = number
-    vcpu    = number
-    address = string
-    mac     = string
-  })
+  type        = map(string)
 }
 
 variable "worker_1" {
   description = "Configuration for worker node 1"
-  type = object({
-    name    = string
-    memory  = number
-    vcpu    = number
-    address = string
-    mac     = string
-  })
+  type        = map(string)
 }
 
 variable "worker_2" {
   description = "Configuration for worker node 2"
-  type = object({
-    name    = string
-    memory  = number
-    vcpu    = number
-    address = string
-    mac     = string
-  })
+  type        = map(string)
 }
 
 variable "worker_3" {
   description = "Configuration for worker node 3"
-  type = object({
-    name    = string
-    memory  = number
-    vcpu    = number
-    address = string
-    mac     = string
-  })
+  type        = map(string)
 }
