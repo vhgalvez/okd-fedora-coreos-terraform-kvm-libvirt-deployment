@@ -5,6 +5,7 @@ dns2    = "8.8.8.8"
 gateway = "10.17.3.1"
 
 coreos_base_volume = "/mnt/lv_data/organized_storage/images/fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2"
+coreos_image = "/mnt/lv_data/organized_storage/images/fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2"
 
 bootstrap_volume_size = 20
 master_volume_size    = 30
