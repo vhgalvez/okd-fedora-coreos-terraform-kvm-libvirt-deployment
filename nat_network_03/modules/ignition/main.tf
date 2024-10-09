@@ -1,5 +1,7 @@
 # modules/ignition/main.tf
 
+# modules/ignition/main.tf
+
 terraform {
   required_version = ">= 1.9.6"
 
@@ -15,23 +17,22 @@ terraform {
 resource "libvirt_ignition" "bootstrap_ignition" {
   name    = "okd_bootstrap.ign"
   pool    = "default"
-  content = file("${path.module}/../../../ignition_configs/bootstrap.ign")  
+  content = file("${path.module}/../../ignition_configs/bootstrap.ign") # Adjusted path to correct level
 }
 
-# Control Plane Ignition Configuration
+# Control Plane Ignition Configuration (renamed from master to match the file name)
 resource "libvirt_ignition" "master_ignition" {
   name    = "okd_master.ign"
   pool    = "default"
-  content = file("${path.module}/../../../ignition_configs/master.ign") 
+  content = file("${path.module}/../../ignition_configs/master.ign") # Adjusted path
 }
 
 # Worker Ignition Configuration
 resource "libvirt_ignition" "worker_ignition" {
   name    = "okd_worker.ign"
   pool    = "default"
-  content = file("${path.module}/../../../ignition_configs/worker.ign")
+  content = file("${path.module}/../../ignition_configs/worker.ign") # Adjusted path
 }
-
 
 # Outputs for the Ignition configurations
 output "bootstrap_ignition" {
