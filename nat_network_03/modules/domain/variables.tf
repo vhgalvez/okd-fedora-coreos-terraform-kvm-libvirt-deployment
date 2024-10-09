@@ -12,11 +12,6 @@ variable "bootstrap_ignition" {
   type        = string
 }
 
-variable "master_ignition" {
-  description = "Ignition configuration for control plane nodes"
-  type        = string
-}
-
 variable "worker_ignition" {
   description = "Ignition configuration for worker nodes"
   type        = string
