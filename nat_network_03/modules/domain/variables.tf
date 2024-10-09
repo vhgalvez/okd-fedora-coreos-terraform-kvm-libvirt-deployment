@@ -12,6 +12,11 @@ variable "bootstrap_ignition" {
   type        = string
 }
 
+variable "master_ignition" { # Corrected from worker_ignition to match the control plane (master) nodes
+  description = "Ignition configuration for control plane nodes"
+  type        = string
+}
+
 variable "worker_ignition" {
   description = "Ignition configuration for worker nodes"
   type        = string
@@ -55,6 +60,7 @@ variable "worker_3_volume" {
 
 # Declare node definitions for bootstrap, control planes, and workers
 variable "bootstrap" {
+  description = "Configuration for the bootstrap node"
   type = object({
     name    = string
     memory  = number
@@ -65,6 +71,7 @@ variable "bootstrap" {
 }
 
 variable "controlplane_1" {
+  description = "Configuration for control plane node 1"
   type = object({
     name    = string
     memory  = number
@@ -75,6 +82,7 @@ variable "controlplane_1" {
 }
 
 variable "controlplane_2" {
+  description = "Configuration for control plane node 2"
   type = object({
     name    = string
     memory  = number
@@ -85,6 +93,7 @@ variable "controlplane_2" {
 }
 
 variable "controlplane_3" {
+  description = "Configuration for control plane node 3"
   type = object({
     name    = string
     memory  = number
@@ -95,6 +104,7 @@ variable "controlplane_3" {
 }
 
 variable "worker_1" {
+  description = "Configuration for worker node 1"
   type = object({
     name    = string
     memory  = number
@@ -105,6 +115,7 @@ variable "worker_1" {
 }
 
 variable "worker_2" {
+  description = "Configuration for worker node 2"
   type = object({
     name    = string
     memory  = number
@@ -115,6 +126,7 @@ variable "worker_2" {
 }
 
 variable "worker_3" {
+  description = "Configuration for worker node 3"
   type = object({
     name    = string
     memory  = number
