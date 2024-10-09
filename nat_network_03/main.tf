@@ -28,7 +28,9 @@ module "volumes" {
   controlplane_1_volume_size = var.controlplane_1_volume_size
   controlplane_2_volume_size = var.controlplane_2_volume_size
   controlplane_3_volume_size = var.controlplane_3_volume_size
-  worker_volume_size         = var.worker_volume_size
+  worker_1_volume_size       = var.worker_1_volume_size
+  worker_2_volume_size       = var.worker_2_volume_size
+  worker_3_volume_size       = var.worker_3_volume_size
 }
 
 module "domain" {
