@@ -1,4 +1,3 @@
-
 # modules/volumes/main.tf
 
 terraform {
@@ -16,27 +15,68 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
+# Volumen base para Fedora CoreOS
+resource "libvirt_volume" "coreos_base" {
+  name   = "fedora_coreos.qcow2"
+  pool   = "default"
+  source = var.coreos_image
+  format = "qcow2"
+}
 
-# Define the volumes for the bootstrap, master, and worker nodes
+# Volumen para Bootstrap
 resource "libvirt_volume" "bootstrap_volume" {
   name           = "okd_bootstrap.qcow2"
   pool           = "default"
-  size           = var.bootstrap_volume_size * 1073741824
-  base_volume_id = var.coreos_base_volume
+  size           = var.bootstrap_volume_size * 1073741824 # Convert GiB to Bytes
+  base_volume_id = libvirt_volume.coreos_base.id
 }
 
-resource "libvirt_volume" "master_volume" {
-  name           = "okd_master.qcow2"
+# Volumen para Control Plane 1
+resource "libvirt_volume" "controlplane_1_volume" {
+  name           = "okd_controlplane_1.qcow2"
   pool           = "default"
-  size           = var.master_volume_size * 1073741824
-  base_volume_id = var.coreos_base_volume
+  size           = var.controlplane_1_volume_size * 1073741824
+  base_volume_id = libvirt_volume.coreos_base.id
 }
 
-resource "libvirt_volume" "worker_volume" {
-  name           = "okd_worker.qcow2"
+# Volumen para Control Plane 2
+resource "libvirt_volume" "controlplane_2_volume" {
+  name           = "okd_controlplane_2.qcow2"
   pool           = "default"
-  size           = var.worker_volume_size * 1073741824
-  base_volume_id = var.coreos_base_volume
+  size           = var.controlplane_2_volume_size * 1073741824
+  base_volume_id = libvirt_volume.coreos_base.id
+}
+
+# Volumen para Control Plane 3
+resource "libvirt_volume" "controlplane_3_volume" {
+  name           = "okd_controlplane_3.qcow2"
+  pool           = "default"
+  size           = var.controlplane_3_volume_size * 1073741824
+  base_volume_id = libvirt_volume.coreos_base.id
+}
+
+# Volumen para Worker 1
+resource "libvirt_volume" "worker_1_volume" {
+  name           = "okd_worker_1.qcow2"
+  pool           = "default"
+  size           = var.worker_1_volume_size * 1073741824
+  base_volume_id = libvirt_volume.coreos_base.id
+}
+
+# Volumen para Worker 2
+resource "libvirt_volume" "worker_2_volume" {
+  name           = "okd_worker_2.qcow2"
+  pool           = "default"
+  size           = var.worker_2_volume_size * 1073741824
+  base_volume_id = libvirt_volume.coreos_base.id
+}
+
+# Volumen para Worker 3
+resource "libvirt_volume" "worker_3_volume" {
+  name           = "okd_worker_3.qcow2"
+  pool           = "default"
+  size           = var.worker_3_volume_size * 1073741824
+  base_volume_id = libvirt_volume.coreos_base.id
 }
 
 # Outputs for the volumes
@@ -44,10 +84,26 @@ output "bootstrap_volume" {
   value = libvirt_volume.bootstrap_volume.id
 }
 
-output "master_volume" {
-  value = libvirt_volume.master_volume.id
+output "controlplane_1_volume" {
+  value = libvirt_volume.controlplane_1_volume.id
 }
 
-output "worker_volume" {
-  value = libvirt_volume.worker_volume.id
+output "controlplane_2_volume" {
+  value = libvirt_volume.controlplane_2_volume.id
+}
+
+output "controlplane_3_volume" {
+  value = libvirt_volume.controlplane_3_volume.id
+}
+
+output "worker_1_volume" {
+  value = libvirt_volume.worker_1_volume.id
+}
+
+output "worker_2_volume" {
+  value = libvirt_volume.worker_2_volume.id
+}
+
+output "worker_3_volume" {
+  value = libvirt_volume.worker_3_volume.id
 }
