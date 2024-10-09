@@ -13,30 +13,18 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Network module
 module "network" {
   source = "./modules/network"
 }
 
-# Ignition module
 module "ignition" {
   source = "./modules/ignition"
 }
 
-# Volumes module (only one instance)
 module "volumes" {
-  source                     = "./modules/volumes"
-  coreos_image               = var.coreos_image
-  bootstrap_volume_size      = var.bootstrap_volume_size
-  controlplane_1_volume_size = var.controlplane_1_volume_size
-  controlplane_2_volume_size = var.controlplane_2_volume_size
-  controlplane_3_volume_size = var.controlplane_3_volume_size
-  worker_1_volume_size       = var.worker_1_volume_size
-  worker_2_volume_size       = var.worker_2_volume_size
-  worker_3_volume_size       = var.worker_3_volume_size
+  source = "./modules/volumes"
 }
 
-# Domain module
 module "domain" {
   source                = "./modules/domain"
   network_name          = module.network.network_name
@@ -50,11 +38,12 @@ module "domain" {
   worker_1_volume       = module.volumes.worker_1_volume
   worker_2_volume       = module.volumes.worker_2_volume
   worker_3_volume       = module.volumes.worker_3_volume
-  bootstrap             = var.bootstrap
-  controlplane_1        = var.controlplane_1
-  controlplane_2        = var.controlplane_2
-  controlplane_3        = var.controlplane_3
-  worker_1              = var.worker_1
-  worker_2              = var.worker_2
-  worker_3              = var.worker_3
+
+  bootstrap      = var.bootstrap
+  controlplane_1 = var.controlplane_1
+  controlplane_2 = var.controlplane_2
+  controlplane_3 = var.controlplane_3
+  worker_1       = var.worker_1
+  worker_2       = var.worker_2
+  worker_3       = var.worker_3
 }
