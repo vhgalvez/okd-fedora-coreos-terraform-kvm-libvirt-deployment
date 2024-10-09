@@ -1,3 +1,4 @@
+# main.tf
 terraform {
   required_version = ">= 1.9.6"
 
@@ -13,7 +14,6 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# main.tf
 provider "libvirt" {
   uri = "qemu:///system"
 }

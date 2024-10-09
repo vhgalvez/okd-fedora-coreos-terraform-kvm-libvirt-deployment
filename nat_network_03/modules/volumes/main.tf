@@ -1,5 +1,23 @@
 
 # modules/volumes/main.tf
+
+terraform {
+  required_version = ">= 1.9.6"
+
+  required_providers {
+    libvirt = {
+      source  = "dmacvicar/libvirt"
+      version = "0.8.0"
+    }
+  }
+}
+
+provider "libvirt" {
+  uri = "qemu:///system"
+}
+
+
+# Define the volumes for the bootstrap, master, and worker nodes
 resource "libvirt_volume" "bootstrap_volume" {
   name           = "okd_bootstrap.qcow2"
   pool           = "default"
