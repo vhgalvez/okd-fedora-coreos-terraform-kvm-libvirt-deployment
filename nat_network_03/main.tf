@@ -38,9 +38,6 @@ module "domain" {
   source                = "./modules/domain"
   network_name          = module.network.network_name
   bootstrap_ignition    = module.ignition.bootstrap_ignition
-  controlplane_ignition = module.ignition.controlplane_ignition
-  worker_ignition       = module.ignition.worker_ignition
-  bootstrap_volume      = module.volumes.bootstrap_volume
   controlplane_1_volume = module.volumes.controlplane_1_volume
   controlplane_2_volume = module.volumes.controlplane_2_volume
   controlplane_3_volume = module.volumes.controlplane_3_volume
