@@ -1,23 +1,41 @@
-# Define the path to the CoreOS image
+# modules/volumes/variables.tf
+
 variable "coreos_image" {
-  type        = string
   description = "Path to the CoreOS image"
+  type        = string
 }
 
-# Define the size for the bootstrap node volume
 variable "bootstrap_volume_size" {
-  type        = number
   description = "Size of the bootstrap node volume in GiB"
+  type        = number
 }
 
-# Define the size for the master node volumes
-variable "master_volume_size" {
+variable "controlplane_1_volume_size" {
+  description = "Size of the control plane node 1 volume in GiB"
   type        = number
-  description = "Size of the master node volumes in GiB"
 }
 
-# Define the size for the worker node volumes
-variable "worker_volume_size" {
+variable "controlplane_2_volume_size" {
+  description = "Size of the control plane node 2 volume in GiB"
   type        = number
-  description = "Size of the worker node volumes in GiB"
+}
+
+variable "controlplane_3_volume_size" {
+  description = "Size of the control plane node 3 volume in GiB"
+  type        = number
+}
+
+variable "worker_1_volume_size" {
+  description = "Size of the worker node 1 volume in GiB"
+  type        = number
+}
+
+variable "worker_2_volume_size" {
+  description = "Size of the worker node 2 volume in GiB"
+  type        = number
+}
+
+variable "worker_3_volume_size" {
+  description = "Size of the worker node 3 volume in GiB"
+  type        = number
 }

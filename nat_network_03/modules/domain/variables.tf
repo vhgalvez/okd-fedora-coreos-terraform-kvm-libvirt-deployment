@@ -1,54 +1,79 @@
-variable "bootstrap_volume" {
-  description = "Volume ID for the bootstrap node"
-  type        = string
+# modules/domain/variables.tf
+
+
+variable "bootstrap" {
+  description = "Bootstrap node configuration"
+  type = object({
+    name    = string
+    memory  = number
+    vcpu    = number
+    address = string
+    mac     = string
+  })
 }
 
-variable "controlplane_1_volume" {
-  description = "Volume ID for control plane node 1"
-  type        = string
+variable "controlplane_1" {
+  description = "Control Plane node 1 configuration"
+  type = object({
+    name    = string
+    memory  = number
+    vcpu    = number
+    address = string
+    mac     = string
+  })
 }
 
-variable "controlplane_2_volume" {
-  description = "Volume ID for control plane node 2"
-  type        = string
+variable "controlplane_2" {
+  description = "Control Plane node 2 configuration"
+  type = object({
+    name    = string
+    memory  = number
+    vcpu    = number
+    address = string
+    mac     = string
+  })
 }
 
-variable "controlplane_3_volume" {
-  description = "Volume ID for control plane node 3"
-  type        = string
+variable "controlplane_3" {
+  description = "Control Plane node 3 configuration"
+  type = object({
+    name    = string
+    memory  = number
+    vcpu    = number
+    address = string
+    mac     = string
+  })
 }
 
-variable "worker_1_volume" {
-  description = "Volume ID for worker node 1"
-  type        = string
+variable "worker_1" {
+  description = "Worker node 1 configuration"
+  type = object({
+    name    = string
+    memory  = number
+    vcpu    = number
+    address = string
+    mac     = string
+  })
 }
 
-variable "worker_2_volume" {
-  description = "Volume ID for worker node 2"
-  type        = string
+variable "worker_2" {
+  description = "Worker node 2 configuration"
+  type = object({
+    name    = string
+    memory  = number
+    vcpu    = number
+    address = string
+    mac     = string
+  })
 }
 
-variable "worker_3_volume" {
-  description = "Volume ID for worker node 3"
-  type        = string
-}
-
-variable "network_name" {
-  description = "Name of the libvirt network"
-  type        = string
-}
-
-variable "bootstrap_ignition" {
-  description = "Ignition ID for bootstrap node"
-  type        = string
-}
-
-variable "master_ignition" {
-  description = "Ignition ID for master nodes"
-  type        = string
-}
-
-variable "worker_ignition" {
-  description = "Ignition ID for worker nodes"
-  type        = string
+variable "worker_3" {
+  description = "Worker node 3 configuration"
+  type = object({
+    name    = string
+    memory  = number
+    vcpu    = number
+    address = string
+    mac     = string
+  })
 }
