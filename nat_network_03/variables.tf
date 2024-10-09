@@ -42,3 +42,7 @@ variable "vm_definitions" {
 variable "coreos_base_volume" {
   type = string
 }
+variable "coreos_image" {
+  description = "Path to the CoreOS image"
+  type        = string
+}

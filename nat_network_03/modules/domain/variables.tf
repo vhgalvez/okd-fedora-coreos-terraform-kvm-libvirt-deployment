@@ -1,69 +1,34 @@
-variable "network_name" {
-  type = string
-  description = "Name of the network to attach the domains"
-}
-
-variable "bootstrap_ignition" {
-  type = string
-  description = "Ignition config for the bootstrap node"
-}
-
-variable "master_ignition" {
-  type = string
-  description = "Ignition config for the control plane nodes"
-}
-
-variable "worker_ignition" {
-  type = string
-  description = "Ignition config for the worker nodes"
-}
-
 variable "bootstrap_volume" {
-  type = string
   description = "Volume ID for the bootstrap node"
+  type        = string
 }
 
-variable "master_volume" {
-  type = string
-  description = "Volume ID for the master nodes"
+variable "controlplane_1_volume" {
+  description = "Volume ID for Control Plane 1"
+  type        = string
 }
 
-variable "worker_volume" {
-  type = string
-  description = "Volume ID for the worker nodes"
+variable "controlplane_2_volume" {
+  description = "Volume ID for Control Plane 2"
+  type        = string
 }
 
-variable "bootstrap" {
-  type = map(any)
-  description = "Configuration for the bootstrap node"
+variable "controlplane_3_volume" {
+  description = "Volume ID for Control Plane 3"
+  type        = string
 }
 
-variable "controlplane_1" {
-  type = map(any)
-  description = "Configuration for the first control plane node"
+variable "worker_1_volume" {
+  description = "Volume ID for Worker 1"
+  type        = string
 }
 
-variable "controlplane_2" {
-  type = map(any)
-  description = "Configuration for the second control plane node"
+variable "worker_2_volume" {
+  description = "Volume ID for Worker 2"
+  type        = string
 }
 
-variable "controlplane_3" {
-  type = map(any)
-  description = "Configuration for the third control plane node"
-}
-
-variable "worker_1" {
-  type = map(any)
-  description = "Configuration for the first worker node"
-}
-
-variable "worker_2" {
-  type = map(any)
-  description = "Configuration for the second worker node"
-}
-
-variable "worker_3" {
-  type = map(any)
-  description = "Configuration for the third worker node"
+variable "worker_3_volume" {
+  description = "Volume ID for Worker 3"
+  type        = string
 }
