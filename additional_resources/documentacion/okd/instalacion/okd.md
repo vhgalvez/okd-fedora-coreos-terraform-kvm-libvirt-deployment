@@ -383,3 +383,32 @@ sudo curl -o /mnt/lv_data/organized_storage/images/Rocky-9-GenericCloud-Base.lat
 
 
 openshift-install create ignition-configs  --dir=/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install --log-level=debug
+
+
+
+__
+  # Conectar a la red
+  network_interface {
+    network_name   = "kube_network_02"
+    mac            = each.value.mac
+    addresses      = [each.value.ip]
+    wait_for_lease = true
+  }
+
+  disk {
+    volume_id = libvirt_volume.okd_volumes[each.key].id
+  }
+
+  graphics {
+    type     = "vnc"
+    autoport = true
+  }
+
+  console {
+    type        = "pty"
+    target_type = "serial"
+    target_port = "0"
+  }
+
+  qemu_agent = false
+}
