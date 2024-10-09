@@ -1,6 +1,6 @@
 # modules/volumes/variables.tf
 
- variable "coreos_image" {
+variable "coreos_image" {
   description = "Path to the CoreOS image"
   type        = string
 }
