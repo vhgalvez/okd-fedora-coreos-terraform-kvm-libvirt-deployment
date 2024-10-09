@@ -38,6 +38,7 @@ module "volumes" {
   worker_3_volume_size       = var.worker_3_volume_size
 }
 
+
 # Domain module to create the VMs for the bootstrap, control plane, and worker nodes
 module "domain" {
   source = "./modules/domain"
