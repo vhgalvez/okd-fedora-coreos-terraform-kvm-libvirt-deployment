@@ -1,3 +1,4 @@
+# terraform.tfvars
 # DNS and Gateway settings
 dns1    = "10.17.3.11"
 dns2    = "8.8.8.8"
@@ -6,7 +7,7 @@ gateway = "10.17.3.1"
 # Path to CoreOS image
 coreos_image = "/mnt/lv_data/organized_storage/images/fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2"
 
-# Volume sizes for bootstrap, control plane (masters), and worker nodes
+# Volume sizes for bootstrap, control plane, and worker nodes
 bootstrap_volume_size = 20
 controlplane_1_volume_size = 30
 controlplane_2_volume_size = 30
@@ -24,9 +25,9 @@ bootstrap = {
   mac     = "52:54:00:00:00:01"
 }
 
-# Define control plane nodes
+# Define control plane nodes (masters)
 controlplane_1 = {
-  name    = "controlplane1.cefaslocalserver.com"
+  name    = "master1.cefaslocalserver.com"
   memory  = 16384
   vcpu    = 4
   address = "10.17.3.22"
@@ -34,7 +35,7 @@ controlplane_1 = {
 }
 
 controlplane_2 = {
-  name    = "controlplane2.cefaslocalserver.com"
+  name    = "master2.cefaslocalserver.com"
   memory  = 16384
   vcpu    = 4
   address = "10.17.3.23"
@@ -42,7 +43,7 @@ controlplane_2 = {
 }
 
 controlplane_3 = {
-  name    = "controlplane3.cefaslocalserver.com"
+  name    = "master3.cefaslocalserver.com"
   memory  = 16384
   vcpu    = 4
   address = "10.17.3.24"

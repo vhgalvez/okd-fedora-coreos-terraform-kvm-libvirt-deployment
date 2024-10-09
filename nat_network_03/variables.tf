@@ -1,4 +1,5 @@
 # variables.tf
+
 variable "dns1" {
   type        = string
   description = "Primary DNS server"
@@ -19,14 +20,36 @@ variable "bootstrap_volume_size" {
   description = "Size of the bootstrap node volume in GiB"
 }
 
-variable "master_volume_size" {
+# Define the volume sizes for control plane nodes
+variable "controlplane_1_volume_size" {
   type        = number
-  description = "Size of the master node volume in GiB"
+  description = "Size of the control plane node 1 volume in GiB"
 }
 
-variable "worker_volume_size" {
+variable "controlplane_2_volume_size" {
   type        = number
-  description = "Size of the worker node volume in GiB"
+  description = "Size of the control plane node 2 volume in GiB"
+}
+
+variable "controlplane_3_volume_size" {
+  type        = number
+  description = "Size of the control plane node 3 volume in GiB"
+}
+
+# Define the volume sizes for worker nodes
+variable "worker_1_volume_size" {
+  type        = number
+  description = "Size of the worker node 1 volume in GiB"
+}
+
+variable "worker_2_volume_size" {
+  type        = number
+  description = "Size of the worker node 2 volume in GiB"
+}
+
+variable "worker_3_volume_size" {
+  type        = number
+  description = "Size of the worker node 3 volume in GiB"
 }
 
 variable "vm_definitions" {
