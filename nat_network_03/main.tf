@@ -1,3 +1,4 @@
+# main.tf
 terraform {
   required_version = ">= 1.9.6"
 
@@ -13,18 +14,31 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
+# Network module to set up the network for the cluster
 module "network" {
   source = "./modules/network"
 }
 
+# Ignition module to manage Ignition configurations for the nodes
 module "ignition" {
   source = "./modules/ignition"
 }
 
+# Volumes module to manage storage volumes for the cluster nodes
 module "volumes" {
   source = "./modules/volumes"
+
+  coreos_image               = var.coreos_image
+  bootstrap_volume_size      = var.bootstrap_volume_size
+  controlplane_1_volume_size = var.controlplane_1_volume_size
+  controlplane_2_volume_size = var.controlplane_2_volume_size
+  controlplane_3_volume_size = var.controlplane_3_volume_size
+  worker_1_volume_size       = var.worker_1_volume_size
+  worker_2_volume_size       = var.worker_2_volume_size
+  worker_3_volume_size       = var.worker_3_volume_size
 }
 
+# Domain module to create the VMs for the bootstrap, control plane, and worker nodes
 module "domain" {
   source = "./modules/domain"
 
