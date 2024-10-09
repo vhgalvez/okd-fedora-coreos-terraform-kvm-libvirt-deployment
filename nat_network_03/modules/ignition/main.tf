@@ -15,32 +15,32 @@ terraform {
 resource "libvirt_ignition" "bootstrap_ignition" {
   name    = "okd_bootstrap.ign"
   pool    = "default"
-  content = file("${path.module}/../../ignition_configs/bootstrap.ign")
+  content = "../ignition_configs/bootstrap.ign" 
 }
 
-# Control Plane Ignition Configuration (renamed from master)
-resource "libvirt_ignition" "controlplane_ignition" {
-  name    = "okd_controlplane.ign"
+# Control Plane Ignition Configuration (renamed from master to match working file)
+resource "libvirt_ignition" "master_ignition" {
+  name    = "okd_master.ign"
   pool    = "default"
-  content = file("${path.module}/../../ignition_configs/master.ign")
+  content = "../ignition_configs/master.ign" 
 }
 
 # Worker Ignition Configuration
 resource "libvirt_ignition" "worker_ignition" {
   name    = "okd_worker.ign"
   pool    = "default"
-  content = file("${path.module}/../../ignition_configs/worker.ign")
+  content = "../ignition_configs/worker.ign" 
 }
 
 # Outputs for the Ignition configurations
 output "bootstrap_ignition" {
-  value = libvirt_ignition.bootstrap_ignition.id
+  value = libvirt_ignition.bootstrap_ignition.id 
 }
 
-output "controlplane_ignition" {
-  value = libvirt_ignition.controlplane_ignition.id
+output "master_ignition" {
+  value = libvirt_ignition.master_ignition.id 
 }
 
 output "worker_ignition" {
-  value = libvirt_ignition.worker_ignition.id
+  value = libvirt_ignition.worker_ignition.id 
 }
