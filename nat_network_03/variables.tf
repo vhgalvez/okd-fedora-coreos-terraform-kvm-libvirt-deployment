@@ -49,11 +49,6 @@ variable "controlplane_3_volume_size" {
   description = "Size of the control plane node 3 volume in GiB"
 }
 
-variable "worker_volume_size" {
-  type        = number
-  description = "Size of the worker node volume in GiB"
-}
-
 variable "coreos_image" {
   type        = string
   description = "Path to the CoreOS image"
