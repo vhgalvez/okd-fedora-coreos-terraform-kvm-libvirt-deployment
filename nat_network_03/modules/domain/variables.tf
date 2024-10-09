@@ -1,8 +1,65 @@
 # modules/domain/variables.tf
 
+# Declare network_name variable
+variable "network_name" {
+  description = "Name of the network to which the nodes should be attached"
+  type        = string
+}
 
+# Declare Ignition config variables
+variable "bootstrap_ignition" {
+  description = "Ignition configuration for the bootstrap node"
+  type        = string
+}
+
+variable "master_ignition" {
+  description = "Ignition configuration for control plane nodes"
+  type        = string
+}
+
+variable "worker_ignition" {
+  description = "Ignition configuration for worker nodes"
+  type        = string
+}
+
+# Declare volume variables for each node type
+variable "bootstrap_volume" {
+  description = "Volume ID for the bootstrap node"
+  type        = string
+}
+
+variable "controlplane_1_volume" {
+  description = "Volume ID for control plane node 1"
+  type        = string
+}
+
+variable "controlplane_2_volume" {
+  description = "Volume ID for control plane node 2"
+  type        = string
+}
+
+variable "controlplane_3_volume" {
+  description = "Volume ID for control plane node 3"
+  type        = string
+}
+
+variable "worker_1_volume" {
+  description = "Volume ID for worker node 1"
+  type        = string
+}
+
+variable "worker_2_volume" {
+  description = "Volume ID for worker node 2"
+  type        = string
+}
+
+variable "worker_3_volume" {
+  description = "Volume ID for worker node 3"
+  type        = string
+}
+
+# Declare node definitions for bootstrap, control planes, and workers
 variable "bootstrap" {
-  description = "Bootstrap node configuration"
   type = object({
     name    = string
     memory  = number
@@ -13,7 +70,6 @@ variable "bootstrap" {
 }
 
 variable "controlplane_1" {
-  description = "Control Plane node 1 configuration"
   type = object({
     name    = string
     memory  = number
@@ -24,7 +80,6 @@ variable "controlplane_1" {
 }
 
 variable "controlplane_2" {
-  description = "Control Plane node 2 configuration"
   type = object({
     name    = string
     memory  = number
@@ -35,7 +90,6 @@ variable "controlplane_2" {
 }
 
 variable "controlplane_3" {
-  description = "Control Plane node 3 configuration"
   type = object({
     name    = string
     memory  = number
@@ -46,7 +100,6 @@ variable "controlplane_3" {
 }
 
 variable "worker_1" {
-  description = "Worker node 1 configuration"
   type = object({
     name    = string
     memory  = number
@@ -57,7 +110,6 @@ variable "worker_1" {
 }
 
 variable "worker_2" {
-  description = "Worker node 2 configuration"
   type = object({
     name    = string
     memory  = number
@@ -68,7 +120,6 @@ variable "worker_2" {
 }
 
 variable "worker_3" {
-  description = "Worker node 3 configuration"
   type = object({
     name    = string
     memory  = number
