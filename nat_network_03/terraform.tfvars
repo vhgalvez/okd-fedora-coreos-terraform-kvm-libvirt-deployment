@@ -6,11 +6,17 @@ gateway = "10.17.3.1"
 
 coreos_image = "/mnt/lv_data/organized_storage/images/fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2"
 
+
 bootstrap_volume_size      = 20
 controlplane_1_volume_size = 30
 controlplane_2_volume_size = 30
 controlplane_3_volume_size = 30
-worker_volume_size         = 30
+
+# Add these for the workers:
+worker_1_volume_size = 30
+worker_2_volume_size = 30
+worker_3_volume_size = 30
+
 
 bootstrap = {
   name    = "bootstrap.cefaslocalserver.com"
