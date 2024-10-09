@@ -22,28 +22,24 @@ module "ignition" {
 }
 
 module "volumes" {
-  source                     = "./modules/volumes"
-  coreos_image               = var.coreos_image
-  bootstrap_volume_size      = var.bootstrap_volume_size
-  controlplane_1_volume_size = var.controlplane_1_volume_size
-  controlplane_2_volume_size = var.controlplane_2_volume_size
-  controlplane_3_volume_size = var.controlplane_3_volume_size
-  worker_1_volume_size       = var.worker_1_volume_size
-  worker_2_volume_size       = var.worker_2_volume_size
-  worker_3_volume_size       = var.worker_3_volume_size
+  source = "./modules/volumes"
 }
 
-
 module "domain" {
-  source                = "./modules/domain"
-  network_name          = module.network.network_name
-  bootstrap_ignition    = module.ignition.bootstrap_ignition
-  controlplane_1_volume = module.volumes.controlplane_1_volume
-  controlplane_2_volume = module.volumes.controlplane_2_volume
-  controlplane_3_volume = module.volumes.controlplane_3_volume
-  worker_1_volume       = module.volumes.worker_1_volume
-  worker_2_volume       = module.volumes.worker_2_volume
-  worker_3_volume       = module.volumes.worker_3_volume
+  source = "./modules/domain"
+
+  network_id            = module.network.network_id
+  bootstrap_ignition_id = module.ignition.bootstrap_ignition.id
+  master_ignition_id    = module.ignition.master_ignition.id
+  worker_ignition_id    = module.ignition.worker_ignition.id
+
+  bootstrap_volume_id      = module.volumes.bootstrap_volume.id
+  controlplane_1_volume_id = module.volumes.controlplane_1_volume.id
+  controlplane_2_volume_id = module.volumes.controlplane_2_volume.id
+  controlplane_3_volume_id = module.volumes.controlplane_3_volume.id
+  worker_1_volume_id       = module.volumes.worker_1_volume.id
+  worker_2_volume_id       = module.volumes.worker_2_volume.id
+  worker_3_volume_id       = module.volumes.worker_3_volume.id
 
   bootstrap      = var.bootstrap
   controlplane_1 = var.controlplane_1
