@@ -1,4 +1,3 @@
-# modules/network/main.tf
 terraform {
   required_version = ">= 1.9.6"
 
@@ -10,6 +9,7 @@ terraform {
   }
 }
 
+# Define the network
 resource "libvirt_network" "okd_network" {
   name      = "okd_network"
   mode      = "nat"
@@ -21,7 +21,12 @@ resource "libvirt_network" "okd_network" {
   }
 }
 
+# Output the network ID for other modules to reference
+output "network_id" {
+  value = libvirt_network.okd_network.id
+}
 
+# Optionally, keep the network name output if needed
 output "network_name" {
   value = libvirt_network.okd_network.name
 }
