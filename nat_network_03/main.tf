@@ -33,6 +33,7 @@ module "volumes" {
   worker_3_volume_size       = var.worker_3_volume_size
 }
 
+
 module "domain" {
   source                = "./modules/domain"
   network_name          = module.network.network_name
