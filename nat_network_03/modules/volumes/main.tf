@@ -10,10 +10,6 @@ terraform {
   }
 }
 
-provider "libvirt" {
-  uri = "qemu:///system"
-}
-
 # Volumen base para Fedora CoreOS
 resource "libvirt_volume" "coreos_base" {
   name   = "fedora_coreos.qcow2"

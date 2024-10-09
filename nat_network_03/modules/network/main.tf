@@ -10,12 +10,6 @@ terraform {
   }
 }
 
-provider "libvirt" {
-  uri = "qemu:///system"
-}
-
-
-
 resource "libvirt_network" "okd_network" {
   name      = "okd_network"
   mode      = "nat"

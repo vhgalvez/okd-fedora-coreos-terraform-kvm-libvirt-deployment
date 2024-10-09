@@ -10,10 +10,6 @@ terraform {
   }
 }
 
-provider "libvirt" {
-  uri = "qemu:///system"
-}
-
 # Bootstrap Node Definition
 resource "libvirt_domain" "okd_bootstrap" {
   name            = var.bootstrap.name
