@@ -1,5 +1,4 @@
 # modules/volumes/main.tf
-
 terraform {
   required_version = ">= 1.9.6"
 
@@ -27,7 +26,7 @@ resource "libvirt_volume" "coreos_base" {
 resource "libvirt_volume" "bootstrap_volume" {
   name           = "okd_bootstrap.qcow2"
   pool           = "default"
-  size           = var.bootstrap_volume_size * 1073741824 # Convert GiB to Bytes
+  size           = var.bootstrap_volume_size * 1073741824  # Convert GiB to Bytes
   base_volume_id = libvirt_volume.coreos_base.id
 }
 
