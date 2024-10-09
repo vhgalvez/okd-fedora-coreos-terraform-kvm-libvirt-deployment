@@ -1112,64 +1112,75 @@
     "systemd": {
         "units": [
             {
-                "contents": "[Unit]\nDescription=Approve CSRs during bootstrap phase\nWants=bootkube.service\nAfter=bootkube.service\n\n[Service]\nExecStart=/usr/local/bin/approve-csr.sh /opt/openshift/auth/kubeconfig-loopback\n\nRestart=on-failure\nRestartSec=5s\n\n[Install]\nWantedBy=multi-user.target\n",
+                "name": "serial-getty@ttyS0.service",
+                "enabled": true
+            },
+            {
+                "name": "approve-csr.service",
                 "enabled": true,
-                "name": "approve-csr.service"
+                "contents": "[Unit]\nDescription=Approve CSRs during bootstrap phase\nWants=bootkube.service\nAfter=bootkube.service\n\n[Service]\nExecStart=/usr/local/bin/approve-csr.sh /opt/openshift/auth/kubeconfig-loopback\n\nRestart=on-failure\nRestartSec=5s\n\n[Install]\nWantedBy=multi-user.target\n"
             },
             {
-                "contents": "[Unit]\nDescription=Bootstrap a Kubernetes cluster\nRequires=crio-configure.service\nWants=kubelet.service\nAfter=kubelet.service crio-configure.service\nConditionPathExists=!/opt/openshift/.bootkube.done\n\n[Service]\nWorkingDirectory=/opt/openshift\nExecStart=/usr/local/bin/bootkube.sh\n\nRestart=on-failure\nRestartSec=5s\n",
-                "name": "bootkube.service"
-            },
-            {
-                "contents": "[Unit]\nDescription=Configure CRI-O to use the pause image\nAfter=release-image.service\nRequires=release-image.service\nRequires=release-image-pivot.service\nBefore=crio.service\n\n[Service]\nType=oneshot\nExecStart=/usr/local/bin/crio-configure.sh\nRemainAfterExit=true\n\n[Install]\nRequiredBy=crio.service\n",
-                "name": "crio-configure.service"
-            },
-            {
-                "contents": "[Unit]\nDescription=Kubernetes Kubelet\nWants=rpc-statd.service crio.service release-image.service\nWants=release-image-pivot.service\nAfter=crio.service release-image.service\nAfter=release-image-pivot.service\n[Service]\nType=notify\nNotifyAccess=all\nExecStartPre=/bin/mkdir --parents /etc/kubernetes/manifests\nExecStartPre=/bin/mkdir --parents /etc/kubernetes/kubelet-plugins/volume/exec\nExecStartPre=/usr/local/bin/kubelet-pause-image.sh\nEnvironment=KUBELET_RUNTIME_REQUEST_TIMEOUT=10m\nEnvironmentFile=-/etc/kubernetes/kubelet-env\nEnvironmentFile=-/etc/kubernetes/kubelet-pause-image-override\n\nExecStart=/usr/local/bin/kubelet.sh\n\nRestart=always\nRestartSec=10\n\n[Install]\nWantedBy=multi-user.target\n",
+                "name": "bootkube.service",
                 "enabled": true,
-                "name": "kubelet.service"
+                "contents": "[Unit]\nDescription=Bootstrap a Kubernetes cluster\nRequires=crio-configure.service\nWants=kubelet.service\nAfter=kubelet.service crio-configure.service\nConditionPathExists=!/opt/openshift/.bootkube.done\n\n[Service]\nWorkingDirectory=/opt/openshift\nExecStart=/usr/local/bin/bootkube.sh\n\nRestart=on-failure\nRestartSec=5s\n"
             },
             {
-                "contents": "[Unit]\nDescription=Report the completion of the cluster bootstrap process\n# Workaround for https://github.com/systemd/systemd/issues/1312\nWants=bootkube.service\nAfter=bootkube.service\n\n[Service]\nExecStart=/usr/local/bin/report-progress.sh /opt/openshift/auth/kubeconfig\n\nRestart=on-failure\nRestartSec=5s\n\n[Install]\nWantedBy=multi-user.target\n",
+                "name": "crio-configure.service",
                 "enabled": true,
-                "name": "progress.service"
+                "contents": "[Unit]\nDescription=Configure CRI-O to use the pause image\nAfter=release-image.service\nRequires=release-image.service\nRequires=release-image-pivot.service\nBefore=crio.service\n\n[Service]\nType=oneshot\nExecStart=/usr/local/bin/crio-configure.sh\nRemainAfterExit=true\n\n[Install]\nRequiredBy=crio.service\n"
             },
             {
-                "contents": "[Unit]\nDescription=Pivot bootstrap to the OpenShift Release Image\nWants=release-image.service\nAfter=release-image.service\nBefore=bootkube.service kubelet.service dnsmasq.service\n\n[Service]\nType=oneshot\nExecStart=/usr/local/bin/bootstrap-pivot.sh\nRemainAfterExit=true\n",
-                "name": "release-image-pivot.service"
+                "name": "kubelet.service",
+                "enabled": true,
+                "contents": "[Unit]\nDescription=Kubernetes Kubelet\nWants=rpc-statd.service crio.service release-image.service\nWants=release-image-pivot.service\nAfter=crio.service release-image.service\nAfter=release-image-pivot.service\n[Service]\nType=notify\nNotifyAccess=all\nExecStartPre=/bin/mkdir --parents /etc/kubernetes/manifests\nExecStartPre=/bin/mkdir --parents /etc/kubernetes/kubelet-plugins/volume/exec\nExecStartPre=/usr/local/bin/kubelet-pause-image.sh\nEnvironment=KUBELET_RUNTIME_REQUEST_TIMEOUT=10m\nEnvironmentFile=-/etc/kubernetes/kubelet-env\nEnvironmentFile=-/etc/kubernetes/kubelet-pause-image-override\n\nExecStart=/usr/local/bin/kubelet.sh\n\nRestart=always\nRestartSec=10\n\n[Install]\nWantedBy=multi-user.target\n"
             },
             {
-                "contents": "[Unit]\nDescription=Download the OpenShift Release Image\nWants=network-online.target\nAfter=network-online.target\n\n[Service]\nType=oneshot\nExecStart=/usr/local/bin/release-image-download.sh\nRemainAfterExit=true\n",
-                "name": "release-image.service"
+                "name": "progress.service",
+                "enabled": true,
+                "contents": "[Unit]\nDescription=Report the completion of the cluster bootstrap process\n# Workaround for https://github.com/systemd/systemd/issues/1312\nWants=bootkube.service\nAfter=bootkube.service\n\n[Service]\nExecStart=/usr/local/bin/report-progress.sh /opt/openshift/auth/kubeconfig\n\nRestart=on-failure\nRestartSec=5s\n\n[Install]\nWantedBy=multi-user.target\n"
             },
             {
+                "name": "release-image-pivot.service",
+                "enabled": true,
+                "contents": "[Unit]\nDescription=Pivot bootstrap to the OpenShift Release Image\nWants=release-image.service\nAfter=release-image.service\nBefore=bootkube.service kubelet.service dnsmasq.service\n\n[Service]\nType=oneshot\nExecStart=/usr/local/bin/bootstrap-pivot.sh\nRemainAfterExit=true\n"
+            },
+            {
+                "name": "release-image.service",
+                "enabled": true,
+                "contents": "[Unit]\nDescription=Download the OpenShift Release Image\nWants=network-online.target\nAfter=network-online.target\n\n[Service]\nType=oneshot\nExecStart=/usr/local/bin/release-image-download.sh\nRemainAfterExit=true\n"
+            },
+            {
+                "name": "systemd-journal-gatewayd.service",
                 "dropins": [
                     {
-                        "contents": "[Service]\nExecStart=\nExecStart=/usr/lib/systemd/systemd-journal-gatewayd \\\n  --key=/opt/openshift/tls/journal-gatewayd.key \\\n  --cert=/opt/openshift/tls/journal-gatewayd.crt \\\n  --trust=/opt/openshift/tls/root-ca.crt\n",
-                        "name": "certs.conf"
+                        "name": "certs.conf",
+                        "contents": "[Service]\nExecStart=\nExecStart=/usr/lib/systemd/systemd-journal-gatewayd \\\n  --key=/opt/openshift/tls/journal-gatewayd.key \\\n  --cert=/opt/openshift/tls/journal-gatewayd.crt \\\n  --trust=/opt/openshift/tls/root-ca.crt\n"
                     }
-                ],
-                "name": "systemd-journal-gatewayd.service"
+                ]
             },
             {
+                "name": "zincati.service",
                 "dropins": [
                     {
-                        "contents": "[Unit]\nConditionPathExists=/enoent\n",
-                        "name": "okd-machine-os-disabled.conf"
+                        "name": "okd-machine-os-disabled.conf",
+                        "contents": "[Unit]\nConditionPathExists=/enoent\n"
                     }
-                ],
-                "name": "zincati.service"
+                ]
             },
             {
-                "contents": "# In RHEL8 the service uses DynamicUser=yes; we need to work both ways, so hence\n# we hack this by adding the user if it doesn't exist and chown the file, rather\n# than doing it in Ignition.\n# https://github.com/openshift/installer/pull/1445\n[Unit]\nDescription=Change ownership of journal-gatewayd.key\nBefore=systemd-journal-gatewayd.service\n\n[Service]\nType=oneshot\nRemainAfterExit=yes\nExecStart=/bin/sh -c \". /usr/local/bin/bootstrap-service-record.sh; if ! getent passwd systemd-journal-gateway \u0026\u003e/dev/null; then useradd -r systemd-journal-gateway; fi \u0026\u0026 chown systemd-journal-gateway: /opt/openshift/tls/journal-gatewayd.{crt,key}\"\n\n[Install]\nWantedBy=multi-user.target\n",
+                "name": "chown-gatewayd-key.service",
                 "enabled": true,
-                "name": "chown-gatewayd-key.service"
+                "contents": "[Unit]\nDescription=Change ownership of journal-gatewayd.key\nBefore=systemd-journal-gatewayd.service\n\n[Service]\nType=oneshot\nRemainAfterExit=yes\nExecStart=/bin/sh -c \". /usr/local/bin/bootstrap-service-record.sh; if ! getent passwd systemd-journal-gateway \u0026\u003e/dev/null; then useradd -r systemd-journal-gateway; fi \u0026\u0026 chown systemd-journal-gateway: /opt/openshift/tls/journal-gatewayd.{crt,key}\"\n\n[Install]\nWantedBy=multi-user.target\n"
             },
             {
-                "contents": "",
+                "name": "systemd-journal-gatewayd.socket",
                 "enabled": true,
-                "name": "systemd-journal-gatewayd.socket"
+                "contents": ""
             }
         ]
-    }
+    },
+    "kernelArguments": [
+        "console=ttyS0,115200n8"
+    ]
 }
