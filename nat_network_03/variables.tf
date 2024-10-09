@@ -115,3 +115,18 @@ variable "worker_3_volume_size" {
   type        = number
   description = "Size of the worker node 3 volume in GiB"
 }
+
+variable "dns1" {
+  type        = string
+  description = "Primary DNS server"
+}
+
+variable "dns2" {
+  type        = string
+  description = "Secondary DNS server"
+}
+
+variable "gateway" {
+  type        = string
+  description = "Network gateway"
+}
