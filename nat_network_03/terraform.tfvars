@@ -6,17 +6,11 @@ gateway = "10.17.3.1"
 # Path to CoreOS image
 coreos_image = "/mnt/lv_data/organized_storage/images/fedora-coreos-40.20240906.3.0-qemu.x86_64.qcow2"
 
-# Volume sizes for bootstrap, master, and worker nodes
+# Volume sizes for bootstrap, control plane (masters), and worker nodes
 bootstrap_volume_size = 20
-master_volume_size    = 30
-worker_volume_size    = 30
-
-# Define volume sizes for control plane nodes (masters)
 controlplane_1_volume_size = 30
 controlplane_2_volume_size = 30
 controlplane_3_volume_size = 30
-
-# Define volume sizes for worker nodes
 worker_1_volume_size = 30
 worker_2_volume_size = 30
 worker_3_volume_size = 30
@@ -30,9 +24,9 @@ bootstrap = {
   mac     = "52:54:00:00:00:01"
 }
 
-# Define control plane nodes (masters)
+# Define control plane nodes
 controlplane_1 = {
-  name    = "master1.cefaslocalserver.com"
+  name    = "controlplane1.cefaslocalserver.com"
   memory  = 16384
   vcpu    = 4
   address = "10.17.3.22"
@@ -40,7 +34,7 @@ controlplane_1 = {
 }
 
 controlplane_2 = {
-  name    = "master2.cefaslocalserver.com"
+  name    = "controlplane2.cefaslocalserver.com"
   memory  = 16384
   vcpu    = 4
   address = "10.17.3.23"
@@ -48,7 +42,7 @@ controlplane_2 = {
 }
 
 controlplane_3 = {
-  name    = "master3.cefaslocalserver.com"
+  name    = "controlplane3.cefaslocalserver.com"
   memory  = 16384
   vcpu    = 4
   address = "10.17.3.24"
