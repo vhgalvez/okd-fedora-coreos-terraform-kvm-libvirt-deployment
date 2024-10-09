@@ -25,9 +25,9 @@ module "ignition" {
 
 # Volumes module (only one instance)
 module "volumes" {
-  source = "./modules/volumes"
-  coreos_image          = var.coreos_image
-  bootstrap_volume_size = var.bootstrap_volume_size
+  source                     = "./modules/volumes"
+  coreos_image               = var.coreos_image
+  bootstrap_volume_size      = var.bootstrap_volume_size
   controlplane_1_volume_size = var.controlplane_1_volume_size
   controlplane_2_volume_size = var.controlplane_2_volume_size
   controlplane_3_volume_size = var.controlplane_3_volume_size
@@ -38,12 +38,12 @@ module "volumes" {
 
 # Domain module
 module "domain" {
-  source = "./modules/domain"
-  network_name         = module.network.network_name
-  bootstrap_ignition   = module.ignition.bootstrap_ignition
-  master_ignition      = module.ignition.master_ignition
-  worker_ignition      = module.ignition.worker_ignition
-  bootstrap_volume     = module.volumes.bootstrap_volume
+  source                = "./modules/domain"
+  network_name          = module.network.network_name
+  bootstrap_ignition    = module.ignition.bootstrap_ignition
+  master_ignition       = module.ignition.master_ignition
+  worker_ignition       = module.ignition.worker_ignition
+  bootstrap_volume      = module.volumes.bootstrap_volume
   controlplane_1_volume = module.volumes.controlplane_1_volume
   controlplane_2_volume = module.volumes.controlplane_2_volume
   controlplane_3_volume = module.volumes.controlplane_3_volume

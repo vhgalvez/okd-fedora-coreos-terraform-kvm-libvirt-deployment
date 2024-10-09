@@ -39,9 +39,7 @@ variable "vm_definitions" {
     disk_size    = number
   }))
 }
-variable "coreos_base_volume" {
-  type = string
-}
+
 variable "coreos_image" {
   description = "Path to the CoreOS image"
   type        = string
