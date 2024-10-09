@@ -17,7 +17,6 @@ worker_1_volume_size = 30
 worker_2_volume_size = 30
 worker_3_volume_size = 30
 
-
 bootstrap = {
   name    = "bootstrap.cefaslocalserver.com"
   memory  = 8192
