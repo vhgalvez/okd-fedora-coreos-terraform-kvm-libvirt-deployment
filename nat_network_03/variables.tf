@@ -1,3 +1,19 @@
+# Declare volume size for each worker node
+variable "worker_1_volume_size" {
+  description = "Size of the worker 1 node volume in GiB"
+  type        = number
+}
+
+variable "worker_2_volume_size" {
+  description = "Size of the worker 2 node volume in GiB"
+  type        = number
+}
+
+variable "worker_3_volume_size" {
+  description = "Size of the worker 3 node volume in GiB"
+  type        = number
+}
+
 variable "dns1" {
   type        = string
   description = "Primary DNS server"
