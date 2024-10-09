@@ -22,22 +22,21 @@ module "ignition" {
 }
 
 module "volumes" {
-  source = "./modules/volumes"
+  source                     = "./modules/volumes"
+  coreos_image               = var.coreos_image
+  bootstrap_volume_size      = var.bootstrap_volume_size
+  controlplane_1_volume_size = var.controlplane_1_volume_size
+  controlplane_2_volume_size = var.controlplane_2_volume_size
+  controlplane_3_volume_size = var.controlplane_3_volume_size
+  worker_volume_size         = var.worker_volume_size
 }
 
-
 module "domain" {
-  source = "./modules/domain"
-
-  # Network
-  network_name = module.network.network_name
-
-  # Ignition files
-  bootstrap_ignition = module.ignition.bootstrap_ignition
-  master_ignition    = module.ignition.master_ignition
-  worker_ignition    = module.ignition.worker_ignition
-
-  # Volumes
+  source                = "./modules/domain"
+  network_name          = module.network.network_name
+  bootstrap_ignition    = module.ignition.bootstrap_ignition
+  controlplane_ignition = module.ignition.controlplane_ignition
+  worker_ignition       = module.ignition.worker_ignition
   bootstrap_volume      = module.volumes.bootstrap_volume
   controlplane_1_volume = module.volumes.controlplane_1_volume
   controlplane_2_volume = module.volumes.controlplane_2_volume
@@ -46,7 +45,6 @@ module "domain" {
   worker_2_volume       = module.volumes.worker_2_volume
   worker_3_volume       = module.volumes.worker_3_volume
 
-  # Node definitions
   bootstrap      = var.bootstrap
   controlplane_1 = var.controlplane_1
   controlplane_2 = var.controlplane_2
