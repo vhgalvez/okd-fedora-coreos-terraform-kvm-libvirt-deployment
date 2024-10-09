@@ -1,4 +1,21 @@
 # modules/network/main.tf
+terraform {
+  required_version = ">= 1.9.6"
+
+  required_providers {
+    libvirt = {
+      source  = "dmacvicar/libvirt"
+      version = "0.8.0"
+    }
+  }
+}
+
+provider "libvirt" {
+  uri = "qemu:///system"
+}
+
+
+
 resource "libvirt_network" "okd_network" {
   name      = "okd_network"
   mode      = "nat"

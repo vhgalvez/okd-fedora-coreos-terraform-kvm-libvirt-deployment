@@ -1,3 +1,4 @@
+# variables.tf
 variable "dns1" {
   type        = string
   description = "Primary DNS server"
@@ -11,11 +12,6 @@ variable "dns2" {
 variable "gateway" {
   type        = string
   description = "Gateway for the network"
-}
-
-variable "coreos_image" {
-  type        = string
-  description = "Path to the CoreOS image"
 }
 
 variable "bootstrap_volume_size" {
@@ -42,4 +38,7 @@ variable "vm_definitions" {
     mac          = string
     disk_size    = number
   }))
+}
+variable "coreos_base_volume" {
+  type = string
 }
