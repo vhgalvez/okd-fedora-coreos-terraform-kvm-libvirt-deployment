@@ -23,9 +23,13 @@ resource "libvirt_network" "okd_network" {
 }
 
 output "network_id" {
-  value = libvirt_network.okd_network.id # Esto es el UUID correcto.
+  value = libvirt_network.okd_network.id
 }
 
 output "network_name" {
   value = libvirt_network.okd_network.name
+}
+
+output "okd_network" {
+  value = libvirt_network.okd_network
 }
