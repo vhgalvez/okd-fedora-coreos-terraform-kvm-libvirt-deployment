@@ -41,10 +41,10 @@ module "volumes" {
 module "domain" {
   source = "./modules/domain"
 
-  network_id            = module.network.network_id # Usar el ID de la red directamente
-  bootstrap_ignition_id = module.ignition.bootstrap_ignition  # Usar el valor directamente
-  master_ignition_id    = module.ignition.master_ignition     # Usar el valor directamente
-  worker_ignition_id    = module.ignition.worker_ignition     # Usar el valor directamente
+  network_id            = module.network.network_id          # Usar el ID de la red directamente
+  bootstrap_ignition_id = module.ignition.bootstrap_ignition # Usar el valor directamente
+  master_ignition_id    = module.ignition.master_ignition    # Usar el valor directamente
+  worker_ignition_id    = module.ignition.worker_ignition    # Usar el valor directamente
 
   bootstrap_volume_id      = module.volumes.bootstrap_volume      # Usar el valor directamente
   controlplane_1_volume_id = module.volumes.controlplane_1_volume # Usar el valor directamente
