@@ -15,7 +15,7 @@ resource "libvirt_network" "okd_network" {
   name      = "okd_network"
   mode      = "nat"
   domain    = "okd.lab"
-  addresses = ["10.17.3.11/24"]
+  addresses = ["10.17.3.0/24"]
 
   dns {
     enabled = true
