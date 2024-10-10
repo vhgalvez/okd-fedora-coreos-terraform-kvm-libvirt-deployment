@@ -1,3 +1,5 @@
+# modules/domain/main.tf
+
 terraform {
   required_version = ">= 1.9.6"
 
@@ -38,7 +40,7 @@ resource "libvirt_domain" "okd_bootstrap" {
   }
 
   network_interface {
-    network_id     = var.network_id  # Usa el UUID de la red
+    network_id     = var.network_id  # Pass the correct network UUID here
     hostname       = var.bootstrap.name
     addresses      = [var.bootstrap.address]
     mac            = var.bootstrap.mac
@@ -75,7 +77,7 @@ resource "libvirt_domain" "okd_controlplane_1" {
   }
 
   network_interface {
-    network_id     = var.network_id  # Usa el UUID de la red
+    network_id     = var.network_id  # Pass the correct network UUID here
     hostname       = var.controlplane_1.name
     addresses      = [var.controlplane_1.address]
     mac            = var.controlplane_1.mac
@@ -112,7 +114,7 @@ resource "libvirt_domain" "okd_controlplane_2" {
   }
 
   network_interface {
-    network_id     = var.network_id  # Usa el UUID de la red
+    network_id     = var.network_id  # Pass the correct network UUID here
     hostname       = var.controlplane_2.name
     addresses      = [var.controlplane_2.address]
     mac            = var.controlplane_2.mac
@@ -149,7 +151,7 @@ resource "libvirt_domain" "okd_controlplane_3" {
   }
 
   network_interface {
-    network_id     = var.network_id  # Usa el UUID de la red
+    network_id     = var.network_id  # Pass the correct network UUID here
     hostname       = var.controlplane_3.name
     addresses      = [var.controlplane_3.address]
     mac            = var.controlplane_3.mac
@@ -186,7 +188,7 @@ resource "libvirt_domain" "okd_worker_1" {
   }
 
   network_interface {
-    network_id     = var.network_id  # Usa el UUID de la red
+    network_id     = var.network_id  # Pass the correct network UUID here
     hostname       = var.worker_1.name
     addresses      = [var.worker_1.address]
     mac            = var.worker_1.mac
@@ -223,7 +225,7 @@ resource "libvirt_domain" "okd_worker_2" {
   }
 
   network_interface {
-    network_id     = var.network_id  # Usa el UUID de la red
+    network_id     = var.network_id  # Pass the correct network UUID here
     hostname       = var.worker_2.name
     addresses      = [var.worker_2.address]
     mac            = var.worker_2.mac
@@ -260,7 +262,7 @@ resource "libvirt_domain" "okd_worker_3" {
   }
 
   network_interface {
-    network_id     = var.network_id  # Usa el UUID de la red
+    network_id     = var.network_id  # Pass the correct network UUID here
     hostname       = var.worker_3.name
     addresses      = [var.worker_3.address]
     mac            = var.worker_3.mac
