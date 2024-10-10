@@ -21,12 +21,11 @@ resource "libvirt_network" "okd_network" {
   }
 }
 
-# Output the network ID (UUID) for other modules to reference
 output "network_id" {
-  value = libvirt_network.okd_network.id # Correct UUID output for network
+  value = libvirt_network.okd_network.id 
 }
 
-# Optionally, keep the network name output if needed
+
 output "network_name" {
-  value = libvirt_network.okd_network.name # This is the network's human-readable name
+  value = libvirt_network.okd_network.name 
 }
