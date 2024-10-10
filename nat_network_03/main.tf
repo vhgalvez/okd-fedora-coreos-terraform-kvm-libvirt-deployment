@@ -1,5 +1,3 @@
-# main.tf
-
 terraform {
   required_version = ">= 1.9.6"
 
@@ -43,18 +41,18 @@ module "volumes" {
 module "domain" {
   source = "./modules/domain"
 
-  network_id            = module.network.network_id             # Correcto: Usamos "network_id" que es el UUID de la red
-  bootstrap_ignition_id = module.ignition.bootstrap_ignition.id # Usamos ".id" para obtener el ID correcto
-  master_ignition_id    = module.ignition.master_ignition.id
-  worker_ignition_id    = module.ignition.worker_ignition.id
+  network_id            = module.network.network_id # Usar el ID de la red directamente
+  bootstrap_ignition_id = module.ignition.bootstrap_ignition  # Usar el valor directamente
+  master_ignition_id    = module.ignition.master_ignition     # Usar el valor directamente
+  worker_ignition_id    = module.ignition.worker_ignition     # Usar el valor directamente
 
-  bootstrap_volume_id      = module.volumes.bootstrap_volume.id # ".id" es necesario para obtener el ID
-  controlplane_1_volume_id = module.volumes.controlplane_1_volume.id
-  controlplane_2_volume_id = module.volumes.controlplane_2_volume.id
-  controlplane_3_volume_id = module.volumes.controlplane_3_volume.id
-  worker_1_volume_id       = module.volumes.worker_1_volume.id
-  worker_2_volume_id       = module.volumes.worker_2_volume.id
-  worker_3_volume_id       = module.volumes.worker_3_volume.id
+  bootstrap_volume_id      = module.volumes.bootstrap_volume      # Usar el valor directamente
+  controlplane_1_volume_id = module.volumes.controlplane_1_volume # Usar el valor directamente
+  controlplane_2_volume_id = module.volumes.controlplane_2_volume # Usar el valor directamente
+  controlplane_3_volume_id = module.volumes.controlplane_3_volume # Usar el valor directamente
+  worker_1_volume_id       = module.volumes.worker_1_volume       # Usar el valor directamente
+  worker_2_volume_id       = module.volumes.worker_2_volume       # Usar el valor directamente
+  worker_3_volume_id       = module.volumes.worker_3_volume       # Usar el valor directamente
 
   bootstrap      = var.bootstrap
   controlplane_1 = var.controlplane_1
