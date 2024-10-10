@@ -20,7 +20,7 @@ worker_3_volume_size = 30
 bootstrap = {
   name    = "bootstrap.cefaslocalserver.com"
   memory  = 8192
-  vcpu    = 4
+  vcpu    = 1
   address = "10.17.3.21"
   mac     = "52:54:00:00:00:01"
 }
@@ -28,7 +28,7 @@ bootstrap = {
 controlplane_1 = {
   name    = "master1.cefaslocalserver.com"
   memory  = 16384
-  vcpu    = 4
+  vcpu    = 1
   address = "10.17.3.22"
   mac     = "52:54:00:00:00:02"
 }
@@ -36,7 +36,7 @@ controlplane_1 = {
 controlplane_2 = {
   name    = "master2.cefaslocalserver.com"
   memory  = 16384
-  vcpu    = 4
+  vcpu    = 1
   address = "10.17.3.23"
   mac     = "52:54:00:00:00:03"
 }
@@ -44,7 +44,7 @@ controlplane_2 = {
 controlplane_3 = {
   name    = "master3.cefaslocalserver.com"
   memory  = 16384
-  vcpu    = 4
+  vcpu    = 1
   address = "10.17.3.24"
   mac     = "52:54:00:00:00:04"
 }
@@ -52,7 +52,7 @@ controlplane_3 = {
 worker_1 = {
   name    = "worker1.cefaslocalserver.com"
   memory  = 8192
-  vcpu    = 4
+  vcpu    = 1
   address = "10.17.3.25"
   mac     = "52:54:00:00:00:05"
 }
@@ -60,7 +60,7 @@ worker_1 = {
 worker_2 = {
   name    = "worker2.cefaslocalserver.com"
   memory  = 8192
-  vcpu    = 4
+  vcpu    = 1
   address = "10.17.3.26"
   mac     = "52:54:00:00:00:06"
 }
@@ -68,7 +68,7 @@ worker_2 = {
 worker_3 = {
   name    = "worker3.cefaslocalserver.com"
   memory  = 8192
-  vcpu    = 4
+  vcpu    = 1
   address = "10.17.3.27"
   mac     = "52:54:00:00:00:07"
 }
