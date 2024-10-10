@@ -26,7 +26,6 @@ output "network_id" {
   value = libvirt_network.okd_network.id 
 }
 
-
 output "network_name" {
   value = libvirt_network.okd_network.name 
 }
