@@ -1,4 +1,5 @@
 # main.tf
+
 terraform {
   required_version = ">= 1.9.6"
 
@@ -14,17 +15,17 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Network module to set up the network for the cluster
+# Módulo de red para configurar la red del clúster
 module "network" {
   source = "./modules/network"
 }
 
-# Ignition module to manage Ignition configurations for the nodes
+# Módulo de Ignition para gestionar las configuraciones de Ignition de los nodos
 module "ignition" {
   source = "./modules/ignition"
 }
 
-# Volumes module to manage storage volumes for the cluster nodes
+# Módulo de volúmenes para gestionar los volúmenes de almacenamiento de los nodos del clúster
 module "volumes" {
   source = "./modules/volumes"
 
@@ -38,22 +39,22 @@ module "volumes" {
   worker_3_volume_size       = var.worker_3_volume_size
 }
 
-# Domain module to create the VMs for the bootstrap, control plane, and worker nodes
+# Módulo de dominios para crear las VMs para bootstrap, control plane y nodos worker
 module "domain" {
   source = "./modules/domain"
 
-  network_id            = module.network.network_name  # Corrected: "network_name" is the correct attribute
-  bootstrap_ignition_id = module.ignition.bootstrap_ignition  # Corrected: removed ".id"
-  master_ignition_id    = module.ignition.master_ignition     # Corrected: removed ".id"
-  worker_ignition_id    = module.ignition.worker_ignition     # Corrected: removed ".id"
+  network_id            = module.network.network_id             # Correcto: Usamos "network_id" que es el UUID de la red
+  bootstrap_ignition_id = module.ignition.bootstrap_ignition.id # Usamos ".id" para obtener el ID correcto
+  master_ignition_id    = module.ignition.master_ignition.id
+  worker_ignition_id    = module.ignition.worker_ignition.id
 
-  bootstrap_volume_id      = module.volumes.bootstrap_volume      # Corrected: removed ".id"
-  controlplane_1_volume_id = module.volumes.controlplane_1_volume # Corrected: removed ".id"
-  controlplane_2_volume_id = module.volumes.controlplane_2_volume # Corrected: removed ".id"
-  controlplane_3_volume_id = module.volumes.controlplane_3_volume # Corrected: removed ".id"
-  worker_1_volume_id       = module.volumes.worker_1_volume       # Corrected: removed ".id"
-  worker_2_volume_id       = module.volumes.worker_2_volume       # Corrected: removed ".id"
-  worker_3_volume_id       = module.volumes.worker_3_volume       # Corrected: removed ".id"
+  bootstrap_volume_id      = module.volumes.bootstrap_volume.id # ".id" es necesario para obtener el ID
+  controlplane_1_volume_id = module.volumes.controlplane_1_volume.id
+  controlplane_2_volume_id = module.volumes.controlplane_2_volume.id
+  controlplane_3_volume_id = module.volumes.controlplane_3_volume.id
+  worker_1_volume_id       = module.volumes.worker_1_volume.id
+  worker_2_volume_id       = module.volumes.worker_2_volume.id
+  worker_3_volume_id       = module.volumes.worker_3_volume.id
 
   bootstrap      = var.bootstrap
   controlplane_1 = var.controlplane_1
