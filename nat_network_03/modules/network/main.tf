@@ -1,3 +1,4 @@
+# modules/network/main.tf
 terraform {
   required_version = ">= 1.9.6"
 
@@ -9,24 +10,23 @@ terraform {
   }
 }
 
-# Definir la red
+# Define the network
 resource "libvirt_network" "okd_network" {
-  name      = "okd_network"       # Nombre de la red
-  mode      = "nat"               # Usar modo NAT
-  domain    = "okd.lab"           # Dominio de la red
-  addresses = ["192.168.150.0/24"] # Dirección CIDR para la red
+  name      = "okd_network"
+  mode      = "nat"
+  domain    = "okd.lab"
+  addresses = ["192.168.150.0/24"]
 
   dns {
-    enabled = true                # Habilitar DNS en la red
+    enabled = true
   }
 }
 
-# Output del UUID de la red para utilizarlo en otros módulos
 output "network_id" {
-  value = libvirt_network.okd_network.id # Exporta el UUID de la red
+  value = libvirt_network.okd_network.id 
 }
 
-# Output opcional para exportar el nombre de la red (si es necesario en otros módulos)
+
 output "network_name" {
-  value = libvirt_network.okd_network.name # Exporta el nombre de la red
+  value = libvirt_network.okd_network.name 
 }
