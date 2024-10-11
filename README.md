@@ -586,7 +586,7 @@ url:   https://console.redhat.com/openshift/create/local
                        |                        |                        |
                        v                        v                        v
                +-------+-------+        +-------+-------+        +-------+-------+
-               |   Master 1    |        |   Master 2    |        |   Master 3    |
+               | controlplane 1  |        |   controlplane 2    |        |   controlplane 3   |
                |   IP: 10.17.4.21|      |   IP: 10.17.4.22|      |   IP: 10.17.4.23|
                +-------+-------+        +-------+-------+        +-------+-------+
                                                 |
@@ -648,9 +648,10 @@ url:   https://console.redhat.com/openshift/create/local
 | FreeIPA Node         | Rocky Linux                |
 | Load Balancer Node   | Rocky Linux                |
 | PostgreSQL Node      | Rocky Linux                |
-| Master Nodes         | Flatcar Container Linux    |
-| Worker Nodes         | Flatcar Container Linux    |
-| Bootstrap Node       | Flatcar Container Linux    |
+| Master Nodes         |Fedora CoreOS   |
+| Worker Nodes         |Fedora CoreOS   |
+| Bootstrap Node       |Fedora CoreOS   |
+
 
 
 
