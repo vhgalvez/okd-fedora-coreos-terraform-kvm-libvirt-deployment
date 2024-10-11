@@ -14,7 +14,7 @@ terraform {
 resource "libvirt_network" "okd_network" {
   name      = "okd_network"
   mode      = "nat"
-  domain    = "okd.lab"
+  domain    = "cefaslocalserver.com"
   addresses = ["10.17.3.0/24"]
 
   dns {
