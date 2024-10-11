@@ -41,18 +41,18 @@ module "volumes" {
 module "domain" {
   source = "./modules/domain"
 
-  network_id            = module.network.network_id          # Usar el ID de la red directamente
-  bootstrap_ignition_id = module.ignition.bootstrap_ignition # Usar el valor directamente
-  master_ignition_id    = module.ignition.master_ignition    # Usar el valor directamente
-  worker_ignition_id    = module.ignition.worker_ignition    # Usar el valor directamente
+  network_id            = module.network.network_id          
+  bootstrap_ignition_id = module.ignition.bootstrap_ignition 
+  master_ignition_id    = module.ignition.master_ignition    
+  worker_ignition_id    = module.ignition.worker_ignition    
 
-  bootstrap_volume_id      = module.volumes.bootstrap_volume      # Usar el valor directamente
-  controlplane_1_volume_id = module.volumes.controlplane_1_volume # Usar el valor directamente
-  controlplane_2_volume_id = module.volumes.controlplane_2_volume # Usar el valor directamente
-  controlplane_3_volume_id = module.volumes.controlplane_3_volume # Usar el valor directamente
-  worker_1_volume_id       = module.volumes.worker_1_volume       # Usar el valor directamente
-  worker_2_volume_id       = module.volumes.worker_2_volume       # Usar el valor directamente
-  worker_3_volume_id       = module.volumes.worker_3_volume       # Usar el valor directamente
+  bootstrap_volume_id      = module.volumes.bootstrap_volume      
+  controlplane_1_volume_id = module.volumes.controlplane_1_volume 
+  controlplane_2_volume_id = module.volumes.controlplane_2_volume 
+  controlplane_3_volume_id = module.volumes.controlplane_3_volume 
+  worker_1_volume_id       = module.volumes.worker_1_volume       
+  worker_2_volume_id       = module.volumes.worker_2_volume     
+  worker_3_volume_id       = module.volumes.worker_3_volume
 
   bootstrap      = var.bootstrap
   controlplane_1 = var.controlplane_1
