@@ -479,7 +479,7 @@ url:   https://console.redhat.com/openshift/create/local
                        |                        |                        |
                        v                        v                        v
                +-------+-------+        +-------+-------+        +-------+-------+
-               | controlplane 1  |        |   controlplane 2    |        |   controlplane 3   |
+               | master 1  |        |   master 2    |        |   master 3   |
                |   IP: 10.17.4.21|      |   IP: 10.17.4.22|      |   IP: 10.17.4.23|
                +-------+-------+        +-------+-------+        +-------+-------+
                                                 |
