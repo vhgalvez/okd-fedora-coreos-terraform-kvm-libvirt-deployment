@@ -140,21 +140,21 @@ cd terraform-openshift-kvm-deployment_
   - **Rol:** Inicialización del clúster
   - **Sistema Operativo:** Flatcar Container Linux
 
-- **Nombre:** master1
+- **Nombre:** controlplane1
   - **CPU:** 2
   - **Memoria:** 4096 MB
   - **IP:** 10.17.4.21
   - **Rol:** Gestión del clúster
   - **Sistema Operativo:** Flatcar Container Linux
 
-- **Nombre:** master2
+- **Nombre:** controlplane2
   - **CPU:** 2
   - **Memoria:** 4096 MB
   - **IP:** 10.17.4.22
   - **Rol:** Gestión del clúster
   - **Sistema Operativo:** Flatcar Container Linux
 
-- **Nombre:** master3
+- **Nombre:** controlplane3
   - **CPU:** 2
   - **Memoria:** 4096 MB
   - **IP:** 10.17.4.23
@@ -216,7 +216,7 @@ cd terraform-openshift-kvm-deployment_
 
 - **Bastion Node**: rocky linux minimal
 - **Bootstrap Node**: rocky linux minimal
-- **Master Nodes**: Flatcar Container Linux
+- **controlplane Nodes**: Flatcar Container Linux
 - **Worker Nodes**: Flatcar Container Linux
 - **FreeIPA Node**: rocky linux minimal
 - **Load Balancer Node**: rocky linux minimal 
@@ -226,7 +226,7 @@ cd terraform-openshift-kvm-deployment_
 
 - **Bastion Node**: Punto de acceso seguro, modo de red Bridge, interfaz enp3s0f1
 - **Bootstrap Node**: Inicializa el clúster
-- **Master Nodes**: Gestión del clúster
+- **controlplane Nodes**: Gestión del clúster
 - **Worker Nodes**: Ejecución de aplicaciones
 - **FreeIPA Node**: DNS y Gestión de identidades
 - **Load Balancer Node**: Traefik para balanceo de carga
@@ -303,7 +303,7 @@ Estas interfaces se utilizan para la comunicación y conectividad de la red, inc
 - **Total VMs**: 11
 - **Roles**:
   - **Bootstrap Node**: 2 CPUs, 2048 MB, inicializa el clúster
-  - **Master Nodes**: 3 x (2 CPUs, 4096 MB), gestionan el clúster
+  - **controlplane Nodes**: 3 x (2 CPUs, 4096 MB), gestionan el clúster
   - **Worker Nodes**: 3 x (2 CPUs, 3584 MB), ejecutan aplicaciones
   - **Bastion Node**: 2 CPUs, 2048 MB, seguridad y acceso
   - **Load Balancer**: 2 CPUs, 2048 MB, con Traefik
@@ -359,9 +359,9 @@ La red `kube_network_03` se dedica a la gestión y ejecución de aplicaciones de
 
 | Red NAT        | Nodos          | Dirección IP | Rol del Nodo              | Interfaz de Red |
 |----------------|----------------|--------------|---------------------------|-----------------|
-| kube_network_03 | master1        | 10.17.3.15   | Gestión del clúster        | (Virtual - NAT) |
-| kube_network_03 | master2        | 10.17.3.16   | Gestión del clúster        | (Virtual - NAT) |
-| kube_network_03 | master3        | 10.17.3.17   | Gestión del clúster        | (Virtual - NAT) |
+| kube_network_03 | controlplane1        | 10.17.3.15   | Gestión del clúster        | (Virtual - NAT) |
+| kube_network_03 | controlplane2        | 10.17.3.16   | Gestión del clúster        | (Virtual - NAT) |
+| kube_network_03 | controlplane3        | 10.17.3.17   | Gestión del clúster        | (Virtual - NAT) |
 | kube_network_03 | worker1        | 10.17.3.18   | Ejecución de aplicaciones  | (Virtual - NAT) |
 | kube_network_03 | worker2        | 10.17.3.19   | Ejecución de aplicaciones  | (Virtual - NAT) |
 | kube_network_03 | worker3        | 10.17.3.20   | Ejecución de aplicaciones  | (Virtual - NAT) |
@@ -378,9 +378,9 @@ A continuación se proporciona un resumen de los hostnames e IPs para referencia
 | 10.17.3.12    | load_balancer1.cefaslocalserver.com |
 | 10.17.3.13    | postgresql1.cefaslocalserver.com |
 | 10.17.3.14    | bootstrap.cefaslocalserver.com  |
-| 10.17.4.21    | master1.cefaslocalserver.com     |
-| 10.17.4.22    | master2.cefaslocalserver.com     |
-| 10.17.4.23    | master3.cefaslocalserver.com     |
+| 10.17.4.21    | controlplane1.cefaslocalserver.com     |
+| 10.17.4.22    | controlplane2.cefaslocalserver.com     |
+| 10.17.4.23    | controlplane3.cefaslocalserver.com     |
 | 10.17.4.24    | worker1.cefaslocalserver.com     |
 | 10.17.4.25    | worker2.cefaslocalserver.com     |
 | 10.17.4.26    | worker3.cefaslocalserver.com     |
@@ -405,17 +405,6 @@ resource "libvirt_network" "kube_network_02" {
   mode      = "nat"
   autostart = true
   addresses = ["10.17.3.0/24"]
-}
-```
-
-### Red kube_network_03 - NAT Network
-
-```hcl
-resource "libvirt_network" "kube_network_03" {
-  name      = "kube_network_03"
-  mode      = "nat"
-  autostart = true
-  addresses = ["10.17.4.0/24"]
 }
 ```
 
@@ -512,9 +501,9 @@ Para asegurar que el servidor físico tiene suficiente memoria para operar de ma
 | postgresql1      | 2    | 2048         | 10.17.3.13   | postgresql1.cefaslocalserver.com | 30                   |
 | bootstrap        | 2    | 2048         | 10.17.3.14   | bootstrap1.cefaslocalserver.com  | 30                   |
 | bastion1         | 2    | 2048         | 192.168.0.20 | bastion1.cefaslocalserver.com    | 30                   |
-| controlplane 1   | 2    | 4096         | 10.17.3.15   | master1.cefaslocalserver.com     | 50                  |
-| controlplane 2   | 2    | 4096         | 10.17.3.16   | master2.cefaslocalserver.com     | 50                   |
-| controlplane 3   | 2    | 4096         | 10.17.3.17   | master3.cefaslocalserver.com     | 50                   |
+| controlplane 1   | 2    | 4096         | 10.17.3.15   | controlplane1.cefaslocalserver.com     | 50                  |
+| controlplane 2   | 2    | 4096         | 10.17.3.16   | controlplane2.cefaslocalserver.com     | 50                   |
+| controlplane 3   | 2    | 4096         | 10.17.3.17   | controlplane3.cefaslocalserver.com     | 50                   |
 | worker1          | 2    | 3584         | 10.17.3.18   | worker1.cefaslocalserver.com     | 50                   |
 | worker2          | 2    | 3584         | 10.17.3.19   | worker2.cefaslocalserver.com     | 50                   |
 | worker3          | 2    | 3584         | 10.17.3.20   | worker3.cefaslocalserver.com     | 50                   |
@@ -643,7 +632,7 @@ url:   https://console.redhat.com/openshift/create/local
 | FreeIPA Node         | Rocky Linux                |
 | Load Balancer Node   | Rocky Linux                |
 | PostgreSQL Node      | Rocky Linux                |
-| Master Nodes         |Fedora CoreOS   |
+| controlplane Nodes   |Fedora CoreOS   |
 | Worker Nodes         |Fedora CoreOS   |
 | Bootstrap Node       |Fedora CoreOS   |
 
@@ -687,9 +676,9 @@ La red kube_network_03 se dedica a la gestión y ejecución de aplicaciones dent
 
 | Red NAT         | Nodos     | Dirección IP | Rol del Nodo          | Interfaz de Red |
 |-----------------|-----------|--------------|-----------------------|-----------------|
-| kube_network_03 | master1   | 10.17.4.21   | Gestión del clúster   | (Virtual - NAT) |
-| kube_network_03 | master2   | 10.17.4.22   | Gestión del clúster   | (Virtual - NAT) |
-| kube_network_03 | master3   | 10.17.4.23   | Gestión del clúster   | (Virtual - NAT) |
+| kube_network_03 | controlplane1   | 10.17.4.21   | Gestión del clúster   | (Virtual - NAT) |
+| kube_network_03 | controlplane2   | 10.17.4.22   | Gestión del clúster   | (Virtual - NAT) |
+| kube_network_03 | controlplane3   | 10.17.4.23   | Gestión del clúster   | (Virtual - NAT) |
 | kube_network_03 | worker1   | 10.17.4.24   | Ejecución de aplicaciones | (Virtual - NAT) |
 | kube_network_03 | worker2   | 10.17.4.25   | Ejecución de aplicaciones | (Virtual - NAT) |
 | kube_network_03 | worker3   | 10.17.4.26   | Ejecución de aplicaciones | (Virtual - NAT) |
@@ -706,9 +695,9 @@ A continuación se proporciona un resumen de los hostnames e IPs para referencia
 | 10.17.3.12    | load_balancer1.cefaslocalserver.com |
 | 10.17.3.13    | postgresql1.cefaslocalserver.com |
 | 10.17.3.14    | helper.cefaslocalserver.com |
-| 10.17.4.21    | master1.cefaslocalserver.com    |
-| 10.17.4.22    | master2.cefaslocalserver.com    |
-| 10.17.4.23    | master3.cefaslocalserver.com    |
+| 10.17.4.21    | controlplane1.cefaslocalserver.com    |
+| 10.17.4.22    | controlplane2.cefaslocalserver.com    |
+| 10.17.4.23    | controlplane3.cefaslocalserver.com    |
 | 10.17.4.24    | worker1.cefaslocalserver.com    |
 | 10.17.4.25    | worker2.cefaslocalserver.com    |
 | 10.17.4.26    | worker3.cefaslocalserver.com    |
@@ -741,7 +730,7 @@ A continuación se proporciona un resumen de los hostnames e IPs para referencia
 3. **Load Balancer (Traefik) (10.17.3.12)**:
    - El tráfico es distribuido hacia los nodos maestros y workers a través del Load Balancer, asegurando la distribución equilibrada de la carga entre los servicios.
 
-4. **Nodos Maestros (Master 1, Master 2, Master 3)**:
+4. **Nodos Maestros (controlplane 1, controlplane 2, controlplane 3)**:
    - Los nodos maestros gestionan el clúster y el control plane de Kubernetes, coordinando las tareas y servicios críticos.
 
 5. **Bootstrap Node (10.17.4.27)**:
