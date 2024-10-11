@@ -6,7 +6,7 @@ Este repositorio contiene tres subproyectos de Terraform que se deben ejecutar d
 
 - `br0_network/`
 - `nat_network_02/`
-- `nat_network_03/`
+- `okd_cluster/`
 
 ## Requisitos
 
@@ -69,10 +69,10 @@ cd terraform-openshift-kvm-deployment_
 
 ### Inicializar y Aplicar Terraform para `nat_network_03`
 
-1. Navegue al directorio `nat_network_03`:
+1. Navegue al directorio `nokd_cluster`:
 
    ```bash
-   cd ../nat_network_03
+   cd ../okd_cluster
    ```
 
 2. Inicialice Terraform y actualice los proveedores:
@@ -94,94 +94,6 @@ cd terraform-openshift-kvm-deployment_
 - Cada subproyecto tiene su propio `main.tf` y configuración de variables, por lo que no debería haber conflictos de nombres si sigue las instrucciones anteriores.
 - Puede ajustar las configuraciones y variables según sea necesario para adaptarse a su entorno y necesidades específicas.
 
-## Detalles de las Máquinas Virtuales
-
-### bastion_network
-
-- **Nombre:** bastion1
-- **CPU:** 2
-- **Memoria:** 2048 MB
-- **IP:** 192.168.0.35
-- **Rol:** Acceso seguro, Punto de conexión de bridge
-- **Sistema Operativo:** Rocky Linux 9.3 Minimal
-
-### nat_network_02
-
-- **Nombre:** freeipa1
-  - **CPU:** 2
-  - **Memoria:** 2048 MB
-  - **IP:** 10.17.3.11
-  - **Rol:** Servidor de DNS y gestión de identidades
-  - **Sistema Operativo:** Rocky Linux 9.3
-
-- **Nombre:** load_balancer1
-  - **CPU:** 2
-  - **Memoria:** 2048 MB
-  - **IP:** 10.17.3.12
-  - **Rol:** Balanceo de carga para el clúster
-  - **Sistema Operativo:** Rocky Linux 9.3
-
-- **Nombre:** postgresql1
-  - **CPU:** 2
-  - **Memoria:** 2048 MB
-  - **IP:** 10.17.3.13
-  - **Rol:** Gestión de bases de datos
-  - **Sistema Operativo:** Rocky Linux 9.3
-
-### nat_network_03
-
-- **Nombre:** bootstrap1
-  - **CPU:** 2
-  - **Memoria:** 2048 MB
-  - **IP:** 10.17.3.14
-  - **Rol:** Inicialización del clúster
-  - **Sistema Operativo:** Flatcar Container Linux
-
-- **Nombre:** master1
-  - **CPU:** 2
-  - **Memoria:** 4096 MB
-  - **IP:** 10.17.4.21
-  - **Rol:** Gestión del clúster
-  - **Sistema Operativo:** Flatcar Container Linux
-
-- **Nombre:** master2
-  - **CPU:** 2
-  - **Memoria:** 4096 MB
-  - **IP:** 10.17.4.22
-  - **Rol:** Gestión del clúster
-  - **Sistema Operativo:** Flatcar Container Linux
-
-- **Nombre:** master3
-  - **CPU:** 2
-  - **Memoria:** 4096 MB
-  - **IP:** 10.17.4.23
-  - **Rol:** Gestión del clúster
-  - **Sistema Operativo:** Flatcar Container Linux
-
-- **Nombre:** worker1
-  - **CPU:** 2
-  - **Memoria:** 3584 MB
-  - **IP:** 10.17.4.24
-  - **Rol:** Ejecución de aplicaciones
-  - **Sistema Operativo:** Flatcar Container Linux
-
-- **Nombre:** worker2
-  - **CPU:** 2
-  - **Memoria:** 3584 MB
-  - **IP:** 10.17.4.25
-  - **Rol:** Ejecución de aplicaciones
-  - **Sistema Operativo:** Flatcar Container Linux
-
-- **Nombre:** worker3
-  - **CPU:** 2
-  - **Memoria:** 3584 MB
-  - **IP:** 10.17.4.26
-  - **Rol:** Ejecución de aplicaciones
-  - **Sistema Operativo:** Flatcar Container Linux
-
-
-
-**Mantenedor del Proyecto:** [Victor Galvez](https://github.com/vhgalvez)
 
 # Hardware del Servidor
 
@@ -350,9 +262,6 @@ La red `kube_network_02` se utiliza para los servicios básicos del clúster, in
 | kube_network_02 | postgresql1    | 10.17.3.13   | Gestión de bases de datos         | (Virtual - NAT) |
 | kube_network_02 | bootstrap1     | 10.17.3.14   | Inicialización del clúster        | (Virtual - NAT) |
 
-### Red kube_network_03 - NAT Network
-
-La red `kube_network_03` se dedica a la gestión y ejecución de aplicaciones dentro del clúster. Esta separación asegura que las aplicaciones se ejecuten de manera eficiente y segura, sin interferir con otros servicios críticos.
 
 | Red NAT        | Nodos          | Dirección IP | Rol del Nodo              | Interfaz de Red |
 |----------------|----------------|--------------|---------------------------|-----------------|
@@ -405,16 +314,7 @@ resource "libvirt_network" "kube_network_02" {
 }
 ```
 
-### Red kube_network_03 - NAT Network
 
-```hcl
-resource "libvirt_network" "kube_network_03" {
-  name      = "kube_network_03"
-  mode      = "nat"
-  autostart = true
-  addresses = ["10.17.4.0/24"]
-}
-```
 
 ## Tabla de Configuración de Redes - br0 - Bridge Network
 
@@ -776,3 +676,5 @@ A continuación se proporciona un resumen de los hostnames e IPs para referencia
 Para cualquier duda o problema, por favor abra un issue en el repositorio o contacte al mantenedor del proyecto.
 
 **Mantenedor del Proyecto:** [Victor Galvez](https://github.com/vhgalvez)
+
+
