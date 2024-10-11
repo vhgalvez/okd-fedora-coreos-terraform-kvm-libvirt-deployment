@@ -720,7 +720,7 @@ A continuación se proporciona un resumen de los hostnames e IPs para referencia
 
 ## FreeIPA (10.17.3.11)
 
-- **Servidor DNS y NTP (chronyc)**: 
+- **Servidor DNS y NTP (chronyc)**:
     FreeIPA actúa como el servidor DNS, gestionando la resolución de nombres y autenticación dentro del clúster. Además, **chronyc** está configurado para sincronizar el tiempo en todo el clúster, utilizando FreeIPA como uno de los servidores NTP principales.
   
 ## Chronyc / NTP
