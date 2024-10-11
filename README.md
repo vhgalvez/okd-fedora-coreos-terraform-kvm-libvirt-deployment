@@ -475,13 +475,6 @@ resource "libvirt_network" "kube_network_02" {
   addresses = ["10.17.3.0/24"]
 }
 
-# Red kube_network_03 - NAT Network
-resource "libvirt_network" "kube_network_03" {
-  name      = "kube_network_03"
-  mode      = "nat"
-  autostart = true
-  addresses = ["10.17.4.0/24"]
-}
 ```
 
 ## Información del Sistema
