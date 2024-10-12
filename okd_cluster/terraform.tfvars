@@ -26,7 +26,7 @@ bootstrap = {
 }
 
 controlplane_1 = {
-  name    = "master1.cefaslocalserver.com"
+  name    = "controlplane_1.cefaslocalserver.com"
   memory  = 2
   vcpu    = 2
   address = "10.17.3.22"
@@ -34,7 +34,7 @@ controlplane_1 = {
 }
 
 controlplane_2 = {
-  name    = "master2.cefaslocalserver.com"
+  name    = "controlplane_2.cefaslocalserver.com"
   memory  = 2
   vcpu    = 2
   address = "10.17.3.23"
@@ -42,7 +42,7 @@ controlplane_2 = {
 }
 
 controlplane_3 = {
-  name    = "master3.cefaslocalserver.com"
+  name    = "controlplane_3.cefaslocalserver.com"
   memory  = 2
   vcpu    = 2
   address = "10.17.3.24"
