@@ -10,59 +10,149 @@ terraform {
     }
   }
 }
+# Bootstrap Node Definition
+resource "libvirt_domain" "okd_bootstrap" {
+  name            = var.bootstrap.name
+  vcpu            = var.bootstrap.vcpu
+  memory          = var.bootstrap.memory * 1024
+  running         = true
+  coreos_ignition = var.bootstrap_ignition_id
 
-# Bootstrap Volume
-resource "libvirt_volume" "bootstrap_volume" {
-  name   = "okd_bootstrap"
-  pool   = "default"
-  source = var.coreos_image
-  # size  = var.bootstrap_volume_size  # Este parámetro se elimina porque hay una imagen de origen
+  disk {
+    volume_id = libvirt_volume.bootstrap_volume.id
+    scsi      = false
+  }
+
+  network_interface {
+    network_name = var.network_name
+    hostname     = var.bootstrap.name
+    addresses    = [var.bootstrap.address]
+    mac          = var.bootstrap.mac
+  }
 }
 
-# Control Plane 1 Volume
-resource "libvirt_volume" "controlplane_1_volume" {
-  name   = "okd_controlplane_1"
-  pool   = "default"
-  source = var.coreos_image
-  # size  = var.controlplane_1_volume_size  # Este parámetro se elimina porque hay una imagen de origen
+# Control Plane 1 Node Definition
+resource "libvirt_domain" "okd_controlplane_1" {
+  name            = var.controlplane_1.name
+  vcpu            = var.controlplane_1.vcpu
+  memory          = var.controlplane_1.memory * 1024
+  running         = true
+  coreos_ignition = var.master_ignition_id
+
+  disk {
+    volume_id = libvirt_volume.controlplane_1_volume.id
+    scsi      = false
+  }
+
+  network_interface {
+    network_name = var.network_name
+    hostname     = var.controlplane_1.name
+    addresses    = [var.controlplane_1.address]
+    mac          = var.controlplane_1.mac
+  }
 }
 
-# Control Plane 2 Volume
-resource "libvirt_volume" "controlplane_2_volume" {
-  name   = "okd_controlplane_2"
-  pool   = "default"
-  source = var.coreos_image
-  # size  = var.controlplane_2_volume_size  # Este parámetro se elimina porque hay una imagen de origen
+# Control Plane 2 Node Definition
+resource "libvirt_domain" "okd_controlplane_2" {
+  name            = var.controlplane_2.name
+  vcpu            = var.controlplane_2.vcpu
+  memory          = var.controlplane_2.memory * 1024
+  running         = true
+  coreos_ignition = var.master_ignition_id
+
+  disk {
+    volume_id = libvirt_volume.controlplane_2_volume.id
+    scsi      = false
+  }
+
+  network_interface {
+    network_name = var.network_name
+    hostname     = var.controlplane_2.name
+    addresses    = [var.controlplane_2.address]
+    mac          = var.controlplane_2.mac
+  }
 }
 
-# Control Plane 3 Volume
-resource "libvirt_volume" "controlplane_3_volume" {
-  name   = "okd_controlplane_3"
-  pool   = "default"
-  source = var.coreos_image
-  # size  = var.controlplane_3_volume_size  # Este parámetro se elimina porque hay una imagen de origen
+# Control Plane 3 Node Definition
+resource "libvirt_domain" "okd_controlplane_3" {
+  name            = var.controlplane_3.name
+  vcpu            = var.controlplane_3.vcpu
+  memory          = var.controlplane_3.memory * 1024
+  running         = true
+  coreos_ignition = var.master_ignition_id
+
+  disk {
+    volume_id = libvirt_volume.controlplane_3_volume.id
+    scsi      = false
+  }
+
+  network_interface {
+    network_name = var.network_name
+    hostname     = var.controlplane_3.name
+    addresses    = [var.controlplane_3.address]
+    mac          = var.controlplane_3.mac
+  }
 }
 
-# Worker 1 Volume
-resource "libvirt_volume" "worker_1_volume" {
-  name   = "okd_worker_1"
-  pool   = "default"
-  source = var.coreos_image
-  # size  = var.worker_1_volume_size  # Este parámetro se elimina porque hay una imagen de origen
+# Worker 1 Node Definition
+resource "libvirt_domain" "okd_worker_1" {
+  name            = var.worker_1.name
+  vcpu            = var.worker_1.vcpu
+  memory          = var.worker_1.memory * 1024
+  running         = true
+  coreos_ignition = var.worker_ignition_id
+
+  disk {
+    volume_id = libvirt_volume.worker_1_volume.id
+    scsi      = false
+  }
+
+  network_interface {
+    network_name = var.network_name
+    hostname     = var.worker_1.name
+    addresses    = [var.worker_1.address]
+    mac          = var.worker_1.mac
+  }
 }
 
-# Worker 2 Volume
-resource "libvirt_volume" "worker_2_volume" {
-  name   = "okd_worker_2"
-  pool   = "default"
-  source = var.coreos_image
-  # size  = var.worker_2_volume_size  # Este parámetro se elimina porque hay una imagen de origen
+# Worker 2 Node Definition
+resource "libvirt_domain" "okd_worker_2" {
+  name            = var.worker_2.name
+  vcpu            = var.worker_2.vcpu
+  memory          = var.worker_2.memory * 1024
+  running         = true
+  coreos_ignition = var.worker_ignition_id
+
+  disk {
+    volume_id = libvirt_volume.worker_2_volume.id
+    scsi      = false
+  }
+
+  network_interface {
+    network_name = var.network_name
+    hostname     = var.worker_2.name
+    addresses    = [var.worker_2.address]
+    mac          = var.worker_2.mac
+  }
 }
 
-# Worker 3 Volume
-resource "libvirt_volume" "worker_3_volume" {
-  name   = "okd_worker_3"
-  pool   = "default"
-  source = var.coreos_image
-  # size  = var.worker_3_volume_size  # Este parámetro se elimina porque hay una imagen de origen
+# Worker 3 Node Definition
+resource "libvirt_domain" "okd_worker_3" {
+  name            = var.worker_3.name
+  vcpu            = var.worker_3.vcpu
+  memory          = var.worker_3.memory * 1024
+  running         = true
+  coreos_ignition = var.worker_ignition_id
+
+  disk {
+    volume_id = libvirt_volume.worker_3_volume.id
+    scsi      = false
+  }
+
+  network_interface {
+    network_name = var.network_name
+    hostname     = var.worker_3.name
+    addresses    = [var.worker_3.address]
+    mac          = var.worker_3.mac
+  }
 }
