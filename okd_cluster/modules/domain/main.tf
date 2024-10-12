@@ -11,261 +11,85 @@ terraform {
   }
 }
 
-# Bootstrap Node Definition
-resource "libvirt_domain" "okd_bootstrap" {
-  name            = var.bootstrap.name
-  vcpu            = var.bootstrap.vcpu
-  memory          = var.bootstrap.memory * 1024
-  running         = true
-  coreos_ignition = var.bootstrap_ignition_id
-
-  disk {
-    volume_id = var.bootstrap_volume_id
-    scsi      = false
-  }
-
-  cpu {
-    mode = "host-passthrough"
-  }
-
-  graphics {
-    type     = "vnc"
-    autoport = true
-  }
-
-  console {
-    type        = "pty"
-    target_type = "serial"
-    target_port = "0"
-  }
-
-  network_interface {
-    network_name   = var.network_name  # Cambiado de network_id a network_name
-    hostname       = var.bootstrap.name
-    addresses      = [var.bootstrap.address]
-    mac            = var.bootstrap.mac
-    wait_for_lease = true
-  }
+provider "libvirt" {
+  uri = "qemu:///system"
 }
 
-# Control Plane 1 Node Definition
-resource "libvirt_domain" "okd_controlplane_1" {
-  name            = var.controlplane_1.name
-  vcpu            = var.controlplane_1.vcpu
-  memory          = var.controlplane_1.memory * 1024
-  running         = true
-  coreos_ignition = var.master_ignition_id
-
-  disk {
-    volume_id = var.controlplane_1_volume_id
-    scsi      = false
-  }
-
-  cpu {
-    mode = "host-passthrough"
-  }
-
-  graphics {
-    type     = "vnc"
-    autoport = true
-  }
-
-  console {
-    type        = "pty"
-    target_type = "serial"
-    target_port = "0"
-  }
-
-  network_interface {
-    network_name   = var.network_name  # Cambiado de network_id a network_name
-    hostname       = var.controlplane_1.name
-    addresses      = [var.controlplane_1.address]
-    mac            = var.controlplane_1.mac
-    wait_for_lease = true
-  }
+# Módulo de red para configurar la red del clúster
+module "network" {
+  source = "./modules/network"
 }
 
-# Control Plane 2 Node Definition
-resource "libvirt_domain" "okd_controlplane_2" {
-  name            = var.controlplane_2.name
-  vcpu            = var.controlplane_2.vcpu
-  memory          = var.controlplane_2.memory * 1024
-  running         = true
-  coreos_ignition = var.master_ignition_id
-
-  disk {
-    volume_id = var.controlplane_2_volume_id
-    scsi      = false
-  }
-
-  cpu {
-    mode = "host-passthrough"
-  }
-
-  graphics {
-    type     = "vnc"
-    autoport = true
-  }
-
-  console {
-    type        = "pty"
-    target_type = "serial"
-    target_port = "0"
-  }
-
-  network_interface {
-    network_name   = var.network_name  # Cambiado de network_id a network_name
-    hostname       = var.controlplane_2.name
-    addresses      = [var.controlplane_2.address]
-    mac            = var.controlplane_2.mac
-    wait_for_lease = true
-  }
+# Módulo de Ignition para gestionar las configuraciones de Ignition de los nodos
+module "ignition" {
+  source = "./modules/ignition"
 }
 
-# Control Plane 3 Node Definition
-resource "libvirt_domain" "okd_controlplane_3" {
-  name            = var.controlplane_3.name
-  vcpu            = var.controlplane_3.vcpu
-  memory          = var.controlplane_3.memory * 1024
-  running         = true
-  coreos_ignition = var.master_ignition_id
+# Módulo de volúmenes para gestionar los volúmenes de almacenamiento de los nodos del clúster
+module "volumes" {
+  source = "./modules/volumes"
 
-  disk {
-    volume_id = var.controlplane_3_volume_id
-    scsi      = false
-  }
-
-  cpu {
-    mode = "host-passthrough"
-  }
-
-  graphics {
-    type     = "vnc"
-    autoport = true
-  }
-
-  console {
-    type        = "pty"
-    target_type = "serial"
-    target_port = "0"
-  }
-
-  network_interface {
-    network_name   = var.network_name  # Cambiado de network_id a network_name
-    hostname       = var.controlplane_3.name
-    addresses      = [var.controlplane_3.address]
-    mac            = var.controlplane_3.mac
-    wait_for_lease = true
-  }
+  coreos_image               = var.coreos_image
+  bootstrap_volume_size      = var.bootstrap_volume_size
+  controlplane_1_volume_size = var.controlplane_1_volume_size
+  controlplane_2_volume_size = var.controlplane_2_volume_size
+  controlplane_3_volume_size = var.controlplane_3_volume_size
+  worker_1_volume_size       = var.worker_1_volume_size
+  worker_2_volume_size       = var.worker_2_volume_size
+  worker_3_volume_size       = var.worker_3_volume_size
 }
 
-# Worker 1 Node Definition
-resource "libvirt_domain" "okd_worker_1" {
-  name            = var.worker_1.name
-  vcpu            = var.worker_1.vcpu
-  memory          = var.worker_1.memory * 1024
-  running         = true
-  coreos_ignition = var.worker_ignition_id
+# Módulo de dominios para crear las VMs para bootstrap, control plane y nodos worker
+module "domain" {
+  source = "./modules/domain"
 
-  disk {
-    volume_id = var.worker_1_volume_id
-    scsi      = false
-  }
+  network_name          = "kube_network_02" # Cambiado de network_id a network_name
+  bootstrap_ignition_id = module.ignition.bootstrap_ignition
+  master_ignition_id    = module.ignition.master_ignition
+  worker_ignition_id    = module.ignition.worker_ignition
 
-  cpu {
-    mode = "host-passthrough"
-  }
+  bootstrap_volume_id      = module.volumes.bootstrap_volume
+  controlplane_1_volume_id = module.volumes.controlplane_1_volume
+  controlplane_2_volume_id = module.volumes.controlplane_2_volume
+  controlplane_3_volume_id = module.volumes.controlplane_3_volume
+  worker_1_volume_id       = module.volumes.worker_1_volume
+  worker_2_volume_id       = module.volumes.worker_2_volume
+  worker_3_volume_id       = module.volumes.worker_3_volume
 
-  graphics {
-    type     = "vnc"
-    autoport = true
-  }
-
-  console {
-    type        = "pty"
-    target_type = "serial"
-    target_port = "0"
-  }
-
-  network_interface {
-    network_name   = var.network_name  # Cambiado de network_id a network_name
-    hostname       = var.worker_1.name
-    addresses      = [var.worker_1.address]
-    mac            = var.worker_1.mac
-    wait_for_lease = true
-  }
+  bootstrap      = var.bootstrap
+  controlplane_1 = var.controlplane_1
+  controlplane_2 = var.controlplane_2
+  controlplane_3 = var.controlplane_3
+  worker_1       = var.worker_1
+  worker_2       = var.worker_2
+  worker_3       = var.worker_3
 }
 
-# Worker 2 Node Definition
-resource "libvirt_domain" "okd_worker_2" {
-  name            = var.worker_2.name
-  vcpu            = var.worker_2.vcpu
-  memory          = var.worker_2.memory * 1024
-  running         = true
-  coreos_ignition = var.worker_ignition_id
-
-  disk {
-    volume_id = var.worker_2_volume_id
-    scsi      = false
-  }
-
-  cpu {
-    mode = "host-passthrough"
-  }
-
-  graphics {
-    type     = "vnc"
-    autoport = true
-  }
-
-  console {
-    type        = "pty"
-    target_type = "serial"
-    target_port = "0"
-  }
-
-  network_interface {
-    network_name   = var.network_name  # Cambiado de network_id a network_name
-    hostname       = var.worker_2.name
-    addresses      = [var.worker_2.address]
-    mac            = var.worker_2.mac
-    wait_for_lease = true
-  }
+# Outputs
+output "bootstrap" {
+  value = module.domain.okd_bootstrap
 }
 
-# Worker 3 Node Definition
-resource "libvirt_domain" "okd_worker_3" {
-  name            = var.worker_3.name
-  vcpu            = var.worker_3.vcpu
-  memory          = var.worker_3.memory * 1024
-  running         = true
-  coreos_ignition = var.worker_ignition_id
+output "controlplane_1" {
+  value = module.domain.okd_controlplane_1
+}
 
-  disk {
-    volume_id = var.worker_3_volume_id
-    scsi      = false
-  }
+output "controlplane_2" {
+  value = module.domain.okd_controlplane_2
+}
 
-  cpu {
-    mode = "host-passthrough"
-  }
+output "controlplane_3" {
+  value = module.domain.okd_controlplane_3
+}
 
-  graphics {
-    type     = "vnc"
-    autoport = true
-  }
+output "worker_1" {
+  value = module.domain.okd_worker_1
+}
 
-  console {
-    type        = "pty"
-    target_type = "serial"
-    target_port = "0"
-  }
+output "worker_2" {
+  value = module.domain.okd_worker_2
+}
 
-  network_interface {
-    network_name   = var.network_name  # Cambiado de network_id a network_name
-    hostname       = var.worker_3.name
-    addresses      = [var.worker_3.address]
-    mac            = var.worker_3.mac
-    wait_for_lease = true
-  }
+output "worker_3" {
+  value = module.domain.okd_worker_3
 }
