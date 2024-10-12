@@ -1,8 +1,12 @@
 # modules/domain/variables.tf
 
+# Variable para network_name
+variable "network_name" {
+  description = "Nombre de la red a la que los nodos deben estar conectados"
+  type        = string
+}
 
-
-# Declare Ignition config ID variables
+# Variables para Ignition Config IDs
 variable "bootstrap_ignition_id" {
   description = "Ignition configuration ID for the bootstrap node"
   type        = string
@@ -18,7 +22,7 @@ variable "worker_ignition_id" {
   type        = string
 }
 
-# Declare volume ID variables for each node type
+# Variables para los volúmenes de los nodos
 variable "bootstrap_volume_id" {
   description = "Volume ID for the bootstrap node"
   type        = string
@@ -54,42 +58,81 @@ variable "worker_3_volume_id" {
   type        = string
 }
 
-# Declare node definitions for bootstrap, control planes, and workers
+# Variables para los nodos (Bootstrap, Control Plane y Worker)
 variable "bootstrap" {
   description = "Configuration for the bootstrap node"
-  type        = map(string)
+  type = object({
+    name    = string
+    memory  = number
+    vcpu    = number
+    address = string
+    mac     = string
+  })
 }
 
 variable "controlplane_1" {
   description = "Configuration for control plane node 1"
-  type        = map(string)
+  type = object({
+    name    = string
+    memory  = number
+    vcpu    = number
+    address = string
+    mac     = string
+  })
 }
 
 variable "controlplane_2" {
   description = "Configuration for control plane node 2"
-  type        = map(string)
+  type = object({
+    name    = string
+    memory  = number
+    vcpu    = number
+    address = string
+    mac     = string
+  })
 }
 
 variable "controlplane_3" {
   description = "Configuration for control plane node 3"
-  type        = map(string)
+  type = object({
+    name    = string
+    memory  = number
+    vcpu    = number
+    address = string
+    mac     = string
+  })
 }
 
 variable "worker_1" {
   description = "Configuration for worker node 1"
-  type        = map(string)
+  type = object({
+    name    = string
+    memory  = number
+    vcpu    = number
+    address = string
+    mac     = string
+  })
 }
 
 variable "worker_2" {
   description = "Configuration for worker node 2"
-  type        = map(string)
+  type = object({
+    name    = string
+    memory  = number
+    vcpu    = number
+    address = string
+    mac     = string
+  })
 }
 
 variable "worker_3" {
   description = "Configuration for worker node 3"
-  type        = map(string)
+  type = object({
+    name    = string
+    memory  = number
+    vcpu    = number
+    address = string
+    mac     = string
+  })
 }
-variable "network_name" {
-  description = "El nombre de la red existente para conectar las interfaces"
-  type        = string
-}
+
