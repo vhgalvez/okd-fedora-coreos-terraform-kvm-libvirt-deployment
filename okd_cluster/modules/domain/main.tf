@@ -10,6 +10,7 @@ terraform {
     }
   }
 }
+
 # Bootstrap Node Definition
 resource "libvirt_domain" "okd_bootstrap" {
   name            = var.bootstrap.name
@@ -19,7 +20,7 @@ resource "libvirt_domain" "okd_bootstrap" {
   coreos_ignition = var.bootstrap_ignition_id
 
   disk {
-    volume_id = libvirt_volume.bootstrap_volume.id
+    volume_id = var.bootstrap_volume_id
     scsi      = false
   }
 
@@ -40,7 +41,7 @@ resource "libvirt_domain" "okd_controlplane_1" {
   coreos_ignition = var.master_ignition_id
 
   disk {
-    volume_id = libvirt_volume.controlplane_1_volume.id
+    volume_id = var.controlplane_1_volume_id
     scsi      = false
   }
 
@@ -61,7 +62,7 @@ resource "libvirt_domain" "okd_controlplane_2" {
   coreos_ignition = var.master_ignition_id
 
   disk {
-    volume_id = libvirt_volume.controlplane_2_volume.id
+    volume_id = var.controlplane_2_volume_id
     scsi      = false
   }
 
@@ -82,7 +83,7 @@ resource "libvirt_domain" "okd_controlplane_3" {
   coreos_ignition = var.master_ignition_id
 
   disk {
-    volume_id = libvirt_volume.controlplane_3_volume.id
+    volume_id = var.controlplane_3_volume_id
     scsi      = false
   }
 
@@ -103,7 +104,7 @@ resource "libvirt_domain" "okd_worker_1" {
   coreos_ignition = var.worker_ignition_id
 
   disk {
-    volume_id = libvirt_volume.worker_1_volume.id
+    volume_id = var.worker_1_volume_id
     scsi      = false
   }
 
@@ -124,7 +125,7 @@ resource "libvirt_domain" "okd_worker_2" {
   coreos_ignition = var.worker_ignition_id
 
   disk {
-    volume_id = libvirt_volume.worker_2_volume.id
+    volume_id = var.worker_2_volume_id
     scsi      = false
   }
 
@@ -145,7 +146,7 @@ resource "libvirt_domain" "okd_worker_3" {
   coreos_ignition = var.worker_ignition_id
 
   disk {
-    volume_id = libvirt_volume.worker_3_volume.id
+    volume_id = var.worker_3_volume_id
     scsi      = false
   }
 
