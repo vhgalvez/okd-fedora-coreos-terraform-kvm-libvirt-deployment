@@ -130,3 +130,7 @@ variable "gateway" {
   type        = string
   description = "Network gateway"
 }
+variable "network_name" {
+  description = "Nombre de la red para conectar los nodos"
+  type        = string
+}
