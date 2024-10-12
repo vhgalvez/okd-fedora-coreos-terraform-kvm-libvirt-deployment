@@ -40,7 +40,7 @@ module "volumes" {
 
 # Módulo de dominios para crear las VMs para bootstrap, control plane y nodos worker
 module "domain" {
-  source = "./modules/domain"
+  source = "./modules/domain"  # Asegúrate de que este directorio exista y esté bien escrito
 
   network_name          = "kube_network_02"  # Cambiado de network_id a network_name
   bootstrap_ignition_id = module.ignition.bootstrap_ignition 
@@ -92,3 +92,4 @@ output "worker_2" {
 output "worker_3" {
   value = module.domain.okd_worker_3
 }
+
