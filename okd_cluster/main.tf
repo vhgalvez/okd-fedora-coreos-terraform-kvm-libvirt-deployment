@@ -41,9 +41,7 @@ module "volumes" {
 
 # Módulo de dominios
 module "domain" {
-  source = "./modules/domain"
-
-  # Usamos network_name en lugar de network_id
+  source                = "./modules/domain"
   network_name          = module.network.network_name
   bootstrap_ignition_id = module.ignition.bootstrap_ignition
   master_ignition_id    = module.ignition.master_ignition
@@ -65,6 +63,8 @@ module "domain" {
   worker_2       = var.worker_2
   worker_3       = var.worker_3
 }
+
+
 
 # Outputs
 output "bootstrap" {
