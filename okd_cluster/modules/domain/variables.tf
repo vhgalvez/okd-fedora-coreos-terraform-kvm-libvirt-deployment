@@ -1,10 +1,6 @@
 # modules/domain/variables.tf
 
-# Declare network_id variable
-variable "network_id" {
-  description = "ID of the network to which the nodes should be attached"
-  type        = string
-}
+
 
 # Declare Ignition config ID variables
 variable "bootstrap_ignition_id" {
