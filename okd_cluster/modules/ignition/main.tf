@@ -10,25 +10,29 @@ terraform {
   }
 }
 
+provider "libvirt" {
+  uri = "qemu:///system"
+}
+
 # Bootstrap Ignition Configuration
 resource "libvirt_ignition" "bootstrap_ignition" {
   name    = "okd_bootstrap.ign"
   pool    = "default"
-  content = file("${path.module}/../../ignition_configs/bootstrap.ign") 
+  content = file("${path.module}/../../ignition_configs/bootstrap.ign")
 }
 
 # Control Plane Ignition Configuration (renamed from master to match the file name)
 resource "libvirt_ignition" "master_ignition" {
   name    = "okd_master.ign"
   pool    = "default"
-  content = file("${path.module}/../../ignition_configs/master.ign") 
+  content = file("${path.module}/../../ignition_configs/master.ign")
 }
 
 # Worker Ignition Configuration
 resource "libvirt_ignition" "worker_ignition" {
   name    = "okd_worker.ign"
   pool    = "default"
-  content = file("${path.module}/../../ignition_configs/worker.ign") 
+  content = file("${path.module}/../../ignition_configs/worker.ign")
 }
 
 # Outputs for the Ignition configurations

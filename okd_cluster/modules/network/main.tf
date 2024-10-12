@@ -10,6 +10,10 @@ terraform {
   }
 }
 
+provider "libvirt" {
+  uri = "qemu:///system"
+}
+
 # Usamos una red existente
 output "network_name" {
   value = "okd_network"
