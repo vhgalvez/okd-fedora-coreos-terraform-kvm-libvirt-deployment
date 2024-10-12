@@ -1,5 +1,7 @@
 # main.tf
 
+# main.tf
+
 terraform {
   required_version = ">= 1.9.6"
 
@@ -43,7 +45,8 @@ module "volumes" {
 module "domain" {
   source = "./modules/domain"
 
-  network_name          = module.network.network_name # Cambiado para usar network_name
+  # Ahora pasamos network_name desde el módulo network
+  network_name          = module.network.network_name
   bootstrap_ignition_id = module.ignition.bootstrap_ignition
   master_ignition_id    = module.ignition.master_ignition
   worker_ignition_id    = module.ignition.worker_ignition
