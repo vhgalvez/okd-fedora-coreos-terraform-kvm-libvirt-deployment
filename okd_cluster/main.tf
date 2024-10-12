@@ -1,5 +1,4 @@
 # main.tf
-
 terraform {
   required_version = ">= 1.9.6"
 
@@ -39,11 +38,11 @@ module "volumes" {
   worker_3_volume_size       = var.worker_3_volume_size
 }
 
-# Módulo de dominios (actualizado para usar los outputs correctos)
+# Módulo de dominios
 module "domain" {
   source = "./modules/domain"
 
-  network_name          = module.network.network_name # Usar output del módulo de red
+  network_name          = "kube_network_02" # Red existente
   bootstrap_ignition_id = module.ignition.bootstrap_ignition
   master_ignition_id    = module.ignition.master_ignition
   worker_ignition_id    = module.ignition.worker_ignition
@@ -93,4 +92,3 @@ output "worker_2" {
 output "worker_3" {
   value = module.domain.okd_worker_3
 }
-
