@@ -10,7 +10,7 @@ terraform {
   }
 }
 
-# Salida para devolver el network_name
+# Usamos una red existente
 output "network_name" {
-  value = "kube_network_02" # El nombre de la red existente
+  value = "okd_network"
 }

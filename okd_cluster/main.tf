@@ -43,7 +43,7 @@ module "volumes" {
 module "domain" {
   source = "./modules/domain"
 
-  # Ahora pasamos network_name desde el módulo network
+  # Pasar network_name desde el módulo de red
   network_name          = module.network.network_name
   bootstrap_ignition_id = module.ignition.bootstrap_ignition
   master_ignition_id    = module.ignition.master_ignition
