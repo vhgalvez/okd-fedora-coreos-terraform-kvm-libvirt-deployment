@@ -20,6 +20,7 @@ module "network" {
   source = "./modules/network"
 }
 
+
 # Módulo de Ignition
 module "ignition" {
   source = "./modules/ignition"
@@ -43,17 +44,17 @@ module "volumes" {
 module "domain" {
   source = "./modules/domain"
 
-  network_name          = "kube_network_02"  # Red existente
-  bootstrap_ignition_id = module.ignition.bootstrap_ignition 
-  master_ignition_id    = module.ignition.master_ignition    
-  worker_ignition_id    = module.ignition.worker_ignition    
+  network_name          = "kube_network_02" # Red existente
+  bootstrap_ignition_id = module.ignition.bootstrap_ignition
+  master_ignition_id    = module.ignition.master_ignition
+  worker_ignition_id    = module.ignition.worker_ignition
 
-  bootstrap_volume_id      = module.volumes.bootstrap_volume      
-  controlplane_1_volume_id = module.volumes.controlplane_1_volume 
-  controlplane_2_volume_id = module.volumes.controlplane_2_volume 
-  controlplane_3_volume_id = module.volumes.controlplane_3_volume 
-  worker_1_volume_id       = module.volumes.worker_1_volume       
-  worker_2_volume_id       = module.volumes.worker_2_volume     
+  bootstrap_volume_id      = module.volumes.bootstrap_volume
+  controlplane_1_volume_id = module.volumes.controlplane_1_volume
+  controlplane_2_volume_id = module.volumes.controlplane_2_volume
+  controlplane_3_volume_id = module.volumes.controlplane_3_volume
+  worker_1_volume_id       = module.volumes.worker_1_volume
+  worker_2_volume_id       = module.volumes.worker_2_volume
   worker_3_volume_id       = module.volumes.worker_3_volume
 
   bootstrap      = var.bootstrap
