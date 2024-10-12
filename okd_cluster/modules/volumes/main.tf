@@ -1,4 +1,5 @@
 # modules/volumes/main.tf
+
 terraform {
   required_version = ">= 1.9.6"
 
@@ -10,95 +11,261 @@ terraform {
   }
 }
 
-# Volumen base para Fedora CoreOS
-resource "libvirt_volume" "coreos_base" {
-  name   = "fedora_coreos.qcow2"
-  pool   = "default"
-  source = var.coreos_image
-  format = "qcow2"
+# Bootstrap Node Definition
+resource "libvirt_domain" "okd_bootstrap" {
+  name            = var.bootstrap.name
+  vcpu            = var.bootstrap.vcpu
+  memory          = var.bootstrap.memory * 1024
+  running         = true
+  coreos_ignition = var.bootstrap_ignition_id
+
+  disk {
+    volume_id = var.bootstrap_volume_id
+    scsi      = false
+  }
+
+  cpu {
+    mode = "host-passthrough"
+  }
+
+  graphics {
+    type     = "vnc"
+    autoport = true
+  }
+
+  console {
+    type        = "pty"
+    target_type = "serial"
+    target_port = "0"
+  }
+
+  network_interface {
+    network_name   = var.network_name # Correcto, usar network_name
+    hostname       = var.bootstrap.name
+    addresses      = [var.bootstrap.address]
+    mac            = var.bootstrap.mac
+    wait_for_lease = true
+  }
 }
 
-# Volumen para Bootstrap
-resource "libvirt_volume" "bootstrap_volume" {
-  name           = "okd_bootstrap.qcow2"
-  pool           = "default"
-  size           = var.bootstrap_volume_size * 1073741824  # Convert GiB to Bytes
-  base_volume_id = libvirt_volume.coreos_base.id
+# Control Plane 1 Node Definition
+resource "libvirt_domain" "okd_controlplane_1" {
+  name            = var.controlplane_1.name
+  vcpu            = var.controlplane_1.vcpu
+  memory          = var.controlplane_1.memory * 1024
+  running         = true
+  coreos_ignition = var.master_ignition_id
+
+  disk {
+    volume_id = var.controlplane_1_volume_id
+    scsi      = false
+  }
+
+  cpu {
+    mode = "host-passthrough"
+  }
+
+  graphics {
+    type     = "vnc"
+    autoport = true
+  }
+
+  console {
+    type        = "pty"
+    target_type = "serial"
+    target_port = "0"
+  }
+
+  network_interface {
+    network_name   = var.network_name # Usar network_name aquí también
+    hostname       = var.controlplane_1.name
+    addresses      = [var.controlplane_1.address]
+    mac            = var.controlplane_1.mac
+    wait_for_lease = true
+  }
 }
 
-# Volumen para Control Plane 1
-resource "libvirt_volume" "controlplane_1_volume" {
-  name           = "okd_controlplane_1.qcow2"
-  pool           = "default"
-  size           = var.controlplane_1_volume_size * 1073741824
-  base_volume_id = libvirt_volume.coreos_base.id
+# Control Plane 2 Node Definition
+resource "libvirt_domain" "okd_controlplane_2" {
+  name            = var.controlplane_2.name
+  vcpu            = var.controlplane_2.vcpu
+  memory          = var.controlplane_2.memory * 1024
+  running         = true
+  coreos_ignition = var.master_ignition_id
+
+  disk {
+    volume_id = var.controlplane_2_volume_id
+    scsi      = false
+  }
+
+  cpu {
+    mode = "host-passthrough"
+  }
+
+  graphics {
+    type     = "vnc"
+    autoport = true
+  }
+
+  console {
+    type        = "pty"
+    target_type = "serial"
+    target_port = "0"
+  }
+
+  network_interface {
+    network_name   = var.network_name
+    hostname       = var.controlplane_2.name
+    addresses      = [var.controlplane_2.address]
+    mac            = var.controlplane_2.mac
+    wait_for_lease = true
+  }
 }
 
-# Volumen para Control Plane 2
-resource "libvirt_volume" "controlplane_2_volume" {
-  name           = "okd_controlplane_2.qcow2"
-  pool           = "default"
-  size           = var.controlplane_2_volume_size * 1073741824
-  base_volume_id = libvirt_volume.coreos_base.id
+# Control Plane 3 Node Definition
+resource "libvirt_domain" "okd_controlplane_3" {
+  name            = var.controlplane_3.name
+  vcpu            = var.controlplane_3.vcpu
+  memory          = var.controlplane_3.memory * 1024
+  running         = true
+  coreos_ignition = var.master_ignition_id
+
+  disk {
+    volume_id = var.controlplane_3_volume_id
+    scsi      = false
+  }
+
+  cpu {
+    mode = "host-passthrough"
+  }
+
+  graphics {
+    type     = "vnc"
+    autoport = true
+  }
+
+  console {
+    type        = "pty"
+    target_type = "serial"
+    target_port = "0"
+  }
+
+  network_interface {
+    network_name   = var.network_name
+    hostname       = var.controlplane_3.name
+    addresses      = [var.controlplane_3.address]
+    mac            = var.controlplane_3.mac
+    wait_for_lease = true
+  }
 }
 
-# Volumen para Control Plane 3
-resource "libvirt_volume" "controlplane_3_volume" {
-  name           = "okd_controlplane_3.qcow2"
-  pool           = "default"
-  size           = var.controlplane_3_volume_size * 1073741824
-  base_volume_id = libvirt_volume.coreos_base.id
+# Worker 1 Node Definition
+resource "libvirt_domain" "okd_worker_1" {
+  name            = var.worker_1.name
+  vcpu            = var.worker_1.vcpu
+  memory          = var.worker_1.memory * 1024
+  running         = true
+  coreos_ignition = var.worker_ignition_id
+
+  disk {
+    volume_id = var.worker_1_volume_id
+    scsi      = false
+  }
+
+  cpu {
+    mode = "host-passthrough"
+  }
+
+  graphics {
+    type     = "vnc"
+    autoport = true
+  }
+
+  console {
+    type        = "pty"
+    target_type = "serial"
+    target_port = "0"
+  }
+
+  network_interface {
+    network_name   = var.network_name # Usar network_name aquí
+    hostname       = var.worker_1.name
+    addresses      = [var.worker_1.address]
+    mac            = var.worker_1.mac
+    wait_for_lease = true
+  }
 }
 
-# Volumen para Worker 1
-resource "libvirt_volume" "worker_1_volume" {
-  name           = "okd_worker_1.qcow2"
-  pool           = "default"
-  size           = var.worker_1_volume_size * 1073741824
-  base_volume_id = libvirt_volume.coreos_base.id
+# Worker 2 Node Definition
+resource "libvirt_domain" "okd_worker_2" {
+  name            = var.worker_2.name
+  vcpu            = var.worker_2.vcpu
+  memory          = var.worker_2.memory * 1024
+  running         = true
+  coreos_ignition = var.worker_ignition_id
+
+  disk {
+    volume_id = var.worker_2_volume_id
+    scsi      = false
+  }
+
+  cpu {
+    mode = "host-passthrough"
+  }
+
+  graphics {
+    type     = "vnc"
+    autoport = true
+  }
+
+  console {
+    type        = "pty"
+    target_type = "serial"
+    target_port = "0"
+  }
+
+  network_interface {
+    network_name   = var.network_name
+    hostname       = var.worker_2.name
+    addresses      = [var.worker_2.address]
+    mac            = var.worker_2.mac
+    wait_for_lease = true
+  }
 }
 
-# Volumen para Worker 2
-resource "libvirt_volume" "worker_2_volume" {
-  name           = "okd_worker_2.qcow2"
-  pool           = "default"
-  size           = var.worker_2_volume_size * 1073741824
-  base_volume_id = libvirt_volume.coreos_base.id
-}
+# Worker 3 Node Definition
+resource "libvirt_domain" "okd_worker_3" {
+  name            = var.worker_3.name
+  vcpu            = var.worker_3.vcpu
+  memory          = var.worker_3.memory * 1024
+  running         = true
+  coreos_ignition = var.worker_ignition_id
 
-# Volumen para Worker 3
-resource "libvirt_volume" "worker_3_volume" {
-  name           = "okd_worker_3.qcow2"
-  pool           = "default"
-  size           = var.worker_3_volume_size * 1073741824
-  base_volume_id = libvirt_volume.coreos_base.id
-}
+  disk {
+    volume_id = var.worker_3_volume_id
+    scsi      = false
+  }
 
-# Outputs for the volumes
-output "bootstrap_volume" {
-  value = libvirt_volume.bootstrap_volume.id
-}
+  cpu {
+    mode = "host-passthrough"
+  }
 
-output "controlplane_1_volume" {
-  value = libvirt_volume.controlplane_1_volume.id
-}
+  graphics {
+    type     = "vnc"
+    autoport = true
+  }
 
-output "controlplane_2_volume" {
-  value = libvirt_volume.controlplane_2_volume.id
-}
+  console {
+    type        = "pty"
+    target_type = "serial"
+    target_port = "0"
+  }
 
-output "controlplane_3_volume" {
-  value = libvirt_volume.controlplane_3_volume.id
-}
-
-output "worker_1_volume" {
-  value = libvirt_volume.worker_1_volume.id
-}
-
-output "worker_2_volume" {
-  value = libvirt_volume.worker_2_volume.id
-}
-
-output "worker_3_volume" {
-  value = libvirt_volume.worker_3_volume.id
+  network_interface {
+    network_name   = var.network_name
+    hostname       = var.worker_3.name
+    addresses      = [var.worker_3.address]
+    mac            = var.worker_3.mac
+    wait_for_lease = true
+  }
 }
