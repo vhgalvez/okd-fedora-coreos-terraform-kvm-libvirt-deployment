@@ -1,5 +1,4 @@
 # modules/volumes/variables.tf
-
 # Declare CoreOS image variable
 variable "coreos_image" {
   description = "Path to the CoreOS image"
