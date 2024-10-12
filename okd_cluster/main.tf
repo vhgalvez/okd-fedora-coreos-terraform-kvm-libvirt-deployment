@@ -39,6 +39,18 @@ module "volumes" {
 }
 
 # Módulo de dominios
+module "volumes" {
+  source                     = "./modules/volumes"
+  coreos_image               = var.coreos_image
+  bootstrap_volume_size      = var.bootstrap_volume_size
+  controlplane_1_volume_size = var.controlplane_1_volume_size
+  controlplane_2_volume_size = var.controlplane_2_volume_size
+  controlplane_3_volume_size = var.controlplane_3_volume_size
+  worker_1_volume_size       = var.worker_1_volume_size
+  worker_2_volume_size       = var.worker_2_volume_size
+  worker_3_volume_size       = var.worker_3_volume_size
+}
+
 module "domain" {
   source       = "./modules/domain"
   network_name = var.network_name
@@ -50,14 +62,14 @@ module "domain" {
   master_ignition_id    = module.ignition.master_ignition
   worker_ignition_id    = module.ignition.worker_ignition
 
-  # Volume IDs
-  bootstrap_volume_id      = module.volumes.bootstrap_volume.id
-  controlplane_1_volume_id = module.volumes.controlplane_1_volume.id
-  controlplane_2_volume_id = module.volumes.controlplane_2_volume.id
-  controlplane_3_volume_id = module.volumes.controlplane_3_volume.id
-  worker_1_volume_id       = module.volumes.worker_1_volume.id
-  worker_2_volume_id       = module.volumes.worker_2_volume.id
-  worker_3_volume_id       = module.volumes.worker_3_volume.id
+  # Volume IDs (sin acceder al atributo `.id`)
+  bootstrap_volume_id      = module.volumes.bootstrap_volume
+  controlplane_1_volume_id = module.volumes.controlplane_1_volume
+  controlplane_2_volume_id = module.volumes.controlplane_2_volume
+  controlplane_3_volume_id = module.volumes.controlplane_3_volume
+  worker_1_volume_id       = module.volumes.worker_1_volume
+  worker_2_volume_id       = module.volumes.worker_2_volume
+  worker_3_volume_id       = module.volumes.worker_3_volume
 
   # Node definitions
   bootstrap      = var.bootstrap
@@ -68,7 +80,6 @@ module "domain" {
   worker_2       = var.worker_2
   worker_3       = var.worker_3
 }
-
 
 
 
