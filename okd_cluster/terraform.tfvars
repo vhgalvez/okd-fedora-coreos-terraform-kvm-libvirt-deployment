@@ -73,5 +73,5 @@ worker_3 = {
   mac     = "52:54:00:00:00:07"
 }
 
-network_name  = "okd_network"
+network_name  = "kube_network_02"
 
