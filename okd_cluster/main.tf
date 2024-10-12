@@ -1,4 +1,5 @@
 # main.tf
+
 terraform {
   required_version = ">= 1.9.6"
 
@@ -37,8 +38,8 @@ module "volumes" {
 module "domain" {
   source = "./modules/domain"
 
-  # Se omite el network_id y se usa directamente la red existente kube_network_02
-  network_name          = "kube_network_02" # Red existente
+  # Se usa directamente la red existente kube_network_02
+  network_name          = "kube_network_02"
   bootstrap_ignition_id = module.ignition.bootstrap_ignition
   master_ignition_id    = module.ignition.master_ignition
   worker_ignition_id    = module.ignition.worker_ignition
