@@ -39,18 +39,6 @@ module "volumes" {
 }
 
 # Módulo de dominios
-module "volumes" {
-  source                     = "./modules/volumes"
-  coreos_image               = var.coreos_image
-  bootstrap_volume_size      = var.bootstrap_volume_size
-  controlplane_1_volume_size = var.controlplane_1_volume_size
-  controlplane_2_volume_size = var.controlplane_2_volume_size
-  controlplane_3_volume_size = var.controlplane_3_volume_size
-  worker_1_volume_size       = var.worker_1_volume_size
-  worker_2_volume_size       = var.worker_2_volume_size
-  worker_3_volume_size       = var.worker_3_volume_size
-}
-
 module "domain" {
   source       = "./modules/domain"
   network_name = var.network_name
@@ -62,7 +50,7 @@ module "domain" {
   master_ignition_id    = module.ignition.master_ignition
   worker_ignition_id    = module.ignition.worker_ignition
 
-  # Volume IDs (sin acceder al atributo `.id`)
+  # Volume IDs
   bootstrap_volume_id      = module.volumes.bootstrap_volume
   controlplane_1_volume_id = module.volumes.controlplane_1_volume
   controlplane_2_volume_id = module.volumes.controlplane_2_volume
@@ -79,35 +67,4 @@ module "domain" {
   worker_1       = var.worker_1
   worker_2       = var.worker_2
   worker_3       = var.worker_3
-}
-
-
-
-# Outputs
-output "bootstrap" {
-  value = module.domain.okd_bootstrap
-}
-
-output "controlplane_1" {
-  value = module.domain.okd_controlplane_1
-}
-
-output "controlplane_2" {
-  value = module.domain.okd_controlplane_2
-}
-
-output "controlplane_3" {
-  value = module.domain.okd_controlplane_3
-}
-
-output "worker_1" {
-  value = module.domain.okd_worker_1
-}
-
-output "worker_2" {
-  value = module.domain.okd_worker_2
-}
-
-output "worker_3" {
-  value = module.domain.okd_worker_3
 }
