@@ -1,5 +1,4 @@
 # main.tf
-
 terraform {
   required_version = ">= 1.9.6"
 
@@ -13,6 +12,11 @@ terraform {
 
 provider "libvirt" {
   uri = "qemu:///system"
+}
+
+# Módulo de red para configurar la red del clúster
+module "network" {
+  source = "./modules/network"
 }
 
 # Módulo de Ignition para gestionar las configuraciones de Ignition de los nodos
@@ -38,18 +42,17 @@ module "volumes" {
 module "domain" {
   source = "./modules/domain"
 
-  # Se usa directamente la red existente kube_network_02
-  network_name          = "kube_network_02"
-  bootstrap_ignition_id = module.ignition.bootstrap_ignition
-  master_ignition_id    = module.ignition.master_ignition
-  worker_ignition_id    = module.ignition.worker_ignition
+  network_name          = "kube_network_02"  # Cambiado de network_id a network_name
+  bootstrap_ignition_id = module.ignition.bootstrap_ignition 
+  master_ignition_id    = module.ignition.master_ignition    
+  worker_ignition_id    = module.ignition.worker_ignition    
 
-  bootstrap_volume_id      = module.volumes.bootstrap_volume
-  controlplane_1_volume_id = module.volumes.controlplane_1_volume
-  controlplane_2_volume_id = module.volumes.controlplane_2_volume
-  controlplane_3_volume_id = module.volumes.controlplane_3_volume
-  worker_1_volume_id       = module.volumes.worker_1_volume
-  worker_2_volume_id       = module.volumes.worker_2_volume
+  bootstrap_volume_id      = module.volumes.bootstrap_volume      
+  controlplane_1_volume_id = module.volumes.controlplane_1_volume 
+  controlplane_2_volume_id = module.volumes.controlplane_2_volume 
+  controlplane_3_volume_id = module.volumes.controlplane_3_volume 
+  worker_1_volume_id       = module.volumes.worker_1_volume       
+  worker_2_volume_id       = module.volumes.worker_2_volume     
   worker_3_volume_id       = module.volumes.worker_3_volume
 
   bootstrap      = var.bootstrap
@@ -59,4 +62,33 @@ module "domain" {
   worker_1       = var.worker_1
   worker_2       = var.worker_2
   worker_3       = var.worker_3
+}
+
+# Outputs
+output "bootstrap" {
+  value = module.domain.okd_bootstrap
+}
+
+output "controlplane_1" {
+  value = module.domain.okd_controlplane_1
+}
+
+output "controlplane_2" {
+  value = module.domain.okd_controlplane_2
+}
+
+output "controlplane_3" {
+  value = module.domain.okd_controlplane_3
+}
+
+output "worker_1" {
+  value = module.domain.okd_worker_1
+}
+
+output "worker_2" {
+  value = module.domain.okd_worker_2
+}
+
+output "worker_3" {
+  value = module.domain.okd_worker_3
 }
