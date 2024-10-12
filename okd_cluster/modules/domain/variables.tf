@@ -136,3 +136,7 @@ variable "worker_3" {
   })
 }
 
+variable "coreos_image" {
+  description = "Path to the CoreOS image"
+  type        = string
+}
