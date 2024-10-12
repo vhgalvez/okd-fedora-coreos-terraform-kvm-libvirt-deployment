@@ -1,4 +1,5 @@
 # main.tf
+
 terraform {
   required_version = ">= 1.9.6"
 
@@ -42,7 +43,7 @@ module "volumes" {
 module "domain" {
   source = "./modules/domain"
 
-  network_name          = "kube_network_02" # Red existente
+  network_id          = module.network.network_id # Red existente, usando network_id
   bootstrap_ignition_id = module.ignition.bootstrap_ignition
   master_ignition_id    = module.ignition.master_ignition
   worker_ignition_id    = module.ignition.worker_ignition
