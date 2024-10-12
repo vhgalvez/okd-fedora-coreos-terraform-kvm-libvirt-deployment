@@ -30,6 +30,17 @@ resource "libvirt_domain" "okd_bootstrap" {
     addresses    = [var.bootstrap.address]
     mac          = var.bootstrap.mac
   }
+
+  graphics {
+    type     = "vnc"
+    autoport = true
+  }
+
+  console {
+    type        = "pty"
+    target_type = "serial"
+    target_port = "0"
+  }
 }
 
 # Control Plane 1 Node Definition
@@ -50,6 +61,17 @@ resource "libvirt_domain" "okd_controlplane_1" {
     hostname     = var.controlplane_1.name
     addresses    = [var.controlplane_1.address]
     mac          = var.controlplane_1.mac
+  }
+
+  graphics {
+    type     = "vnc"
+    autoport = true
+  }
+
+  console {
+    type        = "pty"
+    target_type = "serial"
+    target_port = "0"
   }
 }
 
@@ -72,6 +94,17 @@ resource "libvirt_domain" "okd_controlplane_2" {
     addresses    = [var.controlplane_2.address]
     mac          = var.controlplane_2.mac
   }
+
+  graphics {
+    type     = "vnc"
+    autoport = true
+  }
+
+  console {
+    type        = "pty"
+    target_type = "serial"
+    target_port = "0"
+  }
 }
 
 # Control Plane 3 Node Definition
@@ -92,6 +125,17 @@ resource "libvirt_domain" "okd_controlplane_3" {
     hostname     = var.controlplane_3.name
     addresses    = [var.controlplane_3.address]
     mac          = var.controlplane_3.mac
+  }
+
+  graphics {
+    type     = "vnc"
+    autoport = true
+  }
+
+  console {
+    type        = "pty"
+    target_type = "serial"
+    target_port = "0"
   }
 }
 
@@ -114,6 +158,17 @@ resource "libvirt_domain" "okd_worker_1" {
     addresses    = [var.worker_1.address]
     mac          = var.worker_1.mac
   }
+
+  graphics {
+    type     = "vnc"
+    autoport = true
+  }
+
+  console {
+    type        = "pty"
+    target_type = "serial"
+    target_port = "0"
+  }
 }
 
 # Worker 2 Node Definition
@@ -135,6 +190,17 @@ resource "libvirt_domain" "okd_worker_2" {
     addresses    = [var.worker_2.address]
     mac          = var.worker_2.mac
   }
+
+  graphics {
+    type     = "vnc"
+    autoport = true
+  }
+
+  console {
+    type        = "pty"
+    target_type = "serial"
+    target_port = "0"
+  }
 }
 
 # Worker 3 Node Definition
@@ -155,5 +221,16 @@ resource "libvirt_domain" "okd_worker_3" {
     hostname     = var.worker_3.name
     addresses    = [var.worker_3.address]
     mac          = var.worker_3.mac
+  }
+
+  graphics {
+    type     = "vnc"
+    autoport = true
+  }
+
+  console {
+    type        = "pty"
+    target_type = "serial"
+    target_port = "0"
   }
 }
