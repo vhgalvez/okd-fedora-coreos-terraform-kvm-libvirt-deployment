@@ -1,4 +1,5 @@
 # main.tf
+
 terraform {
   required_version = ">= 1.9.6"
 
@@ -14,19 +15,19 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Módulo de red para configurar la red del clúster
+# Módulo de red
 module "network" {
-  source = "./modules/network/"
+  source = "./modules/network"
 }
 
-# Módulo de Ignition para gestionar las configuraciones de Ignition de los nodos
+# Módulo de Ignition
 module "ignition" {
-  source = "./modules/ignition/"
+  source = "./modules/ignition"
 }
 
-# Módulo de volúmenes para gestionar los volúmenes de almacenamiento de los nodos del clúster
+# Módulo de volúmenes
 module "volumes" {
-  source = "./modules/volumes/"
+  source = "./modules/volumes"
 
   coreos_image               = var.coreos_image
   bootstrap_volume_size      = var.bootstrap_volume_size
@@ -38,9 +39,9 @@ module "volumes" {
   worker_3_volume_size       = var.worker_3_volume_size
 }
 
-# Módulo de dominios para crear las VMs para bootstrap, control plane y nodos worker
+# Módulo de dominios
 module "domain" {
-  source = "./modules/domain/"
+  source = "./modules/domain"
 
   network_name          = "kube_network_02"  # Red existente
   bootstrap_ignition_id = module.ignition.bootstrap_ignition 
