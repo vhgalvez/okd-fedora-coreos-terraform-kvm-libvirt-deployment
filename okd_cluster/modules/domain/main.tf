@@ -11,7 +11,7 @@ terraform {
   }
 }
 
-# Bootstrap Node Definition
+# Bootstrap Domain Definition
 resource "libvirt_domain" "okd_bootstrap" {
   name            = var.bootstrap.name
   vcpu            = var.bootstrap.vcpu
@@ -48,7 +48,7 @@ resource "libvirt_domain" "okd_bootstrap" {
   }
 }
 
-# Control Plane 1 Node Definition
+# Control Plane 1 Domain Definition
 resource "libvirt_domain" "okd_controlplane_1" {
   name            = var.controlplane_1.name
   vcpu            = var.controlplane_1.vcpu
@@ -85,7 +85,7 @@ resource "libvirt_domain" "okd_controlplane_1" {
   }
 }
 
-# Control Plane 2 Node Definition
+# Control Plane 2 Domain Definition
 resource "libvirt_domain" "okd_controlplane_2" {
   name            = var.controlplane_2.name
   vcpu            = var.controlplane_2.vcpu
@@ -122,7 +122,7 @@ resource "libvirt_domain" "okd_controlplane_2" {
   }
 }
 
-# Control Plane 3 Node Definition
+# Control Plane 3 Domain Definition
 resource "libvirt_domain" "okd_controlplane_3" {
   name            = var.controlplane_3.name
   vcpu            = var.controlplane_3.vcpu
@@ -159,7 +159,7 @@ resource "libvirt_domain" "okd_controlplane_3" {
   }
 }
 
-# Worker 1 Node Definition
+# Worker 1 Domain Definition
 resource "libvirt_domain" "okd_worker_1" {
   name            = var.worker_1.name
   vcpu            = var.worker_1.vcpu
@@ -196,7 +196,7 @@ resource "libvirt_domain" "okd_worker_1" {
   }
 }
 
-# Worker 2 Node Definition
+# Worker 2 Domain Definition
 resource "libvirt_domain" "okd_worker_2" {
   name            = var.worker_2.name
   vcpu            = var.worker_2.vcpu
@@ -233,7 +233,7 @@ resource "libvirt_domain" "okd_worker_2" {
   }
 }
 
-# Worker 3 Node Definition
+# Worker 3 Domain Definition
 resource "libvirt_domain" "okd_worker_3" {
   name            = var.worker_3.name
   vcpu            = var.worker_3.vcpu
