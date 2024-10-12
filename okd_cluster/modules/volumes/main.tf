@@ -67,7 +67,8 @@ resource "libvirt_volume" "worker_3_volume" {
   size   = var.worker_3_volume_size * 1024 * 1024 * 1024
 }
 
-# Outputs for the volumes
+# modules/volumes/outputs.tf
+
 output "bootstrap_volume" {
   value = libvirt_volume.bootstrap_volume.id
 }
