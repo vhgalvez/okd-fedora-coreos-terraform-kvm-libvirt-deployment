@@ -72,3 +72,6 @@ worker_3 = {
   address = "10.17.3.27"
   mac     = "52:54:00:00:00:07"
 }
+
+network_name " = "okd_network"
+
