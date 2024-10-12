@@ -27,8 +27,7 @@ module "ignition" {
 
 # Módulo de volúmenes
 module "volumes" {
-  source = "./modules/volumes"
-
+  source                     = "./modules/volumes"
   coreos_image               = var.coreos_image
   bootstrap_volume_size      = var.bootstrap_volume_size
   controlplane_1_volume_size = var.controlplane_1_volume_size

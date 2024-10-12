@@ -7,7 +7,6 @@ variable "coreos_image" {
 }
 
 # Declare volume size variables for each node type
-
 variable "bootstrap_volume_size" {
   description = "Size of the bootstrap node volume in GiB"
   type        = number
