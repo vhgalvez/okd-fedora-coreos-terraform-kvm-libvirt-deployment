@@ -98,3 +98,7 @@ variable "network_name" {
   description = "Name of the network to which the nodes should be attached"
   type        = string
 }
+variable "network_name" {
+  description = "Nombre de la red para conectar los nodos"
+  type        = string
+}
