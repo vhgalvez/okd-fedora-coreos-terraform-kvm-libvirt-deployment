@@ -1,7 +1,4 @@
 # modules/ignition/main.tf
-
-# modules/ignition/main.tf
-
 terraform {
   required_version = ">= 1.9.6"
 

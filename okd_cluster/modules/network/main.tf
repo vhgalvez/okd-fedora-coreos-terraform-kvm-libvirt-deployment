@@ -10,26 +10,7 @@ terraform {
   }
 }
 
-# Define the network
-resource "libvirt_network" "okd_network" {
-  name      = "okd_network"
-  mode      = "nat"
-  domain    = "cefaslocalserver.com"
-  addresses = ["10.17.3.0/24"]
-
-  dns {
-    enabled = true
-  }
-}
-
-output "network_id" {
-  value = libvirt_network.okd_network.id
-}
-
+# No se crea una nueva red, ya que la red kube_network_02 está creada
 output "network_name" {
-  value = libvirt_network.okd_network.name
-}
-
-output "okd_network" {
-  value = libvirt_network.okd_network
+  value = "kube_network_02"
 }
