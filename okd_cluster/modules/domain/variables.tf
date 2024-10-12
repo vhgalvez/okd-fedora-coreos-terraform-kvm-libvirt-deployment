@@ -93,3 +93,7 @@ variable "worker_3" {
   description = "Configuration for worker node 3"
   type        = map(string)
 }
+variable "network_name" {
+  description = "El nombre de la red existente para conectar las interfaces"
+  type        = string
+}

@@ -10,7 +10,7 @@ terraform {
   }
 }
 
-# No se crea una nueva red, ya que la red kube_network_02 está creada
+# Salida para devolver el network_name
 output "network_name" {
-  value = "kube_network_02"
+  value = "kube_network_02" # El nombre de la red existente
 }

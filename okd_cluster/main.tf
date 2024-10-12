@@ -43,10 +43,10 @@ module "volumes" {
 module "domain" {
   source = "./modules/domain"
 
-  network_id              = module.network.network_id # Utiliza network_id en lugar de network_name
-  bootstrap_ignition_id   = module.ignition.bootstrap_ignition
-  master_ignition_id      = module.ignition.master_ignition
-  worker_ignition_id      = module.ignition.worker_ignition
+  network_name          = module.network.network_name # Cambiado para usar network_name
+  bootstrap_ignition_id = module.ignition.bootstrap_ignition
+  master_ignition_id    = module.ignition.master_ignition
+  worker_ignition_id    = module.ignition.worker_ignition
 
   bootstrap_volume_id      = module.volumes.bootstrap_volume
   controlplane_1_volume_id = module.volumes.controlplane_1_volume
