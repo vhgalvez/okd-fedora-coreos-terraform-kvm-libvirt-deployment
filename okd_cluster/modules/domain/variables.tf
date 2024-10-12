@@ -93,3 +93,8 @@ variable "worker_3" {
   description = "Configuration for worker node 3"
   type        = map(string)
 }
+
+variable "network_name" {
+  description = "Name of the network to which the nodes should be attached"
+  type        = string
+}
