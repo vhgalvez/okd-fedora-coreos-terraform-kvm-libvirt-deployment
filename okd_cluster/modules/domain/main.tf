@@ -14,7 +14,7 @@ terraform {
 resource "libvirt_domain" "okd_bootstrap" {
   name            = var.bootstrap.name
   vcpu            = var.bootstrap.vcpu
-  memory          = var.bootstrap.memory * 1024 # Convert memory from MiB
+  memory          = var.bootstrap.memory * 1024
   running         = true
   coreos_ignition = var.bootstrap_ignition_id
 
@@ -39,7 +39,7 @@ resource "libvirt_domain" "okd_bootstrap" {
   }
 
   network_interface {
-    network_id     = var.network_id # Usa el UUID de la red
+    network_id     = var.network_id
     hostname       = var.bootstrap.name
     addresses      = [var.bootstrap.address]
     mac            = var.bootstrap.mac
@@ -113,7 +113,7 @@ resource "libvirt_domain" "okd_controlplane_2" {
   }
 
   network_interface {
-    network_id     = var.network_id # Usa el UUID de la red
+    network_id     = var.network_id
     hostname       = var.controlplane_2.name
     addresses      = [var.controlplane_2.address]
     mac            = var.controlplane_2.mac
@@ -150,7 +150,7 @@ resource "libvirt_domain" "okd_controlplane_3" {
   }
 
   network_interface {
-    network_id     = var.network_id # Usa el UUID de la red
+    network_id     = var.network_id
     hostname       = var.controlplane_3.name
     addresses      = [var.controlplane_3.address]
     mac            = var.controlplane_3.mac
@@ -187,7 +187,7 @@ resource "libvirt_domain" "okd_worker_1" {
   }
 
   network_interface {
-    network_id     = var.network_id # Usa el UUID de la red
+    network_id     = var.network_id
     hostname       = var.worker_1.name
     addresses      = [var.worker_1.address]
     mac            = var.worker_1.mac
@@ -224,7 +224,7 @@ resource "libvirt_domain" "okd_worker_2" {
   }
 
   network_interface {
-    network_id     = var.network_id # Usa el UUID de la red
+    network_id     = var.network_id
     hostname       = var.worker_2.name
     addresses      = [var.worker_2.address]
     mac            = var.worker_2.mac
@@ -261,7 +261,7 @@ resource "libvirt_domain" "okd_worker_3" {
   }
 
   network_interface {
-    network_id     = var.network_id # Usa el UUID de la red
+    network_id     = var.network_id
     hostname       = var.worker_3.name
     addresses      = [var.worker_3.address]
     mac            = var.worker_3.mac
