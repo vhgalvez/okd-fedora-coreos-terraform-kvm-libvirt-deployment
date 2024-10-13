@@ -20,49 +20,49 @@ provider "libvirt" {
 resource "libvirt_volume" "bootstrap_volume" {
   name   = "bootstrap-volume"
   pool   = "default"
-  source = var.coreos_image
+  source = "/mnt/lv_data/organized_storage/volumes/okd_cluster/bootstrap.qcow2"
 }
 
 # Control Plane 1 Volume Definition
 resource "libvirt_volume" "controlplane_1_volume" {
   name   = "controlplane1-volume"
   pool   = "default"
-  source = var.coreos_image
+  source = "/mnt/lv_data/organized_storage/volumes/okd_cluster/controlplane1.qcow2"
 }
 
 # Control Plane 2 Volume Definition
 resource "libvirt_volume" "controlplane_2_volume" {
   name   = "controlplane2-volume"
   pool   = "default"
-  source = var.coreos_image
+  source = "/mnt/lv_data/organized_storage/volumes/okd_cluster/controlplane2.qcow2"
 }
 
 # Control Plane 3 Volume Definition
 resource "libvirt_volume" "controlplane_3_volume" {
   name   = "controlplane3-volume"
   pool   = "default"
-  source = var.coreos_image
+  source = "/mnt/lv_data/organized_storage/volumes/okd_cluster/controlplane3.qcow2"
 }
 
 # Worker 1 Volume Definition
 resource "libvirt_volume" "worker_1_volume" {
   name   = "worker1-volume"
   pool   = "default"
-  source = var.coreos_image
+  source = "/mnt/lv_data/organized_storage/volumes/okd_cluster/worker1.qcow2"
 }
 
 # Worker 2 Volume Definition
 resource "libvirt_volume" "worker_2_volume" {
   name   = "worker2-volume"
   pool   = "default"
-  source = var.coreos_image
+  source = "/mnt/lv_data/organized_storage/volumes/okd_cluster/worker2.qcow2"
 }
 
 # Worker 3 Volume Definition
 resource "libvirt_volume" "worker_3_volume" {
   name   = "worker3-volume"
   pool   = "default"
-  source = var.coreos_image
+  source = "/mnt/lv_data/organized_storage/volumes/okd_cluster/worker3.qcow2"
 }
 
 # modules/volumes/outputs.tf
