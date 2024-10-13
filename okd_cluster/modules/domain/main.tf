@@ -23,6 +23,10 @@ resource "libvirt_domain" "okd_bootstrap" {
   running         = true
   coreos_ignition = var.bootstrap_ignition_id
 
+  cpu {
+    mode = "host-passthrough"
+  }
+
   disk {
     volume_id = var.bootstrap_volume_id
     scsi      = false
@@ -54,6 +58,11 @@ resource "libvirt_domain" "okd_controlplane_1" {
   memory          = var.controlplane_1.memory * 1024
   running         = true
   coreos_ignition = var.master_ignition_id
+
+  cpu {
+    mode = "host-passthrough"
+  }
+
 
   disk {
     volume_id = var.controlplane_1_volume_id
@@ -87,6 +96,11 @@ resource "libvirt_domain" "okd_controlplane_2" {
   running         = true
   coreos_ignition = var.master_ignition_id
 
+  cpu {
+    mode = "host-passthrough"
+  }
+
+
   disk {
     volume_id = var.controlplane_2_volume_id
     scsi      = false
@@ -118,6 +132,10 @@ resource "libvirt_domain" "okd_controlplane_3" {
   memory          = var.controlplane_3.memory * 1024
   running         = true
   coreos_ignition = var.master_ignition_id
+
+  cpu {
+    mode = "host-passthrough"
+  }
 
   disk {
     volume_id = var.controlplane_3_volume_id
@@ -151,6 +169,10 @@ resource "libvirt_domain" "okd_worker_1" {
   running         = true
   coreos_ignition = var.worker_ignition_id
 
+  cpu {
+    mode = "host-passthrough"
+  }
+
   disk {
     volume_id = var.worker_1_volume_id
     scsi      = false
@@ -183,6 +205,11 @@ resource "libvirt_domain" "okd_worker_2" {
   running         = true
   coreos_ignition = var.worker_ignition_id
 
+  cpu {
+    mode = "host-passthrough"
+  }
+
+
   disk {
     volume_id = var.worker_2_volume_id
     scsi      = false
@@ -214,6 +241,10 @@ resource "libvirt_domain" "okd_worker_3" {
   memory          = var.worker_3.memory * 1024
   running         = true
   coreos_ignition = var.worker_ignition_id
+
+  cpu {
+    mode = "host-passthrough"
+  }
 
   disk {
     volume_id = var.worker_3_volume_id
