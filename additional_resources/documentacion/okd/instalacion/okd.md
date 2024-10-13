@@ -385,6 +385,8 @@ sudo curl -o /mnt/lv_data/organized_storage/images/Rocky-9-GenericCloud-Base.lat
 openshift-install create ignition-configs  --dir=/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install --log-level=debug
 
 
+openshift-install create ignition-configs  --dir=/home/victory/okd-fedora-coreos-terraform-kvm-libvirt-deployment/okd_cluster/ignition_configs --log-level=debug
+
 ___
 
   # Conectar a la red
