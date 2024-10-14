@@ -1,22 +1,24 @@
 apiVersion: v1
 baseDomain: cefaslocalserver.com
-compute:
-  - hyperthreading: Enabled
-    name: worker
-    replicas: 3
-controlPlane:
-  hyperthreading: Enabled
-  name: master
-  replicas: 3
 metadata:
   name: local
+compute:
+  - name: worker
+    replicas: 3
+    platform: {}
+controlPlane:
+  name: master
+  replicas: 3
+  platform: {}
 networking:
+  networkType: OVNKubernetes
   clusterNetwork:
     - cidr: 10.100.0.0/14
       hostPrefix: 23
-  networkType: OVNKubernetes
   serviceNetwork:
     - 172.30.0.0/16
+  machineNetwork:
+    - cidr: 10.17.3.0/24
   dns:
     baseDomain: cefaslocalserver.com
     nameservers:
