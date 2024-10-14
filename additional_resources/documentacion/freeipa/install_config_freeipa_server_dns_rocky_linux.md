@@ -724,3 +724,27 @@ Password (confirm):
 kinit admin
 12345678
 
+
+
+
+### Crea el directorio para los certificados:
+
+```bash
+sudo mkdir -p /etc/traefik/ssl
+```
+
+Genera un certificado auto-firmado:
+
+Ejecuta el siguiente comando para generar un certificado auto-firmado válido por un año:
+
+```bash
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/traefik/ssl/cefaslocalserver.com.key -out /etc/traefik/ssl/cefaslocalserver.com.crt
+```
+
+Durante este proceso, se te pedirá ingresar detalles como país, estado, nombre común (Common Name, CN). El valor para el CN debe coincidir con el dominio que estás utilizando (por ejemplo, cefaslocalserver.com o api.local.cefaslocalserver.com).
+
+Verifica que los certificados se han generado correctamente:
+
+```bash
+ls -l /etc/traefik/ssl/
+```
