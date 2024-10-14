@@ -387,6 +387,27 @@ openshift-install create ignition-configs  --dir=/home/victory/terraform-openshi
 
 openshift-install create ignition-configs  --dir=/home/victory/okd-fedora-coreos-terraform-kvm-libvirt-deployment/okd_cluster/ignition_configs --log-level=debug
 
+
+
+
+Sí, puedes copiar el archivo kubeconfig desde el directorio /home/victory/okd-fedora-coreos-terraform-kvm-libvirt-deployment/okd_cluster/ignition_configs/auth/kubeconfig al nodo bootstrap. Esto te permitirá utilizar oc en el nodo bootstrap con la configuración adecuada.
+
+Puedes hacerlo utilizando scp para copiar el archivo kubeconfig al nodo bootstrap. Aquí te muestro cómo hacerlo:
+
+En tu máquina local (donde está almacenado el archivo kubeconfig), ejecuta este comando para copiar el archivo al nodo bootstrap:
+bash
+Copiar código
+sudo scp -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift /home/victory/okd-fedora-coreos-terraform-kvm-libvirt-deployment/okd_cluster/ignition_configs/auth/kubeconfig core@10.17.3.21:/home/core/
+
+Luego, en el nodo bootstrap, establece la variable de entorno KUBECONFIG para que oc utilice el archivo kubeconfig recién copiado:
+bash
+Copiar código
+export KUBECONFIG=/home/core/kubeconfig
+Ahora deberías poder ejecutar comandos oc en el nodo bootstrap sin problemas, por ejemplo:
+bash
+Copiar código
+oc get nodes
+
 ___
 
   # Conectar a la red

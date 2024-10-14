@@ -1,4 +1,5 @@
 # modules/domain/main.tf
+# modules/domain/main.tf
 
 terraform {
   required_version = ">= 1.9.6"
@@ -37,6 +38,8 @@ resource "libvirt_domain" "okd_bootstrap" {
     hostname     = var.bootstrap.name
     addresses    = [var.bootstrap.address]
     mac          = var.bootstrap.mac
+    dns_servers  = [var.dns1, var.dns2] # Agregar servidores DNS aquí
+    gateway      = var.gateway          # Agregar el gateway aquí
   }
 
   graphics {
@@ -63,7 +66,6 @@ resource "libvirt_domain" "okd_controlplane_1" {
     mode = "host-passthrough"
   }
 
-
   disk {
     volume_id = var.controlplane_1_volume_id
     scsi      = false
@@ -74,6 +76,8 @@ resource "libvirt_domain" "okd_controlplane_1" {
     hostname     = var.controlplane_1.name
     addresses    = [var.controlplane_1.address]
     mac          = var.controlplane_1.mac
+    dns_servers  = [var.dns1, var.dns2] # Agregar servidores DNS aquí
+    gateway      = var.gateway          # Agregar el gateway aquí
   }
 
   graphics {
@@ -100,7 +104,6 @@ resource "libvirt_domain" "okd_controlplane_2" {
     mode = "host-passthrough"
   }
 
-
   disk {
     volume_id = var.controlplane_2_volume_id
     scsi      = false
@@ -111,6 +114,8 @@ resource "libvirt_domain" "okd_controlplane_2" {
     hostname     = var.controlplane_2.name
     addresses    = [var.controlplane_2.address]
     mac          = var.controlplane_2.mac
+    dns_servers  = [var.dns1, var.dns2] # Agregar servidores DNS aquí
+    gateway      = var.gateway          # Agregar el gateway aquí
   }
 
   graphics {
@@ -147,6 +152,8 @@ resource "libvirt_domain" "okd_controlplane_3" {
     hostname     = var.controlplane_3.name
     addresses    = [var.controlplane_3.address]
     mac          = var.controlplane_3.mac
+    dns_servers  = [var.dns1, var.dns2] # Agregar servidores DNS aquí
+    gateway      = var.gateway          # Agregar el gateway aquí
   }
 
   graphics {
@@ -183,6 +190,8 @@ resource "libvirt_domain" "okd_worker_1" {
     hostname     = var.worker_1.name
     addresses    = [var.worker_1.address]
     mac          = var.worker_1.mac
+    dns_servers  = [var.dns1, var.dns2] # Agregar servidores DNS aquí
+    gateway      = var.gateway          # Agregar el gateway aquí
   }
 
   graphics {
@@ -209,7 +218,6 @@ resource "libvirt_domain" "okd_worker_2" {
     mode = "host-passthrough"
   }
 
-
   disk {
     volume_id = var.worker_2_volume_id
     scsi      = false
@@ -220,6 +228,8 @@ resource "libvirt_domain" "okd_worker_2" {
     hostname     = var.worker_2.name
     addresses    = [var.worker_2.address]
     mac          = var.worker_2.mac
+    dns_servers  = [var.dns1, var.dns2] # Agregar servidores DNS aquí
+    gateway      = var.gateway          # Agregar el gateway aquí
   }
 
   graphics {
@@ -256,6 +266,8 @@ resource "libvirt_domain" "okd_worker_3" {
     hostname     = var.worker_3.name
     addresses    = [var.worker_3.address]
     mac          = var.worker_3.mac
+    dns_servers  = [var.dns1, var.dns2] # Agregar servidores DNS aquí
+    gateway      = var.gateway          # Agregar el gateway aquí
   }
 
   graphics {

@@ -604,13 +604,13 @@ A continuación se proporciona un resumen de los hostnames e IPs para referencia
 | 10.17.3.12    | load_balancer1.cefaslocalserver.com |
 | 10.17.3.13    | postgresql1.cefaslocalserver.com |
 | 10.17.3.14    | helper.cefaslocalserver.com |
-| 10.17.4.21    | controlplane1.cefaslocalserver.com    |
-| 10.17.4.22    | controlplane2.cefaslocalserver.com    |
-| 10.17.4.23    | controlplane3.cefaslocalserver.com    |
-| 10.17.4.24    | worker1.cefaslocalserver.com    |
-| 10.17.4.25    | worker2.cefaslocalserver.com    |
-| 10.17.4.26    | worker3.cefaslocalserver.com    |
-| 10.17.4.27    | bootstrap.cefaslocalserver.com |
+| 10.17.3.22    | controlplane1.cefaslocalserver.com    |
+| 10.17.3.23    | controlplane2.cefaslocalserver.com    |
+| 10.17.3.24    | controlplane3.cefaslocalserver.com    |
+| 10.17.3.25    | worker1.cefaslocalserver.com    |
+| 10.17.3.26    | worker2.cefaslocalserver.com    |
+| 10.17.3.27    | worker3.cefaslocalserver.com    |
+| 10.17.3.21    | bootstrap.cefaslocalserver.com |
 
 
 

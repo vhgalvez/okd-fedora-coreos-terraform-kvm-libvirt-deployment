@@ -106,3 +106,31 @@ sudo virsh shutdown postgresql1
 sudo virsh shutdown worker1.cefaslocalserver.com
 sudo virsh shutdown worker2.cefaslocalserver.com
 sudo virsh shutdown worker3.cefaslocalserver.com
+
+
+
+
+sudo virsh shutdown freeipa1
+sudo virsh shutdown load_balancer1
+sudo virsh shutdown bastion1.cefaslocalserver.com
+sudo virsh shutdown bootstrap.cefaslocalserver.com
+sudo virsh shutdown controlplane_1.cefaslocalserver.com
+sudo virsh shutdown controlplane_2.cefaslocalserver.com
+sudo virsh shutdown controlplane_3.cefaslocalserver.com
+sudo virsh shutdown worker1.cefaslocalserver.com
+sudo virsh shutdown worker2.cefaslocalserver.com
+sudo virsh shutdown worker3.cefaslocalserver.com
+
+
+sudo virsh start bastion1.cefaslocalserver.com
+sudo virsh start bootstrap.cefaslocalserver.com
+sudo virsh start controlplane_1.cefaslocalserver.com
+sudo virsh start controlplane_2.cefaslocalserver.com
+sudo virsh start controlplane_3.cefaslocalserver.com
+sudo virsh start worker1.cefaslocalserver.com
+sudo virsh start worker2.cefaslocalserver.com
+sudo virsh start worker3.cefaslocalserver.com
+
+sudo virsh start freeipa1
+sudo virsh start load_balancer1
+sudo virsh start helper
