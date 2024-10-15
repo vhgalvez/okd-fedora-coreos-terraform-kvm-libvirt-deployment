@@ -123,6 +123,7 @@ sudo virsh shutdown worker3.cefaslocalserver.com
 
 
 sudo virsh start bastion1.cefaslocalserver.com
+
 sudo virsh start bootstrap.cefaslocalserver.com
 sudo virsh start controlplane_1.cefaslocalserver.com
 sudo virsh start controlplane_2.cefaslocalserver.com
