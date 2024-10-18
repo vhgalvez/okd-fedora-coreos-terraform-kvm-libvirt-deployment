@@ -380,8 +380,6 @@ sudo systemctl restart libvirtd
 sudo curl -o /mnt/lv_data/organized_storage/images/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2 https://dl.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-GenericCloud-Base.latest.x86_64.qcow2
 
 
-sudo chmod 644 /etc/traefik/ssl/cefaslocalserver.com.crt
-sudo chmod 600 /etc/traefik/ssl/cefaslocalserver.com.key
 
 
 openshift-install create ignition-configs  --dir=/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install --log-level=debug

@@ -304,9 +304,5 @@ __
 
  update-ca-certificates 
 
-
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout /etc/traefik/ssl/cefaslocalserver.com.key \
-  -out /etc/traefik/ssl/cefaslocalserver.com.crt \
-  -subj "/CN=api.local.cefaslocalserver.com" \
-  -addext "subjectAltName=DNS:api.local.cefaslocalserver.com,DNS:api-int.local.cefaslocalserver.com,DNS:load_balancer1.cefaslocalserver.com"
+sudo chmod 644 /etc/traefik/ssl/cefaslocalserver.com.crt
+sudo chmod 600 /etc/traefik/ssl/cefaslocalserver.com.key
