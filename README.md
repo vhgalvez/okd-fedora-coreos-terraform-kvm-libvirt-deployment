@@ -546,10 +546,6 @@ url:   https://console.redhat.com/openshift/create/local
 | Bootstrap Node       |Fedora CoreOS   |
 
 
-
-
-
-
 # Entrada para el Servidor Físico
 
 El servidor físico actúa como el anfitrión principal para las máquinas virtuales y otros servicios críticos. Es fundamental asegurar que este servidor esté configurado adecuadamente y mantenido en buen estado.
@@ -579,19 +575,13 @@ La red kube_network_02 se utiliza para los servicios básicos del clúster, incl
 | kube_network_02 | postgresql1     | 10.17.3.13    | Gestión de bases de datos     | (Virtual - NAT) |
 | kube_network_02 | helper          | 10.17.3.14    | Inicialización del clúster    | (Virtual - NAT) |
 
-## Red kube_network_03 - NAT Network
-
-La red kube_network_03 se dedica a la gestión y ejecución de aplicaciones dentro del clúster. Esta separación asegura que las aplicaciones se ejecuten de manera eficiente y segura, sin interferir con otros servicios críticos.
-
-| Red NAT         | Nodos     | Dirección IP | Rol del Nodo          | Interfaz de Red |
-|-----------------|-----------|--------------|-----------------------|-----------------|
-| kube_network_03 | controlplane1   | 10.17.4.21   | Gestión del clúster   | (Virtual - NAT) |
-| kube_network_03 | controlplane2   | 10.17.4.22   | Gestión del clúster   | (Virtual - NAT) |
-| kube_network_03 | controlplane3   | 10.17.4.23   | Gestión del clúster   | (Virtual - NAT) |
-| kube_network_03 | worker1   | 10.17.4.24   | Ejecución de aplicaciones | (Virtual - NAT) |
-| kube_network_03 | worker2   | 10.17.4.25   | Ejecución de aplicaciones | (Virtual - NAT) |
-| kube_network_03 | worker3   | 10.17.4.26   | Ejecución de aplicaciones | (Virtual - NAT) |
-| kube_network_03 | Bootstrap | 10.17.4.27   | Bootstrap | (Virtual - NAT) |
+| kube_network_02 | controlplane1   | 10.17.3.22   | Gestión del clúster   | (Virtual - NAT) |
+| kube_network_02 | controlplane2   | 10.17.3.23   | Gestión del clúster   | (Virtual - NAT) |
+| kube_network_02 | controlplane3   | 10.17.3.24   | Gestión del clúster   | (Virtual - NAT) |
+| kube_network_02 | worker1   | 10.17.3.25   | Ejecución de aplicaciones | (Virtual - NAT) |
+| kube_network_02 | worker2   | 10.17.3.26   | Ejecución de aplicaciones | (Virtual - NAT) |
+| kube_network_02 | worker3   | 10.17.3.27   | Ejecución de aplicaciones | (Virtual - NAT) |
+| kube_network_02 | Bootstrap | 10.17.3.21   | Bootstrap | (Virtual - NAT) |
 
 
 # Resumen de los Hostnames e IPs
