@@ -440,10 +440,6 @@ ___
 }
 
 
-
-
-
-
 openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 \
 -keyout /etc/traefik/ssl/cefaslocalserver.com.key \
 -out /etc/traefik/ssl/cefaslocalserver.com.crt \

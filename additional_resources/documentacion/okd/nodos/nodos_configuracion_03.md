@@ -121,35 +121,6 @@ sudo virsh shutdown worker1.cefaslocalserver.com
 sudo virsh shutdown worker2.cefaslocalserver.com
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 sudo virsh list --all
 
 
