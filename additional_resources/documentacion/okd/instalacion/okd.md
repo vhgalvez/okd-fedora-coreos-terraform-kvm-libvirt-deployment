@@ -441,16 +441,14 @@ ___
 
 
 
-sudo bash -c 'openssl genrsa -out /etc/traefik/custom-ca/myCA.key 2048 && \
-openssl req -x509 -new -nodes -key /etc/traefik/custom-ca/myCA.key -sha256 -days 1024 -out /etc/traefik/custom-ca/myCA.pem -subj "/CN=My Custom CA" && \
-openssl genrsa -out /etc/traefik/ssl/cefaslocalserver.com.key 2048 && \
-openssl req -new -key /etc/traefik/ssl/cefaslocalserver.com.key -out /etc/traefik/ssl/cefaslocalserver.com.csr -subj "/CN=api.local.cefaslocalserver.com" && \
-openssl x509 -req -in /etc/traefik/ssl/cefaslocalserver.com.csr -CA /etc/traefik/custom-ca/myCA.pem -CAkey /etc/traefik/custom-ca/myCA.key -CAcreateserial -out /etc/traefik/ssl/cefaslocalserver.com.crt -days 365 -sha256 -extfile <(echo "subjectAltName=DNS:api.local.cefaslocalserver.com,DNS:api-int.local.cefaslocalserver.com")'
 
 
 
-sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-  -keyout /etc/traefik/ssl/cefaslocalserver.com.key \
-  -out /etc/traefik/ssl/cefaslocalserver.com.crt \
-  -subj "/CN=api.local.cefaslocalserver.com" \
-  -addext "subjectAltName=DNS:api.local.cefaslocalserver.com,DNS:api-int.local.cefaslocalserver.com"
+openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 \
+-keyout /etc/traefik/ssl/cefaslocalserver.com.key \
+-out /etc/traefik/ssl/cefaslocalserver.com.crt \
+-subj "/CN=api.local.cefaslocalserver.com" \
+-addext "subjectAltName=DNS:api.local.cefaslocalserver.com,DNS:api-int.local.cefaslocalserver.com"
+
+sudo chmod 644 /etc/traefik/ssl/cefaslocalserver.com.crt
+sudo chmod 600 /etc/traefik/ssl/cefaslocalserver.com.key
