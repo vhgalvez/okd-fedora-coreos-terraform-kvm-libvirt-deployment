@@ -455,3 +455,12 @@ openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 \
 
 sudo chmod 644 /etc/traefik/ssl/cefaslocalserver.com.crt
 sudo chmod 600 /etc/traefik/ssl/cefaslocalserver.com.key
+
+
+
+
+
+dnsmasq (/etc/dnsmasq.conf
+
+server=10.17.3.11  # DNS interno (FreeIPA)
+server=8.8.8.8
