@@ -110,6 +110,16 @@ sudo chown -R victory:victory /home/victory/okd_file
 sudo chmod -R 775 /home/victory/okd_file
 
 
+sudo chmod -R u+w /home/victory/openshift_okd_cluster/terraform
+sudo chown -R victory:victory /home/victory/openshift_okd_cluster/terraform
+
+
+openshift-install create ignition-configs --dir=/home/victory/openshift_okd_cluster/terraform/ignition_configs --log-level=debug
+
+
+openshift-install create ignition-configs --dir=/home/victory/openshift_okd_cluster/terraform/ignition_configs/install-config.yaml --log-level=debug
+
+
 
 openshift-install create manifests --dir=/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install --log-level=debug
 
