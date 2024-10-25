@@ -33,11 +33,11 @@ resource "libvirt_network" "kube_network_02" {
 
   dnsmasq_options {
     option_name  = "server"
-    option_value = "10.17.3.11" # Servidor DNS personalizado
+    option_value = "10.17.3.11"
   }
   dnsmasq_options {
     option_name  = "server"
-    option_value = "8.8.8.8" # Otro DNS (opcional)
+    option_value = "8.8.8.8" 
   }
 }
 

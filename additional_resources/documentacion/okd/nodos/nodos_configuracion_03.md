@@ -108,6 +108,13 @@ sudo virsh shutdown worker2.cefaslocalserver.com
 sudo virsh shutdown worker3.cefaslocalserver.com
 
 
+sudo virsh shutdown postgresql1
+sudo virsh shutdown helper
+sudo virsh shutdown bastion1.cefaslocalserver.com
+
+
+
+
 
 
 sudo virsh shutdown freeipa1
