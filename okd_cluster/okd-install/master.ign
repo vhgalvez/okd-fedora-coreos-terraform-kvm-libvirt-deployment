@@ -35,39 +35,6 @@
                 "contents": {
                     "source": "data:text/plain;charset=utf-8;base64,bmFtZXNlcnZlciAxMC4xNy4zLjExCg=="
                 }
-            },
-            {
-                "path": "/etc/NetworkManager/conf.d/dns.conf",
-                "mode": 420,
-                "overwrite": true,
-                "contents": {
-                    "source": "data:text/plain;charset=utf-8;base64,W21haW5dCm5hbWVzZXJ2ZXI9MTAuMTcuMy4xMQo="
-                }
-            }
-        ]
-    },
-    "systemd": {
-        "units": [
-            {
-                "name": "network-pre.target",
-                "enabled": true
-            },
-            {
-                "name": "NetworkManager.service",
-                "enabled": true
-            },
-            {
-                "name": "install-tools.service",
-                "enabled": true,
-                "contents": "[Unit]\nDescription=Install basic tools\n[Service]\nType=oneshot\nExecStart=/usr/bin/rpm-ostree install bind-utils iputils\n[Install]\nWantedBy=multi-user.target"
-            }
-        ]
-    },
-    "networkd": {
-        "units": [
-            {
-                "name": "10-eth0.network",
-                "contents": "[Match]\nName=eth0\n\n[Network]\nDNS=10.17.3.11\n"
             }
         ]
     }

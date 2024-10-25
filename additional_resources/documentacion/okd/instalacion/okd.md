@@ -104,6 +104,11 @@ openshift-install create manifests --dir=/home/victory/terraform-openshift-kvm-d
 openshift-install create ignition-configs --dir=/home/core/okd-install/ignition
 
 
+openshift-install create ignition-configs --dir=/home/victory/okd_file
+
+[victory@physical1 okd_file]$ sudo chown -R victory:victory /home/victory/okd_file
+[victory@physical1 okd_file]$ sudo chmod -R 775 /home/victory/okd_file
+
 
 
 openshift-install create manifests --dir=/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install --log-level=debug
@@ -397,11 +402,13 @@ Puedes hacerlo utilizando scp para copiar el archivo kubeconfig al nodo bootstra
 En tu máquina local (donde está almacenado el archivo kubeconfig), ejecuta este comando para copiar el archivo al nodo bootstrap:
 bash
 Copiar código
+
 sudo scp -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift /home/victory/okd-fedora-coreos-terraform-kvm-libvirt-deployment/okd_cluster/ignition_configs/auth/kubeconfig core@10.17.3.21:/home/core/
 
 Luego, en el nodo bootstrap, establece la variable de entorno KUBECONFIG para que oc utilice el archivo kubeconfig recién copiado:
 bash
 Copiar código
+
 export KUBECONFIG=/home/core/kubeconfig
 Ahora deberías poder ejecutar comandos oc en el nodo bootstrap sin problemas, por ejemplo:
 bash
