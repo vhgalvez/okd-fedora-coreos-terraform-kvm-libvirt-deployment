@@ -18,25 +18,26 @@ provider "libvirt" {
   uri = "qemu:///system"
 }
 
-# Red definida con DNS
+
 resource "libvirt_network" "kube_network_02" {
   name      = "kube_network_02"
   mode      = "nat"
   autostart = true
   addresses = ["10.17.3.0/24"]
 
-  # Configuración de DNS
+  # Configurar opciones de DNS
   dns {
     enabled    = true
     local_only = false
+  }
 
-    forwarders {
-      address = var.dns1
-    }
-
-    forwarders {
-      address = var.dns2
-    }
+  dnsmasq_options {
+    option_name  = "server"
+    option_value = "10.17.3.11" # Servidor DNS personalizado
+  }
+  dnsmasq_options {
+    option_name  = "server"
+    option_value = "8.8.8.8" # Otro DNS (opcional)
   }
 }
 
