@@ -106,8 +106,8 @@ openshift-install create ignition-configs --dir=/home/core/okd-install/ignition
 
 openshift-install create ignition-configs --dir=/home/victory/okd_file
 
-[victory@physical1 okd_file]$ sudo chown -R victory:victory /home/victory/okd_file
-[victory@physical1 okd_file]$ sudo chmod -R 775 /home/victory/okd_file
+sudo chown -R victory:victory /home/victory/okd_file
+sudo chmod -R 775 /home/victory/okd_file
 
 
 
@@ -308,12 +308,12 @@ Make the file immutable:
 bash
 Copiar código
 sudo chattr +i /usr/local/bin/qemu-system-x86_64
-2. Ensure Your User is Permanently Added to Groups:
+1. Ensure Your User is Permanently Added to Groups:
 Check that your user is correctly added to libvirt and kvm groups:
 bash
 Copiar código
 sudo usermod -aG libvirt,kvm $(whoami)
-3. Persistent SELinux Policy:
+1. Persistent SELinux Policy:
 If SELinux is enabled, consider creating a policy allowing qemu-system-x86_64 access instead of turning it off permanently.
 After applying these, restart libvirtd:
 
