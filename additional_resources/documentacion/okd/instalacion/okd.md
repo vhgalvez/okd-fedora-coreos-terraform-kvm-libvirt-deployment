@@ -474,3 +474,12 @@ dnsmasq (/etc/dnsmasq.conf
 
 server=10.17.3.11  # DNS interno (FreeIPA)
 server=8.8.8.8
+
+
+
+sudo scp -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluster_openshift /home/victory/okd-fedora-coreos-terraform-kvm-libvirt-deployment/okd_cluster/ignition_configs/auth/kubeconfig core@10.17.3.21:/home/core/
+
+
+
+sudo setenforce 0
+sudo systemctl restart libvirtd
