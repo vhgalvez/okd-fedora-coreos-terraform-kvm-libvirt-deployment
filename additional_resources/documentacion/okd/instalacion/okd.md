@@ -483,3 +483,12 @@ sudo scp -i /root/.ssh/cluster_openshift/key_cluster_openshift/id_rsa_key_cluste
 
 sudo setenforce 0
 sudo systemctl restart libvirtd
+
+
+openshift-install create ignition-configs --dir=/home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install --log-level=debug
+
+sudo chown -R core:core /home/core/okd-install
+sudo chmod -R 755 /home/core/okd-install
+
+sudo chown -R victory:victory /home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install
+sudo chmod -R 755 /home/victory/terraform-openshift-kvm-deployment_linux_Flatcar/nat_network_03/okd-install
